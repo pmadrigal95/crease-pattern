@@ -1,0 +1,29 @@
+{
+  "$description": "Contour lines: trail maps, cloud forest, mountain lakes. Default identity.",
+  "light": {
+    "bg": { "$type": "color", "$value": "#EFF1EC", "$description": "Map paper" },
+    "surface": { "$type": "color", "$value": "#FAFBF8", "$description": "Panels and demos" },
+    "ink": { "$type": "color", "$value": "#18211D", "$description": "Deep forest ink, body text" },
+    "mute": { "$type": "color", "$value": "#56605A", "$description": "Lichen grey, secondary text" },
+    "rule": { "$type": "color", "$value": "#D9DED6", "$description": "Hairlines and separators" },
+    "accent": { "$type": "color", "$value": "#245F86", "$description": "Lake blue for text-size use" },
+    "accentUi": { "$type": "color", "$value": "#3B82B0", "$description": "Lake blue for UI and large text" },
+    "second": {
+      "$type": "color",
+      "$value": "#3F6B4A",
+      "$description": "Forest green: data and passing states"
+    },
+    "earth": { "$type": "color", "$value": "#8C7A66", "$description": "Contour lines and graphics only" }
+  },
+  "dark": {
+    "bg": { "$type": "color", "$value": "#101512" },
+    "surface": { "$type": "color", "$value": "#172019" },
+    "ink": { "$type": "color", "$value": "#E6ECE7" },
+    "mute": { "$type": "color", "$value": "#9DA9A1" },
+    "rule": { "$type": "color", "$value": "#26302A" },
+    "accent": { "$type": "color", "$value": "#7DB8E0" },
+    "accentUi": { "$type": "color", "$value": "#7DB8E0" },
+    "second": { "$type": "color", "$value": "#86BF92" },
+    "earth": { "$type": "color", "$value": "#B8A48C" }
+  }
+}

@@ -1,0 +1,7 @@
+dist
+.astro
+node_modules
+pnpm-lock.yaml
+src/generated
+.changeset/*.md
+CHANGELOG.md

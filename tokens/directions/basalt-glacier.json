@@ -1,0 +1,29 @@
+{
+  "$description": "Basalt & glacier: Icelandic basalt, glacier ice, moss.",
+  "light": {
+    "bg": { "$type": "color", "$value": "#F3F5F5", "$description": "Fog" },
+    "surface": { "$type": "color", "$value": "#FFFFFF" },
+    "ink": { "$type": "color", "$value": "#14191C", "$description": "Basalt" },
+    "mute": { "$type": "color", "$value": "#57636A", "$description": "Lava grey" },
+    "rule": { "$type": "color", "$value": "#DDE2E4" },
+    "accent": { "$type": "color", "$value": "#1F6E94", "$description": "Glacier blue for text-size use" },
+    "accentUi": {
+      "$type": "color",
+      "$value": "#3189B5",
+      "$description": "Glacier blue for UI and large text"
+    },
+    "second": { "$type": "color", "$value": "#4E7A5C", "$description": "Moss" },
+    "earth": { "$type": "color", "$value": "#7E7A73", "$description": "Lava rock, graphics only" }
+  },
+  "dark": {
+    "bg": { "$type": "color", "$value": "#0F1315" },
+    "surface": { "$type": "color", "$value": "#171C1F" },
+    "ink": { "$type": "color", "$value": "#E8EEF0" },
+    "mute": { "$type": "color", "$value": "#9AA7AD" },
+    "rule": { "$type": "color", "$value": "#273036" },
+    "accent": { "$type": "color", "$value": "#7CC6E8" },
+    "accentUi": { "$type": "color", "$value": "#7CC6E8" },
+    "second": { "$type": "color", "$value": "#8DBF9A" },
+    "earth": { "$type": "color", "$value": "#A9A49B" }
+  }
+}
