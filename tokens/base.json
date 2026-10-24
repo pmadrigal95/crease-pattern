@@ -1,0 +1,52 @@
+{
+  "$description": "Identity-independent tokens: type, space, radius and motion. Same in every visual direction.",
+  "font": {
+    "sans": {
+      "$type": "fontFamily",
+      "$value": "'Schibsted Grotesk Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif"
+    },
+    "mono": {
+      "$type": "fontFamily",
+      "$value": "'JetBrains Mono Variable', ui-monospace, 'Cascadia Mono', Menlo, monospace"
+    }
+  },
+  "size": {
+    "xs": { "$type": "dimension", "$value": "0.75rem", "$description": "12px, the absolute minimum" },
+    "sm": { "$type": "dimension", "$value": "0.9375rem" },
+    "md": { "$type": "dimension", "$value": "1.0625rem", "$description": "17px body" },
+    "prose": { "$type": "dimension", "$value": "1.125rem", "$description": "18px for essays" },
+    "lg": { "$type": "dimension", "$value": "1.4375rem" },
+    "xl": { "$type": "dimension", "$value": "1.8125rem" },
+    "2xl": { "$type": "dimension", "$value": "2.25rem" },
+    "display": {
+      "$type": "dimension",
+      "$value": "clamp(3rem, 9.2vw, 7.75rem)",
+      "$description": "Hero statement, 3 to 4 words"
+    }
+  },
+  "space": {
+    "1": { "$type": "dimension", "$value": "4px" },
+    "2": { "$type": "dimension", "$value": "8px" },
+    "3": { "$type": "dimension", "$value": "12px" },
+    "4": { "$type": "dimension", "$value": "16px" },
+    "6": { "$type": "dimension", "$value": "24px" },
+    "8": { "$type": "dimension", "$value": "32px" },
+    "12": { "$type": "dimension", "$value": "48px" },
+    "16": { "$type": "dimension", "$value": "64px" },
+    "24": { "$type": "dimension", "$value": "96px" }
+  },
+  "radius": {
+    "none": { "$type": "dimension", "$value": "0" },
+    "control": { "$type": "dimension", "$value": "3px", "$description": "Buttons" },
+    "panel": { "$type": "dimension", "$value": "8px", "$description": "Floating panels and cards" },
+    "pill": { "$type": "dimension", "$value": "999px", "$description": "Tags and toggles" }
+  },
+  "motion": {
+    "fast": { "$type": "duration", "$value": "120ms", "$description": "Hover, focus, press" },
+    "base": { "$type": "duration", "$value": "200ms", "$description": "Component states, panels" },
+    "exit": { "$type": "duration", "$value": "250ms", "$description": "Leaving the inspector" },
+    "stage": { "$type": "duration", "$value": "650ms", "$description": "Entering the inspector" },
+    "easeOut": { "$type": "cubicBezier", "$value": "cubic-bezier(.23, 1, .32, 1)" },
+    "easeInOut": { "$type": "cubicBezier", "$value": "cubic-bezier(.77, 0, .175, 1)" }
+  }
+}

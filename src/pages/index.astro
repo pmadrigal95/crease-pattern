@@ -1,0 +1,84 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import site from '../../site.config';
+---
+
+<BaseLayout
+  title={`${site.author} · ${site.role}`}
+  description="Lead Frontend Architect. I design the component systems, tests and pipelines that let product teams ship fast without breaking things."
+>
+  <main id="main" class="wrap">
+    <p class="who">
+      {site.author} · {site.role} · Costa Rica
+    </p>
+    <h1>
+      Interfaces built <span class="em">to last.</span>
+    </h1>
+    <p class="sub">
+      I design the component systems, tests and pipelines that let product teams ship fast without breaking
+      things.
+    </p>
+    <p class="status">The full site is being built in public. Version 0.1.</p>
+    <ul class="links" aria-label="Contact">
+      <li>
+        <a href={`mailto:${site.contact.email}`}>{site.contact.email}</a>
+      </li>
+      <li>
+        <a href={site.contact.linkedin}>LinkedIn</a>
+      </li>
+      <li>
+        <a href={site.contact.github}>GitHub</a>
+      </li>
+    </ul>
+  </main>
+</BaseLayout>
+
+<style>
+  main {
+    padding-block: var(--space-24) var(--space-16);
+  }
+  .who {
+    font: 500 var(--size-sm) var(--font-mono);
+    color: var(--color-mute);
+    margin: 0 0 var(--space-6);
+  }
+  h1 {
+    font-size: var(--size-display);
+    line-height: 0.94;
+    letter-spacing: -0.045em;
+    font-weight: 600;
+    margin: 0;
+    text-wrap: balance;
+  }
+  .em {
+    color: var(--color-accent);
+  }
+  .sub {
+    font-size: var(--size-lg);
+    color: var(--color-mute);
+    max-width: 44ch;
+    margin: var(--space-6) 0 0;
+  }
+  .status {
+    font: 500 var(--size-xs) var(--font-mono);
+    color: var(--color-second);
+    margin-top: var(--space-8);
+  }
+  .links {
+    list-style: none;
+    padding: 0;
+    margin: var(--space-4) 0 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-4);
+  }
+  .links a {
+    color: var(--color-mute);
+    display: inline-flex;
+    min-height: 44px;
+    align-items: center;
+  }
+  .links a:hover {
+    color: var(--color-ink);
+  }
+</style>

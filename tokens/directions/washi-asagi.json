@@ -1,0 +1,25 @@
+{
+  "$description": "Washi & asagi: Japanese paper, sumi ink, walnut wood.",
+  "light": {
+    "bg": { "$type": "color", "$value": "#F2F2EE", "$description": "Washi paper" },
+    "surface": { "$type": "color", "$value": "#FBFBF9" },
+    "ink": { "$type": "color", "$value": "#1C1D1F", "$description": "Sumi ink" },
+    "mute": { "$type": "color", "$value": "#5F615F", "$description": "Stone" },
+    "rule": { "$type": "color", "$value": "#DEDED8" },
+    "accent": { "$type": "color", "$value": "#1E6F7D", "$description": "Asagi for text-size use" },
+    "accentUi": { "$type": "color", "$value": "#2E95A6", "$description": "Asagi for UI and large text" },
+    "second": { "$type": "color", "$value": "#7A5C45", "$description": "Walnut" },
+    "earth": { "$type": "color", "$value": "#9C8A78", "$description": "Paper fiber, graphics only" }
+  },
+  "dark": {
+    "bg": { "$type": "color", "$value": "#121313" },
+    "surface": { "$type": "color", "$value": "#1B1C1C" },
+    "ink": { "$type": "color", "$value": "#ECEBE6" },
+    "mute": { "$type": "color", "$value": "#A4A49E" },
+    "rule": { "$type": "color", "$value": "#2C2D2C" },
+    "accent": { "$type": "color", "$value": "#6CC3CF" },
+    "accentUi": { "$type": "color", "$value": "#6CC3CF" },
+    "second": { "$type": "color", "$value": "#C4A07F" },
+    "earth": { "$type": "color", "$value": "#B5A592" }
+  }
+}

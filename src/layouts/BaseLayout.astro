@@ -1,0 +1,50 @@
+---
+import '@fontsource-variable/schibsted-grotesk';
+import '@fontsource-variable/jetbrains-mono';
+import '../styles/tokens.css';
+import '../styles/base.css';
+import site from '../../site.config';
+import { allVisualDirections } from '../config/visual-direction';
+
+interface Props {
+  title: string;
+  description: string;
+  lang?: 'en' | 'es';
+}
+
+const { title, description, lang = 'en' } = Astro.props;
+const canonical = new URL(Astro.url.pathname, site.url);
+---
+
+<!doctype html>
+<html lang={lang} data-direction={site.visualDirection}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <meta name="author" content={site.author} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonical} />
+    <script is:inline define:vars={{ allowed: allVisualDirections }}>
+      // Restore the visitor's identity and theme before first paint (no flash).
+      try {
+        const d = localStorage.getItem('pm.direction');
+        if (d && allowed.includes(d)) document.documentElement.setAttribute('data-direction', d);
+        const t = localStorage.getItem('pm.theme');
+        if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
+      } catch {
+        /* storage unavailable: keep the defaults rendered on the server */
+      }
+    </script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">
+      Skip to content
+    </a>
+    <slot />
+  </body>
+</html>
