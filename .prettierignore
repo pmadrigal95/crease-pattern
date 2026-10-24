@@ -5,3 +5,4 @@ pnpm-lock.yaml
 src/generated
 .changeset/*.md
 CHANGELOG.md
+docs/concept/prototype-v2.html
