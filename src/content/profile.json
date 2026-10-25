@@ -1,0 +1,13 @@
+{
+  "owner": {
+    "name": "Pablo Madrigal",
+    "role": "Lead Frontend Architect",
+    "location": "Costa Rica",
+    "summary": "I design the component systems, tests and pipelines that let product teams ship fast without breaking things.",
+    "contact": {
+      "email": "pablomadrigal.1995@gmail.com",
+      "linkedin": "https://www.linkedin.com/in/pablomadrigal95/",
+      "github": "https://github.com/pmadrigal95"
+    }
+  }
+}

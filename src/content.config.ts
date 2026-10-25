@@ -1,5 +1,5 @@
 import { defineCollection } from 'astro:content';
-import { glob } from 'astro/loaders';
+import { file, glob } from 'astro/loaders';
 import { z } from 'astro/zod';
 
 /**
@@ -42,4 +42,24 @@ const notes = defineCollection({
     }),
 });
 
-export const collections = { notes };
+/**
+ * The site owner's public profile: the only place personal data lives, so code stays
+ * free of it. The schema is strict on purpose: an unexpected field (a phone number,
+ * an address) fails the build instead of being published.
+ */
+const profile = defineCollection({
+  loader: file('./src/content/profile.json'),
+  schema: z.strictObject({
+    name: z.string().min(1),
+    role: z.string().min(1),
+    location: z.string().min(1),
+    summary: z.string().max(160),
+    contact: z.strictObject({
+      email: z.email(),
+      linkedin: z.url().startsWith('https://www.linkedin.com/in/'),
+      github: z.url().startsWith('https://github.com/'),
+    }),
+  }),
+});
+
+export const collections = { notes, profile };
