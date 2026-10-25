@@ -1,0 +1,242 @@
+---
+import { career, releasesNewestFirst, formatRange, formatElevation } from '../../lib/career';
+import { copy, fill } from '../../lib/copy';
+
+/** The full career changelog: Unreleased first, then each release, newest first. */
+const releases = releasesNewestFirst();
+const highest = Math.max(...releases.map((r) => r.elevationM));
+const t = copy.home.changelog;
+---
+
+<div class="notes">
+  <section class="release unreleased" aria-labelledby="release-unreleased">
+    <header class="head">
+      <h2 id="release-unreleased">{t.unreleased}</h2>
+    </header>
+    <ul class="changes">
+      {career.unreleased.map((line) => (
+        <li class="add">
+          <span class="sr-only">{t.sections.added}: </span>
+          {line}
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  {releases.map((r) => (
+    <section class="release" aria-labelledby={`release-${r.major}`}>
+      <header class="head">
+        <p class="major">v{r.major}</p>
+        <h2 id={`release-${r.major}`}>
+          {r.codename}{' '}
+          <span class="elev">{fill(t.elevation, { elevation: formatElevation(r.elevationM) })}</span>
+        </h2>
+        <p class="theme">{r.theme}</p>
+        <svg
+          class="altitude"
+          viewBox="0 0 100 2"
+          preserveAspectRatio="none"
+          aria-hidden="true"
+          focusable="false"
+        >
+          <rect width={((r.elevationM / highest) * 100).toFixed(1)} height="2" />
+        </svg>
+      </header>
+      <ol class="entries">
+        {r.entries.map((e) => (
+          <li class="entry">
+            <div class="meta">
+              <code>{e.version}</code>
+              <span>{formatRange(e.start, e.end, t.present)}</span>
+            </div>
+            <div class="body">
+              <h3>
+                {e.title} <span class="org">· {e.org}</span>
+              </h3>
+              {e.stack && (
+                <ul class="stack" aria-label={copy.labels.stack}>
+                  {e.stack.map((s) => (
+                    <li>{s}</li>
+                  ))}
+                </ul>
+              )}
+              {(e.added || e.changed) && (
+                <ul class="changes">
+                  {e.added?.map((line) => (
+                    <li class="add">
+                      <span class="sr-only">{t.sections.added}: </span>
+                      {line}
+                    </li>
+                  ))}
+                  {e.changed?.map((line) => (
+                    <li class="chg">
+                      <span class="sr-only">{t.sections.changed}: </span>
+                      {line}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </li>
+        ))}
+      </ol>
+    </section>
+  ))}
+</div>
+
+<style>
+  .notes {
+    display: grid;
+    gap: var(--space-8);
+  }
+  .release {
+    border: 1px solid var(--color-rule);
+    border-radius: var(--radius-panel);
+    background: var(--color-surface);
+    overflow: hidden;
+  }
+  .head {
+    position: relative;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: var(--space-1) var(--space-4);
+    align-items: baseline;
+    padding: var(--space-6) var(--space-6) var(--space-4);
+    border-bottom: 1px solid var(--color-rule);
+  }
+  .major {
+    margin: 0;
+    font: 600 var(--size-sm) var(--font-mono);
+    color: var(--color-accent);
+  }
+  h2 {
+    margin: 0;
+    font-size: var(--size-xl);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+  }
+  .unreleased h2 {
+    font-size: var(--size-lg);
+  }
+  .elev {
+    font: 500 var(--size-sm) var(--font-mono);
+    color: var(--color-mute);
+    letter-spacing: 0;
+    white-space: nowrap;
+  }
+  .theme {
+    grid-column: 2;
+    margin: 0;
+    color: var(--color-mute);
+    font-size: var(--size-sm);
+  }
+  /* Altitude bar: each release climbs higher than the last. */
+  /* An SVG rather than an inline style, so the page needs no 'unsafe-inline' in its CSP. */
+  .altitude {
+    position: absolute;
+    left: 0;
+    bottom: -1px;
+    width: 100%;
+    height: 2px;
+    display: block;
+  }
+  .altitude rect {
+    fill: var(--color-earth);
+  }
+  .entries {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .entry {
+    display: grid;
+    grid-template-columns: 180px minmax(0, 1fr);
+    gap: var(--space-2) var(--space-6);
+    padding: var(--space-6);
+    border-top: 1px solid var(--color-rule);
+  }
+  .entry:first-child {
+    border-top: 0;
+  }
+  .meta {
+    display: grid;
+    gap: var(--space-1);
+    align-content: start;
+    font: var(--size-xs) / 1.5 var(--font-mono);
+    color: var(--color-mute);
+  }
+  .meta code {
+    font: 600 var(--size-sm) var(--font-mono);
+    color: var(--color-ink);
+  }
+  .body {
+    display: grid;
+    gap: var(--space-3);
+    min-width: 0;
+  }
+  h3 {
+    margin: 0;
+    font-size: var(--size-md);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+  .org {
+    font-weight: 400;
+    color: var(--color-mute);
+  }
+  .stack {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+  .stack li {
+    font: 500 var(--size-xs) var(--font-mono);
+    color: var(--color-mute);
+    border: 1px solid var(--color-rule);
+    border-radius: var(--radius-pill);
+    padding: 2px var(--space-3);
+  }
+  .changes {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: var(--space-2);
+  }
+  .unreleased .changes {
+    padding: var(--space-4) var(--space-6) var(--space-6);
+  }
+  .changes li {
+    display: grid;
+    grid-template-columns: 20px minmax(0, 1fr);
+    gap: var(--space-1);
+    max-width: 68ch;
+  }
+  .changes li::before {
+    font: 600 var(--size-sm) / 1.55 var(--font-mono);
+  }
+  .changes li.add::before {
+    content: '+';
+    color: var(--color-second);
+  }
+  .changes li.chg::before {
+    content: '~';
+    color: var(--color-accent);
+  }
+  @media (max-width: 720px) {
+    .entry {
+      grid-template-columns: minmax(0, 1fr);
+      padding: var(--space-4);
+    }
+    .head {
+      padding: var(--space-4);
+    }
+    .unreleased .changes {
+      padding: var(--space-4);
+    }
+  }
+</style>

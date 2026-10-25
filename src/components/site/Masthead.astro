@@ -1,0 +1,92 @@
+---
+import FoldMark from './FoldMark.astro';
+import { copy } from '../../lib/copy';
+
+interface Props {
+  name: string;
+}
+const { name } = Astro.props;
+
+const links = [
+  { href: '/#work', label: copy.nav.work, match: null },
+  { href: '/changelog', label: copy.nav.changelog, match: '/changelog' },
+  { href: '/#notes', label: copy.nav.notes, match: null },
+  { href: '/about', label: copy.nav.about, match: '/about' },
+];
+const path = Astro.url.pathname.replace(/\/$/, '') || '/';
+---
+
+<header class="mast">
+  <div class="wrap">
+    <a class="me" href="/" aria-label={`${name}, home`}>
+      <FoldMark />
+      <span>{name}</span>
+    </a>
+    <nav aria-label={copy.labels.main}>
+      {links.map((l) => (
+        <a href={l.href} aria-current={l.match && path === l.match ? 'page' : undefined}>
+          {l.label}
+        </a>
+      ))}
+    </nav>
+  </div>
+</header>
+
+<style>
+  .mast {
+    position: sticky;
+    top: env(safe-area-inset-top, 0px);
+    z-index: 20;
+    background: var(--color-bg);
+    border-bottom: 1px solid var(--color-rule);
+  }
+  .mast .wrap {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    min-height: 60px;
+  }
+  .me {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    text-decoration: none;
+    white-space: nowrap;
+    min-height: 44px;
+  }
+  nav {
+    margin-left: auto;
+    display: flex;
+    gap: var(--space-1);
+  }
+  nav a {
+    font-size: var(--size-sm);
+    color: var(--color-mute);
+    text-decoration: none;
+    padding: 0 var(--space-2);
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    transition: color var(--motion-fast) var(--motion-ease-out);
+  }
+  nav a:hover,
+  nav a[aria-current='page'] {
+    color: var(--color-ink);
+  }
+  nav a[aria-current='page'] {
+    text-decoration: underline;
+    text-decoration-color: var(--color-accent-ui);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 6px;
+  }
+  @media (max-width: 560px) {
+    .me span {
+      display: none;
+    }
+    nav a {
+      padding: 0 var(--space-1);
+    }
+  }
+</style>

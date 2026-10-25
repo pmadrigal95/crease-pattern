@@ -1,0 +1,80 @@
+---
+import { copy } from '../../lib/copy';
+
+interface Props {
+  name: string;
+  contact: { email: string; linkedin: string; github: string };
+}
+const { name, contact } = Astro.props;
+const year = new Date().getFullYear();
+---
+
+<footer class="foot">
+  <div class="wrap">
+    <p>
+      © {year} {name}
+    </p>
+    <ul class="links" aria-label={copy.labels.elsewhere}>
+      <li>
+        <a href={`mailto:${contact.email}`}>Email</a>
+      </li>
+      <li>
+        <a href={contact.linkedin}>LinkedIn</a>
+      </li>
+      <li>
+        <a href={contact.github}>GitHub</a>
+      </li>
+      <li>
+        <a href="/colophon">{copy.footer.colophon}</a>
+      </li>
+      <li>
+        <a href="https://github.com/pmadrigal95/crease-pattern">{copy.footer.source}</a>
+      </li>
+    </ul>
+    <p class="license">{copy.footer.license}</p>
+  </div>
+</footer>
+
+<style>
+  .foot {
+    border-top: 1px solid var(--color-rule);
+  }
+  .wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3) var(--space-6);
+    align-items: center;
+    padding-block: var(--space-6) var(--space-12);
+    font-size: var(--size-sm);
+    color: var(--color-mute);
+  }
+  p {
+    margin: 0;
+  }
+  .links {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 var(--space-4);
+  }
+  .links a {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+  .links a:hover {
+    color: var(--color-ink);
+  }
+  .license {
+    margin-left: auto;
+    font-family: var(--font-mono);
+    font-size: var(--size-xs);
+  }
+  @media (max-width: 720px) {
+    .license {
+      margin-left: 0;
+    }
+  }
+</style>
