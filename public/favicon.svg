@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <style>
+    .sheet { fill: #245f86; }
+    .fold { fill: #3b82b0; }
+    .crease { stroke: #eff1ec; }
+    @media (prefers-color-scheme: dark) {
+      .sheet { fill: #7fb6d9; }
+      .fold { fill: #a9cfe6; }
+      .crease { stroke: #18211d; }
+    }
+  </style>
+  <path class="sheet" d="M4 4h24v24H4z" />
+  <path class="fold" d="M4 4h24L4 28z" />
+  <path class="crease" d="M28 4 4 28" stroke-width="1.5" fill="none" />
+</svg>

@@ -49,7 +49,7 @@ pnpm lighthouse   # budgets: LCP < 1.8 s, CLS < 0.05, initial JS < 15 KB
 | Branch                         | Purpose                                                                                                                                                        |
 | ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `main`                         | Concept-independent foundations: tooling, tokens, layout, content model, CI. Deploys to production                                                             |
-| `dev`                          | Integration. Feature and concept branches merge here first                                                                                                     |
+| `development`                  | Integration. Feature and concept branches merge here first                                                                                                     |
 | `concept/inspector-identities` | Everything specific to the current concept (inspector, fox, fluid ink, Threads). Kept separate so the concept can be replaced without touching the foundations |
 
 ## Decisions
@@ -58,4 +58,4 @@ Architecture decisions are recorded in [`docs/decisions`](docs/decisions).
 
 ## License
 
-Code is MIT. Writing is CC BY-NC 4.0. The visual identity is reserved. See [LICENSE.md](LICENSE.md).
+Code is MIT. Writing is CC BY-NC-ND 4.0. The visual identity and media are reserved. See [LICENSE.md](LICENSE.md).

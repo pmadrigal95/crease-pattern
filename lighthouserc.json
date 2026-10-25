@@ -4,7 +4,7 @@
       "staticDistDir": "./dist",
       "url": ["http://localhost/index.html"],
       "numberOfRuns": 3,
-      "settings": { "preset": "perf", "formFactor": "mobile", "throttlingMethod": "simulate" }
+      "settings": { "formFactor": "mobile", "throttlingMethod": "simulate" }
     },
     "assert": {
       "assertions": {
