@@ -1,0 +1,1 @@
+(function(){try{var a=["basalt-glacier","washi-asagi","contour-lines"],r=document.documentElement,d=localStorage.getItem("pm.direction"),t=localStorage.getItem("pm.theme");if(d&&a.indexOf(d)>-1)r.setAttribute("data-direction",d);if(t==="light"||t==="dark")r.setAttribute("data-theme",t)}catch(e){}})();

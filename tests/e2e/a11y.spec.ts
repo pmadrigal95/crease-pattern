@@ -36,6 +36,23 @@ for (const path of pages) {
   });
 }
 
+for (const path of pages) {
+  test(`${path} runs with no Content Security Policy violations`, async ({ page }) => {
+    const violations: string[] = [];
+    page.on('console', (msg) => {
+      if (msg.type() === 'error' && /Content Security Policy/i.test(msg.text())) violations.push(msg.text());
+    });
+    await page.addInitScript(() => {
+      document.addEventListener('securitypolicyviolation', (e) => {
+        console.error(`Content Security Policy violation: ${e.violatedDirective} ${e.blockedURI}`);
+      });
+    });
+    await page.goto(path);
+    await page.waitForLoadState('networkidle');
+    expect(violations).toEqual([]);
+  });
+}
+
 test('an unknown URL answers 404 with a way home', async ({ page }) => {
   const response = await page.goto('/this-page-does-not-exist');
   expect(response?.status()).toBe(404);

@@ -4,11 +4,14 @@ import '@fontsource-variable/jetbrains-mono';
 import '../styles/tokens.css';
 import '../styles/base.css';
 import site from '../../site.config';
-import { allVisualDirections } from '../config/visual-direction';
 import { getProfile } from '../lib/profile';
+// Same file scripts/csp-hashes.mjs hashes for the CSP; ?raw inlines it at build time.
+import restoreIdentitySource from '../scripts/restore-identity.js?raw';
 // Preloaded so text renders in its final font on first paint (no layout shift on swap).
 import sansLatin from '@fontsource-variable/schibsted-grotesk/files/schibsted-grotesk-latin-wght-normal.woff2?url';
 import monoLatin from '@fontsource-variable/jetbrains-mono/files/jetbrains-mono-latin-wght-normal.woff2?url';
+
+const restoreIdentityScript = restoreIdentitySource.trim();
 
 interface Props {
   title: string;
@@ -37,19 +40,15 @@ const profile = await getProfile();
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
     <meta property="og:url" content={canonical} />
-    <script is:inline define:vars={{ allowed: allVisualDirections }}>
-      // Restore the visitor's identity and theme before first paint (no flash).
-      try {
-        const d = localStorage.getItem('pm.direction');
-        if (d && allowed.includes(d)) document.documentElement.setAttribute('data-direction', d);
-        const t = localStorage.getItem('pm.theme');
-        if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
-      } catch {
-        /* storage unavailable: keep the defaults rendered on the server */
-      }
-    </script>
   </head>
   <body>
+    <!--
+      First thing in <body>, not in <head>: Astro appends the CSP meta tag at the end of
+      <head>, and a script placed before it would run unprotected. It still runs before
+      any content is parsed, so there is no flash of the default identity.
+    -->
+    <!-- Restores the visitor's identity and theme. Its CSP hash comes from scripts/csp-hashes.mjs. -->
+    <script is:inline set:html={restoreIdentityScript} />
     <a class="skip-link" href="#main">
       Skip to content
     </a>
