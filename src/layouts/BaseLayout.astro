@@ -6,6 +6,9 @@ import '../styles/base.css';
 import site from '../../site.config';
 import { allVisualDirections } from '../config/visual-direction';
 import { getProfile } from '../lib/profile';
+// Preloaded so text renders in its final font on first paint (no layout shift on swap).
+import sansLatin from '@fontsource-variable/schibsted-grotesk/files/schibsted-grotesk-latin-wght-normal.woff2?url';
+import monoLatin from '@fontsource-variable/jetbrains-mono/files/jetbrains-mono-latin-wght-normal.woff2?url';
 
 interface Props {
   title: string;
@@ -27,6 +30,8 @@ const profile = await getProfile();
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="preload" href={sansLatin} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={monoLatin} as="font" type="font/woff2" crossorigin />
     <meta name="author" content={profile.name} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />

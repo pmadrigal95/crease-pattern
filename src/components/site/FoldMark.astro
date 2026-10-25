@@ -1,0 +1,25 @@
+---
+/** Provisional mark: a sheet with one diagonal fold. The origami fox replaces it later. */
+interface Props {
+  size?: number;
+}
+const { size = 24 } = Astro.props;
+---
+
+<svg width={size} height={size} viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+  <path class="sheet" d="M4 4h24v24H4z"></path>
+  <path class="fold" d="M4 4h24L4 28z"></path>
+  <path class="crease" d="M28 4 4 28" fill="none" stroke-width="1.5"></path>
+</svg>
+
+<style>
+  .sheet {
+    fill: var(--color-accent);
+  }
+  .fold {
+    fill: var(--color-accent-ui);
+  }
+  .crease {
+    stroke: var(--color-bg);
+  }
+</style>

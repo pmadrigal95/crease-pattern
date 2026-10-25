@@ -2,7 +2,12 @@
   "ci": {
     "collect": {
       "staticDistDir": "./dist",
-      "url": ["http://localhost/index.html"],
+      "url": [
+        "http://localhost/index.html",
+        "http://localhost/changelog/index.html",
+        "http://localhost/about/index.html",
+        "http://localhost/colophon/index.html"
+      ],
       "numberOfRuns": 3,
       "settings": { "formFactor": "mobile", "throttlingMethod": "simulate" }
     },

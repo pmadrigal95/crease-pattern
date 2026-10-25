@@ -1,0 +1,95 @@
+---
+import { getEntry, render } from 'astro:content';
+import PageLayout from '../layouts/PageLayout.astro';
+import { getProfile } from '../lib/profile';
+import { career, yearsSince } from '../lib/career';
+import { copy, fill } from '../lib/copy';
+
+const page = await getEntry('pages', 'about');
+if (!page) throw new Error('src/content/pages/about.mdx is missing.');
+const { Content } = await render(page);
+const profile = await getProfile();
+const t = copy.about;
+const list = new Intl.ListFormat('en', { type: 'conjunction' });
+
+// The side column holds facts today and can hold a photo later (decision pending).
+const facts = [
+  { term: t.facts.location, value: profile.location },
+  { term: t.facts.role, value: profile.role },
+  { term: t.facts.training, value: profile.training },
+  { term: t.facts.vue, value: fill(t.vueYears, { years: yearsSince(career.vueSince) }) },
+  { term: t.facts.languages, value: list.format(profile.languages) },
+];
+---
+
+<PageLayout title={page.data.title} description={page.data.description}>
+  <div class="wrap">
+    <header class="page-head">
+      <p class="eyebrow">{page.data.title}</p>
+      <h1>{t.title}</h1>
+    </header>
+    <div class="grid">
+      <div class="prose">
+        <Content />
+      </div>
+      <aside class="side" aria-label={t.factsLabel}>
+        <dl class="facts">
+          {facts.map((f) => (
+            <div>
+              <dt>{f.term}</dt>
+              <dd>{f.value}</dd>
+            </div>
+          ))}
+        </dl>
+      </aside>
+    </div>
+  </div>
+</PageLayout>
+
+<style>
+  .grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 300px;
+    gap: var(--space-16);
+    align-items: start;
+    padding-bottom: var(--space-24);
+  }
+  .side {
+    position: sticky;
+    top: 84px;
+  }
+  .facts {
+    margin: 0;
+    border: 1px solid var(--color-rule);
+    border-radius: var(--radius-panel);
+    background: var(--color-surface);
+    padding: var(--space-2) var(--space-6);
+  }
+  .facts div {
+    display: grid;
+    gap: 2px;
+    padding: var(--space-4) 0;
+    border-top: 1px solid var(--color-rule);
+  }
+  .facts div:first-child {
+    border-top: 0;
+  }
+  dt {
+    font: 500 var(--size-xs) var(--font-mono);
+    color: var(--color-mute);
+  }
+  dd {
+    margin: 0;
+    font-weight: 600;
+  }
+  @media (max-width: 880px) {
+    .grid {
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--space-8);
+    }
+    .side {
+      position: static;
+      order: -1;
+    }
+  }
+</style>
