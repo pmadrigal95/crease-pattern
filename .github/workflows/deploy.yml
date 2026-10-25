@@ -5,6 +5,10 @@ on:
     branches: [main]
   workflow_dispatch:
 
+# Least privilege: the workflow only reads the repository.
+permissions:
+  contents: read
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
