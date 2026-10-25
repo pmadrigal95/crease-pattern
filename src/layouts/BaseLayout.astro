@@ -5,6 +5,7 @@ import '../styles/tokens.css';
 import '../styles/base.css';
 import site from '../../site.config';
 import { allVisualDirections } from '../config/visual-direction';
+import { getProfile } from '../lib/profile';
 
 interface Props {
   title: string;
@@ -14,6 +15,7 @@ interface Props {
 
 const { title, description, lang = 'en' } = Astro.props;
 const canonical = new URL(Astro.url.pathname, site.url);
+const profile = await getProfile();
 ---
 
 <!doctype html>
@@ -25,7 +27,7 @@ const canonical = new URL(Astro.url.pathname, site.url);
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <meta name="author" content={site.author} />
+    <meta name="author" content={profile.name} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
