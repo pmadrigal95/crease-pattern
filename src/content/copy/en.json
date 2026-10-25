@@ -1,0 +1,86 @@
+{
+  "nav": {
+    "work": "Work",
+    "changelog": "Changelog",
+    "notes": "Notes",
+    "about": "About",
+    "colophon": "Colophon",
+    "skip": "Skip to content"
+  },
+  "home": {
+    "positioning": "Systems engineer by training. Frontend architect by focus.",
+    "title": "Interfaces built to last.",
+    "status": "v0.1 · Built in public, one release at a time.",
+    "work": {
+      "heading": "Work",
+      "intro": "The strongest evidence is the kind you can inspect. This site is open source, from its design tokens to its test suite.",
+      "thisSite": {
+        "title": "This site",
+        "summary": "One design system, three visual identities. Contrast is tested in every theme, and every change has to pass accessibility and performance budgets before it ships.",
+        "links": {
+          "colophon": "Read how it's built",
+          "repo": "Browse the source on GitHub"
+        }
+      },
+      "more": "More case studies are published as they're cleared for release."
+    },
+    "changelog": {
+      "heading": "Changelog",
+      "intro": "My career as release notes. Each major version marks a new level of responsibility. From v1 on, each one is named after a Costa Rican volcano, higher than the last.",
+      "years": "{years} years shipping Vue in production",
+      "unreleased": "Unreleased",
+      "elevation": "{elevation} m",
+      "present": "Present",
+      "sections": {
+        "added": "Added",
+        "changed": "Changed"
+      },
+      "full": "Read the full release notes"
+    },
+    "notes": {
+      "heading": "Notes",
+      "empty": "Essays on frontend architecture, performance and accessibility. The first one, on parallel code that actually scales, is in progress.",
+      "follow": "Follow the build on GitHub"
+    },
+    "contact": {
+      "heading": "Contact",
+      "intro": "Email reaches me fastest.",
+      "copy": "Copy email address",
+      "copied": "Email address copied"
+    }
+  },
+  "footer": {
+    "license": "Code MIT · Writing CC BY-NC-ND 4.0",
+    "colophon": "Colophon",
+    "source": "Source on GitHub"
+  },
+  "notFound": {
+    "title": "This page isn't on the map.",
+    "body": "The link may be outdated or mistyped.",
+    "action": "Back to the home page"
+  },
+  "changelogPage": {
+    "title": "Changelog",
+    "description": "Pablo Madrigal's career as release notes, from base camp to Irazú."
+  },
+  "labels": {
+    "stack": "Stack",
+    "elsewhere": "Elsewhere",
+    "main": "Main"
+  },
+  "about": {
+    "title": "Systems engineer. Frontend architect.",
+    "factsLabel": "Facts",
+    "facts": {
+      "location": "Based in",
+      "role": "Role",
+      "training": "Training",
+      "vue": "Vue in production",
+      "languages": "Languages"
+    },
+    "vueYears": "{years} years"
+  },
+  "colophonPage": {
+    "title": "How this site is built."
+  }
+}

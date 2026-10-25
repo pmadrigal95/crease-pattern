@@ -1,0 +1,24 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import Masthead from '../components/site/Masthead.astro';
+import SiteFooter from '../components/site/SiteFooter.astro';
+import { getProfile } from '../lib/profile';
+
+interface Props {
+  /** Page title; the owner's name is appended unless `standalone` is set. */
+  title: string;
+  description: string;
+  standalone?: boolean;
+}
+const { title, description, standalone = false } = Astro.props;
+const profile = await getProfile();
+const fullTitle = standalone ? title : `${title} · ${profile.name}`;
+---
+
+<BaseLayout title={fullTitle} description={description}>
+  <Masthead name={profile.name} />
+  <main id="main">
+    <slot />
+  </main>
+  <SiteFooter name={profile.name} contact={profile.contact} />
+</BaseLayout>

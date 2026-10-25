@@ -1,0 +1,43 @@
+---
+title: Colophon
+description: How this site is built, tested and shipped.
+---
+
+Every claim on this page can be checked in [the repository](https://github.com/pmadrigal95/crease-pattern).
+
+## Architecture
+
+- **[Astro](https://astro.build/)** renders every page to static HTML at build time. A page ships no framework
+  JavaScript unless one of its components needs it.
+- **TypeScript** in its strictest configuration, from content schemas to components.
+
+## Design system
+
+- **One system, three identities.** Contour lines, Basalt & glacier and Washi & asagi share the same semantic
+  tokens. Only the primitive colors change.
+- Tokens are authored in the [DTCG format](https://www.designtokens.org/) and compiled to CSS at build time.
+- **Contrast is tested, not assumed.** A unit test checks every text and interface color against WCAG 2.2 AA,
+  in all three identities, in light and dark.
+- Type is set in **Schibsted Grotesk** and **JetBrains Mono**, both self-hosted.
+
+## Quality gates
+
+A change can't merge until it passes formatting, linting, type checks, unit tests, an axe accessibility scan
+in every identity and theme, and Lighthouse budgets:
+
+| Budget                   | Threshold    |
+| ------------------------ | ------------ |
+| Performance              | 95 or higher |
+| Accessibility            | 100          |
+| Best practices           | 100          |
+| SEO                      | 100          |
+| Largest Contentful Paint | under 1.8 s  |
+| Cumulative Layout Shift  | under 0.05   |
+
+## Hosting
+
+Static files on **Cloudflare Workers**, deployed automatically from the `main` branch.
+
+## Licenses
+
+Code is MIT. Writing is CC BY-NC-ND 4.0. The visual identity and media are reserved.
