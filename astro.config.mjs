@@ -14,7 +14,11 @@ export default defineConfig({
     locales: ['en', 'es'],
     routing: { prefixDefaultLocale: false },
   },
+  // One URL per page, without a trailing slash: pages build to changelog.html, which
+  // Cloudflare serves at /changelog directly (no 307 to /changelog/).
+  trailingSlash: 'never',
   build: {
+    format: 'file',
     inlineStylesheets: 'auto',
   },
   // Content Security Policy as a <meta> tag per page. Astro hashes every inline
