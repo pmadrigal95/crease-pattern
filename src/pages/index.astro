@@ -1,42 +1,96 @@
 ---
-import BaseLayout from '../layouts/BaseLayout.astro';
+import PageLayout from '../layouts/PageLayout.astro';
+import ReleaseSummary from '../components/site/ReleaseSummary.astro';
+import CopyEmail from '../components/site/CopyEmail.astro';
 import { getProfile } from '../lib/profile';
+import { career, yearsSince } from '../lib/career';
+import { copy, fill } from '../lib/copy';
 
 const profile = await getProfile();
+const home = copy.home;
+const years = fill(home.changelog.years, { years: yearsSince(career.vueSince) });
 ---
 
-<BaseLayout title={`${profile.name} · ${profile.role}`} description={`${profile.role}. ${profile.summary}`}>
-  <main id="main" class="wrap">
-    <p class="who">
-      {profile.name} · {profile.role} · {profile.location}
-    </p>
-    <h1>
-      Interfaces built <span class="em">to last.</span>
-    </h1>
-    <p class="sub">{profile.summary}</p>
-    <p class="status">The full site is being built in public. Version 0.1.</p>
-    <ul class="links" aria-label="Contact">
-      <li>
-        <a href={`mailto:${profile.contact.email}`}>{profile.contact.email}</a>
-      </li>
-      <li>
-        <a href={profile.contact.linkedin}>LinkedIn</a>
-      </li>
-      <li>
-        <a href={profile.contact.github}>GitHub</a>
-      </li>
-    </ul>
-  </main>
-</BaseLayout>
+<PageLayout
+  title={`${profile.name} · ${profile.role}`}
+  description={`${profile.role}. ${profile.summary}`}
+  standalone
+>
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="wrap">
+      <p class="eyebrow">{home.positioning}</p>
+      <h1 id="hero-title">
+        Interfaces built <span class="em">to last.</span>
+      </h1>
+      <p class="sub">{profile.summary}</p>
+      <p class="who">
+        {profile.name} · {profile.role} · {profile.location}
+      </p>
+      <p class="status">{home.status}</p>
+    </div>
+  </section>
+
+  <section class="sec" id="work" aria-labelledby="work-title">
+    <div class="wrap">
+      <h2 id="work-title">{home.work.heading}</h2>
+      <p class="lead">{home.work.intro}</p>
+      <article class="feature">
+        <h3>{home.work.thisSite.title}</h3>
+        <p>{home.work.thisSite.summary}</p>
+        <ul class="chips" aria-label={copy.labels.stack}>
+          <li>Astro</li>
+          <li>TypeScript</li>
+          <li>DTCG tokens</li>
+          <li>Vitest</li>
+          <li>Playwright + axe</li>
+          <li>Lighthouse CI</li>
+          <li>Cloudflare Workers</li>
+        </ul>
+        <p class="actions">
+          <a href="/colophon">{home.work.thisSite.links.colophon}</a>
+          <a href="https://github.com/pmadrigal95/crease-pattern">{home.work.thisSite.links.repo}</a>
+        </p>
+      </article>
+      <p class="more">{home.work.more}</p>
+    </div>
+  </section>
+
+  <section class="sec" id="changelog" aria-labelledby="changelog-title">
+    <div class="wrap">
+      <div class="sec-head">
+        <h2 id="changelog-title">{home.changelog.heading}</h2>
+        <p class="counter">{years}</p>
+      </div>
+      <p class="lead">{home.changelog.intro}</p>
+      <ReleaseSummary />
+      <p class="actions">
+        <a href="/changelog">{home.changelog.full}</a>
+      </p>
+    </div>
+  </section>
+
+  <section class="sec" id="notes" aria-labelledby="notes-title">
+    <div class="wrap">
+      <h2 id="notes-title">{home.notes.heading}</h2>
+      <p class="lead">{home.notes.empty}</p>
+      <p class="actions">
+        <a href="https://github.com/pmadrigal95/crease-pattern">{home.notes.follow}</a>
+      </p>
+    </div>
+  </section>
+
+  <section class="sec close" id="contact" aria-labelledby="contact-title">
+    <div class="wrap">
+      <h2 id="contact-title">{home.contact.heading}</h2>
+      <p class="lead">{home.contact.intro}</p>
+      <CopyEmail email={profile.contact.email} />
+    </div>
+  </section>
+</PageLayout>
 
 <style>
-  main {
+  .hero .wrap {
     padding-block: var(--space-24) var(--space-16);
-  }
-  .who {
-    font: 500 var(--size-sm) var(--font-mono);
-    color: var(--color-mute);
-    margin: 0 0 var(--space-6);
   }
   h1 {
     font-size: var(--size-display);
@@ -55,26 +109,109 @@ const profile = await getProfile();
     max-width: 44ch;
     margin: var(--space-6) 0 0;
   }
+  .who {
+    font: 500 var(--size-sm) var(--font-mono);
+    color: var(--color-mute);
+    margin: var(--space-8) 0 0;
+  }
   .status {
     font: 500 var(--size-xs) var(--font-mono);
     color: var(--color-second);
-    margin-top: var(--space-8);
+    margin: var(--space-2) 0 0;
   }
-  .links {
-    list-style: none;
-    padding: 0;
-    margin: var(--space-4) 0 0;
+  .sec {
+    border-top: 1px solid var(--color-rule);
+  }
+  .sec .wrap {
+    padding-block: var(--space-16);
+  }
+  .sec h2 {
+    font-size: clamp(1.875rem, 3.6vw, 2.875rem);
+    letter-spacing: -0.03em;
+    line-height: 1.05;
+    font-weight: 600;
+    margin: 0 0 var(--space-4);
+    text-wrap: balance;
+  }
+  .sec-head {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--space-2) var(--space-4);
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-2) var(--space-6);
   }
-  .links a {
+  .counter {
+    font: 600 var(--size-sm) var(--font-mono);
+    color: var(--color-second);
+    margin: 0;
+  }
+  .lead {
     color: var(--color-mute);
-    display: inline-flex;
+    max-width: 60ch;
+    margin: 0 0 var(--space-8);
+  }
+  .feature {
+    background: var(--color-surface);
+    border: 1px solid var(--color-rule);
+    border-radius: var(--radius-panel);
+    padding: var(--space-8);
+    display: grid;
+    gap: var(--space-4);
+    max-width: 760px;
+  }
+  .feature h3 {
+    font-size: var(--size-xl);
+    letter-spacing: -0.02em;
+    margin: 0;
+    font-weight: 600;
+  }
+  .feature p {
+    margin: 0;
+    color: var(--color-mute);
+    max-width: 56ch;
+  }
+  .chips {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+  .chips li {
+    font: 500 var(--size-xs) var(--font-mono);
+    color: var(--color-mute);
+    border: 1px solid var(--color-rule);
+    border-radius: var(--radius-pill);
+    padding: 2px var(--space-3);
+  }
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-6);
+    margin: var(--space-6) 0 0;
+  }
+  .feature .actions {
+    margin: 0;
+  }
+  .actions a {
+    font-weight: 600;
+    color: var(--color-accent);
     min-height: 44px;
+    display: inline-flex;
     align-items: center;
   }
-  .links a:hover {
-    color: var(--color-ink);
+  .more {
+    color: var(--color-mute);
+    font-size: var(--size-sm);
+    margin: var(--space-6) 0 0;
+  }
+  .close .wrap {
+    padding-block: var(--space-24);
+  }
+  .close h2 {
+    font-size: clamp(2.5rem, 6.4vw, 5.25rem);
+    letter-spacing: -0.04em;
+    line-height: 1;
   }
 </style>
