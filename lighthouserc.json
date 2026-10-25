@@ -4,9 +4,9 @@
       "staticDistDir": "./dist",
       "url": [
         "http://localhost/index.html",
-        "http://localhost/changelog/index.html",
-        "http://localhost/about/index.html",
-        "http://localhost/colophon/index.html"
+        "http://localhost/changelog.html",
+        "http://localhost/about.html",
+        "http://localhost/colophon.html"
       ],
       "numberOfRuns": 3,
       "settings": { "formFactor": "mobile", "throttlingMethod": "simulate" }

@@ -5,6 +5,7 @@ import '../styles/tokens.css';
 import '../styles/base.css';
 import site from '../../site.config';
 import { getProfile } from '../lib/profile';
+import { publicPath } from '../lib/url';
 // Same file scripts/csp-hashes.mjs hashes for the CSP; ?raw inlines it at build time.
 import restoreIdentitySource from '../scripts/restore-identity.js?raw';
 // Preloaded so text renders in its final font on first paint (no layout shift on swap).
@@ -20,7 +21,7 @@ interface Props {
 }
 
 const { title, description, lang = 'en' } = Astro.props;
-const canonical = new URL(Astro.url.pathname, site.url);
+const canonical = new URL(publicPath(Astro.url.pathname), site.url);
 const profile = await getProfile();
 ---
 

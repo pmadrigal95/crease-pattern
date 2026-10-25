@@ -53,6 +53,20 @@ for (const path of pages) {
   });
 }
 
+for (const path of pages.filter((p) => p !== '/this-page-does-not-exist')) {
+  test(`${path} links to internal pages that answer 200 without a redirect`, async ({ page }) => {
+    await page.goto(path);
+    const hrefs = await page.$$eval('a[href^="/"]', (links) =>
+      links.map((a) => a.getAttribute('href') ?? ''),
+    );
+    const targets = [...new Set(hrefs.map((h) => h.split('#')[0] || '/'))];
+    for (const target of targets) {
+      const response = await page.request.get(target, { maxRedirects: 0 });
+      expect(response.status(), target).toBe(200);
+    }
+  });
+}
+
 test('an unknown URL answers 404 with a way home', async ({ page }) => {
   const response = await page.goto('/this-page-does-not-exist');
   expect(response?.status()).toBe(404);

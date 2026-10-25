@@ -1,6 +1,7 @@
 ---
 import FoldMark from './FoldMark.astro';
 import { copy } from '../../lib/copy';
+import { publicPath } from '../../lib/url';
 
 interface Props {
   name: string;
@@ -13,7 +14,7 @@ const links = [
   { href: '/#notes', label: copy.nav.notes, match: null },
   { href: '/about', label: copy.nav.about, match: '/about' },
 ];
-const path = Astro.url.pathname.replace(/\/$/, '') || '/';
+const path = publicPath(Astro.url.pathname);
 ---
 
 <header class="mast">
