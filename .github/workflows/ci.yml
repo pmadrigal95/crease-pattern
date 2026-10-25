@@ -29,6 +29,8 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm tokens
 
+      - name: File sizes (media lives in R2, not git)
+        run: pnpm check:sizes
       - name: Format
         run: pnpm format:check
       - name: Lint
