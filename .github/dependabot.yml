@@ -1,11 +1,11 @@
 version: 2
 updates:
-  # npm dependencies, weekly against dev. Minor and patch updates arrive as one
+  # npm dependencies, weekly against development. Minor and patch updates arrive as one
   # grouped PR; each major update gets its own PR so a breaking package never
   # blocks the safe ones. Security updates are separate and ignore these rules.
   - package-ecosystem: npm
     directory: /
-    target-branch: dev
+    target-branch: development
     schedule:
       interval: weekly
       day: monday
@@ -22,7 +22,7 @@ updates:
   # GitHub Actions used by the workflows.
   - package-ecosystem: github-actions
     directory: /
-    target-branch: dev
+    target-branch: development
     schedule:
       interval: monthly
     groups:
