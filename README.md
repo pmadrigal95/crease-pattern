@@ -58,4 +58,4 @@ Architecture decisions are recorded in [`docs/decisions`](docs/decisions).
 
 ## License
 
-Code is MIT. Writing is CC BY-NC 4.0. The visual identity is reserved. See [LICENSE.md](LICENSE.md).
+Code is MIT. Writing is CC BY-NC-ND 4.0. The visual identity and media are reserved. See [LICENSE.md](LICENSE.md).
