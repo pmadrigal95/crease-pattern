@@ -1,33 +1,29 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import site from '../../site.config';
+import { getProfile } from '../lib/profile';
+
+const profile = await getProfile();
 ---
 
-<BaseLayout
-  title={`${site.author} · ${site.role}`}
-  description="Lead Frontend Architect. I design the component systems, tests and pipelines that let product teams ship fast without breaking things."
->
+<BaseLayout title={`${profile.name} · ${profile.role}`} description={`${profile.role}. ${profile.summary}`}>
   <main id="main" class="wrap">
     <p class="who">
-      {site.author} · {site.role} · Costa Rica
+      {profile.name} · {profile.role} · {profile.location}
     </p>
     <h1>
       Interfaces built <span class="em">to last.</span>
     </h1>
-    <p class="sub">
-      I design the component systems, tests and pipelines that let product teams ship fast without breaking
-      things.
-    </p>
+    <p class="sub">{profile.summary}</p>
     <p class="status">The full site is being built in public. Version 0.1.</p>
     <ul class="links" aria-label="Contact">
       <li>
-        <a href={`mailto:${site.contact.email}`}>{site.contact.email}</a>
+        <a href={`mailto:${profile.contact.email}`}>{profile.contact.email}</a>
       </li>
       <li>
-        <a href={site.contact.linkedin}>LinkedIn</a>
+        <a href={profile.contact.linkedin}>LinkedIn</a>
       </li>
       <li>
-        <a href={site.contact.github}>GitHub</a>
+        <a href={profile.contact.github}>GitHub</a>
       </li>
     </ul>
   </main>
