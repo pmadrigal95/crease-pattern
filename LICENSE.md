@@ -20,16 +20,18 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
 CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
-## 2. Writing: CC BY-NC 4.0
+## 2. Writing: CC BY-NC-ND 4.0
 
-The essays and notes in `src/content/` are licensed under
-[Creative Commons Attribution-NonCommercial 4.0 International](https://creativecommons.org/licenses/by-nc/4.0/).
-You may share and adapt them with attribution, for non-commercial purposes.
+The essays, notes and page copy in `src/content/` are licensed under
+[Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International](https://creativecommons.org/licenses/by-nc-nd/4.0/).
+You may share them unchanged, with attribution, for non-commercial purposes. Adaptations, translations
+and commercial use need permission.
 
-## 3. Identity: all rights reserved
+## 3. Identity and media: all rights reserved
 
-The name, photographs, the origami fox mark, and the site's visual design as a whole are not licensed for
-reuse. Please don't clone the look of this site; build your own.
+The name, personal data, photographs, videos, reels, illustrations, the origami fox mark, and the site's
+visual design as a whole are not licensed for reuse. Media files are served from a separate store and are
+not part of this repository. Please don't clone the look of this site; build your own.
 
 ## Third-party
 
