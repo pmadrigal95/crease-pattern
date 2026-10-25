@@ -11,12 +11,12 @@ tooling and foundations each time would be wasted work.
 
 - `main` holds only concept-independent foundations: tooling, CI, tokens engine, layout, content
   model, licenses. It is what deploys.
-- `dev` integrates work before it reaches `main`.
+- `development` integrates work before it reaches `main`.
 - `concept/inspector-identities` holds everything specific to the current concept and merges into
-  `dev` piece by piece once validated.
+  `development` piece by piece once validated.
 
 ## Consequences
 
-- Replacing the concept means starting a new `concept/*` branch from `dev`; foundations stay intact.
+- Replacing the concept means starting a new `concept/*` branch from `development`; foundations stay intact.
 - Concept code should live in its own folders (`src/components/instrument`, `src/labs`) so it can be
   removed cleanly.
