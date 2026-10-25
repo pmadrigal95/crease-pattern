@@ -1,6 +1,8 @@
 version: 2
 updates:
-  # npm dependencies: one grouped PR per week against dev, security fixes as soon as published.
+  # npm dependencies, weekly against dev. Minor and patch updates arrive as one
+  # grouped PR; each major update gets its own PR so a breaking package never
+  # blocks the safe ones. Security updates are separate and ignore these rules.
   - package-ecosystem: npm
     directory: /
     target-branch: dev
@@ -8,9 +10,14 @@ updates:
       interval: weekly
       day: monday
     groups:
-      all-dependencies:
-        patterns: ['*']
-    open-pull-requests-limit: 3
+      minor-and-patch:
+        update-types: [minor, patch]
+    ignore:
+      # astro check does not support TypeScript 7 yet. Remove this rule once
+      # @astrojs/check lists typescript 7 in its peer dependencies.
+      - dependency-name: typescript
+        versions: ['>=7']
+    open-pull-requests-limit: 5
 
   # GitHub Actions used by the workflows.
   - package-ecosystem: github-actions
