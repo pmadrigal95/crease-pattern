@@ -32,7 +32,13 @@ const t = copy.home.changelog;
           <span class="elev">{fill(t.elevation, { elevation: formatElevation(r.elevationM) })}</span>
         </h2>
         <p class="theme">{r.theme}</p>
-        <svg class="altitude" viewBox="0 0 100 2" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+        <svg
+          class="altitude"
+          viewBox="0 0 100 2"
+          preserveAspectRatio="none"
+          aria-hidden="true"
+          focusable="false"
+        >
           <rect width={((r.elevationM / highest) * 100).toFixed(1)} height="2" />
         </svg>
       </header>
