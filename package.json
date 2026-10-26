@@ -20,6 +20,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "check:sizes": "node scripts/check-file-sizes.mjs",
+    "check:workflows": "node scripts/check-workflows.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",

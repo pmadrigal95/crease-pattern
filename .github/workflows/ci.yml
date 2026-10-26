@@ -10,6 +10,7 @@ concurrency:
   cancel-in-progress: true
 
 # Least privilege: the workflow only reads the repository.
+# Actions are pinned to full commit SHAs (version in the comment); Dependabot keeps them current.
 permissions:
   contents: read
 
@@ -17,11 +18,13 @@ jobs:
   quality:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       # pnpm version comes from package.json → packageManager; Node from .node-version.
-      - uses: pnpm/action-setup@v6
-      - uses: actions/setup-node@v7
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: .node-version
           cache: pnpm
@@ -29,6 +32,8 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm tokens
 
+      - name: Workflow policy (SHA pins, no persisted credentials, protected deploy)
+        run: pnpm check:workflows
       - name: File sizes (media lives in R2, not git)
         run: pnpm check:sizes
       - name: Format
