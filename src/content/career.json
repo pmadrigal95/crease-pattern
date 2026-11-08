@@ -105,7 +105,7 @@
       "end": "2022-07",
       "title": "Frontend Consultant",
       "org": "Buo",
-      "added": ["Joined Buo, an HR tech company, as a frontend consultant."]
+      "added": ["Joined Buo, an HR tech company, as its only frontend developer."]
     },
     {
       "version": "2.1.0",
@@ -114,19 +114,28 @@
       "end": "2024-07",
       "title": "Frontend Developer",
       "org": "Buo",
-      "changed": ["Moved from consultant to full-time engineer on the product team."]
+      "changed": ["Moved from consultant to full time, still the only frontend developer on the product."]
     },
     {
       "version": "3.0.0",
       "kind": "role",
       "start": "2024-07",
+      "end": "2026-01",
+      "title": "Frontend Lead",
+      "org": "Buo",
+      "changed": ["Started leading the frontend team as it grew around the product."]
+    },
+    {
+      "version": "3.1.0",
+      "kind": "role",
+      "start": "2026-01",
       "end": null,
       "title": "Lead Frontend Architect",
       "org": "Buo",
       "changed": ["Took ownership of the frontend architecture and its technical direction."]
     },
     {
-      "version": "3.1.0",
+      "version": "3.2.0",
       "kind": "project",
       "start": "2026-10",
       "end": null,
