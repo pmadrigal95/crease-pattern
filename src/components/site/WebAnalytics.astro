@@ -1,0 +1,28 @@
+---
+/**
+ * Cloudflare Web Analytics, loaded after the page and only where it should count visits:
+ * on the configured hosts, and never when the browser asks not to be tracked. The beacon
+ * origins are allowed in the CSP from astro.config.mjs; /privacy describes what it sends.
+ */
+import site from '../../../site.config';
+---
+
+<div hidden data-web-analytics={JSON.stringify(site.webAnalytics)}></div>
+
+<script>
+  const config = document.querySelector<HTMLElement>('[data-web-analytics]')?.dataset.webAnalytics;
+  const { token, hosts } = config
+    ? (JSON.parse(config) as { token: string; hosts: string[] })
+    : { token: '', hosts: [] };
+  const optedOut =
+    (navigator as Navigator & { globalPrivacyControl?: boolean }).globalPrivacyControl === true ||
+    navigator.doNotTrack === '1';
+
+  if (token && hosts.includes(location.hostname) && !optedOut) {
+    const beacon = document.createElement('script');
+    beacon.defer = true;
+    beacon.src = 'https://static.cloudflareinsights.com/beacon.min.js';
+    beacon.dataset.cfBeacon = JSON.stringify({ token });
+    document.head.append(beacon);
+  }
+</script>

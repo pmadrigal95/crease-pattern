@@ -1,0 +1,65 @@
+---
+title: Privacy
+description: What this site collects, what it doesn't, and how to check it yourself.
+---
+
+_Last updated 7 November 2026. Every change to this page is in [its history on GitHub](https://github.com/pmadrigal95/crease-pattern/commits/main/src/content/pages/privacy.mdx)._
+
+This is the personal site of Pablo Madrigal, an individual based in Costa Rica. It sells nothing, has no
+accounts and no forms. If you have a question about this page, write to the email address in the footer.
+
+## The short version
+
+- **No cookies.** This site sets none, and neither does anything it loads.
+- **No profiles.** Visits are counted in aggregate. Nothing here can tell that two visits came from the same
+  person.
+- **No ads, no third-party trackers, no data sold or shared** for marketing.
+- **Your browser's privacy signals are respected.** With Global Privacy Control or Do Not Track turned on,
+  the analytics script is never loaded.
+
+## What happens when you visit
+
+**Hosting.** The site is served by [Cloudflare](https://www.cloudflare.com/). Like any web server, Cloudflare
+receives the technical data every request carries, such as your IP address, browser and the page you asked
+for, and processes it to deliver and protect the site under the
+[Cloudflare Privacy Policy](https://www.cloudflare.com/privacypolicy/). This site keeps no request logs of its
+own.
+
+**Analytics.** To know which pages are read and whether the site loads fast, it uses
+[Cloudflare Web Analytics](https://www.cloudflare.com/web-analytics/). After the page loads, a small script
+from `static.cloudflareinsights.com` sends one report to `cloudflareinsights.com` with:
+
+- the page you viewed and the page that linked to it;
+- your country, browser, operating system and device type;
+- how fast the page loaded and how stable it was while loading.
+
+Cloudflare states that Web Analytics uses no cookies or local storage and does not fingerprint visitors. I
+only ever see totals, such as views per page or visits per country, and I don't copy them anywhere else.
+Cloudflare is a U.S. company and may process this data outside your country, as described in its privacy
+policy.
+
+**Preferences.** The site reads two preferences from your browser's local storage, `pm.direction` and
+`pm.theme`, to show the visual identity and theme you picked. They are written only when you make that
+choice, they never leave your device, and clearing your site data removes them.
+
+**Fonts and everything else** are served from this site itself. No other third party is contacted.
+
+## Why, and your rights
+
+Counting visits in aggregate and keeping the site fast and secure are legitimate interests of running a public
+site (Article 6(1)(f) of the GDPR; Costa Rica's Law 8968 on personal data protection). Under those laws you
+can ask to access, correct or delete personal data and object to its processing. Because the analytics are
+aggregate, there is usually nothing that can be linked back to you, but write to me and I'll answer. You can
+also complain to your data protection authority: in Costa Rica, the
+[PRODHAB](https://www.prodhab.go.cr/); in the EU, the authority of your country.
+
+## Check it yourself
+
+Open your browser's developer tools on any page:
+
+- **Application → Cookies:** empty.
+- **Application → Local storage:** empty, or only `pm.direction` and `pm.theme` if you chose them.
+- **Network:** requests to this site, plus `static.cloudflareinsights.com` and `cloudflareinsights.com` unless
+  your browser sends a privacy signal.
+
+If anything you see doesn't match this page, that's a bug. Please tell me.
