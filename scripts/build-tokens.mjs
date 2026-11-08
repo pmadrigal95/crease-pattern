@@ -37,6 +37,23 @@ const directions = readdirSync(join(root, 'tokens/directions'))
 const fallback = directions.find((d) => d.id === FALLBACK_DIRECTION);
 if (!fallback) throw new Error(`Missing tokens for fallback direction "${FALLBACK_DIRECTION}"`);
 
+// Every identity must define the same color tokens in both themes, each with a value:
+// a missing or misspelled token would otherwise fall back silently to another identity's color.
+const expected = Object.keys(fallback.light).sort().join();
+for (const d of directions) {
+  for (const theme of ['light', 'dark']) {
+    const keys = Object.keys(d[theme]).sort().join();
+    if (keys !== expected)
+      throw new Error(
+        `tokens/directions/${d.id}.json (${theme}) does not match the token set of "${FALLBACK_DIRECTION}"`,
+      );
+    for (const [k, v] of Object.entries(d[theme])) {
+      if (typeof v !== 'string' || !v.trim())
+        throw new Error(`tokens/directions/${d.id}.json (${theme}): "${k}" has no value`);
+    }
+  }
+}
+
 const lightBlocks = directions
   .map((d) => `:root[data-direction='${d.id}'] {\n${decl(d.light, 'color-')}\n}`)
   .join('\n\n');

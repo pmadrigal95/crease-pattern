@@ -1,14 +1,14 @@
 import { defineConfig } from 'astro/config';
-import vue from '@astrojs/vue';
 import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
 import { restoreIdentityScript, sha256 } from './scripts/csp-hashes.mjs';
 
 export default defineConfig({
   site: 'https://pablomadrigal.dev',
-  // Static HTML by default; only islands (inspector, Threads, fluid ink) ship JavaScript.
+  // Static HTML by default. Islands get a framework integration only when one needs it (the
+  // Inspector in M2); until then no framework runtime ships.
   output: 'static',
-  integrations: [vue(), mdx(), sitemap()],
+  integrations: [mdx(), sitemap()],
   i18n: {
     defaultLocale: 'en',
     locales: ['en', 'es'],
