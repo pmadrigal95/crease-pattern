@@ -23,7 +23,7 @@ describe('career changelog', () => {
   test('releases and entries are listed newest first', () => {
     const releases = releasesNewestFirst();
     expect(releases.map((r) => r.major)).toEqual([...releases.map((r) => r.major)].sort((a, b) => b - a));
-    expect(releases[0]?.entries[0]?.version).toBe('3.1.0');
+    expect(releases[0]?.entries[0]?.version).toBe('3.2.0');
   });
 
   test('years are whole years since the start date', () => {
