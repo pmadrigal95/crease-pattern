@@ -32,12 +32,14 @@ export default defineConfig({
         "img-src 'self' data:",
         // Vite inlines the smallest font subsets as data: URIs.
         "font-src 'self' data:",
-        "connect-src 'self'",
+        // Cloudflare Web Analytics posts its cookieless beacon here (see /privacy).
+        "connect-src 'self' https://cloudflareinsights.com",
         "base-uri 'self'",
         "form-action 'self'",
         "object-src 'none'",
       ],
       scriptDirective: {
+        resources: ["'self'", 'https://static.cloudflareinsights.com'],
         hashes: [sha256(restoreIdentityScript)],
       },
     },

@@ -6,7 +6,8 @@
         "http://localhost/index.html",
         "http://localhost/changelog.html",
         "http://localhost/about.html",
-        "http://localhost/colophon.html"
+        "http://localhost/colophon.html",
+        "http://localhost/privacy.html"
       ],
       "numberOfRuns": 3,
       "settings": { "formFactor": "mobile", "throttlingMethod": "simulate" }
