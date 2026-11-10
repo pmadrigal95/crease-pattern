@@ -5,7 +5,7 @@
  *
  * Assets come from crease-pattern-studio/tools/depth (photo cutout, silhouette mask, contour
  * SVG); the colophon explains how. The duotone is CSS: the identity's colors blended over a
- * grayscale photo and cut to the silhouette, so it works on every identity and theme.
+ * grayscale photo (cut to the silhouette in dark themes), so it works on every identity and theme.
  *
  * Without JavaScript the fold rests through the nose. With it, the fold opens once per page
  * load (not under reduced motion) and then follows the handle: pointer or arrow keys.
@@ -31,6 +31,7 @@ const valueText = (fold: number) => fill(t.value, { photo: fold, contours: 100 -
         alt={t.alt}
         loading="eager"
         decoding="async"
+        fetchpriority="high"
       />
     </div>
     <div class="contours" set:html={contours} />
@@ -73,15 +74,25 @@ const valueText = (fold: number) => fill(t.value, { photo: fold, contours: 100 -
     container-type: size;
     touch-action: none;
   }
+  /* Dark themes invert the duotone, so the photo's white background would glow: cut it to the
+     silhouette there. Light themes don't need the mask, which keeps it off the LCP path. */
   @media (prefers-color-scheme: dark) {
     :global(:root:not([data-theme='light'])) .portrait {
       --duo-high: var(--color-accent-ui);
       --duo-low: var(--color-bg);
     }
+    :global(:root:not([data-theme='light'])) .photo {
+      -webkit-mask: url('../../assets/portrait/silhouette.png') center / cover no-repeat;
+      mask: url('../../assets/portrait/silhouette.png') center / cover no-repeat;
+    }
   }
   :global(:root[data-theme='dark']) .portrait {
     --duo-high: var(--color-accent-ui);
     --duo-low: var(--color-bg);
+  }
+  :global(:root[data-theme='dark']) .photo {
+    -webkit-mask: url('../../assets/portrait/silhouette.png') center / cover no-repeat;
+    mask: url('../../assets/portrait/silhouette.png') center / cover no-repeat;
   }
 
   /* Duotone: grayscale × highlight, then lightened by the shadow color, cut to the person. */
@@ -90,8 +101,6 @@ const valueText = (fold: number) => fill(t.value, { photo: fold, contours: 100 -
     inset: 0;
     isolation: isolate;
     background: var(--duo-high);
-    -webkit-mask: url('../../assets/portrait/silhouette.png') center / cover no-repeat;
-    mask: url('../../assets/portrait/silhouette.png') center / cover no-repeat;
   }
   .photo :global(img) {
     display: block;
