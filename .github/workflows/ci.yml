@@ -32,7 +32,8 @@ jobs:
           cache: pnpm
 
       - run: pnpm install --frozen-lockfile
-      - run: pnpm tokens
+      # Generated sources (tokens CSS, Inspector manifest) the type check and tests read.
+      - run: pnpm generate
 
       - name: Workflow policy (SHA pins, no persisted credentials, protected deploy)
         run: pnpm check:workflows

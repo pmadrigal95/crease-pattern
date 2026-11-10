@@ -10,6 +10,7 @@
   },
   "scripts": {
     "tokens": "node scripts/build-tokens.mjs",
+    "generate": "node scripts/build-tokens.mjs && node scripts/build-inspector-manifest.mjs",
     "predev": "node scripts/build-tokens.mjs && node scripts/build-inspector-manifest.mjs",
     "dev": "astro dev",
     "prebuild": "node scripts/build-tokens.mjs && node scripts/build-inspector-manifest.mjs",
