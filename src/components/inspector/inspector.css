@@ -207,6 +207,53 @@
   }
 }
 
+/* The 3D layer view (M2b, layers.ts). The page tilts around the middle of the viewport and each
+   part rises one step per nesting level, the shallow ones first. Transitions run both ways, so
+   closing the Inspector lets the layers settle back. */
+main {
+  transform-origin: 50% var(--tilt-origin, 50vh);
+  transition: transform var(--motion-stage) var(--motion-ease-in-out);
+}
+
+main [data-inspect] {
+  transition:
+    transform var(--motion-stage) var(--motion-ease-in-out) calc(var(--layer-depth, 1) * 60ms),
+    box-shadow var(--motion-stage) var(--motion-ease-in-out),
+    outline-color var(--motion-fast) ease;
+}
+
+/* The page itself becomes the base plate the layers float above. */
+.inspector-3d main {
+  transform-style: preserve-3d;
+  transform: perspective(2000px) rotateX(22deg) rotateZ(-6deg) scale(0.9);
+  background: var(--color-surface);
+  outline: 1px solid var(--color-rule);
+  box-shadow: 0 40px 80px rgb(0 0 0 / 0.25);
+}
+
+.inspector-3d main .layer-path {
+  transform-style: preserve-3d;
+}
+
+.inspector-3d main [data-inspect] {
+  transform-style: preserve-3d;
+  transform: translateZ(calc(var(--layer-depth, 1) * 28px));
+  background: var(--color-bg);
+  outline: 1px dashed color-mix(in srgb, var(--color-accent-ui) 55%, transparent);
+  outline-offset: 6px;
+  box-shadow: 0 calc(var(--layer-depth, 1) * 12px) calc(var(--layer-depth, 1) * 28px) rgb(0 0 0 / 0.22);
+}
+
+/* The hovered or pinned part: drawn in the accent and lifted above its siblings. */
+.inspector-3d [data-inspect].is-inspected {
+  outline: 2px solid var(--color-accent-ui);
+  outline-offset: 6px;
+}
+
+.inspector-3d main [data-inspect].is-inspected {
+  transform: translateZ(calc(var(--layer-depth, 1) * 28px + 48px));
+}
+
 /* Inspect mode: parts show a crosshair so clicking reads as "pick", not "follow the link". */
 .inspecting [data-inspect] {
   cursor: crosshair;
@@ -235,7 +282,9 @@
 
 @media (prefers-reduced-motion: reduce) {
   #inspector,
-  .highlight {
+  .highlight,
+  main,
+  main [data-inspect] {
     animation: none;
     transition: none;
   }

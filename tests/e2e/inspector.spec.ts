@@ -87,3 +87,37 @@ test('opening the Inspector raises no Content Security Policy violations', async
   await page.waitForLoadState('networkidle');
   expect(violations).toEqual([]);
 });
+
+test('on wide screens the page tilts into layers, nested parts sit higher, and closing settles it', async ({
+  page,
+}) => {
+  await page.goto('/?inspect');
+  await expect(page.locator('html')).toHaveClass(/inspector-3d/);
+  await expect(page.locator('main')).not.toHaveCSS('transform', 'none');
+  await expect(page.locator('[data-inspect="index#hero"]')).toHaveAttribute('style', /--layer-depth:\s*1/);
+  await expect(page.locator('[data-inspect="ReleaseSummary"]')).toHaveAttribute(
+    'style',
+    /--layer-depth:\s*2/,
+  );
+
+  await page.keyboard.press('Escape');
+  await expect(page.locator('html')).not.toHaveClass(/inspector-3d/);
+  await expect(page.locator('.layer-path')).toHaveCount(0);
+});
+
+test('reduced motion keeps the Inspector flat', async ({ browser }) => {
+  const context = await browser.newContext({ reducedMotion: 'reduce' });
+  const page = await context.newPage();
+  await page.goto('/?inspect');
+  await expect(page.locator('#inspector')).toBeVisible();
+  await expect(page.locator('html')).not.toHaveClass(/inspector-3d/);
+  await expect(page.locator('main')).toHaveCSS('transform', 'none');
+  await context.close();
+});
+
+test('phones keep the Inspector flat', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 });
+  await page.goto('/?inspect');
+  await expect(page.locator('#inspector')).toBeVisible();
+  await expect(page.locator('html')).not.toHaveClass(/inspector-3d/);
+});
