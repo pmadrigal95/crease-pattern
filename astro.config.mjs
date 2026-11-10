@@ -1,14 +1,14 @@
 import { defineConfig } from 'astro/config';
-import vue from '@astrojs/vue';
 import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
 import { restoreIdentityScript, sha256 } from './scripts/csp-hashes.mjs';
 
 export default defineConfig({
   site: 'https://pablomadrigal.dev',
-  // Static HTML by default; only islands (inspector, Threads, fluid ink) ship JavaScript.
+  // Static HTML by default. Islands get a framework integration only when one needs it (the
+  // Inspector in M2); until then no framework runtime ships.
   output: 'static',
-  integrations: [vue(), mdx(), sitemap()],
+  integrations: [mdx(), sitemap()],
   i18n: {
     defaultLocale: 'en',
     locales: ['en', 'es'],
@@ -32,12 +32,14 @@ export default defineConfig({
         "img-src 'self' data:",
         // Vite inlines the smallest font subsets as data: URIs.
         "font-src 'self' data:",
-        "connect-src 'self'",
+        // Cloudflare Web Analytics posts its cookieless beacon here (see /privacy).
+        "connect-src 'self' https://cloudflareinsights.com",
         "base-uri 'self'",
         "form-action 'self'",
         "object-src 'none'",
       ],
       scriptDirective: {
+        resources: ["'self'", 'https://static.cloudflareinsights.com'],
         hashes: [sha256(restoreIdentityScript)],
       },
     },

@@ -52,6 +52,7 @@
   "footer": {
     "license": "Code MIT · Writing CC BY-NC-ND 4.0",
     "colophon": "Colophon",
+    "privacy": "Privacy",
     "source": "Source on GitHub"
   },
   "notFound": {
@@ -82,5 +83,8 @@
   },
   "colophonPage": {
     "title": "How this site is built."
+  },
+  "privacyPage": {
+    "title": "What this site knows about you."
   }
 }

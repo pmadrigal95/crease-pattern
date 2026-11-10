@@ -28,10 +28,15 @@ const year = new Date().getFullYear();
         <a href="/colophon">{copy.footer.colophon}</a>
       </li>
       <li>
+        <a href="/privacy">{copy.footer.privacy}</a>
+      </li>
+      <li>
         <a href="https://github.com/pmadrigal95/crease-pattern">{copy.footer.source}</a>
       </li>
     </ul>
-    <p class="license">{copy.footer.license}</p>
+    <a class="license" href="https://github.com/pmadrigal95/crease-pattern/blob/main/LICENSE.md">
+      {copy.footer.license}
+    </a>
   </div>
 </footer>
 
@@ -64,11 +69,15 @@ const year = new Date().getFullYear();
     display: inline-flex;
     align-items: center;
   }
-  .links a:hover {
+  .links a:hover,
+  .license:hover {
     color: var(--color-ink);
   }
   .license {
     margin-left: auto;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
     font-family: var(--font-mono);
     font-size: var(--size-xs);
   }

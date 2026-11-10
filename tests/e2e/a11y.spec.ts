@@ -3,7 +3,7 @@ import AxeBuilder from '@axe-core/playwright';
 import { allVisualDirections } from '../../src/config/visual-direction';
 
 // Every page must pass axe in all 3 identities × 2 themes.
-const pages = ['/', '/changelog', '/about', '/colophon', '/this-page-does-not-exist'];
+const pages = ['/', '/changelog', '/about', '/colophon', '/privacy', '/this-page-does-not-exist'];
 
 for (const path of pages) {
   for (const direction of allVisualDirections) {
