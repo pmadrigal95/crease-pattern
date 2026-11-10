@@ -22,4 +22,15 @@ const { size = 24 } = Astro.props;
   .crease {
     stroke: var(--color-bg);
   }
+  /* First visit (decision 42): the flap starts folded over the crease and opens into place. */
+  :global(.intro) .fold {
+    transform-box: view-box;
+    transform-origin: 16px 16px;
+    animation: mark-fold calc(var(--motion-intro) * 2) var(--motion-ease-out) both;
+  }
+  @keyframes mark-fold {
+    from {
+      transform: rotate3d(1, -1, 0, 180deg);
+    }
+  }
 </style>

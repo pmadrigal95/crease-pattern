@@ -7,3 +7,4 @@ src/generated
 CHANGELOG.md
 # Inlined verbatim and hashed for the CSP (scripts/csp-hashes.mjs): reformatting would change the hash.
 src/scripts/restore-identity.js
+src/scripts/page-reveal.js

@@ -239,4 +239,33 @@ const t = copy.home.changelog;
       padding: var(--space-4);
     }
   }
+  /* Each release's altitude bar climbs as it scrolls into view (decision 42). Without
+     scroll-driven animations, or with reduced motion, the bar is simply there. */
+  @supports (animation-timeline: view()) {
+    .altitude rect {
+      transform-box: fill-box;
+      transform-origin: left;
+      animation: altitude-climb linear both;
+    }
+    /* The timeline belongs to the release card (SVG shapes can't host a view timeline). A
+       separate, more specific rule, or the minifier folds it into the shorthand, which
+       browsers reject. */
+    .release {
+      view-timeline: --release block;
+    }
+    .release .altitude rect {
+      animation-timeline: --release;
+      animation-range: entry 10% cover 40%;
+    }
+  }
+  @keyframes altitude-climb {
+    from {
+      transform: scaleX(0);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .altitude rect {
+      animation: none;
+    }
+  }
 </style>

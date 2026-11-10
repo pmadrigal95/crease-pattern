@@ -1,7 +1,7 @@
 import { defineConfig } from 'astro/config';
 import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
-import { restoreIdentityScript, sha256 } from './scripts/csp-hashes.mjs';
+import { pageRevealScript, restoreIdentityScript, sha256 } from './scripts/csp-hashes.mjs';
 
 export default defineConfig({
   site: 'https://pablomadrigal.dev',
@@ -40,7 +40,7 @@ export default defineConfig({
       ],
       scriptDirective: {
         resources: ["'self'", 'https://static.cloudflareinsights.com'],
-        hashes: [sha256(restoreIdentityScript)],
+        hashes: [sha256(restoreIdentityScript), sha256(pageRevealScript)],
       },
     },
   },

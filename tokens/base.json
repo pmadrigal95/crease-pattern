@@ -46,6 +46,22 @@
     "base": { "$type": "duration", "$value": "200ms", "$description": "Component states, panels" },
     "exit": { "$type": "duration", "$value": "250ms", "$description": "Leaving the inspector" },
     "stage": { "$type": "duration", "$value": "650ms", "$description": "Entering the inspector" },
+    "page": { "$type": "duration", "$value": "460ms", "$description": "Page-to-page fold (decision 42)" },
+    "intro": {
+      "$type": "duration",
+      "$value": "420ms",
+      "$description": "First-load entrance of each element"
+    },
+    "stagger": {
+      "$type": "duration",
+      "$value": "45ms",
+      "$description": "Delay between elements entering together"
+    },
+    "portrait": {
+      "$type": "duration",
+      "$value": "1600ms",
+      "$description": "The folded portrait opening on About"
+    },
     "easeOut": { "$type": "cubicBezier", "$value": "cubic-bezier(.23, 1, .32, 1)" },
     "easeInOut": { "$type": "cubicBezier", "$value": "cubic-bezier(.77, 0, .175, 1)" }
   }
