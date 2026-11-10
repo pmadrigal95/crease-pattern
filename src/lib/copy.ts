@@ -1,0 +1,27 @@
+import { z } from 'astro/zod';
+import raw from '../content/copy/en.json';
+
+/**
+ * Interface copy (English). Strings never get concatenated in components: dynamic
+ * values go through `fill`, so translations can reorder them freely.
+ *
+ * Validated on import: every leaf must be a non-empty string whose placeholders are
+ * well formed (`{name}`), so a stray brace or an emptied string fails the build.
+ */
+type CopyTree = { [key: string]: string | CopyTree };
+
+const leaf = z
+  .string()
+  .min(1)
+  .refine((s) => !/\{(?!\w+\})|(?<!\{\w+)\}/.test(s), 'placeholders must look like {name}');
+const tree: z.ZodType<CopyTree> = z.lazy(() => z.record(z.string(), z.union([leaf, tree])));
+
+export const copy: typeof raw = tree.parse(raw) as typeof raw;
+
+/** Replaces `{name}` placeholders. Throws on a missing value so a typo fails the build. */
+export function fill(template: string, values: Record<string, string | number>): string {
+  return template.replace(/\{(\w+)\}/g, (_, key: string) => {
+    if (!(key in values)) throw new Error(`Missing value for {${key}} in "${template}"`);
+    return String(values[key]);
+  });
+}

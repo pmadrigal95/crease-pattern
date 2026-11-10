@@ -1,0 +1,69 @@
+---
+import { copy } from '../../lib/copy';
+
+interface Props {
+  email: string;
+}
+const { email } = Astro.props;
+const t = copy.home.contact;
+---
+
+<div class="copy-email">
+  <a class="address" href={`mailto:${email}`}>
+    {email}
+  </a>
+  <button type="button" class="btn" data-copy={email} data-done={t.copied}>
+    {t.copy}
+  </button>
+  <span class="status" role="status" aria-live="polite"></span>
+</div>
+
+<script>
+  // Copies the address and confirms in a live region; falls back to selecting the text.
+  for (const button of document.querySelectorAll<HTMLButtonElement>('.copy-email .btn')) {
+    button.addEventListener('click', async () => {
+      const root = button.closest('.copy-email');
+      const status = root?.querySelector<HTMLElement>('.status');
+      try {
+        await navigator.clipboard.writeText(button.dataset.copy ?? '');
+        if (status) status.textContent = button.dataset.done ?? '';
+      } catch {
+        const address = root?.querySelector('.address');
+        if (address) window.getSelection()?.selectAllChildren(address);
+      }
+    });
+  }
+</script>
+
+<style>
+  .copy-email {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3) var(--space-4);
+    align-items: center;
+  }
+  .address {
+    font-size: var(--size-lg);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    overflow-wrap: anywhere;
+  }
+  .btn {
+    font: 600 var(--size-sm) var(--font-sans);
+    color: var(--color-ink);
+    background: var(--color-surface);
+    border: 1px solid var(--color-rule);
+    border-radius: var(--radius-control);
+    padding: 0 var(--space-4);
+    min-height: 44px;
+    cursor: pointer;
+    transition: border-color var(--motion-fast) var(--motion-ease-out);
+  }
+  .btn:hover {
+    border-color: var(--color-accent-ui);
+  }
+  .status {
+    font: 500 var(--size-xs) var(--font-mono);
+    color: var(--color-second);
+  }
+</style>

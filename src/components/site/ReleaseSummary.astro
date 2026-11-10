@@ -1,0 +1,82 @@
+---
+import { releasesNewestFirst, formatElevation } from '../../lib/career';
+import { copy, fill } from '../../lib/copy';
+
+/** Compact changelog for the home page: one row per release. */
+const releases = releasesNewestFirst();
+const t = copy.home.changelog;
+const yearOf = (v: string) => v.slice(0, 4);
+const span = (r: (typeof releases)[number]) => {
+  const starts = r.entries.map((e) => yearOf(e.start)).sort();
+  const open = r.entries.some((e) => !e.end);
+  const ends = r.entries.map((e) => (e.end ? yearOf(e.end) : '')).sort();
+  return `${starts[0]} – ${open ? t.present : ends[ends.length - 1]}`;
+};
+---
+
+<ol class="summary">
+  {releases.map((r) => (
+    <li>
+      <p class="name">
+        <span class="major">v{r.major}</span>
+        <strong>{r.codename}</strong>
+        <span class="elev">{fill(t.elevation, { elevation: formatElevation(r.elevationM) })}</span>
+      </p>
+      <p class="roles">
+        {[
+          ...new Set(r.entries.filter((e) => e.kind !== 'education').map((e) => `${e.title} · ${e.org}`)),
+        ].join(' / ') || r.theme}
+      </p>
+      <p class="years">{span(r)}</p>
+    </li>
+  ))}
+</ol>
+
+<style>
+  .summary {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-top: 1px solid var(--color-rule);
+  }
+  li {
+    display: grid;
+    grid-template-columns: 240px minmax(0, 1fr) auto;
+    gap: var(--space-2) var(--space-6);
+    align-items: baseline;
+    padding: var(--space-4) 0;
+    border-bottom: 1px solid var(--color-rule);
+  }
+  p {
+    margin: 0;
+  }
+  .name {
+    display: flex;
+    gap: var(--space-3);
+    align-items: baseline;
+  }
+  .major {
+    font: 600 var(--size-sm) var(--font-mono);
+    color: var(--color-accent);
+  }
+  strong {
+    font-size: var(--size-lg);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+  .elev,
+  .years {
+    font: var(--size-xs) var(--font-mono);
+    color: var(--color-mute);
+    white-space: nowrap;
+  }
+  .roles {
+    color: var(--color-mute);
+    min-width: 0;
+  }
+  @media (max-width: 720px) {
+    li {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+</style>

@@ -53,6 +53,8 @@ const profile = defineCollection({
     name: z.string().min(1),
     role: z.string().min(1),
     location: z.string().min(1),
+    training: z.string().min(1),
+    languages: z.array(z.string().min(1)).min(1),
     summary: z.string().max(160),
     contact: z.strictObject({
       email: z.email(),
@@ -62,4 +64,13 @@ const profile = defineCollection({
   }),
 });
 
-export const collections = { notes, profile };
+/** Standalone pages written in MDX (About, Colophon). */
+const pages = defineCollection({
+  loader: glob({ pattern: '*.mdx', base: './src/content/pages' }),
+  schema: z.strictObject({
+    title: z.string().min(1),
+    description: z.string().max(160),
+  }),
+});
+
+export const collections = { notes, profile, pages };

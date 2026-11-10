@@ -3,6 +3,8 @@
     "name": "Pablo Madrigal",
     "role": "Lead Frontend Architect",
     "location": "Costa Rica",
+    "training": "Systems engineering",
+    "languages": ["Spanish", "English"],
     "summary": "I design the component systems, tests and pipelines that let product teams ship fast without breaking things.",
     "contact": {
       "email": "pablomadrigal.1995@gmail.com",

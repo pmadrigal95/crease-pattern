@@ -1,9 +1,22 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import { allVisualDirections } from '../../src/config/visual-direction';
 
+// axe measures the settled page: mid-fade text would read as low contrast. Scroll-driven
+// animations have no end to wait for, so only time-based ones (the first-load entrance) count.
+async function settleEntranceAnimations(page: Page) {
+  await page.evaluate(() =>
+    Promise.all(
+      document
+        .getAnimations()
+        .filter((a) => a.timeline instanceof DocumentTimeline)
+        .map((a) => a.finished.catch(() => undefined)),
+    ),
+  );
+}
+
 // Every page must pass axe in all 3 identities × 2 themes.
-const pages = ['/'];
+const pages = ['/', '/changelog', '/about', '/colophon', '/privacy', '/this-page-does-not-exist'];
 
 for (const path of pages) {
   for (const direction of allVisualDirections) {
@@ -18,6 +31,7 @@ for (const path of pages) {
         );
         await page.goto(path);
         await expect(page.locator('html')).toHaveAttribute('data-direction', direction);
+        await settleEntranceAnimations(page);
         const results = await new AxeBuilder({ page })
           .withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa'])
           .analyze();
@@ -27,9 +41,55 @@ for (const path of pages) {
   }
 }
 
-test('the page has no horizontal overflow on a 375px phone', async ({ page }) => {
-  await page.setViewportSize({ width: 375, height: 812 });
-  await page.goto('/');
-  const overflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth);
-  expect(overflow).toBe(false);
+for (const path of pages) {
+  test(`${path} has no horizontal overflow on a 375px phone`, async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 812 });
+    await page.goto(path);
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth);
+    expect(overflow).toBe(false);
+  });
+}
+
+for (const path of pages) {
+  test(`${path} runs with no Content Security Policy violations`, async ({ page }) => {
+    const violations: string[] = [];
+    page.on('console', (msg) => {
+      if (msg.type() === 'error' && /Content Security Policy/i.test(msg.text())) violations.push(msg.text());
+    });
+    await page.addInitScript(() => {
+      document.addEventListener('securitypolicyviolation', (e) => {
+        console.error(`Content Security Policy violation: ${e.violatedDirective} ${e.blockedURI}`);
+      });
+    });
+    await page.goto(path);
+    await page.waitForLoadState('networkidle');
+    expect(violations).toEqual([]);
+  });
+}
+
+for (const path of pages.filter((p) => p !== '/this-page-does-not-exist')) {
+  test(`${path} links to internal pages that answer 200 without a redirect`, async ({ page }) => {
+    await page.goto(path);
+    const hrefs = await page.$$eval('a[href^="/"]', (links) =>
+      links.map((a) => a.getAttribute('href') ?? ''),
+    );
+    const targets = [...new Set(hrefs.map((h) => h.split('#')[0] || '/'))];
+    for (const target of targets) {
+      const response = await page.request.get(target, { maxRedirects: 0 });
+      expect(response.status(), target).toBe(200);
+    }
+  });
+}
+
+test('an unknown URL answers 404 with a way home', async ({ page }) => {
+  const response = await page.goto('/this-page-does-not-exist');
+  expect(response?.status()).toBe(404);
+  await expect(page.getByRole('link', { name: 'Back to the home page' })).toBeVisible();
+});
+
+test('the main navigation marks the current page', async ({ page }) => {
+  await page.goto('/changelog');
+  await expect(
+    page.getByRole('navigation', { name: 'Main' }).getByRole('link', { name: 'Changelog' }),
+  ).toHaveAttribute('aria-current', 'page');
 });

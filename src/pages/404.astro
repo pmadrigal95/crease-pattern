@@ -1,0 +1,33 @@
+---
+import PageLayout from '../layouts/PageLayout.astro';
+import { copy } from '../lib/copy';
+
+const t = copy.notFound;
+---
+
+<PageLayout title={t.title} description={t.body}>
+  <div class="wrap">
+    <header class="page-head">
+      <p class="eyebrow">404</p>
+      <h1>{t.title}</h1>
+      <p>{t.body}</p>
+    </header>
+    <p class="back">
+      <a href="/">{t.action}</a>
+    </p>
+  </div>
+</PageLayout>
+
+<style>
+  .back {
+    padding-bottom: var(--space-24);
+    margin: 0;
+  }
+  .back a {
+    font-weight: 600;
+    color: var(--color-accent);
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+</style>

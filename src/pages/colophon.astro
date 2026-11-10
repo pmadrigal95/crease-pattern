@@ -1,0 +1,27 @@
+---
+import { getEntry, render } from 'astro:content';
+import PageLayout from '../layouts/PageLayout.astro';
+import { copy } from '../lib/copy';
+
+const page = await getEntry('pages', 'colophon');
+if (!page) throw new Error('src/content/pages/colophon.mdx is missing.');
+const { Content } = await render(page);
+---
+
+<PageLayout title={page.data.title} description={page.data.description}>
+  <div class="wrap">
+    <header class="page-head">
+      <p class="eyebrow">{page.data.title}</p>
+      <h1>{copy.colophonPage.title}</h1>
+    </header>
+    <div class="prose body">
+      <Content />
+    </div>
+  </div>
+</PageLayout>
+
+<style>
+  .body {
+    padding-bottom: var(--space-24);
+  }
+</style>
