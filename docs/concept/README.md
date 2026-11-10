@@ -12,15 +12,15 @@ tokens, accessibility outline and live performance metrics.
 
 ## Pieces
 
-| Piece | Description | Milestone |
-| --- | --- | --- |
-| Inspector | `Shift`+`I`, the button or the fox open it. The page separates into CSS 3D layers; a panel shows layers, tokens, lowest text contrast per layer, live metrics and the accessibility outline. Keyboard: arrows move, Enter pins, Esc closes | M2 |
-| Identity switcher | Public section of the inspector: same components in three identities, with a token diff | M2 |
-| Origami fox | Geometric mark that unfolds into its crease pattern when inspecting; real 3D folding in Three.js | M2 (2D) · M4 (3D) |
-| 3D scene | Under the exploded layers, per identity: Irazú relief from real elevation data (contour-lines), procedural basalt columns (basalt-glacier), stacked washi sheets (washi-asagi) | M4 |
-| Fluid ink | WebGL2 fluid simulation in the hero only, tuned per identity; off for reduced motion, touch and while inspecting | M4 |
-| Essay: Parallel code that actually scales | A puzzle solver running with real threads in the browser (C → WebAssembly), Amdahl and Gustafson demos | M3 · M7 |
-| Career changelog | Career told as semver releases | M1 |
+| Piece                                     | Description                                                                                                                                                                                                                                | Milestone         |
+| ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------- |
+| Inspector                                 | `Shift`+`I`, the button or the fox open it. The page separates into CSS 3D layers; a panel shows layers, tokens, lowest text contrast per layer, live metrics and the accessibility outline. Keyboard: arrows move, Enter pins, Esc closes | M2                |
+| Identity switcher                         | Public section of the inspector: same components in three identities, with a token diff                                                                                                                                                    | M2                |
+| Origami fox                               | Geometric mark that unfolds into its crease pattern when inspecting; real 3D folding in Three.js                                                                                                                                           | M2 (2D) · M4 (3D) |
+| 3D scene                                  | Under the exploded layers, per identity: Irazú relief from real elevation data (contour-lines), procedural basalt columns (basalt-glacier), stacked washi sheets (washi-asagi)                                                             | M4                |
+| Fluid ink                                 | WebGL2 fluid simulation in the hero only, tuned per identity; off for reduced motion, touch and while inspecting                                                                                                                           | M4                |
+| Essay: Parallel code that actually scales | A puzzle solver running with real threads in the browser (C → WebAssembly), Amdahl and Gustafson demos                                                                                                                                     | M3 · M7           |
+| Career changelog                          | Career told as semver releases                                                                                                                                                                                                             | M1                |
 
 ## Prototype
 
