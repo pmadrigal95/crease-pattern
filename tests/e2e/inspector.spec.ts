@@ -22,6 +22,7 @@ test('Shift+I opens the Inspector, moves focus in, and Esc returns it', async ({
 test('clicking a part pins it and shows where it comes from, without following links', async ({ page }) => {
   await page.goto('/about');
   await page.locator(toggle).click();
+  // The page makes room for the panel, so every part stays clickable while inspecting.
   await page.locator('[data-inspect="FoldedPortrait"] figcaption').click();
   await expect(page).toHaveURL(/\/about$/);
   const details = page.locator(`${panel} .facts`);
