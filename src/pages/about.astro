@@ -5,6 +5,7 @@ import { getProfile } from '../lib/profile';
 import { career, yearsSince } from '../lib/career';
 import { copy, fill } from '../lib/copy';
 import FoldedPortrait from '../components/site/FoldedPortrait.astro';
+import silhouette from '../assets/portrait/silhouette.png?url';
 
 const page = await getEntry('pages', 'about');
 if (!page) throw new Error('src/content/pages/about.mdx is missing.');
@@ -24,6 +25,15 @@ const facts = [
 ---
 
 <PageLayout title={page.data.title} description={page.data.description}>
+  <!-- In dark themes the portrait can't paint until its silhouette mask arrives; CSS finds it late. -->
+  <link
+    slot="head"
+    rel="preload"
+    as="image"
+    href={silhouette}
+    type="image/png"
+    media="(prefers-color-scheme: dark)"
+  />
   <div class="wrap">
     <header class="page-head">
       <p class="eyebrow">{page.data.title}</p>

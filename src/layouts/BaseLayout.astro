@@ -44,6 +44,8 @@ const profile = await getProfile();
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
     <meta property="og:url" content={canonical} />
+    <!-- Page-specific hints, such as a preload for the page's first image. -->
+    <slot name="head" />
   </head>
   <body>
     <!--

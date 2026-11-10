@@ -16,6 +16,7 @@ const fullTitle = standalone ? title : `${title} · ${profile.name}`;
 ---
 
 <BaseLayout title={fullTitle} description={description}>
+  <slot name="head" slot="head" />
   <Masthead name={profile.name} />
   <main id="main">
     <slot />
