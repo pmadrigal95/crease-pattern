@@ -6,13 +6,26 @@ import { createApp, type App } from 'vue';
 import InspectorPanel, { type Manifest } from './InspectorPanel.vue';
 import manifest from '../../generated/inspector.json';
 import { inspector as t } from '../../content/copy/en.json';
-import './inspector.css';
+// Imported as text, not as a stylesheet: a CSS import here would make Astro add it to every
+// page's <head> as render-blocking CSS. It is adopted only when the Inspector opens.
+import inspectorStyles from './inspector.css?inline';
 
 export interface InspectorHandle {
   close(): void;
 }
 
+let styles: CSSStyleSheet | null = null;
+
+/** Adopts the Inspector's styles once; kept after closing so the layers can settle back. */
+function adoptStyles() {
+  if (styles) return;
+  styles = new CSSStyleSheet();
+  styles.replaceSync(inspectorStyles);
+  document.adoptedStyleSheets = [...document.adoptedStyleSheets, styles];
+}
+
 export function openInspector(trigger: HTMLElement | null, onClosed: () => void): InspectorHandle {
+  adoptStyles();
   const host = document.createElement('aside');
   host.id = 'inspector';
   host.setAttribute('aria-label', t.title);

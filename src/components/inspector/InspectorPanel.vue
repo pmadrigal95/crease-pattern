@@ -14,6 +14,7 @@ import {
   scriptBytes,
   type Vitals,
 } from './measure';
+import { explode, layersEnabled, markCurrent } from './layers';
 
 /** Built by scripts/build-inspector-manifest.mjs: facts per file, and each part's file. */
 export interface Manifest {
@@ -40,6 +41,8 @@ const outline = ref(accessibilityOutline());
 const announce = ref('');
 const firstRun = ref(true);
 const box = ref<DOMRect | null>(null);
+// The 3D layer view (M2b); phones and reduced motion keep the flat outline.
+const threeD = layersEnabled();
 const heading = ref<HTMLElement | null>(null);
 const layerButtons = ref<HTMLButtonElement[]>([]);
 const scripts = scriptBytes(props.openedAt);
@@ -77,7 +80,8 @@ const details = computed(() => {
 });
 
 function place() {
-  box.value = current.value ? current.value.getBoundingClientRect() : null;
+  if (threeD) markCurrent(elements.value, current.value);
+  else box.value = current.value ? current.value.getBoundingClientRect() : null;
 }
 
 function pin(el: HTMLElement, focusList = false) {
@@ -124,6 +128,7 @@ function onKey(e: KeyboardEvent) {
 }
 
 let stopVitals = () => {};
+let settle = () => {};
 onMounted(async () => {
   elements.value = [...document.querySelectorAll<HTMLElement>('[data-inspect]')];
   stopVitals = observeVitals((v) => (vitals.value = v));
@@ -132,11 +137,13 @@ onMounted(async () => {
   document.addEventListener('keydown', onKey);
   addEventListener('scroll', place, { passive: true });
   addEventListener('resize', place);
+  if (threeD) settle = explode(elements.value);
   await nextTick();
   heading.value?.focus();
 });
 onBeforeUnmount(() => {
   stopVitals();
+  settle();
   document.removeEventListener('pointerover', onPointerOver);
   document.removeEventListener('click', onClick, true);
   document.removeEventListener('keydown', onKey);
