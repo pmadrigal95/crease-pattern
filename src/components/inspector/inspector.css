@@ -173,6 +173,109 @@
   font-weight: 600;
 }
 
+/* Identity and theme (M2c): native radios, styled as rows with the identity's own swatches. */
+.inspector-panel .choices {
+  display: grid;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.inspector-panel .themes {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: var(--space-3);
+}
+
+.inspector-panel .themes legend {
+  grid-column: 1 / -1;
+  margin-bottom: var(--space-1);
+  font: 500 var(--size-xs) var(--font-mono);
+  color: var(--color-mute);
+}
+
+.inspector-panel .choice {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 40px;
+  padding: 0 var(--space-2);
+  border: 1px solid var(--color-rule);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.inspector-panel .choice:has(input:checked) {
+  border-color: var(--color-accent-ui);
+  background: color-mix(in srgb, var(--color-accent-ui) 14%, transparent);
+}
+
+.inspector-panel .choice:has(input:focus-visible) {
+  outline: 2px solid var(--color-accent-ui);
+  outline-offset: 2px;
+}
+
+.inspector-panel .choice input {
+  margin: 0;
+  accent-color: var(--color-accent-ui);
+}
+
+.inspector-panel .swatches {
+  display: inline-flex;
+}
+
+.inspector-panel .swatches span {
+  width: 14px;
+  height: 14px;
+  border: 1px solid var(--color-rule);
+  border-radius: 50%;
+  margin-left: -4px;
+}
+
+.inspector-panel .swatches span:first-child {
+  margin-left: 0;
+}
+
+/* The identity transition (decision 42): the new colors rise like terrain from the chosen
+   control, edged with contour lines; the masks live in public/topo. The masthead joins the page
+   here, since its colors change too. */
+.vt-identity .mast {
+  view-transition-name: none;
+}
+
+:root.vt-identity::view-transition-old(root) {
+  z-index: 1;
+  clip-path: none;
+  animation: none;
+}
+
+:root.vt-identity::view-transition-new(root) {
+  z-index: 2;
+  mask: url('/topo/mask.svg') no-repeat;
+  animation: terrain-rise 1100ms var(--motion-ease-in-out) both;
+}
+
+.topo-rings {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  pointer-events: none;
+  background: var(--color-accent-ui);
+  mask: url('/topo/rings.svg') no-repeat;
+  animation: terrain-rise 1100ms var(--motion-ease-in-out) both;
+}
+
+@keyframes terrain-rise {
+  from {
+    mask-size: 0 0;
+    mask-position: var(--vx) var(--vy);
+  }
+  to {
+    mask-size: 420vmax 420vmax;
+    mask-position: calc(var(--vx) - 210vmax) calc(var(--vy) - 210vmax);
+  }
+}
+
 /* The outline drawn over the hovered or pinned part, in the DevTools content color. */
 .highlight {
   position: fixed;

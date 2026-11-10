@@ -122,6 +122,14 @@
     "fail": "needs work",
     "waiting": "interact to measure",
     "scripts": "JavaScript before the Inspector",
-    "selectedAnnouncement": "Selected {name}"
+    "selectedAnnouncement": "Selected {name}",
+    "identity": "Identity",
+    "identityNote": "The same {count} color tokens in every identity. Only their values change.",
+    "theme": "Theme",
+    "themes": {
+      "system": "System",
+      "light": "Light",
+      "dark": "Dark"
+    }
   }
 }

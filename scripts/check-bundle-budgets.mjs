@@ -1,28 +1,42 @@
 // Fails the build when JavaScript outgrows its budget, measured the way visitors receive it
 // (Brotli, as Cloudflare serves it). Run after `pnpm build`.
 //  - Page scripts: every script an HTML page references directly. Lighthouse also caps these.
-//  - On demand: everything else in dist/_astro, which only loads when a visitor asks for it
-//    (today the Inspector: Vue and the panel). Budget from decision 44.
+//  - On demand: what those scripts can import later (today the Inspector: Vue and the panel),
+//    found by following their imports. Files nothing references never reach a visitor and don't
+//    count. Budget from decision 44 (raised from 30 to 32 KB when the Identity switcher joined the panel).
 import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { brotliCompressSync } from 'node:zlib';
 
-const BUDGET_KB = { page: 15, onDemand: 30 };
-const dist = join(import.meta.dirname, '..', 'dist');
+const BUDGET_KB = { page: 15, onDemand: 32 };
+const assets = join(import.meta.dirname, '..', 'dist', '_astro');
 const kb = (bytes) => Math.round((bytes / 1024) * 10) / 10;
+const read = (file) => readFileSync(join(assets, file), 'utf8');
+const size = (file) => brotliCompressSync(readFileSync(join(assets, file))).length;
 
-const scripts = readdirSync(join(dist, '_astro')).filter((f) => f.endsWith('.js'));
-const html = readdirSync(dist)
+const scripts = readdirSync(assets).filter((f) => f.endsWith('.js'));
+const html = readdirSync(join(assets, '..'))
   .filter((f) => f.endsWith('.html'))
-  .map((f) => readFileSync(join(dist, f), 'utf8'))
+  .map((f) => readFileSync(join(assets, '..', f), 'utf8'))
   .join('\n');
-const size = (file) => brotliCompressSync(readFileSync(join(dist, '_astro', file))).length;
+
+// Static (`from"./x.js"`, `import"./x.js"`) and dynamic (`import("./x.js")`) imports between chunks.
+const importsOf = (file) =>
+  [...read(file).matchAll(/(?:from|import)\s*\(?\s*["'`]\.\/([^"'`]+\.js)["'`]/g)].map((m) => m[1]);
 
 const page = scripts.filter((f) => html.includes(`/_astro/${f}`));
-const onDemand = scripts.filter((f) => !page.includes(f));
+const onDemand = new Set();
+const queue = page.flatMap(importsOf);
+while (queue.length) {
+  const file = queue.pop();
+  if (page.includes(file) || onDemand.has(file) || !scripts.includes(file)) continue;
+  onDemand.add(file);
+  queue.push(...importsOf(file));
+}
+
 const totals = {
   page: page.reduce((sum, f) => sum + size(f), 0),
-  onDemand: onDemand.reduce((sum, f) => sum + size(f), 0),
+  onDemand: [...onDemand].reduce((sum, f) => sum + size(f), 0),
 };
 
 let failed = false;

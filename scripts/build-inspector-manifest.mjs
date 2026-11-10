@@ -35,6 +35,22 @@ function knownTokens(root) {
   return new Set([...Object.keys(manifest.base), ...colors]);
 }
 
+/**
+ * Five colors per identity and theme for the Identity switcher's swatches, plus how many color
+ * tokens every identity shares (the point of the switcher: same system, different values).
+ */
+function identities(root) {
+  const { directions } = JSON.parse(readFileSync(join(root, 'src/generated/tokens.json'), 'utf8'));
+  const SWATCH = ['bg', 'ink', 'accent', 'accent-ui', 'second'];
+  const pick = (palette) => SWATCH.map((k) => palette[k]);
+  return {
+    tokenCount: Object.keys(Object.values(directions)[0].light).length,
+    swatches: Object.fromEntries(
+      Object.entries(directions).map(([id, d]) => [id, { light: pick(d.light), dark: pick(d.dark) }]),
+    ),
+  };
+}
+
 export function buildManifest(root) {
   const tokens = knownTokens(root);
   /** @type {Record<string, { tokens: string[], lastChange: { commit: string, date: string, subject: string } | null }>} */
@@ -77,7 +93,13 @@ export function buildManifest(root) {
   }
 
   // Facts live once per file; parts point at their file. Keeps the payload small (it ships with the panel).
-  return { repository: REPOSITORY, commit: git(root, ['rev-parse', 'HEAD']), files, parts };
+  return {
+    repository: REPOSITORY,
+    commit: git(root, ['rev-parse', 'HEAD']),
+    files,
+    parts,
+    identities: identities(root),
+  };
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
