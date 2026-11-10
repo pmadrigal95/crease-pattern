@@ -4,6 +4,7 @@ import PageLayout from '../layouts/PageLayout.astro';
 import { getProfile } from '../lib/profile';
 import { career, yearsSince } from '../lib/career';
 import { copy, fill } from '../lib/copy';
+import FoldedPortrait from '../components/site/FoldedPortrait.astro';
 
 const page = await getEntry('pages', 'about');
 if (!page) throw new Error('src/content/pages/about.mdx is missing.');
@@ -12,7 +13,7 @@ const profile = await getProfile();
 const t = copy.about;
 const list = new Intl.ListFormat('en', { type: 'conjunction' });
 
-// The side column holds facts today and can hold a photo later (decision pending).
+// The side column holds the folded portrait (decision 41) and the facts.
 const facts = [
   { term: t.facts.location, value: profile.location },
   { term: t.facts.role, value: profile.role },
@@ -32,16 +33,19 @@ const facts = [
       <div class="prose">
         <Content />
       </div>
-      <aside class="side" aria-label={t.factsLabel}>
-        <dl class="facts">
-          {facts.map((f) => (
-            <div>
-              <dt>{f.term}</dt>
-              <dd>{f.value}</dd>
-            </div>
-          ))}
-        </dl>
-      </aside>
+      <div class="side">
+        <FoldedPortrait />
+        <aside aria-label={t.factsLabel}>
+          <dl class="facts">
+            {facts.map((f) => (
+              <div>
+                <dt>{f.term}</dt>
+                <dd>{f.value}</dd>
+              </div>
+            ))}
+          </dl>
+        </aside>
+      </div>
     </div>
   </div>
 </PageLayout>
