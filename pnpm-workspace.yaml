@@ -1,3 +1,10 @@
 allowBuilds:
   esbuild: true
   workerd: true
+
+# rolldown's WebAssembly binding pulls in the emnapi 2.0 beta, and pnpm then hands that beta to
+# @astrojs/check, which crashes against the 1.x core it ships with (astro check fails in CI).
+# Pin both to the stable 1.x line until @astrojs/check supports 2.0.
+overrides:
+  '@emnapi/runtime': 1.11.3
+  '@emnapi/core': 1.11.3
