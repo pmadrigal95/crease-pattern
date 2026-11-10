@@ -185,7 +185,7 @@ const valueText = (fold: number) => fill(t.value, { photo: fold, contours: 100 -
   }
 
   .portrait:global(.is-opening) {
-    animation: portrait-open 1600ms var(--motion-ease-in-out) 250ms both;
+    animation: portrait-open var(--motion-portrait) var(--motion-ease-in-out) 250ms both;
   }
   @keyframes portrait-open {
     from {
