@@ -15,6 +15,12 @@ import {
   type Vitals,
 } from './measure';
 import { explode, layersEnabled, markCurrent } from './layers';
+import { currentDirection, currentTheme, setDirection, setTheme, type Theme } from './identity';
+import {
+  allVisualDirections,
+  visualDirectionLabels,
+  type VisualDirection,
+} from '../../config/visual-direction';
 
 /** Built by scripts/build-inspector-manifest.mjs: facts per file, and each part's file. */
 export interface Manifest {
@@ -25,6 +31,7 @@ export interface Manifest {
     { tokens: string[]; lastChange: { commit: string; date: string; subject: string } | null }
   >;
   parts: Record<string, string>;
+  identities: { tokenCount: number; swatches: Record<string, { light: string[]; dark: string[] }> };
 }
 
 const props = defineProps<{ manifest: Manifest; openedAt: number }>();
@@ -43,6 +50,24 @@ const firstRun = ref(true);
 const box = ref<DOMRect | null>(null);
 // The 3D layer view (M2b); phones and reduced motion keep the flat outline.
 const threeD = layersEnabled();
+const direction = ref<VisualDirection>(currentDirection());
+const theme = ref<Theme>(currentTheme());
+const themes: Theme[] = ['system', 'light', 'dark'];
+const dark = () =>
+  theme.value === 'dark' || (theme.value === 'system' && matchMedia('(prefers-color-scheme: dark)').matches);
+// The point the contour transition rises from: the control the visitor used.
+const origin = (e: Event) => {
+  const r = (e.target as HTMLElement).closest('label')?.getBoundingClientRect();
+  return r ? { x: r.left + r.width / 2, y: r.top + r.height / 2 } : { x: innerWidth / 2, y: innerHeight / 2 };
+};
+function chooseDirection(id: VisualDirection, e: Event) {
+  direction.value = id;
+  setDirection(id, origin(e));
+}
+function chooseTheme(value: Theme, e: Event) {
+  theme.value = value;
+  setTheme(value, origin(e));
+}
 const heading = ref<HTMLElement | null>(null);
 const layerButtons = ref<HTMLButtonElement[]>([]);
 const scripts = scriptBytes(props.openedAt);
@@ -176,6 +201,44 @@ const metrics = computed(() => [
     </header>
     <p v-if="firstRun" class="intro">{{ t.intro }}</p>
     <p class="sr-only" role="status" aria-live="polite">{{ announce }}</p>
+
+    <section aria-labelledby="inspector-identity">
+      <h3 id="inspector-identity">{{ t.identity }}</h3>
+      <fieldset class="choices">
+        <legend class="sr-only">{{ t.identity }}</legend>
+        <label v-for="id in allVisualDirections" :key="id" class="choice">
+          <input
+            type="radio"
+            name="inspector-direction"
+            :value="id"
+            :checked="direction === id"
+            @change="chooseDirection(id, $event)"
+          />
+          <span class="swatches" aria-hidden="true">
+            <span
+              v-for="(color, i) in manifest.identities.swatches[id]?.[dark() ? 'dark' : 'light']"
+              :key="i"
+              :style="{ background: color }"
+            ></span>
+          </span>
+          {{ visualDirectionLabels[id].label }}
+        </label>
+      </fieldset>
+      <p class="muted">{{ fill(t.identityNote, { count: manifest.identities.tokenCount }) }}</p>
+      <fieldset class="choices themes">
+        <legend>{{ t.theme }}</legend>
+        <label v-for="value in themes" :key="value" class="choice">
+          <input
+            type="radio"
+            name="inspector-theme"
+            :value="value"
+            :checked="theme === value"
+            @change="chooseTheme(value, $event)"
+          />
+          {{ t.themes[value] }}
+        </label>
+      </fieldset>
+    </section>
 
     <section aria-labelledby="inspector-layers">
       <h3 id="inspector-layers">{{ t.layers }}</h3>

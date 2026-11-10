@@ -121,3 +121,25 @@ test('phones keep the Inspector flat', async ({ page }) => {
   await expect(page.locator('#inspector')).toBeVisible();
   await expect(page.locator('html')).not.toHaveClass(/inspector-3d/);
 });
+
+test('the Identity switcher applies a direction and a theme, and remembers them', async ({ page }) => {
+  await page.goto('/?inspect');
+  await page.getByRole('radio', { name: 'Washi & asagi' }).check();
+  await expect(page.locator('html')).toHaveAttribute('data-direction', 'washi-asagi');
+  await page.getByRole('radio', { name: 'Dark' }).check();
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+  expect(
+    await page.evaluate(() => [localStorage.getItem('pm.direction'), localStorage.getItem('pm.theme')]),
+  ).toEqual(['washi-asagi', 'dark']);
+
+  // restore-identity.js brings the choice back before the next page paints.
+  await page.goto('/about');
+  await expect(page.locator('html')).toHaveAttribute('data-direction', 'washi-asagi');
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+
+  // Back to System forgets the theme instead of storing a default.
+  await page.goto('/about?inspect');
+  await page.getByRole('radio', { name: 'System' }).check();
+  await expect(page.locator('html')).not.toHaveAttribute('data-theme', /.+/);
+  expect(await page.evaluate(() => localStorage.getItem('pm.theme'))).toBeNull();
+});
