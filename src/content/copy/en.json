@@ -79,7 +79,13 @@
       "vue": "Vue in production",
       "languages": "Languages"
     },
-    "vueYears": "{years} years"
+    "vueYears": "{years} years",
+    "portrait": {
+      "alt": "Pablo Madrigal, head and shoulders, in glasses and a striped shirt. A diagonal fold turns part of the photo into the same face drawn as contour lines.",
+      "caption": "Interface · architecture",
+      "handle": "Fold the portrait",
+      "value": "{photo}% photo, {contours}% contour lines"
+    }
   },
   "colophonPage": {
     "title": "How this site is built."

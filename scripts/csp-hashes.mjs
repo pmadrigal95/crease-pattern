@@ -9,4 +9,10 @@ export const restoreIdentityScript = readFileSync(
   'utf8',
 ).trim();
 
+/** Inline script that starts the page-to-page fold or the first-load entrance (decision 42). */
+export const pageRevealScript = readFileSync(
+  new URL('../src/scripts/page-reveal.js', import.meta.url),
+  'utf8',
+).trim();
+
 export const sha256 = (source) => `sha256-${createHash('sha256').update(source).digest('base64')}`;

@@ -1,6 +1,19 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import { allVisualDirections } from '../../src/config/visual-direction';
+
+// axe measures the settled page: mid-fade text would read as low contrast. Scroll-driven
+// animations have no end to wait for, so only time-based ones (the first-load entrance) count.
+async function settleEntranceAnimations(page: Page) {
+  await page.evaluate(() =>
+    Promise.all(
+      document
+        .getAnimations()
+        .filter((a) => a.timeline instanceof DocumentTimeline)
+        .map((a) => a.finished.catch(() => undefined)),
+    ),
+  );
+}
 
 // Every page must pass axe in all 3 identities × 2 themes.
 const pages = ['/', '/changelog', '/about', '/colophon', '/privacy', '/this-page-does-not-exist'];
@@ -18,6 +31,7 @@ for (const path of pages) {
         );
         await page.goto(path);
         await expect(page.locator('html')).toHaveAttribute('data-direction', direction);
+        await settleEntranceAnimations(page);
         const results = await new AxeBuilder({ page })
           .withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa'])
           .analyze();
