@@ -1,0 +1,234 @@
+/* The Inspector panel and its highlight. Loaded with the panel, never before. */
+
+#inspector {
+  position: fixed;
+  top: 61px;
+  right: 0;
+  bottom: 0;
+  z-index: 60;
+  width: min(380px, 100vw);
+  overflow: auto;
+  overscroll-behavior: contain;
+  background: var(--color-surface);
+  color: var(--color-ink);
+  border-left: 1px solid var(--color-rule);
+  box-shadow: -12px 0 32px rgb(0 0 0 / 0.12);
+  font-size: var(--size-sm);
+  animation: inspector-in var(--motion-base) var(--motion-ease-out) both;
+}
+
+@keyframes inspector-in {
+  from {
+    transform: translateX(16px);
+    opacity: 0;
+  }
+}
+
+.inspector-panel {
+  padding: var(--space-4) var(--space-6) var(--space-12);
+}
+
+.inspector-panel .top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.inspector-panel h2 {
+  margin: 0;
+  font-size: var(--size-lg);
+  outline: none;
+}
+
+.inspector-panel h3 {
+  margin: var(--space-6) 0 var(--space-2);
+  font: 600 var(--size-xs) var(--font-mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-mute);
+}
+
+.inspector-panel h4 {
+  margin: var(--space-3) 0 var(--space-1);
+  font-size: var(--size-sm);
+}
+
+.inspector-panel .close {
+  min-width: 44px;
+  min-height: 44px;
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-panel);
+  background: transparent;
+  color: inherit;
+  font-size: 22px;
+  cursor: pointer;
+}
+
+.inspector-panel .intro {
+  margin: var(--space-3) 0 0;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-panel);
+  background: color-mix(in srgb, var(--color-accent-ui) 14%, transparent);
+  font-family: var(--font-mono);
+  font-size: var(--size-xs);
+}
+
+.inspector-panel .muted {
+  color: var(--color-mute);
+  margin: 0;
+}
+
+.inspector-panel .layers,
+.inspector-panel .plain,
+.inspector-panel .tokens {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.inspector-panel .layers button {
+  width: 100%;
+  min-height: 36px;
+  padding: var(--space-1) var(--space-2);
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: inherit;
+  font: 500 var(--size-xs) var(--font-mono);
+  text-align: left;
+  cursor: pointer;
+}
+
+.inspector-panel .layers button:hover,
+.inspector-panel .layers button:focus-visible,
+.inspector-panel .layers button[aria-pressed='true'] {
+  background: color-mix(in srgb, var(--color-accent-ui) 18%, transparent);
+}
+
+.inspector-panel .facts {
+  display: grid;
+  gap: var(--space-1);
+  margin: 0;
+}
+
+.inspector-panel .facts dt,
+.inspector-panel .metrics dt {
+  font: 500 var(--size-xs) var(--font-mono);
+  color: var(--color-mute);
+  margin-top: var(--space-2);
+}
+
+.inspector-panel dd {
+  margin: 0;
+}
+
+.inspector-panel .tokens {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+
+.inspector-panel .tokens li {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 6px;
+  border: 1px solid var(--color-rule);
+  border-radius: 6px;
+  font-size: var(--size-xs);
+}
+
+.inspector-panel .swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  border: 1px solid var(--color-rule);
+}
+
+.inspector-panel .plain li {
+  padding: 2px 0;
+}
+
+.inspector-panel .plain .h2 {
+  padding-left: var(--space-3);
+}
+
+.inspector-panel .plain .h3 {
+  padding-left: var(--space-6);
+}
+
+.inspector-panel .level {
+  font: 500 var(--size-xs) var(--font-mono);
+  color: var(--color-mute);
+}
+
+.inspector-panel .metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2) var(--space-4);
+  margin: var(--space-2) 0 0;
+}
+
+.inspector-panel .metrics dd {
+  font-weight: 600;
+}
+
+/* The outline drawn over the hovered or pinned part, in the DevTools content color. */
+.highlight {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 55;
+  pointer-events: none;
+  outline: 2px solid var(--color-accent-ui);
+  background: var(--color-bm-content);
+  transition:
+    transform var(--motion-fast) var(--motion-ease-out),
+    width var(--motion-fast) var(--motion-ease-out),
+    height var(--motion-fast) var(--motion-ease-out);
+}
+
+.highlight span {
+  position: absolute;
+  left: -2px;
+  bottom: 100%;
+  padding: 2px 6px;
+  background: var(--color-accent-ui);
+  color: var(--color-bg);
+  font: 600 var(--size-xs) var(--font-mono);
+  white-space: nowrap;
+}
+
+/* Inspect mode: parts show a crosshair so clicking reads as "pick", not "follow the link". */
+.inspecting [data-inspect] {
+  cursor: crosshair;
+}
+
+/* Phones: a bottom sheet over the lower half of the screen. */
+@media (max-width: 720px) {
+  #inspector {
+    top: auto;
+    left: 0;
+    width: auto;
+    max-height: 60vh;
+    border-left: 0;
+    border-top: 1px solid var(--color-rule);
+    border-radius: 16px 16px 0 0;
+    box-shadow: 0 -12px 32px rgb(0 0 0 / 0.16);
+    animation-name: inspector-up;
+  }
+  @keyframes inspector-up {
+    from {
+      transform: translateY(24px);
+      opacity: 0;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #inspector,
+  .highlight {
+    animation: none;
+    transition: none;
+  }
+}

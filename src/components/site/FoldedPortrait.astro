@@ -20,7 +20,7 @@ const t = copy.about.portrait;
 const valueText = (fold: number) => fill(t.value, { photo: fold, contours: 100 - fold });
 ---
 
-<figure class="figure">
+<figure class="figure" data-inspect="FoldedPortrait">
   <div class="portrait" data-folded-portrait data-value-template={t.value}>
     <div class="photo">
       <Picture

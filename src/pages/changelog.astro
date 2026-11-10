@@ -10,7 +10,7 @@ const years = fill(t.years, { years: yearsSince(career.vueSince) });
 
 <PageLayout title={copy.changelogPage.title} description={copy.changelogPage.description}>
   <div class="wrap">
-    <header class="page-head">
+    <header class="page-head" data-inspect="changelog#header">
       <p class="eyebrow">{years}</p>
       <h1>{copy.changelogPage.title}</h1>
       <p>{t.intro}</p>

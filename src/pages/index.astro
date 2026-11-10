@@ -16,7 +16,7 @@ const years = fill(home.changelog.years, { years: yearsSince(career.vueSince) })
   description={`${profile.role}. ${profile.summary}`}
   standalone
 >
-  <section class="hero" aria-labelledby="hero-title">
+  <section class="hero" aria-labelledby="hero-title" data-inspect="index#hero">
     <div class="wrap">
       <p class="eyebrow">{home.positioning}</p>
       <h1 id="hero-title">
@@ -27,10 +27,11 @@ const years = fill(home.changelog.years, { years: yearsSince(career.vueSince) })
         {profile.name} · {profile.role} · {profile.location}
       </p>
       <p class="status">{home.status}</p>
+      <p class="hint">{copy.inspector.hint}</p>
     </div>
   </section>
 
-  <section class="sec" id="work" aria-labelledby="work-title">
+  <section class="sec" id="work" aria-labelledby="work-title" data-inspect="index#work">
     <div class="wrap">
       <h2 id="work-title">{home.work.heading}</h2>
       <p class="lead">{home.work.intro}</p>
@@ -55,7 +56,7 @@ const years = fill(home.changelog.years, { years: yearsSince(career.vueSince) })
     </div>
   </section>
 
-  <section class="sec" id="changelog" aria-labelledby="changelog-title">
+  <section class="sec" id="changelog" aria-labelledby="changelog-title" data-inspect="index#changelog">
     <div class="wrap">
       <div class="sec-head">
         <h2 id="changelog-title">{home.changelog.heading}</h2>
@@ -69,7 +70,7 @@ const years = fill(home.changelog.years, { years: yearsSince(career.vueSince) })
     </div>
   </section>
 
-  <section class="sec" id="notes" aria-labelledby="notes-title">
+  <section class="sec" id="notes" aria-labelledby="notes-title" data-inspect="index#notes">
     <div class="wrap">
       <h2 id="notes-title">{home.notes.heading}</h2>
       <p class="lead">{home.notes.empty}</p>
@@ -79,7 +80,7 @@ const years = fill(home.changelog.years, { years: yearsSince(career.vueSince) })
     </div>
   </section>
 
-  <section class="sec close" id="contact" aria-labelledby="contact-title">
+  <section class="sec close" id="contact" aria-labelledby="contact-title" data-inspect="index#contact">
     <div class="wrap">
       <h2 id="contact-title">{home.contact.heading}</h2>
       <p class="lead">{home.contact.intro}</p>
@@ -89,6 +90,16 @@ const years = fill(home.changelog.years, { years: yearsSince(career.vueSince) })
 </PageLayout>
 
 <style>
+  .hint {
+    margin: var(--space-2) 0 0;
+    font: 500 var(--size-xs) var(--font-mono);
+    color: var(--color-mute);
+  }
+  @media (pointer: coarse) {
+    .hint {
+      display: none;
+    }
+  }
   .hero .wrap {
     padding-block: var(--space-24) var(--space-16);
   }

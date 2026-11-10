@@ -22,6 +22,15 @@ const { size = 24 } = Astro.props;
   .crease {
     stroke: var(--color-bg);
   }
+  /* Inspecting (decision 44): the flap opens over the crease, showing the pattern underneath. */
+  .fold {
+    transform-box: view-box;
+    transform-origin: 16px 16px;
+    transition: transform var(--motion-stage) var(--motion-ease-in-out);
+  }
+  :global(.inspecting) .fold {
+    transform: rotate3d(1, -1, 0, 180deg);
+  }
   /* First visit (decision 42): the flap starts folded over the crease and opens into place. */
   :global(.intro) .fold {
     transform-box: view-box;

@@ -35,7 +35,7 @@ const facts = [
     media="(prefers-color-scheme: dark)"
   />
   <div class="wrap">
-    <header class="page-head">
+    <header class="page-head" data-inspect="about#header">
       <p class="eyebrow">{page.data.title}</p>
       <h1>{t.title}</h1>
     </header>
@@ -53,7 +53,7 @@ const facts = [
           </dl>
         </aside>
       </div>
-      <div class="prose">
+      <div class="prose" data-inspect="about#story">
         <Content />
       </div>
     </div>

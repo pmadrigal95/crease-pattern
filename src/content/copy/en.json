@@ -92,5 +92,36 @@
   },
   "privacyPage": {
     "title": "What this site knows about you."
+  },
+  "inspector": {
+    "open": "Inspect",
+    "shortcut": "Shift I",
+    "hint": "Press Shift+I to see how this page is built.",
+    "title": "Inspector",
+    "close": "Close the inspector",
+    "intro": "Hover a block · Click to pin · Esc to leave",
+    "layers": "Layers",
+    "selected": "Selected",
+    "nothingSelected": "Hover or pick a layer to see where it comes from.",
+    "component": "Component",
+    "section": "Page section",
+    "source": "View source",
+    "lastChange": "Last change",
+    "size": "Size",
+    "tokens": "Tokens it uses",
+    "contrast": "Text contrast",
+    "contrastPass": "{ratio}:1 · passes AA",
+    "contrastFail": "{ratio}:1 · below AA",
+    "noText": "No text inside",
+    "outline": "Accessibility outline",
+    "landmarks": "Landmarks",
+    "headings": "Headings",
+    "metrics": "This visit, measured",
+    "metricsNote": "Real numbers from your browser, not a lab. Thresholds are Google's \"good\" limits.",
+    "pass": "good",
+    "fail": "needs work",
+    "waiting": "interact to measure",
+    "scripts": "JavaScript before the Inspector",
+    "selectedAnnouncement": "Selected {name}"
   }
 }
