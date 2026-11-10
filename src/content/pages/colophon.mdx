@@ -20,6 +20,17 @@ Every claim on this page can be checked in [the repository](https://github.com/p
   in all three identities, in light and dark.
 - Type is set in **Schibsted Grotesk** and **JetBrains Mono**, both self-hosted.
 
+## The portrait
+
+The portrait on [About](/about) is one real photo, untouched by generative AI, shown two ways.
+
+- **The interface** is the photo itself. The duotone is plain CSS: a grayscale image blended with the active
+  identity's colors and cut to a silhouette mask, so it follows every identity and theme without extra files.
+- **The architecture** is the same face as contour lines. A depth map of the photo comes from
+  [Depth Anything V2 Small](https://github.com/DepthAnything/Depth-Anything-V2) (Apache 2.0), run once on
+  my machine, and a marching-squares script traces it into an 11 KB SVG.
+- Drag the handle, or focus it and use the arrow keys, to move the fold.
+
 ## Quality gates
 
 A change can't merge until it passes formatting, linting, type checks, unit tests, an axe accessibility scan

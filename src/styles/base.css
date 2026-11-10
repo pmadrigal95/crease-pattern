@@ -150,6 +150,130 @@ video {
   left: var(--space-4);
 }
 
+/*
+ * Motion (decision 42). Every metaphor has one job:
+ * - between pages, a paper fold: a valley crease sweeps corner to corner and cuts the old page away;
+ * - on a first visit, the fold mark folds and the hero's supporting lines rise in (never the headline: LCP);
+ * - the changelog's altitude bars climb with the reader's scroll (ReleaseNotes.astro).
+ * Native CSS only: cross-document View Transitions and scroll-driven animations, no library.
+ * Browsers without them simply navigate and scroll. src/scripts/page-reveal.js picks fold or entrance.
+ */
+@view-transition {
+  navigation: auto;
+}
+
+@property --fold-progress {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 0;
+}
+
+@keyframes fold-sweep {
+  from {
+    --fold-progress: 0;
+  }
+  to {
+    --fold-progress: 1;
+  }
+}
+
+/* Never swallow a click while a transition plays: the next navigation simply starts. */
+::view-transition {
+  pointer-events: none;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  mix-blend-mode: normal;
+  animation: none;
+}
+
+/* The old page sits on top and is cut along a diagonal that moves from top-left to bottom-right. */
+::view-transition-old(root) {
+  z-index: 2;
+  animation: fold-sweep var(--motion-page) var(--motion-ease-out) both;
+  clip-path: polygon(
+    calc(min(2 * var(--fold-progress), 1) * 100%) calc(max(2 * var(--fold-progress) - 1, 0) * 100%),
+    100% calc(max(2 * var(--fold-progress) - 1, 0) * 100%),
+    100% 100%,
+    calc(max(2 * var(--fold-progress) - 1, 0) * 100%) 100%,
+    calc(max(2 * var(--fold-progress) - 1, 0) * 100%) calc(min(2 * var(--fold-progress), 1) * 100%)
+  );
+}
+
+::view-transition-new(root) {
+  z-index: 1;
+}
+
+/* The masthead stays put while the page under it folds away. */
+.mast {
+  view-transition-name: masthead;
+}
+
+::view-transition-group(masthead) {
+  animation: none;
+  z-index: 3;
+}
+
+::view-transition-old(masthead) {
+  display: none;
+}
+
+::view-transition-new(masthead) {
+  animation: none;
+}
+
+/* The crease itself: a dashed valley line riding the cut, drawn in the new page while the fold runs. */
+.vt-crease {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  pointer-events: none;
+  background: repeating-linear-gradient(to top right, var(--color-ink) 0 10px, transparent 10px 18px);
+  mask: linear-gradient(
+    to bottom right,
+    transparent calc(var(--fold-progress) * 100% - 0.12%),
+    #000 calc(var(--fold-progress) * 100% - 0.12%),
+    #000 calc(var(--fold-progress) * 100% + 0.06%),
+    transparent calc(var(--fold-progress) * 100% + 0.06%)
+  );
+}
+
+.vt-fold .vt-crease {
+  display: block;
+  animation: fold-sweep var(--motion-page) var(--motion-ease-out) both;
+}
+
+/* First visit: the supporting lines rise in, one after another. Headlines stay put for LCP. */
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+.intro :is(.hero .eyebrow, .hero .sub, .hero .who, .hero .status, .page-head .eyebrow) {
+  animation: rise-in var(--motion-intro) var(--motion-ease-out) both;
+}
+
+.intro .hero .eyebrow {
+  animation-delay: calc(var(--motion-stagger) * 3);
+}
+
+.intro .hero .sub {
+  animation-delay: calc(var(--motion-stagger) * 4);
+}
+
+.intro .hero .who {
+  animation-delay: calc(var(--motion-stagger) * 5);
+}
+
+.intro .hero .status {
+  animation-delay: calc(var(--motion-stagger) * 6);
+}
+
+/* Reduced motion: no fold, no rise, no scroll-driven bars. Pages just swap with a short fade. */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -157,5 +281,30 @@ video {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+
+  ::view-transition-old(root) {
+    clip-path: none;
+    animation: vt-fade-out 150ms ease both !important;
+  }
+
+  ::view-transition-new(root) {
+    animation: vt-fade-in 150ms ease both !important;
+  }
+
+  .vt-fold .vt-crease {
+    display: none;
+  }
+}
+
+@keyframes vt-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes vt-fade-in {
+  from {
+    opacity: 0;
   }
 }

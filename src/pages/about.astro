@@ -4,6 +4,8 @@ import PageLayout from '../layouts/PageLayout.astro';
 import { getProfile } from '../lib/profile';
 import { career, yearsSince } from '../lib/career';
 import { copy, fill } from '../lib/copy';
+import FoldedPortrait from '../components/site/FoldedPortrait.astro';
+import silhouette from '../assets/portrait/silhouette.png?url';
 
 const page = await getEntry('pages', 'about');
 if (!page) throw new Error('src/content/pages/about.mdx is missing.');
@@ -12,7 +14,7 @@ const profile = await getProfile();
 const t = copy.about;
 const list = new Intl.ListFormat('en', { type: 'conjunction' });
 
-// The side column holds facts today and can hold a photo later (decision pending).
+// The side column holds the folded portrait (decision 41) and the facts.
 const facts = [
   { term: t.facts.location, value: profile.location },
   { term: t.facts.role, value: profile.role },
@@ -23,6 +25,15 @@ const facts = [
 ---
 
 <PageLayout title={page.data.title} description={page.data.description}>
+  <!-- In dark themes the portrait can't paint until its silhouette mask arrives; CSS finds it late. -->
+  <link
+    slot="head"
+    rel="preload"
+    as="image"
+    href={silhouette}
+    type="image/png"
+    media="(prefers-color-scheme: dark)"
+  />
   <div class="wrap">
     <header class="page-head">
       <p class="eyebrow">{page.data.title}</p>
@@ -32,16 +43,19 @@ const facts = [
       <div class="prose">
         <Content />
       </div>
-      <aside class="side" aria-label={t.factsLabel}>
-        <dl class="facts">
-          {facts.map((f) => (
-            <div>
-              <dt>{f.term}</dt>
-              <dd>{f.value}</dd>
-            </div>
-          ))}
-        </dl>
-      </aside>
+      <div class="side">
+        <FoldedPortrait />
+        <aside aria-label={t.factsLabel}>
+          <dl class="facts">
+            {facts.map((f) => (
+              <div>
+                <dt>{f.term}</dt>
+                <dd>{f.value}</dd>
+              </div>
+            ))}
+          </dl>
+        </aside>
+      </div>
     </div>
   </div>
 </PageLayout>
