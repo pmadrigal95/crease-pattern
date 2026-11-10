@@ -8,7 +8,7 @@ const { email } = Astro.props;
 const t = copy.home.contact;
 ---
 
-<div class="copy-email">
+<div class="copy-email" data-inspect="CopyEmail">
   <a class="address" href={`mailto:${email}`}>
     {email}
   </a>

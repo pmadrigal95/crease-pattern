@@ -1,14 +1,23 @@
 import { defineConfig } from 'astro/config';
+import vue from '@astrojs/vue';
 import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
 import { pageRevealScript, restoreIdentityScript, sha256 } from './scripts/csp-hashes.mjs';
 
 export default defineConfig({
   site: 'https://pablomadrigal.dev',
-  // Static HTML by default. Islands get a framework integration only when one needs it (the
-  // Inspector in M2); until then no framework runtime ships.
+  // Static HTML by default. Vue powers the Inspector only, loaded when a visitor opens it.
   output: 'static',
-  integrations: [mdx(), sitemap()],
+  integrations: [vue(), mdx(), sitemap()],
+  // The Inspector uses Vue's Composition API only: drop the Options API and devtools hooks from the
+  // production runtime to keep the panel inside its 30 KB budget.
+  vite: {
+    define: {
+      __VUE_OPTIONS_API__: false,
+      __VUE_PROD_DEVTOOLS__: false,
+      __VUE_PROD_HYDRATION_MISMATCH_DETAILS__: false,
+    },
+  },
   i18n: {
     defaultLocale: 'en',
     locales: ['en', 'es'],
