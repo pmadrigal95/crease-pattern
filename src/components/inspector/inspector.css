@@ -199,6 +199,14 @@
   white-space: nowrap;
 }
 
+/* Wide screens: the page makes room for the panel, as browser DevTools do, so no part of it
+   hides under the panel. The shift is the visitor's own action, so it isn't layout instability. */
+@media (min-width: 721px) {
+  .inspecting body {
+    padding-right: min(380px, 100vw);
+  }
+}
+
 /* Inspect mode: parts show a crosshair so clicking reads as "pick", not "follow the link". */
 .inspecting [data-inspect] {
   cursor: crosshair;
