@@ -1,5 +1,5 @@
 ---
-import FoldMark from './FoldMark.astro';
+import FoxMark from './FoxMark.astro';
 import { copy } from '../../lib/copy';
 import { publicPath } from '../../lib/url';
 
@@ -17,10 +17,10 @@ const links = [
 const path = publicPath(Astro.url.pathname);
 ---
 
-<header class="mast">
+<header class="mast" data-inspect="Masthead">
   <div class="wrap">
     <a class="me" href="/" aria-label={`${name}, home`}>
-      <FoldMark />
+      <FoxMark />
       <span>{name}</span>
     </a>
     <nav aria-label={copy.labels.main}>
@@ -30,8 +30,59 @@ const path = publicPath(Astro.url.pathname);
         </a>
       ))}
     </nav>
+    <button
+      type="button"
+      class="inspect"
+      aria-expanded="false"
+      aria-keyshortcuts="Shift+I"
+      data-inspector-toggle
+    >
+      <svg class="icon" viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+        <path d="M3 7h10v10H3z" />
+        <path d="M7 3h10v10" />
+      </svg>
+      <span class="label">{copy.inspector.open}</span>
+      <kbd aria-hidden="true">{copy.inspector.shortcut}</kbd>
+    </button>
   </div>
 </header>
+
+<script>
+  // Opens the Inspector (decision 44): the button, Shift+I or ?inspect in the URL. Vue and the
+  // panel download only now, on first use; hovering the button starts that download early.
+  type Handle = { close(): void };
+  const button = document.querySelector<HTMLButtonElement>('[data-inspector-toggle]');
+  let handle: Handle | null = null;
+  let loading = false;
+  const load = () => import('../inspector/mount');
+
+  async function open(trigger: HTMLElement | null) {
+    if (handle || loading) return;
+    loading = true;
+    const { openInspector } = await load();
+    handle = openInspector(trigger, () => {
+      handle = null;
+      button?.setAttribute('aria-expanded', 'false');
+    });
+    button?.setAttribute('aria-expanded', 'true');
+    loading = false;
+  }
+  const toggle = (trigger: HTMLElement | null) => (handle ? handle.close() : open(trigger));
+  const typing = (el: EventTarget | null) =>
+    el instanceof HTMLElement && (el.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName));
+
+  button?.addEventListener('click', () => toggle(button));
+  button?.addEventListener('pointerenter', () => void load(), { once: true });
+  addEventListener('keydown', (e) => {
+    if (!e.shiftKey || e.ctrlKey || e.metaKey || e.altKey || e.key.toLowerCase() !== 'i' || typing(e.target))
+      return;
+    e.preventDefault();
+    // Focus goes back where it was on close; with nothing focused, to the Inspect button.
+    const active = document.activeElement;
+    toggle(active instanceof HTMLElement && active !== document.body ? active : button);
+  });
+  if (new URLSearchParams(location.search).has('inspect')) void open(button);
+</script>
 
 <style>
   .mast {
@@ -48,6 +99,7 @@ const path = publicPath(Astro.url.pathname);
     min-height: 60px;
   }
   .me {
+    flex-shrink: 0;
     display: flex;
     align-items: center;
     gap: var(--space-3);
@@ -82,12 +134,82 @@ const path = publicPath(Astro.url.pathname);
     text-decoration-thickness: 2px;
     text-underline-offset: 6px;
   }
+  .inspect {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: 36px;
+    margin-left: var(--space-2);
+    padding: 0 var(--space-3);
+    border: 1px solid var(--color-rule);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--color-ink);
+    font: inherit;
+    font-size: var(--size-sm);
+    cursor: pointer;
+    transition: border-color var(--motion-fast) var(--motion-ease-out);
+  }
+  .inspect:hover,
+  .inspect[aria-expanded='true'] {
+    border-color: var(--color-accent-ui);
+  }
+  .inspect .icon {
+    display: none;
+    width: 18px;
+    height: 18px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.5;
+  }
+  .inspect kbd {
+    font: 500 var(--size-xs) var(--font-mono);
+    color: var(--color-mute);
+  }
+  @media (pointer: coarse) {
+    .inspect kbd {
+      display: none;
+    }
+  }
+  /* Narrow screens: the button keeps its name for assistive tech but shows only the layers icon. */
+  @media (max-width: 560px) {
+    .inspect {
+      flex-shrink: 0;
+      width: 40px;
+      min-height: 40px;
+      padding: 0;
+      justify-content: center;
+    }
+    .inspect .icon {
+      display: block;
+    }
+    .inspect .label {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+    .inspect kbd {
+      display: none;
+    }
+  }
   @media (max-width: 560px) {
     .me span {
       display: none;
     }
     nav a {
       padding: 0 var(--space-1);
+    }
+  }
+  /* The narrowest phones (320 px): smaller links so the logo, the menu and Inspect share one row. */
+  @media (max-width: 380px) {
+    .mast .wrap {
+      gap: var(--space-2);
+    }
+    nav a {
+      font-size: var(--size-xs);
     }
   }
 </style>

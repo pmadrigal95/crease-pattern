@@ -35,14 +35,11 @@ const facts = [
     media="(prefers-color-scheme: dark)"
   />
   <div class="wrap">
-    <header class="page-head">
+    <header class="page-head" data-inspect="about#header">
       <p class="eyebrow">{page.data.title}</p>
       <h1>{t.title}</h1>
     </header>
     <div class="grid">
-      <div class="prose">
-        <Content />
-      </div>
       <div class="side">
         <FoldedPortrait />
         <aside aria-label={t.factsLabel}>
@@ -56,6 +53,9 @@ const facts = [
           </dl>
         </aside>
       </div>
+      <div class="prose" data-inspect="about#story">
+        <Content />
+      </div>
     </div>
   </div>
 </PageLayout>
@@ -68,9 +68,17 @@ const facts = [
     align-items: start;
     padding-bottom: var(--space-24);
   }
+  /* The side column comes first in the source, so focus reaches the portrait before the text
+     on phones, where it also appears first (WCAG 2.4.3). On wide screens it moves right. */
   .side {
+    grid-column: 2;
+    grid-row: 1;
     position: sticky;
     top: 84px;
+  }
+  .prose {
+    grid-column: 1;
+    grid-row: 1;
   }
   .facts {
     margin: 0;
@@ -101,9 +109,13 @@ const facts = [
       grid-template-columns: minmax(0, 1fr);
       gap: var(--space-8);
     }
+    .side,
+    .prose {
+      grid-column: auto;
+      grid-row: auto;
+    }
     .side {
       position: static;
-      order: -1;
     }
   }
 </style>
