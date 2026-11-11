@@ -270,11 +270,11 @@
   }
 }
 
-.intro :is(.hero .eyebrow, .hero .sub, .hero .who, .hero .status, .page-head .eyebrow) {
+.intro :is(.hero .who, .hero .sub, .hero .cta, .page-head .eyebrow) {
   animation: rise-in var(--motion-intro) var(--motion-ease-out) both;
 }
 
-.intro .hero .eyebrow {
+.intro .hero .who {
   animation-delay: calc(var(--motion-stagger) * 3);
 }
 
@@ -282,12 +282,8 @@
   animation-delay: calc(var(--motion-stagger) * 4);
 }
 
-.intro .hero .who {
+.intro .hero .cta {
   animation-delay: calc(var(--motion-stagger) * 5);
-}
-
-.intro .hero .status {
-  animation-delay: calc(var(--motion-stagger) * 6);
 }
 
 /* Reduced motion: no fold, no rise, no scroll-driven bars. Pages just swap with a short fade. */

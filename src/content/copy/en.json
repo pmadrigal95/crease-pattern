@@ -8,21 +8,49 @@
     "precrease": "Precrease"
   },
   "home": {
-    "positioning": "Systems engineer by training. Frontend architect by focus.",
-    "title": "Interfaces built to last.",
-    "status": "v0.1 · Built in public, one release at a time.",
+    "hero": {
+      "title": "Interfaces built to last.",
+      "inspect": "Inspect this page",
+      "releases": "Read the release notes",
+      "fold": {
+        "label": "Unfold the fox into its crease pattern",
+        "interface": "Interface",
+        "architecture": "Architecture",
+        "folded": "Folded: the interface",
+        "unfolded": "Unfolded: the crease pattern",
+        "mountain": "mountain",
+        "valley": "valley",
+        "caption": "The fox is the interface. Unfold it and you get the crease pattern that makes it: the architecture. Every page here opens the same way."
+      }
+    },
     "work": {
-      "heading": "Work",
-      "intro": "The strongest evidence is the kind you can inspect. This site is open source, from its design tokens to its test suite.",
-      "thisSite": {
-        "title": "This site",
-        "summary": "One design system, three visual identities. Contrast is tested in every theme, and every change has to pass accessibility and performance budgets before it ships.",
-        "links": {
-          "colophon": "Read how it's built",
-          "repo": "Browse the source on GitHub"
+      "heading": "This site, measured.",
+      "eyebrow": "Work",
+      "intro": "The strongest evidence is the kind you can check. These numbers come from the build you're reading, and the source is open from its design tokens to its test suite.",
+      "metrics": {
+        "js": {
+          "unit": "KB",
+          "label": "JavaScript on first load",
+          "note": "budget {budget} KB"
+        },
+        "axe": {
+          "label": "axe violations across {pages} pages × {identities} identities × {themes} themes",
+          "note": "checked on every change"
+        },
+        "parts": {
+          "label": "inspectable parts, each with its file, tokens and last change",
+          "note": "open the Inspector to see them"
+        },
+        "identities": {
+          "label": "identities, one design system",
+          "note": "only the color tokens change"
         }
       },
-      "more": "More case studies are published as they're cleared for release."
+      "source": "Measured on build {commit}, from the same run that built this page.",
+      "links": {
+        "colophon": "How it's built",
+        "repo": "Source on GitHub"
+      }
     },
     "changelog": {
       "heading": "Changelog",
@@ -98,7 +126,6 @@
   "inspector": {
     "open": "Inspect",
     "shortcut": "Shift I",
-    "hint": "Press Shift+I to see how this page is built.",
     "title": "Inspector",
     "close": "Close the inspector",
     "intro": "Hover a block · Click to pin · Esc to leave",
