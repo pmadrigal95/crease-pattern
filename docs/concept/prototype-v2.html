@@ -609,12 +609,14 @@ figcaption{font:13px/1.5 var(--mono);color:var(--mute)}
     if (e.key === 'Escape' && inspecting) setInspect(false);
   });
   window.addEventListener('resize', () => { if (inspecting) { root.style.setProperty('--stage-h', stageHeight()); liftTo(sel); } });
+  // Page text is escaped before it joins the outline's HTML, so a heading can never become markup.
+  const escapeHtml = s => s.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
   function buildOutline(){
     const items = [];
     document.querySelectorAll('header.mast, nav, main, main section[aria-labelledby], footer, h1, h2, h3').forEach(el => {
       const t = el.tagName.toLowerCase();
-      if (/^h[1-3]$/.test(t)) items.push('<li class="lv' + t[1] + '">' + t + ' · ' + el.textContent.trim().replace(/\s+/g, ' ').slice(0, 44) + '</li>');
-      else { const role = { header: 'banner', nav: 'navigation', footer: 'contentinfo', section: 'region', main: 'main' }[t]; items.push('<li class="lm">[' + role + ']' + (t === 'section' ? ' ' + document.getElementById(el.getAttribute('aria-labelledby')).textContent.slice(0, 30) : '') + '</li>'); }
+      if (/^h[1-3]$/.test(t)) items.push('<li class="lv' + t[1] + '">' + t + ' · ' + escapeHtml(el.textContent.trim().replace(/\s+/g, ' ').slice(0, 44)) + '</li>');
+      else { const role = { header: 'banner', nav: 'navigation', footer: 'contentinfo', section: 'region', main: 'main' }[t]; items.push('<li class="lm">[' + role + ']' + (t === 'section' ? ' ' + escapeHtml(document.getElementById(el.getAttribute('aria-labelledby')).textContent.slice(0, 30)) : '') + '</li>'); }
     });
     $('outline').innerHTML = items.join('');
   }
