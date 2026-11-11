@@ -2,10 +2,11 @@ import { defineConfig } from 'astro/config';
 import vue from '@astrojs/vue';
 import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
+import siteConfig from './site.config.ts';
 import { pageRevealScript, restoreIdentityScript, sha256 } from './scripts/csp-hashes.mjs';
 
 export default defineConfig({
-  site: 'https://pablomadrigal.dev',
+  site: siteConfig.url,
   // Static HTML by default. Vue powers the Inspector only, loaded when a visitor opens it.
   output: 'static',
   integrations: [vue(), mdx(), sitemap()],

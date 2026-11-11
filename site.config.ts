@@ -5,6 +5,11 @@ import { VisualDirection } from './src/config/visual-direction';
  * src/content/profile.json and is read through src/lib/profile.ts.
  */
 export interface SiteConfig {
+  /**
+   * Canonical origin: canonical links, the sitemap and absolute URLs. It points at the live
+   * workers.dev host until pablomadrigal.dev is registered (configured last, before M8); then it
+   * moves back here, and the new host joins webAnalytics.hosts. astro.config.mjs reads it too.
+   */
   url: string;
   /** Identity rendered by default; visitors can switch it from the inspector. */
   visualDirection: VisualDirection;
@@ -20,7 +25,7 @@ export interface SiteConfig {
 }
 
 const siteConfig: SiteConfig = {
-  url: 'https://pablomadrigal.dev',
+  url: 'https://crease-pattern.pablomadrigal-1995.workers.dev',
   visualDirection: VisualDirection.ContourLines,
   showDirectionSwitcher: true,
   webAnalytics: {
