@@ -4,11 +4,12 @@
 // It fails the build if a placeholder is missing or left unfilled: a dash must never ship.
 import { readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { measureBundles, toKb } from './bundle-sizes.mjs';
+import { measurePage, toKb } from './bundle-sizes.mjs';
 
 const dist = join(import.meta.dirname, '..', 'dist');
 const file = join(dist, 'index.html');
-const values = { 'first-load-js': toKb(measureBundles(dist).page).toFixed(1) };
+// Measured on the home page itself: external scripts plus the ones Astro inlined.
+const values = { 'first-load-js': toKb(measurePage(dist, 'index.html')).toFixed(1) };
 
 let html = readFileSync(file, 'utf8');
 for (const [name, value] of Object.entries(values)) {

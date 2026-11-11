@@ -39,3 +39,24 @@ export function measureBundles(dist) {
     onDemand: [...onDemand].reduce((sum, f) => sum + size(f), 0),
   };
 }
+
+/**
+ * Everything one page runs on load: the external scripts it references plus the scripts Astro
+ * inlined into it (small ones with no imports), each Brotli-compressed. This is what the home
+ * page's "JavaScript on first load" figure reports.
+ * @returns {number} bytes, Brotli
+ */
+export function measurePage(dist, page) {
+  const html = readFileSync(join(dist, page), 'utf8');
+  const external = [...html.matchAll(/<script[^>]*\ssrc="\/_astro\/([^"]+\.js)"/g)].map((m) =>
+    readFileSync(join(dist, '_astro', m[1])),
+  );
+  const inline = [
+    ...html.matchAll(
+      /<script(?![^>]*\ssrc=)(?![^>]*type="application\/ld\+json")[^>]*>([\s\S]*?)<\/script>/g,
+    ),
+  ]
+    .map((m) => m[1])
+    .filter((code) => code.trim());
+  return [...external, ...inline].reduce((sum, code) => sum + brotliCompressSync(code).length, 0);
+}
