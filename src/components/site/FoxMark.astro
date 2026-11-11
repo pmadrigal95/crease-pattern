@@ -1,0 +1,134 @@
+---
+/**
+ * The site's mark: an origami fox of six flat facets (decision 44, M2d). It carries the site's
+ * thesis, "the interface is the folded fox; the architecture is the crease pattern":
+ *  - on a first visit (decision 42) the facets fold into place;
+ *  - while inspecting, the fox unfolds into its crease pattern, every facet edge drawn as a fold
+ *    (mountain folds solid, valley folds dashed) on the flat sheet it came from.
+ * Real 3D folding comes later with the M4 scene.
+ */
+interface Props {
+  size?: number;
+}
+const { size = 26 } = Astro.props;
+---
+
+<svg class="fox-mark" width={size} height={size} viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+  <g class="pattern">
+    <path class="sheet" d="M3 2h42v44H3z"></path>
+    <path class="mountain" d="M6 16h36M6 16l5-13 8 13M29 16l8-13 5 13"></path>
+    <path class="valley" d="M24 16v28M6 16l18 28M42 16 24 44"></path>
+  </g>
+  <g class="fox">
+    <path class="facet ear ear-left" d="M6 16 11 3l8 13z"></path>
+    <path class="facet ear ear-right" d="m29 16 8-13 5 13z"></path>
+    <path class="facet inner inner-left" d="m9.5 16 2-8 4.5 8z"></path>
+    <path class="facet inner inner-right" d="m32 16 4.5-8 2 8z"></path>
+    <path class="facet head head-left" d="M6 16h18v28z"></path>
+    <path class="facet head head-right" d="M24 16h18L24 44z"></path>
+  </g>
+</svg>
+
+<style>
+  .head-left {
+    fill: var(--color-accent);
+  }
+  .head-right {
+    fill: var(--color-ink);
+  }
+  /* Mixed toward the paper so the ears stay a separate facet in dark themes, where the accent
+     and its UI shade are the same color. */
+  .ear {
+    fill: color-mix(in oklab, var(--color-accent-ui) 75%, var(--color-bg));
+  }
+  .inner {
+    fill: var(--color-ink);
+  }
+
+  .sheet {
+    fill: var(--color-surface);
+    stroke: var(--color-rule);
+    stroke-width: 1.5;
+  }
+  .mountain,
+  .valley {
+    fill: none;
+    stroke: var(--color-accent-ui);
+    stroke-width: 2;
+    stroke-linejoin: round;
+  }
+  .valley {
+    stroke-dasharray: 3 3;
+  }
+
+  /* Each facet folds along the edge it shares with the head: the head halves along the center
+     line, the ears along the brow. */
+  .facet {
+    transform-box: fill-box;
+    transition:
+      transform var(--motion-stage) var(--motion-ease-in-out),
+      opacity var(--motion-stage) var(--motion-ease-in-out);
+  }
+  .head-left {
+    transform-origin: right center;
+  }
+  .head-right {
+    transform-origin: left center;
+  }
+  .ear,
+  .inner {
+    transform-origin: center bottom;
+  }
+  .pattern {
+    opacity: 0;
+    transform-box: view-box;
+    transform-origin: center;
+    transform: scale(0.85);
+    transition:
+      opacity var(--motion-stage) var(--motion-ease-in-out),
+      transform var(--motion-stage) var(--motion-ease-in-out);
+  }
+
+  /* Inspecting: the fox unfolds and its crease pattern shows through. */
+  :global(.inspecting) .head-left,
+  :global(.inspecting) .head-right {
+    transform: scaleX(0);
+    opacity: 0;
+  }
+  :global(.inspecting) .ear,
+  :global(.inspecting) .inner {
+    transform: scaleY(0);
+    opacity: 0;
+  }
+  :global(.inspecting) .pattern {
+    opacity: 1;
+    transform: none;
+    transition-delay: calc(var(--motion-stage) / 3);
+  }
+
+  /* First visit: the facets fold into place, head first, then ears, then their inner folds. */
+  :global(.intro) .facet {
+    animation: facet-fold calc(var(--motion-intro) * 1.6) var(--motion-ease-out) both;
+  }
+  :global(.intro) .head-left {
+    --from: scaleX(0);
+    animation-delay: var(--motion-stagger);
+  }
+  :global(.intro) .head-right {
+    --from: scaleX(0);
+  }
+  :global(.intro) .ear {
+    --from: scaleY(0);
+    animation-delay: calc(var(--motion-stagger) * 3);
+  }
+  :global(.intro) .inner {
+    --from: scaleY(0);
+    animation-delay: calc(var(--motion-stagger) * 5);
+  }
+  @keyframes facet-fold {
+    from {
+      transform: var(--from);
+      opacity: 0.2;
+    }
+  }
+</style>

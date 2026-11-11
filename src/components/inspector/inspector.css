@@ -1,0 +1,394 @@
+/* The Inspector panel and its highlight. Loaded with the panel, never before. */
+
+#inspector {
+  position: fixed;
+  top: 61px;
+  right: 0;
+  bottom: 0;
+  z-index: 60;
+  width: min(380px, 100vw);
+  overflow: auto;
+  overscroll-behavior: contain;
+  background: var(--color-surface);
+  color: var(--color-ink);
+  border-left: 1px solid var(--color-rule);
+  box-shadow: -12px 0 32px rgb(0 0 0 / 0.12);
+  font-size: var(--size-sm);
+  animation: inspector-in var(--motion-base) var(--motion-ease-out) both;
+}
+
+@keyframes inspector-in {
+  from {
+    transform: translateX(16px);
+    opacity: 0;
+  }
+}
+
+.inspector-panel {
+  padding: var(--space-4) var(--space-6) var(--space-12);
+}
+
+.inspector-panel .top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.inspector-panel h2 {
+  margin: 0;
+  font-size: var(--size-lg);
+  outline: none;
+}
+
+.inspector-panel h3 {
+  margin: var(--space-6) 0 var(--space-2);
+  font: 600 var(--size-xs) var(--font-mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-mute);
+}
+
+.inspector-panel h4 {
+  margin: var(--space-3) 0 var(--space-1);
+  font-size: var(--size-sm);
+}
+
+.inspector-panel .close {
+  min-width: 44px;
+  min-height: 44px;
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-panel);
+  background: transparent;
+  color: inherit;
+  font-size: 22px;
+  cursor: pointer;
+}
+
+.inspector-panel .intro {
+  margin: var(--space-3) 0 0;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-panel);
+  background: color-mix(in srgb, var(--color-accent-ui) 14%, transparent);
+  font-family: var(--font-mono);
+  font-size: var(--size-xs);
+}
+
+.inspector-panel .muted {
+  color: var(--color-mute);
+  margin: 0;
+}
+
+.inspector-panel .layers,
+.inspector-panel .plain,
+.inspector-panel .tokens {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.inspector-panel .layers button {
+  width: 100%;
+  min-height: 36px;
+  padding: var(--space-1) var(--space-2);
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: inherit;
+  font: 500 var(--size-xs) var(--font-mono);
+  text-align: left;
+  cursor: pointer;
+}
+
+.inspector-panel .layers button:hover,
+.inspector-panel .layers button:focus-visible,
+.inspector-panel .layers button[aria-pressed='true'] {
+  background: color-mix(in srgb, var(--color-accent-ui) 18%, transparent);
+}
+
+.inspector-panel .facts {
+  display: grid;
+  gap: var(--space-1);
+  margin: 0;
+}
+
+.inspector-panel .facts dt,
+.inspector-panel .metrics dt {
+  font: 500 var(--size-xs) var(--font-mono);
+  color: var(--color-mute);
+  margin-top: var(--space-2);
+}
+
+.inspector-panel dd {
+  margin: 0;
+}
+
+.inspector-panel .tokens {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+
+.inspector-panel .tokens li {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 6px;
+  border: 1px solid var(--color-rule);
+  border-radius: 6px;
+  font-size: var(--size-xs);
+}
+
+.inspector-panel .swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  border: 1px solid var(--color-rule);
+}
+
+.inspector-panel .plain li {
+  padding: 2px 0;
+}
+
+.inspector-panel .plain .h2 {
+  padding-left: var(--space-3);
+}
+
+.inspector-panel .plain .h3 {
+  padding-left: var(--space-6);
+}
+
+.inspector-panel .level {
+  font: 500 var(--size-xs) var(--font-mono);
+  color: var(--color-mute);
+}
+
+.inspector-panel .metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2) var(--space-4);
+  margin: var(--space-2) 0 0;
+}
+
+.inspector-panel .metrics dd {
+  font-weight: 600;
+}
+
+/* Identity and theme (M2c): native radios, styled as rows with the identity's own swatches. */
+.inspector-panel .choices {
+  display: grid;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.inspector-panel .themes {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: var(--space-3);
+}
+
+.inspector-panel .themes legend {
+  grid-column: 1 / -1;
+  margin-bottom: var(--space-1);
+  font: 500 var(--size-xs) var(--font-mono);
+  color: var(--color-mute);
+}
+
+.inspector-panel .choice {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 40px;
+  padding: 0 var(--space-2);
+  border: 1px solid var(--color-rule);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.inspector-panel .choice:has(input:checked) {
+  border-color: var(--color-accent-ui);
+  background: color-mix(in srgb, var(--color-accent-ui) 14%, transparent);
+}
+
+.inspector-panel .choice:has(input:focus-visible) {
+  outline: 2px solid var(--color-accent-ui);
+  outline-offset: 2px;
+}
+
+.inspector-panel .choice input {
+  margin: 0;
+  accent-color: var(--color-accent-ui);
+}
+
+.inspector-panel .swatches {
+  display: inline-flex;
+}
+
+.inspector-panel .swatches span {
+  width: 14px;
+  height: 14px;
+  border: 1px solid var(--color-rule);
+  border-radius: 50%;
+  margin-left: -4px;
+}
+
+.inspector-panel .swatches span:first-child {
+  margin-left: 0;
+}
+
+/* The identity transition (decision 42): the new colors rise like terrain from the chosen
+   control, edged with contour lines; the masks live in public/topo. The masthead joins the page
+   here, since its colors change too. */
+.vt-identity .mast {
+  view-transition-name: none;
+}
+
+:root.vt-identity::view-transition-old(root) {
+  z-index: 1;
+  clip-path: none;
+  animation: none;
+}
+
+:root.vt-identity::view-transition-new(root) {
+  z-index: 2;
+  mask: url('/topo/mask.svg') no-repeat;
+  animation: terrain-rise 1100ms var(--motion-ease-in-out) both;
+}
+
+.topo-rings {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  pointer-events: none;
+  background: var(--color-accent-ui);
+  mask: url('/topo/rings.svg') no-repeat;
+  animation: terrain-rise 1100ms var(--motion-ease-in-out) both;
+}
+
+@keyframes terrain-rise {
+  from {
+    mask-size: 0 0;
+    mask-position: var(--vx) var(--vy);
+  }
+  to {
+    mask-size: 420vmax 420vmax;
+    mask-position: calc(var(--vx) - 210vmax) calc(var(--vy) - 210vmax);
+  }
+}
+
+/* The outline drawn over the hovered or pinned part, in the DevTools content color. */
+.highlight {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 55;
+  pointer-events: none;
+  outline: 2px solid var(--color-accent-ui);
+  background: var(--color-bm-content);
+  transition:
+    transform var(--motion-fast) var(--motion-ease-out),
+    width var(--motion-fast) var(--motion-ease-out),
+    height var(--motion-fast) var(--motion-ease-out);
+}
+
+.highlight span {
+  position: absolute;
+  left: -2px;
+  bottom: 100%;
+  padding: 2px 6px;
+  background: var(--color-accent-ui);
+  color: var(--color-bg);
+  font: 600 var(--size-xs) var(--font-mono);
+  white-space: nowrap;
+}
+
+/* Wide screens: the page makes room for the panel, as browser DevTools do, so no part of it
+   hides under the panel. The shift is the visitor's own action, so it isn't layout instability. */
+@media (min-width: 721px) {
+  .inspecting body {
+    padding-right: min(380px, 100vw);
+  }
+}
+
+/* The 3D layer view (M2b, layers.ts). The page tilts around the middle of the viewport and each
+   part rises one step per nesting level, the shallow ones first. Transitions run both ways, so
+   closing the Inspector lets the layers settle back. */
+main {
+  transform-origin: 50% var(--tilt-origin, 50vh);
+  transition: transform var(--motion-stage) var(--motion-ease-in-out);
+}
+
+main [data-inspect] {
+  transition:
+    transform var(--motion-stage) var(--motion-ease-in-out) calc(var(--layer-depth, 1) * 60ms),
+    box-shadow var(--motion-stage) var(--motion-ease-in-out),
+    outline-color var(--motion-fast) ease;
+}
+
+/* The page itself becomes the base plate the layers float above. */
+.inspector-3d main {
+  transform-style: preserve-3d;
+  transform: perspective(2000px) rotateX(22deg) rotateZ(-6deg) scale(0.9);
+  background: var(--color-surface);
+  outline: 1px solid var(--color-rule);
+  box-shadow: 0 40px 80px rgb(0 0 0 / 0.25);
+}
+
+.inspector-3d main .layer-path {
+  transform-style: preserve-3d;
+}
+
+.inspector-3d main [data-inspect] {
+  transform-style: preserve-3d;
+  transform: translateZ(calc(var(--layer-depth, 1) * 28px));
+  background: var(--color-bg);
+  outline: 1px dashed color-mix(in srgb, var(--color-accent-ui) 55%, transparent);
+  outline-offset: 6px;
+  box-shadow: 0 calc(var(--layer-depth, 1) * 12px) calc(var(--layer-depth, 1) * 28px) rgb(0 0 0 / 0.22);
+}
+
+/* The hovered or pinned part: drawn in the accent and lifted above its siblings. */
+.inspector-3d [data-inspect].is-inspected {
+  outline: 2px solid var(--color-accent-ui);
+  outline-offset: 6px;
+}
+
+.inspector-3d main [data-inspect].is-inspected {
+  transform: translateZ(calc(var(--layer-depth, 1) * 28px + 48px));
+}
+
+/* Inspect mode: parts show a crosshair so clicking reads as "pick", not "follow the link". */
+.inspecting [data-inspect] {
+  cursor: crosshair;
+}
+
+/* Phones: a bottom sheet over the lower half of the screen. */
+@media (max-width: 720px) {
+  #inspector {
+    top: auto;
+    left: 0;
+    width: auto;
+    max-height: 60vh;
+    border-left: 0;
+    border-top: 1px solid var(--color-rule);
+    border-radius: 16px 16px 0 0;
+    box-shadow: 0 -12px 32px rgb(0 0 0 / 0.16);
+    animation-name: inspector-up;
+  }
+  @keyframes inspector-up {
+    from {
+      transform: translateY(24px);
+      opacity: 0;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #inspector,
+  .highlight,
+  main,
+  main [data-inspect] {
+    animation: none;
+    transition: none;
+  }
+}
