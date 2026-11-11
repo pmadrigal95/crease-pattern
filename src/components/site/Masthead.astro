@@ -1,5 +1,5 @@
 ---
-import FoldMark from './FoldMark.astro';
+import FoxMark from './FoxMark.astro';
 import { copy } from '../../lib/copy';
 import { publicPath } from '../../lib/url';
 
@@ -20,7 +20,7 @@ const path = publicPath(Astro.url.pathname);
 <header class="mast" data-inspect="Masthead">
   <div class="wrap">
     <a class="me" href="/" aria-label={`${name}, home`}>
-      <FoldMark />
+      <FoxMark />
       <span>{name}</span>
     </a>
     <nav aria-label={copy.labels.main}>
