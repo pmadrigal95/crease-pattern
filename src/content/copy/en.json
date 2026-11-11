@@ -2,10 +2,10 @@
   "nav": {
     "work": "Work",
     "changelog": "Changelog",
-    "notes": "Notes",
     "about": "About",
     "colophon": "Colophon",
-    "skip": "Skip to content"
+    "skip": "Skip to content",
+    "precrease": "Precrease"
   },
   "home": {
     "positioning": "Systems engineer by training. Frontend architect by focus.",
@@ -38,9 +38,11 @@
       "full": "Read the full release notes"
     },
     "notes": {
-      "heading": "Notes",
-      "empty": "Essays on frontend architecture, performance and accessibility. The first one, on parallel code that actually scales, is in progress.",
-      "follow": "Follow the build on GitHub"
+      "heading": "Precrease",
+      "intro": "The work before the shape: notes on software architecture, systems, AI and craft. Written in public, failures included.",
+      "latest": "Latest creases",
+      "empty": "The first crease is being folded. It introduces who I am and what this blog will cover.",
+      "all": "Read Precrease"
     },
     "contact": {
       "heading": "Contact",
@@ -130,6 +132,58 @@
       "system": "System",
       "light": "Light",
       "dark": "Dark"
+    }
+  },
+  "precrease": {
+    "name": "Precrease",
+    "tagline": "The work before the shape.",
+    "description": "Pablo Madrigal's notes on software architecture, systems, AI and craft, written in public.",
+    "nav": {
+      "latest": "Latest",
+      "map": "Topic map",
+      "rss": "RSS"
+    },
+    "number": "Crease No. {number}",
+    "minutes": "{minutes} min read",
+    "published": "Published {date}",
+    "updated": "Updated {date}",
+    "topicsLabel": "Topics",
+    "breadcrumb": "Topic path",
+    "related": "Related creases",
+    "latestHeading": "Latest creases",
+    "empty": "The first crease is being folded. Subscribe to the RSS feed to read it when it lands.",
+    "map": {
+      "title": "Topic map",
+      "description": "Every Precrease topic as a tree, with how many posts sit in each branch.",
+      "intro": "Topics nest without a depth limit. Open a branch to see what sits below it; a topic's page gathers its whole subtree.",
+      "count": "{count} posts",
+      "countOne": "1 post",
+      "countZero": "No posts yet",
+      "subtopics": "{count} subtopics",
+      "subtopicsOne": "1 subtopic"
+    },
+    "topic": {
+      "title": "{topic} · Precrease",
+      "heading": "{topic}",
+      "subtopics": "Inside this topic",
+      "empty": "Nothing in this branch yet.",
+      "feed": "RSS for this topic"
+    },
+    "book": "On {title} by {author} ({year})",
+    "chapter": "Chapter: {chapter}",
+    "draft": "Draft: only visible in development",
+    "search": {
+      "label": "Search Precrease",
+      "placeholder": "Search creases",
+      "filters": "Filter results",
+      "format": "Format",
+      "topic": "Topic",
+      "clear": "Clear filters",
+      "loading": "Searching…",
+      "one": "1 crease",
+      "many": "{count} creases",
+      "none": "No creases match. Try fewer words or clear a filter.",
+      "failed": "Search didn't load. Check your connection and reload the page."
     }
   }
 }

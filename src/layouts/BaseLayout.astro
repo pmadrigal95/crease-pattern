@@ -21,9 +21,13 @@ interface Props {
   title: string;
   description: string;
   lang?: 'en' | 'es';
+  /** Absolute or root-relative URL of the social preview image (1200 × 630 PNG). */
+  image?: string | undefined;
+  /** Open Graph type: Precrease posts are articles, everything else a website. */
+  type?: 'website' | 'article' | undefined;
 }
 
-const { title, description, lang = 'en' } = Astro.props;
+const { title, description, lang = 'en', image, type = 'website' } = Astro.props;
 const canonical = new URL(publicPath(Astro.url.pathname), site.url);
 const profile = await getProfile();
 ---
@@ -42,8 +46,12 @@ const profile = await getProfile();
     <meta name="author" content={profile.name} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    <meta property="og:type" content="website" />
+    <meta property="og:type" content={type} />
     <meta property="og:url" content={canonical} />
+    {image && <meta property="og:image" content={new URL(image, site.url)} />}
+    {image && <meta property="og:image:width" content="1200" />}
+    {image && <meta property="og:image:height" content="630" />}
+    <meta name="twitter:card" content={image ? 'summary_large_image' : 'summary'} />
     <!-- Page-specific hints, such as a preload for the page's first image. -->
     <slot name="head" />
   </head>

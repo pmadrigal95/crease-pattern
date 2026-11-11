@@ -1,0 +1,41 @@
+---
+/**
+ * Precrease's mark: a square sheet already creased for the waterbomb base, the sheet before the
+ * fox (see portfolio-discovery/16-precrease-marca.md). Mountain folds solid (the +), valley
+ * folds dashed (the X). Decorative: the wordmark next to it carries the name.
+ */
+interface Props {
+  size?: number;
+}
+const { size = 28 } = Astro.props;
+---
+
+<svg
+  class="precrease-mark"
+  width={size}
+  height={size}
+  viewBox="0 0 32 32"
+  aria-hidden="true"
+  focusable="false"
+>
+  <rect class="sheet" x="1" y="1" width="30" height="30"></rect>
+  <path class="valley" d="M1 1 31 31M31 1 1 31"></path>
+  <path class="mountain" d="M16 1v30M1 16h30"></path>
+</svg>
+
+<style>
+  .sheet {
+    fill: var(--color-surface);
+    stroke: var(--color-ink);
+    stroke-width: 2;
+  }
+  .mountain {
+    stroke: var(--color-ink);
+    stroke-width: 2;
+  }
+  .valley {
+    stroke: var(--color-accent-ui);
+    stroke-width: 2;
+    stroke-dasharray: 3 2.5;
+  }
+</style>

@@ -1,0 +1,36 @@
+---
+/**
+ * Every /precrease page: the site's layout plus Precrease's masthead, its display face and its
+ * feed. Newsreader loads only here, so the rest of the site pays nothing for it.
+ */
+import '@fontsource-variable/newsreader/opsz.css';
+import '@fontsource-variable/newsreader/opsz-italic.css';
+import PageLayout from './PageLayout.astro';
+import PrecreaseMast from '../components/precrease/PrecreaseMast.astro';
+import { copy } from '../lib/copy';
+
+interface Props {
+  title: string;
+  description: string;
+  image?: string | undefined;
+  type?: 'website' | 'article' | undefined;
+  /** Thin pages (a topic with few posts) stay out of search engines. */
+  noindex?: boolean;
+  /** An extra feed to advertise, such as a topic's. */
+  feed?: { href: string; title: string };
+  /** The Precrease index: its masthead wordmark becomes the page's h1. */
+  home?: boolean;
+}
+const { title, description, image, type, noindex = false, feed, home = false } = Astro.props;
+---
+
+<PageLayout title={title} description={description} image={image} type={type}>
+  <Fragment slot="head">
+    <link rel="alternate" type="application/rss+xml" title={copy.precrease.name} href="/precrease/rss.xml" />
+    {feed && <link rel="alternate" type="application/rss+xml" title={feed.title} href={feed.href} />}
+    {noindex && <meta name="robots" content="noindex, follow" />}
+    <slot name="head" />
+  </Fragment>
+  <PrecreaseMast home={home} />
+  <slot />
+</PageLayout>

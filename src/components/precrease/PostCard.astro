@@ -1,0 +1,77 @@
+---
+/** One post in a Precrease list: its number, thumbnail, title and what kind of post it is. */
+import PostThumb from './PostThumb.astro';
+import { formats } from '../../config/precrease';
+import { copy, fill } from '../../lib/copy';
+import { postHref, type PostSummary } from '../../lib/precrease';
+import { readingMinutes } from '../../lib/reading';
+
+interface Props {
+  post: PostSummary;
+  headingLevel?: 'h2' | 'h3';
+}
+const { post, headingLevel: Heading = 'h2' } = Astro.props;
+const { data } = post.entry;
+const t = copy.precrease;
+---
+
+<article class="post-card" data-inspect="PostCard">
+  <a href={postHref(post.id)} class="link">
+    <span class="num">{String(data.number).padStart(3, '0')}</span>
+    <PostThumb slug={post.id} format={data.format} />
+    <Heading class="title">{data.title}</Heading>
+  </a>
+  <p class="meta">
+    <span>
+      {data.series
+        ? `${formats[data.format].label} ${String(data.series.part).padStart(2, '0')}`
+        : formats[data.format].label}
+    </span>
+    <span>{fill(t.minutes, { minutes: readingMinutes(post.entry.body ?? '') })}</span>
+    {data.draft && <span class="draft">{t.draft}</span>}
+  </p>
+</article>
+
+<style>
+  .post-card {
+    display: grid;
+    gap: var(--space-3);
+    align-content: start;
+  }
+  .link {
+    display: grid;
+    gap: var(--space-3);
+    color: inherit;
+    text-decoration: none;
+  }
+  .num {
+    font: italic 300 3.5rem/1 var(--font-serif);
+    font-variation-settings: 'opsz' 72;
+    color: var(--color-accent);
+  }
+  .title {
+    margin: 0;
+    font: 500 var(--size-xl) / 1.2 var(--font-serif);
+    font-variation-settings: 'opsz' 36;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+  .link:hover .title,
+  .link:focus-visible .title {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 4px;
+    text-decoration-color: var(--color-accent-ui);
+  }
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin: 0;
+    font: var(--size-xs) var(--font-mono);
+    color: var(--color-mute);
+  }
+  .draft {
+    color: var(--color-accent);
+  }
+</style>

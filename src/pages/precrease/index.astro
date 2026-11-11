@@ -1,0 +1,126 @@
+---
+import PrecreaseLayout from '../../layouts/PrecreaseLayout.astro';
+import FoldTitle from '../../components/precrease/FoldTitle.astro';
+import PostThumb from '../../components/precrease/PostThumb.astro';
+import PostCard from '../../components/precrease/PostCard.astro';
+import { formats } from '../../config/precrease';
+import { copy, fill } from '../../lib/copy';
+import { getPosts, postHref } from '../../lib/precrease';
+import { readingMinutes } from '../../lib/reading';
+
+const t = copy.precrease;
+const posts = await getPosts();
+const [featured, ...rest] = posts;
+const date = new Intl.DateTimeFormat('en', { dateStyle: 'long', timeZone: 'UTC' });
+---
+
+<PrecreaseLayout title={t.name} description={t.description} home>
+  <div class="wrap">
+    {featured ? (
+      <section class="featured fold-host" aria-labelledby="featured-title">
+        <div class="text">
+          <p class="kicker">
+            {fill(t.number, { number: String(featured.number).padStart(3, '0') })} ·{' '}
+            {formats[featured.entry.data.format].label} ·{' '}
+            {fill(t.minutes, { minutes: readingMinutes(featured.entry.body ?? '') })}
+          </p>
+          <FoldTitle
+            text={featured.entry.data.title}
+            href={postHref(featured.id)}
+            id="featured-title"
+            as="h2"
+            unfold="hover"
+          />
+          <p class="lede">{featured.entry.data.description}</p>
+          <p class="date">
+            <time datetime={featured.date.toISOString()}>{date.format(featured.date)}</time>
+          </p>
+        </div>
+        <a class="thumb" href={postHref(featured.id)} tabindex="-1" aria-hidden="true">
+          <PostThumb slug={featured.id} format={featured.entry.data.format} />
+        </a>
+      </section>
+    ) : (
+      <section class="empty">
+        <p>{t.empty}</p>
+      </section>
+    )}
+
+    {rest.length > 0 && (
+      <section class="latest" aria-labelledby="latest-title">
+        <h2 id="latest-title" class="sr-only">
+          {t.latestHeading}
+        </h2>
+        <div class="grid">
+          {rest.map((post) => (
+            <PostCard post={post} headingLevel="h3" />
+          ))}
+        </div>
+      </section>
+    )}
+  </div>
+</PrecreaseLayout>
+
+<style>
+  .featured {
+    display: grid;
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    align-items: end;
+    gap: var(--space-8);
+    padding-block: var(--space-12) var(--space-16);
+    border-bottom: 1px solid var(--color-rule);
+  }
+  .featured :global(.fold-title) {
+    font-size: clamp(2.6rem, 6.5vw, 5.5rem);
+  }
+  .kicker,
+  .date {
+    font: var(--size-xs) var(--font-mono);
+    color: var(--color-mute);
+    margin: 0 0 var(--space-4);
+  }
+  .lede {
+    max-width: 52ch;
+    margin: var(--space-6) 0 var(--space-3);
+    font-size: var(--size-lg);
+    color: var(--color-mute);
+  }
+  .thumb {
+    display: block;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: var(--space-12) var(--space-6);
+    padding-block: var(--space-12) var(--space-24);
+  }
+  .grid > :global(*) {
+    grid-column: span 2;
+  }
+  .grid > :global(*:nth-child(-n + 2)) {
+    grid-column: span 3;
+  }
+  .empty {
+    padding-block: var(--space-12) var(--space-24);
+    max-width: 52ch;
+  }
+  .empty p {
+    font-size: var(--size-lg);
+    color: var(--color-mute);
+  }
+  @media (max-width: 760px) {
+    .featured {
+      grid-template-columns: 1fr;
+    }
+    .thumb {
+      max-width: 320px;
+    }
+    .grid {
+      grid-template-columns: 1fr;
+    }
+    .grid > :global(*),
+    .grid > :global(*:nth-child(-n + 2)) {
+      grid-column: auto;
+    }
+  }
+</style>
