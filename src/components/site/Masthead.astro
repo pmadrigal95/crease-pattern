@@ -51,11 +51,14 @@ const path = publicPath(Astro.url.pathname);
 </header>
 
 <script>
-  import { isTypingTarget } from '../../lib/keyboard';
-
   // Opens the Inspector (decision 44): the button, Shift+I or ?inspect in the URL. Vue and the
   // panel download only now, on first use; hovering the button starts that download early.
   type Handle = { close(): void };
+  // Same rule as isTypingTarget in src/lib/keyboard.ts, kept local: this script runs on every page,
+  // and importing a helper shared with Precrease search would add a chained request to each one.
+  const isTypingTarget = (el: EventTarget | null) =>
+    el instanceof HTMLElement &&
+    (el.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(el.tagName));
   const button = document.querySelector<HTMLButtonElement>('[data-inspector-toggle]');
   let handle: Handle | null = null;
   let loading = false;

@@ -213,7 +213,8 @@ const valueText = (fold: number) => fill(t.value, { photo: fold, contours: 100 -
 </style>
 
 <script>
-  import { fill } from '../../lib/template';
+  // Self-contained on purpose (ENGINEERING.md, "Browser scripts"): with no imports Astro inlines
+  // this script, and About's LCP doesn't wait for extra requests.
 
   const MIN = 8;
   const MAX = 92;
@@ -229,7 +230,10 @@ const valueText = (fold: number) => fill(t.value, { photo: fold, contours: 100 -
       el.classList.remove('is-opening');
       el.style.setProperty('--fold', String(fold));
       handle.setAttribute('aria-valuenow', String(fold));
-      handle.setAttribute('aria-valuetext', fill(template, { photo: fold, contours: 100 - fold }));
+      handle.setAttribute(
+        'aria-valuetext',
+        template.replace('{photo}', String(fold)).replace('{contours}', String(100 - fold)),
+      );
     };
     const current = () => Number(handle.getAttribute('aria-valuenow')) || REST;
 

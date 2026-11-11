@@ -85,8 +85,12 @@ and tokens (`tokens/`) are data, read through `lib` and generated CSS.
   starts `hidden` and the script reveals it.
 - Server data reaches a script as JSON in a `data-*` attribute, read with `readJsonData()`
   (`src/lib/dom.ts`). No inline scripts: the CSP allows only hashed ones.
-- Shared helpers live in `src/lib` (`keyboard.ts`, `template.ts`, `format.ts`). Each script stays
-  small and self-contained; there is no client framework outside the Inspector.
+- Scripts that run on every page (the masthead, analytics, the About portrait) stay
+  self-contained: with no imports Astro inlines a small script, and a helper shared between two
+  scripts becomes its own chunk, requested after them. Three such 400-byte chunks pushed About's
+  LCP over its budget. Shared helpers (`src/lib/keyboard.ts`, `template.ts`, `dom.ts`) are for
+  scripts that load on their own page or on demand, such as Precrease search. There is no client
+  framework outside the Inspector.
 - Heavy code loads on first use (`import()` on focus or click), never on page load.
 
 ## CSS

@@ -10,13 +10,11 @@ import site from '../../../site.config';
 <div hidden data-web-analytics={JSON.stringify(site.webAnalytics)}></div>
 
 <script>
-  import { readJsonData } from '../../lib/dom';
-
-  const { token, hosts } = readJsonData(
-    document.querySelector<HTMLElement>('[data-web-analytics]'),
-    'webAnalytics',
-    { token: '', hosts: [] as string[] },
-  );
+  // Self-contained on purpose (ENGINEERING.md, "Browser scripts"): Astro inlines it.
+  const config = document.querySelector<HTMLElement>('[data-web-analytics]')?.dataset.webAnalytics;
+  const { token, hosts } = config
+    ? (JSON.parse(config) as { token: string; hosts: string[] })
+    : { token: '', hosts: [] };
   const optedOut =
     (navigator as Navigator & { globalPrivacyControl?: boolean }).globalPrivacyControl === true ||
     navigator.doNotTrack === '1';
