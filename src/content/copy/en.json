@@ -158,7 +158,9 @@
       "intro": "Topics nest without a depth limit. Open a branch to see what sits below it; a topic's page gathers its whole subtree.",
       "count": "{count} posts",
       "countOne": "1 post",
-      "countZero": "No posts yet"
+      "countZero": "No posts yet",
+      "subtopics": "{count} subtopics",
+      "subtopicsOne": "1 subtopic"
     },
     "topic": {
       "title": "{topic} · Precrease",
