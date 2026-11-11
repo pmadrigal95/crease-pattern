@@ -14,9 +14,8 @@ const [featured, ...rest] = posts;
 const date = new Intl.DateTimeFormat('en', { dateStyle: 'long', timeZone: 'UTC' });
 ---
 
-<PrecreaseLayout title={t.name} description={t.description}>
+<PrecreaseLayout title={t.name} description={t.description} home>
   <div class="wrap">
-    {featured && <h1 class="sr-only">{t.name}</h1>}
     {featured ? (
       <section class="featured fold-host" aria-labelledby="featured-title">
         <div class="text">
@@ -42,10 +41,7 @@ const date = new Intl.DateTimeFormat('en', { dateStyle: 'long', timeZone: 'UTC' 
         </a>
       </section>
     ) : (
-      <section class="empty" aria-labelledby="empty-title">
-        <h1 id="empty-title" class="empty-title">
-          {t.name}
-        </h1>
+      <section class="empty">
         <p>{t.empty}</p>
       </section>
     )}
@@ -72,7 +68,7 @@ const date = new Intl.DateTimeFormat('en', { dateStyle: 'long', timeZone: 'UTC' 
     align-items: end;
     gap: var(--space-8);
     padding-block: var(--space-12) var(--space-16);
-    border-bottom: 6px solid var(--color-accent);
+    border-bottom: 1px solid var(--color-rule);
   }
   .featured :global(.fold-title) {
     font-size: clamp(2.6rem, 6.5vw, 5.5rem);
@@ -105,13 +101,8 @@ const date = new Intl.DateTimeFormat('en', { dateStyle: 'long', timeZone: 'UTC' 
     grid-column: span 3;
   }
   .empty {
-    padding-block: var(--space-16) var(--space-24);
+    padding-block: var(--space-12) var(--space-24);
     max-width: 52ch;
-  }
-  .empty-title {
-    font: italic 300 clamp(3rem, 9vw, 7rem) / 1 var(--font-serif);
-    font-variation-settings: 'opsz' 72;
-    margin: 0 0 var(--space-6);
   }
   .empty p {
     font-size: var(--size-lg);

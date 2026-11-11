@@ -18,8 +18,10 @@ interface Props {
   noindex?: boolean;
   /** An extra feed to advertise, such as a topic's. */
   feed?: { href: string; title: string };
+  /** The Precrease index: its masthead wordmark becomes the page's h1. */
+  home?: boolean;
 }
-const { title, description, image, type, noindex = false, feed } = Astro.props;
+const { title, description, image, type, noindex = false, feed, home = false } = Astro.props;
 ---
 
 <PageLayout title={title} description={description} image={image} type={type}>
@@ -29,6 +31,6 @@ const { title, description, image, type, noindex = false, feed } = Astro.props;
     {noindex && <meta name="robots" content="noindex, follow" />}
     <slot name="head" />
   </Fragment>
-  <PrecreaseMast />
+  <PrecreaseMast home={home} />
   <slot />
 </PageLayout>

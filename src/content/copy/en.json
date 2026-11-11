@@ -169,6 +169,19 @@
     },
     "book": "On {title} by {author} ({year})",
     "chapter": "Chapter: {chapter}",
-    "draft": "Draft: only visible in development"
+    "draft": "Draft: only visible in development",
+    "search": {
+      "label": "Search Precrease",
+      "placeholder": "Search creases",
+      "filters": "Filter results",
+      "format": "Format",
+      "topic": "Topic",
+      "clear": "Clear filters",
+      "loading": "Searching…",
+      "one": "1 crease",
+      "many": "{count} creases",
+      "none": "No creases match. Try fewer words or clear a filter.",
+      "failed": "Search didn't load. Check your connection and reload the page."
+    }
   }
 }

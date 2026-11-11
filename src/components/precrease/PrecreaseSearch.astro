@@ -1,0 +1,246 @@
+---
+/**
+ * Precrease search (Pagefind). The index is built after `astro build` from the post pages only
+ * (`data-pagefind-body`), with `format` and `topic` filters; a post's topic filter includes every
+ * ancestor, so "Frontend" finds a post filed under Performance.
+ *
+ * Nothing loads until the visitor uses the box: Pagefind's script, its WebAssembly and the index
+ * fragments download on first focus. Without JavaScript the box stays hidden, since it can't work.
+ * Shortcuts: "/" or Ctrl/Cmd+K focus it; Escape closes the results.
+ */
+import { formats, topics } from '../../config/precrease';
+import { copy } from '../../lib/copy';
+
+const t = copy.precrease.search;
+const formatChips = Object.entries(formats).map(([id, f]) => ({ id, label: f.label }));
+const topicChips = topics
+  .filter((topic) => !topic.parent)
+  .map((topic) => ({ id: topic.id, label: topic.label }));
+const strings = JSON.stringify({
+  number: copy.precrease.number,
+  loading: t.loading,
+  one: t.one,
+  many: t.many,
+  none: t.none,
+  failed: t.failed,
+  formats: Object.fromEntries(formatChips.map((f) => [f.id, f.label])),
+});
+---
+
+<div
+  class="precrease-search"
+  data-precrease-search
+  data-strings={strings}
+  hidden
+  data-inspect="PrecreaseSearch"
+>
+  <form role="search" aria-label={t.label}>
+    <label for="precrease-q" class="sr-only">
+      {t.label}
+    </label>
+    <svg class="glass" viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+      <circle cx="8.5" cy="8.5" r="5.5"></circle>
+      <path d="m13 13 4.5 4.5"></path>
+    </svg>
+    <input
+      id="precrease-q"
+      type="search"
+      placeholder={t.placeholder}
+      autocomplete="off"
+      spellcheck="false"
+      aria-controls="precrease-results"
+      aria-keyshortcuts="/ Control+K Meta+K"
+    />
+    <kbd aria-hidden="true">/</kbd>
+  </form>
+
+  <div class="panel" id="precrease-results" hidden>
+    <div class="filters" role="group" aria-label={t.filters}>
+      <div class="group" role="group" aria-label={t.format}>
+        {formatChips.map((f) => (
+          <button type="button" class="chip" data-filter="format" data-value={f.id} aria-pressed="false">
+            {f.label}
+          </button>
+        ))}
+      </div>
+      <div class="group" role="group" aria-label={t.topic}>
+        {topicChips.map((topic) => (
+          <button type="button" class="chip" data-filter="topic" data-value={topic.id} aria-pressed="false">
+            {topic.label}
+          </button>
+        ))}
+      </div>
+      <button type="button" class="clear" data-clear hidden>
+        {t.clear}
+      </button>
+    </div>
+    <p class="status" role="status" aria-live="polite"></p>
+    <ol class="results"></ol>
+  </div>
+</div>
+
+<style>
+  .precrease-search {
+    position: relative;
+    flex: 0 1 20rem;
+    margin-bottom: var(--space-2);
+  }
+  form {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  .glass {
+    position: absolute;
+    left: var(--space-3);
+    width: 1rem;
+    height: 1rem;
+    fill: none;
+    stroke: var(--color-mute);
+    stroke-width: 1.75;
+    stroke-linecap: round;
+    pointer-events: none;
+  }
+  input {
+    width: 100%;
+    min-height: 2.75rem;
+    padding: var(--space-2) var(--space-8) var(--space-2) calc(var(--space-3) + 1.5rem);
+    border: 1px solid var(--color-rule);
+    border-radius: 999px;
+    background: var(--color-surface);
+    color: var(--color-ink);
+    font: inherit;
+    font-size: var(--size-sm);
+  }
+  input::placeholder {
+    color: var(--color-mute);
+  }
+  input:focus-visible {
+    outline: 2px solid var(--color-accent-ui);
+    outline-offset: 2px;
+  }
+  kbd {
+    position: absolute;
+    right: var(--space-3);
+    padding: 0 0.4em;
+    border: 1px solid var(--color-rule);
+    border-radius: 4px;
+    font: var(--size-xs) var(--font-mono);
+    color: var(--color-mute);
+    pointer-events: none;
+  }
+  input:focus ~ kbd {
+    display: none;
+  }
+  .panel {
+    position: absolute;
+    z-index: 20;
+    top: calc(100% + var(--space-2));
+    right: 0;
+    width: min(40rem, calc(100vw - 2 * var(--space-4)));
+    max-height: min(70vh, 40rem);
+    overflow: auto;
+    padding: var(--space-4);
+    border: 1px solid var(--color-rule);
+    border-top: 4px solid var(--color-accent);
+    background: var(--color-surface);
+    box-shadow: 0 18px 40px -20px color-mix(in oklab, var(--color-ink) 45%, transparent);
+  }
+  .panel[hidden] {
+    display: none;
+  }
+  .filters {
+    display: grid;
+    gap: var(--space-2);
+    padding-bottom: var(--space-3);
+    border-bottom: 1px solid var(--color-rule);
+  }
+  .group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+  .chip,
+  .clear {
+    min-height: 2rem;
+    padding: 0 var(--space-3);
+    border: 1px solid var(--color-rule);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--color-mute);
+    font: inherit;
+    font-size: var(--size-xs);
+    cursor: pointer;
+  }
+  .chip[aria-pressed='true'] {
+    border-color: var(--color-accent);
+    background: var(--color-accent);
+    color: var(--color-bg);
+  }
+  .clear {
+    justify-self: start;
+    border-style: dashed;
+  }
+  .chip:focus-visible,
+  .clear:focus-visible {
+    outline: 2px solid var(--color-accent-ui);
+    outline-offset: 2px;
+  }
+  .status {
+    margin: var(--space-3) 0 0;
+    font: var(--size-xs) var(--font-mono);
+    color: var(--color-mute);
+  }
+  .status:empty {
+    display: none;
+  }
+  .results {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .results :global(li + li) {
+    border-top: 1px dashed var(--color-rule);
+  }
+  .results :global(a) {
+    display: grid;
+    gap: var(--space-1);
+    padding: var(--space-3) 0;
+    color: inherit;
+    text-decoration: none;
+  }
+  .results :global(.r-kicker) {
+    font: var(--size-xs) var(--font-mono);
+    color: var(--color-mute);
+  }
+  .results :global(.r-title) {
+    font: 600 1.35rem/1.15 var(--font-serif);
+    font-variation-settings: 'opsz' 36;
+  }
+  .results :global(a:hover .r-title),
+  .results :global(a:focus-visible .r-title) {
+    color: var(--color-accent);
+  }
+  .results :global(.r-excerpt) {
+    font-size: var(--size-sm);
+    color: var(--color-mute);
+  }
+  .results :global(mark) {
+    background: color-mix(in oklab, var(--color-accent-ui) 22%, transparent);
+    color: var(--color-ink);
+  }
+  @media (max-width: 640px) {
+    .precrease-search {
+      flex-basis: 100%;
+    }
+    .panel {
+      left: 0;
+      width: auto;
+    }
+  }
+</style>
+
+<script>
+  import { initPrecreaseSearch } from '../../lib/precrease-search';
+  initPrecreaseSearch();
+</script>

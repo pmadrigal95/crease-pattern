@@ -23,14 +23,14 @@ const { text, as: Tag = 'h1', href, unfold = 'hover', id } = Astro.props;
   {href ? (
     <a href={href}>
       <span class="flat">{text}</span>
-      <span class="folded" aria-hidden="true">
+      <span class="folded" aria-hidden="true" data-pagefind-ignore>
         {text}
       </span>
     </a>
   ) : (
     <>
       <span class="flat">{text}</span>
-      <span class="folded" aria-hidden="true">
+      <span class="folded" aria-hidden="true" data-pagefind-ignore>
         {text}
       </span>
     </>

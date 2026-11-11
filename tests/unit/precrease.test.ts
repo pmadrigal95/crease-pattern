@@ -10,6 +10,7 @@ import {
   validateTree,
 } from '../../src/lib/precrease-tree';
 import { readingMinutes } from '../../src/lib/reading';
+import { excerptRuns, resultHref, toFilters } from '../../src/lib/precrease-search';
 import { seeded, thumbnail } from '../../src/lib/thumbnail';
 
 const post = (id: string, number: number, topicIds: string[], day: number) => ({
@@ -118,5 +119,29 @@ describe('Reading time', () => {
     expect(readingMinutes(words)).toBe(2);
     expect(readingMinutes(`${words}\n\`\`\`ts\n${words}\n\`\`\``)).toBe(2);
     expect(readingMinutes('')).toBe(1);
+  });
+});
+
+describe('Search', () => {
+  test('Pagefind file URLs map to the URLs the site serves', () => {
+    expect(resultHref('/precrease/the-work-before-the-shape.html')).toBe(
+      '/precrease/the-work-before-the-shape',
+    );
+    expect(resultHref('/precrease/a.html#part')).toBe('/precrease/a#part');
+    expect(resultHref('/index.html')).toBe('/');
+  });
+
+  test('only groups with a selection become filters', () => {
+    expect(toFilters({ format: new Set(['note', 'essay']), topic: new Set() })).toEqual({
+      format: { any: ['essay', 'note'] },
+    });
+  });
+
+  test('excerpts keep their highlights as data, never as markup', () => {
+    expect(excerptRuns('a <mark>fold</mark> &amp; <b>x</b>&lt;script&gt;')).toEqual([
+      { text: 'a ', marked: false },
+      { text: 'fold', marked: true },
+      { text: ' & x<script>', marked: false },
+    ]);
   });
 });

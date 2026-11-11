@@ -28,6 +28,8 @@ const number = String(data.number).padStart(3, '0');
 const format = formats[data.format].label;
 const paths = data.topics.map((id) => pathTo(topics, id));
 const others = related(topics, posts, post);
+// Search filters: a post counts under each of its topics and every ancestor of them.
+const topicFilters = [...new Set(paths.flat().map((topic) => topic.id))];
 ---
 
 <PrecreaseLayout
@@ -36,7 +38,16 @@ const others = related(topics, posts, post);
   image={`/precrease/og/${post.id}.png`}
   type="article"
 >
-  <article class="post">
+  <article class="post" data-pagefind-body>
+    <div hidden data-pagefind-ignore>
+      <span data-pagefind-meta="title">{data.title}</span>
+      <span data-pagefind-meta="number">{number}</span>
+      <span data-pagefind-meta="format">{data.format}</span>
+      <span data-pagefind-filter="format">{data.format}</span>
+      {topicFilters.map((id) => (
+        <span data-pagefind-filter="topic">{id}</span>
+      ))}
+    </div>
     <header class="wrap head">
       <div class="text">
         <p class="kicker">
@@ -62,7 +73,7 @@ const others = related(topics, posts, post);
           )}
           <span>{fill(t.minutes, { minutes: readingMinutes(post.entry.body ?? '') })}</span>
         </p>
-        <nav class="topics" aria-label={t.breadcrumb}>
+        <nav class="topics" aria-label={t.breadcrumb} data-pagefind-ignore>
           {paths.map((path) => (
             <ol>
               {path.map((topic) => (

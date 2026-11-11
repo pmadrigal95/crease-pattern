@@ -1,12 +1,19 @@
 ---
 /**
- * Precrease's own masthead, under the site's: the wordmark, the tagline and the blog's sections.
- * "Same house, own room" (decision 48): the site's menu stays above it.
+ * Precrease's own masthead, under the site's (decision 48, "same house, own room"): the large
+ * wordmark from the fold-out zine direction, the search, the tagline over a heavy accent rule, and
+ * the blog's sections. On the index the wordmark is the page's h1; elsewhere it links home.
  */
 import PrecreaseMark from './PrecreaseMark.astro';
+import PrecreaseSearch from './PrecreaseSearch.astro';
 import { copy } from '../../lib/copy';
 import { publicPath } from '../../lib/url';
 
+interface Props {
+  /** The Precrease index, where the wordmark is the h1. */
+  home?: boolean;
+}
+const { home = false } = Astro.props;
 const t = copy.precrease;
 const path = publicPath(Astro.url.pathname);
 const links = [
@@ -14,18 +21,32 @@ const links = [
   { href: '/precrease/map', label: t.nav.map },
   { href: '/precrease/rss.xml', label: t.nav.rss },
 ];
+const Word = home ? 'h1' : 'p';
 ---
 
-<div class="precrease-mast" data-inspect="PrecreaseMast">
-  <div class="wrap row">
-    <a class="brand" href="/precrease">
-      <PrecreaseMark />
-      <span class="word">
-        <span class="pre">Pre</span>
-        <span class="crease">crease</span>
-      </span>
-    </a>
-    <p class="tagline">{t.tagline}</p>
+<header class="precrease-mast" data-inspect="PrecreaseMast">
+  <div class="wrap">
+    <p class="eyebrow">
+      <PrecreaseMark size={16} />
+      <span>/precrease</span>
+    </p>
+    <div class="row">
+      <Word class="word">
+        {home ? (
+          <>
+            <span class="pre">Pre</span>
+            <span class="crease">crease</span>
+          </>
+        ) : (
+          <a href="/precrease">
+            <span class="pre">Pre</span>
+            <span class="crease">crease</span>
+          </a>
+        )}
+      </Word>
+      <PrecreaseSearch />
+    </div>
+    <p class="tagline">{`${t.tagline} ${t.description}`}</p>
     <nav aria-label={t.name}>
       {links.map((l) => (
         <a href={l.href} aria-current={path === l.href ? 'page' : undefined}>
@@ -34,30 +55,38 @@ const links = [
       ))}
     </nav>
   </div>
-</div>
+</header>
 
 <style>
   .precrease-mast {
-    border-bottom: 1px solid var(--color-rule);
+    padding-top: var(--space-12);
+  }
+  .eyebrow {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin: 0;
+    font: var(--size-xs) var(--font-mono);
+    color: var(--color-mute);
   }
   .row {
     display: flex;
     flex-wrap: wrap;
-    align-items: center;
-    gap: var(--space-3) var(--space-6);
-    padding-block: var(--space-4);
-  }
-  .brand {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-3);
-    color: inherit;
-    text-decoration: none;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--space-4) var(--space-8);
   }
   .word {
-    font: 1.75rem/1 var(--font-serif);
+    margin: 0;
+    font-family: var(--font-serif);
+    font-size: clamp(3.75rem, 11vw, 9.25rem);
     font-variation-settings: 'opsz' 72;
+    line-height: 0.9;
     letter-spacing: -0.02em;
+  }
+  .word a {
+    color: inherit;
+    text-decoration: none;
   }
   .pre {
     font-style: italic;
@@ -68,14 +97,16 @@ const links = [
     color: var(--color-accent);
   }
   .tagline {
-    margin: 0;
-    font: var(--size-xs) var(--font-mono);
+    max-width: 60ch;
+    margin: var(--space-6) 0 0;
     color: var(--color-mute);
   }
   nav {
     display: flex;
-    gap: var(--space-4);
-    margin-left: auto;
+    gap: var(--space-6);
+    margin-top: var(--space-6);
+    padding-top: var(--space-3);
+    border-top: 6px solid var(--color-accent);
     font-size: var(--size-sm);
   }
   nav a {
@@ -89,13 +120,6 @@ const links = [
   nav a[aria-current='page'] {
     text-decoration: underline;
     text-decoration-color: var(--color-accent-ui);
-  }
-  @media (max-width: 560px) {
-    .tagline {
-      display: none;
-    }
-    nav {
-      margin-left: 0;
-    }
+    text-underline-offset: 0.3em;
   }
 </style>
