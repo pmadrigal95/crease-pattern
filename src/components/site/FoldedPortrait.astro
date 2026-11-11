@@ -207,12 +207,14 @@ const valueText = (fold: number) => fill(t.value, { photo: fold, contours: 100 -
 
   figcaption {
     margin-top: var(--space-2);
-    font: 500 var(--size-xs) var(--font-mono);
+    font: 500 var(--type-caption);
     color: var(--color-mute);
   }
 </style>
 
 <script>
+  import { fill } from '../../lib/template';
+
   const MIN = 8;
   const MAX = 92;
   const REST = 39;
@@ -227,10 +229,7 @@ const valueText = (fold: number) => fill(t.value, { photo: fold, contours: 100 -
       el.classList.remove('is-opening');
       el.style.setProperty('--fold', String(fold));
       handle.setAttribute('aria-valuenow', String(fold));
-      handle.setAttribute(
-        'aria-valuetext',
-        template.replace('{photo}', String(fold)).replace('{contours}', String(100 - fold)),
-      );
+      handle.setAttribute('aria-valuetext', fill(template, { photo: fold, contours: 100 - fold }));
     };
     const current = () => Number(handle.getAttribute('aria-valuenow')) || REST;
 

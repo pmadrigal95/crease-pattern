@@ -1,5 +1,6 @@
 ---
-import { career, releasesNewestFirst, formatRange, formatElevation } from '../../lib/career';
+import { career, releasesNewestFirst } from '../../lib/career';
+import { formatNumber, formatRange } from '../../lib/format';
 import { copy, fill } from '../../lib/copy';
 
 /** The full career changelog: Unreleased first, then each release, newest first. */
@@ -29,7 +30,7 @@ const t = copy.home.changelog;
         <p class="major">v{r.major}</p>
         <h2 id={`release-${r.major}`}>
           {r.codename}{' '}
-          <span class="elev">{fill(t.elevation, { elevation: formatElevation(r.elevationM) })}</span>
+          <span class="elev">{fill(t.elevation, { elevation: formatNumber(r.elevationM) })}</span>
         </h2>
         <p class="theme">{r.theme}</p>
         <svg
@@ -194,7 +195,7 @@ const t = copy.home.changelog;
     gap: var(--space-2);
   }
   .stack li {
-    font: 500 var(--size-xs) var(--font-mono);
+    font: 500 var(--type-caption);
     color: var(--color-mute);
     border: 1px solid var(--color-rule);
     border-radius: var(--radius-pill);

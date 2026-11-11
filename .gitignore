@@ -20,3 +20,6 @@ src/generated/
 
 # local tooling
 .claude/
+
+# local visual-regression baselines (OS-specific, see playwright.visual.config.ts)
+.visual-baselines/

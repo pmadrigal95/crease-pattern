@@ -106,7 +106,7 @@ const strings = JSON.stringify({
     min-height: 2.75rem;
     padding: var(--space-2) var(--space-8) var(--space-2) calc(var(--space-3) + 1.5rem);
     border: 1px solid var(--color-rule);
-    border-radius: 999px;
+    border-radius: var(--radius-pill);
     background: var(--color-surface);
     color: var(--color-ink);
     font: inherit;
@@ -125,7 +125,7 @@ const strings = JSON.stringify({
     padding: 0 0.4em;
     border: 1px solid var(--color-rule);
     border-radius: 4px;
-    font: var(--size-xs) var(--font-mono);
+    font: var(--type-caption);
     color: var(--color-mute);
     pointer-events: none;
   }
@@ -165,7 +165,7 @@ const strings = JSON.stringify({
     min-height: 2rem;
     padding: 0 var(--space-3);
     border: 1px solid var(--color-rule);
-    border-radius: 999px;
+    border-radius: var(--radius-pill);
     background: transparent;
     color: var(--color-mute);
     font: inherit;
@@ -188,7 +188,7 @@ const strings = JSON.stringify({
   }
   .status {
     margin: var(--space-3) 0 0;
-    font: var(--size-xs) var(--font-mono);
+    font: var(--type-caption);
     color: var(--color-mute);
   }
   .status:empty {
@@ -210,7 +210,7 @@ const strings = JSON.stringify({
     text-decoration: none;
   }
   .results :global(.r-kicker) {
-    font: var(--size-xs) var(--font-mono);
+    font: var(--type-caption);
     color: var(--color-mute);
   }
   .results :global(.r-title) {

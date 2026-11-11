@@ -1,7 +1,7 @@
 import type { APIRoute } from 'astro';
 import { formats } from '../../../config/precrease';
 import { getPosts } from '../../../lib/precrease';
-import { creaseNumber } from '../../../lib/precrease-tree';
+import { creaseNumber } from '../../../lib/precrease';
 import { ogImage } from '../../../lib/og-image';
 
 export async function getStaticPaths() {

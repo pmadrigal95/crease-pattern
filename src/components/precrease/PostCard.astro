@@ -1,9 +1,9 @@
 ---
 /** One post in a Precrease list: its number, thumbnail, title and what kind of post it is. */
 import PostThumb from './PostThumb.astro';
-import { formats } from '../../config/precrease';
 import { copy, fill } from '../../lib/copy';
-import { postHref, type PostSummary } from '../../lib/precrease';
+import { padNumber } from '../../lib/format';
+import { postHref, postKind, type PostSummary } from '../../lib/precrease';
 import { readingMinutes } from '../../lib/reading';
 
 interface Props {
@@ -17,16 +17,12 @@ const t = copy.precrease;
 
 <article class="post-card" data-inspect="PostCard">
   <a href={postHref(post.id)} class="link">
-    <span class="num">{String(data.number).padStart(3, '0')}</span>
+    <span class="num">{padNumber(data.number)}</span>
     <PostThumb slug={post.id} format={data.format} />
     <Heading class="title">{data.title}</Heading>
   </a>
   <p class="meta">
-    <span>
-      {data.series
-        ? `${formats[data.format].label} ${String(data.series.part).padStart(2, '0')}`
-        : formats[data.format].label}
-    </span>
+    <span>{postKind(post.entry)}</span>
     <span>{fill(t.minutes, { minutes: readingMinutes(post.entry.body ?? '') })}</span>
     {data.draft && <span class="draft">{t.draft}</span>}
   </p>
@@ -68,7 +64,7 @@ const t = copy.precrease;
     flex-wrap: wrap;
     gap: var(--space-3);
     margin: 0;
-    font: var(--size-xs) var(--font-mono);
+    font: var(--type-caption);
     color: var(--color-mute);
   }
   .draft {

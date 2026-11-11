@@ -27,7 +27,12 @@ interface Strings {
   formats: Record<string, string>;
 }
 
-/** Where Pagefind writes its bundle (`pagefind --site dist`). */
+/** Where scripts/build-search-index.mjs writes the bundle. */
+import { readJsonData } from './dom';
+import { formatCount } from './format';
+import { isTypingTarget } from './keyboard';
+import { fill } from './template';
+
 const BUNDLE = '/pagefind/pagefind.js';
 const MAX_RESULTS = 8;
 
@@ -63,13 +68,6 @@ export function excerptRuns(excerpt: string): { text: string; marked: boolean }[
     .filter((run) => run.text.length > 0);
 }
 
-const fill = (template: string, values: Record<string, string>) =>
-  template.replace(/\{(\w+)\}/g, (_, key: string) => values[key] ?? '');
-
-const typing = (target: EventTarget | null) =>
-  target instanceof HTMLElement &&
-  (target.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName));
-
 export function initPrecreaseSearch(): void {
   const root = document.querySelector<HTMLElement>('[data-precrease-search]');
   if (!root) return;
@@ -80,7 +78,9 @@ export function initPrecreaseSearch(): void {
   const clear = root.querySelector<HTMLButtonElement>('[data-clear]');
   const form = root.querySelector('form');
   if (!input || !panel || !status || !list || !clear || !form) return;
-  const strings = JSON.parse(root.dataset.strings ?? '{}') as Strings;
+  const data = readJsonData<Strings | null>(root, 'strings', null);
+  if (!data) return;
+  const strings: Strings = data;
   const chips = [...root.querySelectorAll<HTMLButtonElement>('[data-filter]')];
   const selected: Record<string, Set<string>> = { format: new Set(), topic: new Set() };
 
@@ -122,8 +122,7 @@ export function initPrecreaseSearch(): void {
       const data = await Promise.all(found.results.slice(0, MAX_RESULTS).map((r) => r.data()));
       if (current !== run) return;
       const total = found.results.length;
-      status!.textContent =
-        total === 0 ? strings.none : total === 1 ? strings.one : fill(strings.many, { count: String(total) });
+      status!.textContent = formatCount(total, { zero: strings.none, one: strings.one, many: strings.many });
       list!.replaceChildren(...data.map(renderResult));
     } catch (error) {
       if (current !== run) return;
@@ -212,7 +211,7 @@ export function initPrecreaseSearch(): void {
   addEventListener('keydown', (e) => {
     const slash = e.key === '/' && !e.ctrlKey && !e.metaKey && !e.altKey;
     const commandK = e.key.toLowerCase() === 'k' && (e.ctrlKey || e.metaKey) && !e.altKey;
-    if ((!slash && !commandK) || (slash && typing(e.target))) return;
+    if ((!slash && !commandK) || (slash && isTypingTarget(e.target))) return;
     e.preventDefault();
     input.focus();
     input.select();

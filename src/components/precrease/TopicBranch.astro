@@ -5,7 +5,8 @@
  * JavaScript. The link never goes inside <summary>: a link nested in the disclosure control is
  * announced badly and fails axe's nested-interactive rule.
  */
-import { copy, fill } from '../../lib/copy';
+import { copy } from '../../lib/copy';
+import { formatCount } from '../../lib/format';
 import { topicHref } from '../../lib/precrease';
 
 export interface Branch {
@@ -20,10 +21,8 @@ interface Props {
 }
 const { branch, depth = 0 } = Astro.props;
 const t = copy.precrease.map;
-const count =
-  branch.count === 0 ? t.countZero : branch.count === 1 ? t.countOne : fill(t.count, { count: branch.count });
-const subtopics =
-  branch.children.length === 1 ? t.subtopicsOne : fill(t.subtopics, { count: branch.children.length });
+const count = formatCount(branch.count, { zero: t.countZero, one: t.countOne, many: t.count });
+const subtopics = formatCount(branch.children.length, { one: t.subtopicsOne, many: t.subtopics });
 ---
 
 <li class:list={['branch', { root: depth === 0 }]} data-inspect="TopicBranch">
@@ -55,7 +54,7 @@ const subtopics =
   summary {
     width: fit-content;
     margin-top: var(--space-1);
-    font: var(--size-xs) var(--font-mono);
+    font: var(--type-caption);
     color: var(--color-mute);
     cursor: pointer;
   }
@@ -76,7 +75,7 @@ const subtopics =
   }
   .count {
     margin-left: var(--space-2);
-    font: var(--size-xs) var(--font-mono);
+    font: var(--type-caption);
     color: var(--color-mute);
     white-space: nowrap;
   }

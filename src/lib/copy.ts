@@ -18,10 +18,5 @@ const tree: z.ZodType<CopyTree> = z.lazy(() => z.record(z.string(), z.union([lea
 
 export const copy: typeof raw = tree.parse(raw) as typeof raw;
 
-/** Replaces `{name}` placeholders. Throws on a missing value so a typo fails the build. */
-export function fill(template: string, values: Record<string, string | number>): string {
-  return template.replace(/\{(\w+)\}/g, (_, key: string) => {
-    if (!(key in values)) throw new Error(`Missing value for {${key}} in "${template}"`);
-    return String(values[key]);
-  });
-}
+// `fill` lives in ./template so browser scripts can use it without the copy loader.
+export { fill } from './template';

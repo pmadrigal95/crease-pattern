@@ -2,8 +2,7 @@
 import rss from '@astrojs/rss';
 import site from '../../site.config';
 import { copy } from './copy';
-import { postHref, type PostSummary } from './precrease';
-import { creaseNumber } from './precrease-tree';
+import { creaseNumber, postHref, type PostSummary } from './precrease';
 
 export function feed(posts: PostSummary[], title: string, description: string) {
   return rss({
