@@ -1,15 +1,16 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
   <style>
-    .sheet { fill: #245f86; }
-    .fold { fill: #3b82b0; }
-    .crease { stroke: #eff1ec; }
+    .head-left { fill: #245f86; }
+    .head-right, .inner { fill: #18211d; }
+    .ear { fill: #689ebf; }
     @media (prefers-color-scheme: dark) {
-      .sheet { fill: #7fb6d9; }
-      .fold { fill: #a9cfe6; }
-      .crease { stroke: #18211d; }
+      .head-left { fill: #7db8e0; }
+      .head-right, .inner { fill: #e6ece7; }
+      .ear { fill: #618fad; }
     }
   </style>
-  <path class="sheet" d="M4 4h24v24H4z" />
-  <path class="fold" d="M4 4h24L4 28z" />
-  <path class="crease" d="M28 4 4 28" stroke-width="1.5" fill="none" />
+  <path class="ear" d="M6 16 11 3l8 13zM29 16l8-13 5 13z" />
+  <path class="inner" d="m9.5 16 2-8 4.5 8zM32 16l4.5-8 2 8z" />
+  <path class="head-left" d="M6 16h18v28z" />
+  <path class="head-right" d="M24 16h18L24 44z" />
 </svg>
