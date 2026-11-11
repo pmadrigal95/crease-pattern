@@ -65,7 +65,7 @@ const Word = home ? 'h1' : 'p';
     display: flex;
     align-items: center;
     gap: var(--space-2);
-    margin: 0;
+    margin: 0 0 var(--space-4);
     font: var(--size-xs) var(--font-mono);
     color: var(--color-mute);
   }
@@ -81,7 +81,8 @@ const Word = home ? 'h1' : 'p';
     font-family: var(--font-serif);
     font-size: clamp(3.75rem, 11vw, 9.25rem);
     font-variation-settings: 'opsz' 72;
-    line-height: 0.9;
+    /* 1, not tighter: the italic P's ascender would rise into the eyebrow above it. */
+    line-height: 1;
     letter-spacing: -0.02em;
   }
   .word a {
