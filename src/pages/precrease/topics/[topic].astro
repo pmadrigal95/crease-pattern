@@ -1,0 +1,153 @@
+---
+import PrecreaseLayout from '../../../layouts/PrecreaseLayout.astro';
+import PostCard from '../../../components/precrease/PostCard.astro';
+import { MIN_POSTS_TO_INDEX, topics, type Topic } from '../../../config/precrease';
+import { copy, fill } from '../../../lib/copy';
+import { getPosts, topicHref, type PostSummary } from '../../../lib/precrease';
+import { childrenOf, pathTo, postsUnder } from '../../../lib/precrease-tree';
+
+export async function getStaticPaths() {
+  const posts = await getPosts();
+  return topics.map((topic) => ({ params: { topic: topic.id }, props: { topic, posts } }));
+}
+
+interface Props {
+  topic: Topic;
+  posts: PostSummary[];
+}
+const { topic, posts } = Astro.props;
+const t = copy.precrease;
+const here = postsUnder(topics, posts, topic.id);
+const path = pathTo(topics, topic.id);
+const children = childrenOf(topics, topic.id).map((c) => ({
+  ...c,
+  count: postsUnder(topics, posts, c.id).length,
+}));
+const feedHref = `/precrease/topics/${topic.id}/rss.xml`;
+---
+
+<PrecreaseLayout
+  title={fill(t.topic.title, { topic: topic.label })}
+  description={topic.intro}
+  noindex={here.length < MIN_POSTS_TO_INDEX}
+  feed={{ href: feedHref, title: `${t.name}: ${topic.label}` }}
+>
+  <div class="wrap">
+    <header class="head">
+      <nav aria-label={t.breadcrumb}>
+        <ol class="crumbs">
+          <li>
+            <a href="/precrease/map">{t.map.title}</a>
+          </li>
+          {path.slice(0, -1).map((p) => (
+            <li>
+              <a href={topicHref(p.id)}>{p.label}</a>
+            </li>
+          ))}
+        </ol>
+      </nav>
+      <h1>{fill(t.topic.heading, { topic: topic.label })}</h1>
+      <p class="intro">{topic.intro}</p>
+      <p class="feed">
+        <a href={feedHref}>{t.topic.feed}</a>
+      </p>
+    </header>
+
+    {children.length > 0 && (
+      <section aria-labelledby="sub-title" class="sub">
+        <h2 id="sub-title">{t.topic.subtopics}</h2>
+        <ul>
+          {children.map((c) => (
+            <li>
+              <a href={topicHref(c.id)}>{c.label}</a>
+              <span class="count">{c.count}</span>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )}
+
+    {here.length > 0 ? (
+      <section class="grid" aria-label={topic.label}>
+        {here.map((post) => (
+          <PostCard post={post} />
+        ))}
+      </section>
+    ) : (
+      <p class="empty">{t.topic.empty}</p>
+    )}
+  </div>
+</PrecreaseLayout>
+
+<style>
+  .head {
+    padding-block: var(--space-12) var(--space-8);
+  }
+  .crumbs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin: 0 0 var(--space-4);
+    padding: 0;
+    list-style: none;
+    font: var(--size-xs) var(--font-mono);
+  }
+  .crumbs li + li::before {
+    content: '/';
+    margin-right: var(--space-2);
+    color: var(--color-mute);
+  }
+  .crumbs a {
+    color: var(--color-mute);
+  }
+  h1 {
+    margin: 0;
+    font: 600 clamp(2.4rem, 6vw, 4.5rem) / 1 var(--font-serif);
+    font-variation-settings: 'opsz' 72;
+    letter-spacing: -0.02em;
+  }
+  .intro {
+    max-width: 52ch;
+    margin: var(--space-4) 0 0;
+    font-size: var(--size-lg);
+    color: var(--color-mute);
+  }
+  .feed {
+    margin: var(--space-3) 0 0;
+    font: var(--size-xs) var(--font-mono);
+  }
+  .sub {
+    border-top: 1px solid var(--color-rule);
+    padding-block: var(--space-6);
+  }
+  .sub h2 {
+    margin: 0 0 var(--space-3);
+    font: 500 var(--size-sm) var(--font-mono);
+    color: var(--color-mute);
+  }
+  .sub ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-6);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .count {
+    margin-left: var(--space-2);
+    font: var(--size-xs) var(--font-mono);
+    color: var(--color-mute);
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: var(--space-12) var(--space-8);
+    padding-block: var(--space-8) var(--space-24);
+    border-top: 6px solid var(--color-accent);
+  }
+  .empty {
+    padding-block: var(--space-8) var(--space-24);
+    border-top: 6px solid var(--color-accent);
+    color: var(--color-mute);
+  }
+</style>

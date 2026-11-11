@@ -1,0 +1,116 @@
+---
+/**
+ * A headline with a crease across it (Precrease, decision 48): the lower half is folded back
+ * along a dashed valley line and opens flat.
+ *
+ * - `unfold="hover"`: opens while the pointer or focus is on the surrounding `.fold-host`.
+ * - `unfold="load"`: opens once when the page arrives.
+ *
+ * The folded half is a visual copy, hidden from assistive tech; screen readers and search engines
+ * read the text once. Under reduced motion the title is simply flat.
+ */
+interface Props {
+  text: string;
+  as?: 'h1' | 'h2';
+  href?: string;
+  unfold?: 'hover' | 'load';
+  id?: string;
+}
+const { text, as: Tag = 'h1', href, unfold = 'hover', id } = Astro.props;
+---
+
+<Tag class:list={['fold-title', `unfold-${unfold}`]} id={id} data-inspect="FoldTitle">
+  {href ? (
+    <a href={href}>
+      <span class="flat">{text}</span>
+      <span class="folded" aria-hidden="true">
+        {text}
+      </span>
+    </a>
+  ) : (
+    <>
+      <span class="flat">{text}</span>
+      <span class="folded" aria-hidden="true">
+        {text}
+      </span>
+    </>
+  )}
+</Tag>
+
+<style>
+  .fold-title {
+    position: relative;
+    margin: 0;
+    font-family: var(--font-serif);
+    font-weight: 600;
+    font-variation-settings: 'opsz' 72;
+    line-height: 1.02;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+    perspective: 900px;
+  }
+  .fold-title a {
+    display: block;
+    position: relative;
+    color: inherit;
+    text-decoration: none;
+  }
+  .flat,
+  .folded {
+    display: block;
+  }
+  /* The upper half stays put; the lower half is a copy that folds back along the crease. */
+  .flat {
+    clip-path: polygon(0 0, 100% 0, 100% 52%, 0 52%);
+  }
+  .folded {
+    position: absolute;
+    inset: 0;
+    clip-path: polygon(0 52%, 100% 52%, 100% 100%, 0 100%);
+    transform-origin: 50% 52%;
+    transform: rotateX(-38deg);
+    color: color-mix(in oklab, var(--color-ink) 72%, var(--color-accent));
+    transition: transform var(--motion-stage) var(--motion-ease-out);
+  }
+  .fold-title::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 52%;
+    border-top: 1.5px dashed var(--color-accent-ui);
+    transition: opacity var(--motion-stage) var(--motion-ease-out);
+    pointer-events: none;
+  }
+
+  :global(.fold-host:hover) .unfold-hover .folded,
+  :global(.fold-host:focus-within) .unfold-hover .folded {
+    transform: none;
+  }
+  .unfold-load .folded {
+    animation: unfold calc(var(--motion-stage) * 1.4) var(--motion-ease-out) 200ms both;
+  }
+  .unfold-load::after {
+    animation: crease-fade var(--motion-stage) var(--motion-ease-out) 900ms both;
+  }
+  @keyframes unfold {
+    to {
+      transform: none;
+    }
+  }
+  @keyframes crease-fade {
+    to {
+      opacity: 0.35;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .flat {
+      clip-path: none;
+    }
+    .folded,
+    .fold-title::after {
+      display: none;
+    }
+  }
+</style>

@@ -11,7 +11,7 @@ const { name } = Astro.props;
 const links = [
   { href: '/#work', label: copy.nav.work, match: null },
   { href: '/changelog', label: copy.nav.changelog, match: '/changelog' },
-  { href: '/#notes', label: copy.nav.notes, match: null },
+  { href: '/precrease', label: copy.nav.precrease, match: '/precrease' },
   { href: '/about', label: copy.nav.about, match: '/about' },
 ];
 const path = publicPath(Astro.url.pathname);
@@ -25,7 +25,10 @@ const path = publicPath(Astro.url.pathname);
     </a>
     <nav aria-label={copy.labels.main}>
       {links.map((l) => (
-        <a href={l.href} aria-current={l.match && path === l.match ? 'page' : undefined}>
+        <a
+          href={l.href}
+          aria-current={l.match && (path === l.match || path.startsWith(`${l.match}/`)) ? 'page' : undefined}
+        >
           {l.label}
         </a>
       ))}

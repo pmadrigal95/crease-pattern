@@ -9,13 +9,15 @@ interface Props {
   title: string;
   description: string;
   standalone?: boolean;
+  image?: string | undefined;
+  type?: 'website' | 'article' | undefined;
 }
-const { title, description, standalone = false } = Astro.props;
+const { title, description, standalone = false, image, type } = Astro.props;
 const profile = await getProfile();
 const fullTitle = standalone ? title : `${title} · ${profile.name}`;
 ---
 
-<BaseLayout title={fullTitle} description={description}>
+<BaseLayout title={fullTitle} description={description} image={image} type={type}>
   <slot name="head" slot="head" />
   <Masthead name={profile.name} />
   <main id="main">

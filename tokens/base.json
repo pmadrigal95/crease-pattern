@@ -8,6 +8,11 @@
     "mono": {
       "$type": "fontFamily",
       "$value": "'JetBrains Mono Variable', ui-monospace, 'Cascadia Mono', Menlo, monospace"
+    },
+    "serif": {
+      "$type": "fontFamily",
+      "$value": "'Newsreader Variable', 'Iowan Old Style', Georgia, serif",
+      "$description": "Precrease's display face (decision 48). Loaded only on /precrease pages."
     }
   },
   "size": {

@@ -1,0 +1,101 @@
+---
+/**
+ * Precrease's own masthead, under the site's: the wordmark, the tagline and the blog's sections.
+ * "Same house, own room" (decision 48): the site's menu stays above it.
+ */
+import PrecreaseMark from './PrecreaseMark.astro';
+import { copy } from '../../lib/copy';
+import { publicPath } from '../../lib/url';
+
+const t = copy.precrease;
+const path = publicPath(Astro.url.pathname);
+const links = [
+  { href: '/precrease', label: t.nav.latest },
+  { href: '/precrease/map', label: t.nav.map },
+  { href: '/precrease/rss.xml', label: t.nav.rss },
+];
+---
+
+<div class="precrease-mast" data-inspect="PrecreaseMast">
+  <div class="wrap row">
+    <a class="brand" href="/precrease">
+      <PrecreaseMark />
+      <span class="word">
+        <span class="pre">Pre</span>
+        <span class="crease">crease</span>
+      </span>
+    </a>
+    <p class="tagline">{t.tagline}</p>
+    <nav aria-label={t.name}>
+      {links.map((l) => (
+        <a href={l.href} aria-current={path === l.href ? 'page' : undefined}>
+          {l.label}
+        </a>
+      ))}
+    </nav>
+  </div>
+</div>
+
+<style>
+  .precrease-mast {
+    border-bottom: 1px solid var(--color-rule);
+  }
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-3) var(--space-6);
+    padding-block: var(--space-4);
+  }
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-3);
+    color: inherit;
+    text-decoration: none;
+  }
+  .word {
+    font: 1.75rem/1 var(--font-serif);
+    font-variation-settings: 'opsz' 72;
+    letter-spacing: -0.02em;
+  }
+  .pre {
+    font-style: italic;
+    font-weight: 300;
+  }
+  .crease {
+    font-weight: 600;
+    color: var(--color-accent);
+  }
+  .tagline {
+    margin: 0;
+    font: var(--size-xs) var(--font-mono);
+    color: var(--color-mute);
+  }
+  nav {
+    display: flex;
+    gap: var(--space-4);
+    margin-left: auto;
+    font-size: var(--size-sm);
+  }
+  nav a {
+    color: var(--color-mute);
+    text-decoration: none;
+  }
+  nav a:hover,
+  nav a[aria-current='page'] {
+    color: var(--color-ink);
+  }
+  nav a[aria-current='page'] {
+    text-decoration: underline;
+    text-decoration-color: var(--color-accent-ui);
+  }
+  @media (max-width: 560px) {
+    .tagline {
+      display: none;
+    }
+    nav {
+      margin-left: 0;
+    }
+  }
+</style>

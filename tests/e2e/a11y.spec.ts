@@ -16,7 +16,17 @@ async function settleEntranceAnimations(page: Page) {
 }
 
 // Every page must pass axe in all 3 identities × 2 themes.
-const pages = ['/', '/changelog', '/about', '/colophon', '/privacy', '/this-page-does-not-exist'];
+const pages = [
+  '/',
+  '/changelog',
+  '/about',
+  '/colophon',
+  '/privacy',
+  '/precrease',
+  '/precrease/map',
+  '/precrease/topics/frontend',
+  '/this-page-does-not-exist',
+];
 
 for (const path of pages) {
   for (const direction of allVisualDirections) {

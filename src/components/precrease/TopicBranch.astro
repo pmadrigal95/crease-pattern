@@ -1,0 +1,78 @@
+---
+/**
+ * One branch of the topic map, drawn recursively so the tree can grow to any depth. A branch with
+ * children is a <details> element: it opens without JavaScript and with the keyboard.
+ */
+import { copy, fill } from '../../lib/copy';
+import { topicHref } from '../../lib/precrease';
+
+export interface Branch {
+  id: string;
+  label: string;
+  count: number;
+  children: Branch[];
+}
+interface Props {
+  branch: Branch;
+  depth?: number;
+}
+const { branch, depth = 0 } = Astro.props;
+const t = copy.precrease.map;
+const count =
+  branch.count === 0 ? t.countZero : branch.count === 1 ? t.countOne : fill(t.count, { count: branch.count });
+---
+
+<li class:list={['branch', { root: depth === 0 }]} data-inspect="TopicBranch">
+  {branch.children.length > 0 ? (
+    <details open={depth === 0}>
+      <summary>
+        <a href={topicHref(branch.id)}>{branch.label}</a>
+        <span class="count">{count}</span>
+      </summary>
+      <ul>
+        {branch.children.map((child) => (
+          <Astro.self branch={child} depth={depth + 1} />
+        ))}
+      </ul>
+    </details>
+  ) : (
+    <p class="leaf">
+      <a href={topicHref(branch.id)}>{branch.label}</a>
+      <span class="count">{count}</span>
+    </p>
+  )}
+  <slot />
+</li>
+
+<style>
+  summary,
+  .leaf {
+    margin: 0;
+    font: 500 var(--size-lg) / 1.25 var(--font-serif);
+  }
+  .root > details > summary,
+  .root > .leaf {
+    font-size: var(--size-xl);
+  }
+  summary {
+    cursor: pointer;
+  }
+  a {
+    color: inherit;
+    text-decoration-color: var(--color-accent-ui);
+  }
+  ul {
+    margin: var(--space-3) 0 0;
+    padding: 0 0 0 var(--space-4);
+    list-style: none;
+    display: grid;
+    gap: var(--space-2);
+    border-left: 1px solid var(--color-rule);
+  }
+  .count {
+    margin-left: var(--space-2);
+    font: var(--size-xs) var(--font-mono);
+    color: var(--color-mute);
+    white-space: nowrap;
+  }
+</style>
