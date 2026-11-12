@@ -13,6 +13,13 @@ export default defineConfig({
   // The Inspector uses Vue's Composition API only: drop the Options API and devtools hooks from the
   // production runtime to keep the panel inside its 30 KB budget.
   vite: {
+    build: {
+      // A page's own stylesheet (up to 12 KB) goes inline in its HTML, so it doesn't block the first paint
+      // with a round trip: in CI, About's and the home page's each cost ~300 ms of render-blocking. The shared stylesheet stays a
+      // cached file. Everything else keeps the default 4 KB rule (undefined = default).
+      assetsInlineLimit: (file, content) =>
+        file.endsWith('.css') && content.length < 12288 ? true : undefined,
+    },
     define: {
       __VUE_OPTIONS_API__: false,
       __VUE_PROD_DEVTOOLS__: false,
