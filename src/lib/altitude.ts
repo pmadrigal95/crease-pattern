@@ -117,7 +117,7 @@ export function profile(climbs: readonly Climb[], frame: Frame): Profile {
   });
 
   const xy = points.map(([t, m]) => [x(t), y(m)] as [number, number]);
-  const line = smooth(xy);
+  const line = smoothPath(xy);
   const first = xy[0]!;
   const end = xy[xy.length - 1]!;
   const area = `${line} L${round(end[0])},${baseline} L${round(first[0])},${baseline} Z`;
@@ -130,7 +130,7 @@ export function profile(climbs: readonly Climb[], frame: Frame): Profile {
 }
 
 /** A smooth path through the points (Catmull-Rom as cubic Béziers). */
-function smooth(points: [number, number][]): string {
+export function smoothPath(points: [number, number][]): string {
   const [first] = points;
   if (!first) return '';
   let d = `M${round(first[0])},${round(first[1])}`;

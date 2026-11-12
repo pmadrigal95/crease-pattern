@@ -1,0 +1,246 @@
+---
+/**
+ * The career as a map, at the top of /changelog (design debt phase 2): the volcanoes each
+ * release is named after, at their real coordinates, with contour lines every 250 m and the
+ * route in the order they were climbed. Each summit is a link to its release notes below, so
+ * the map is also the page's navigation. Geometry comes from src/lib/terrain.ts.
+ *
+ * Styled like a maps app: quiet terrain, one route of straight legs with a casing, round pins with a ring,
+ * labels with a halo so they stay legible over the contours. Two drawings (wide and phone), one
+ * shown by CSS. Static SVG, no JavaScript, no inline styles.
+ */
+import { climbs, places } from '../../lib/career';
+import { expeditionMap, type MapFrame } from '../../lib/terrain';
+import { copy, fill } from '../../lib/copy';
+import { formatNumber } from '../../lib/format';
+
+const t = copy.changelogPage.map;
+const elevation = (m: number) => fill(copy.home.changelog.elevation, { elevation: formatNumber(m) });
+const spans = new Map(climbs().map((c, i, all) => [c.major, { c, current: i === all.length - 1 }]));
+const frames = {
+  wide: {
+    width: 1000,
+    height: 520,
+    pad: { top: 70, right: 130, bottom: 70, left: 90 },
+    cell: 8,
+    floorM: 1000,
+    intervalM: 250,
+  },
+  narrow: {
+    width: 360,
+    height: 420,
+    pad: { top: 60, right: 104, bottom: 60, left: 36 },
+    cell: 6,
+    floorM: 1000,
+    intervalM: 250,
+    compact: true,
+  },
+} satisfies Record<string, MapFrame>;
+const data = places();
+const byMajor = new Map(data.map((p) => [p.major, p]));
+const drawings = (['wide', 'narrow'] as const).map((name) => ({
+  name,
+  frame: frames[name],
+  g: expeditionMap(data, frames[name]),
+}));
+const years = (major: number) => {
+  const { c, current } = spans.get(major)!;
+  return `${Math.floor(c.start)} – ${current ? copy.home.changelog.present : Math.floor(c.end)}`;
+};
+---
+
+<figure class="expedition" data-inspect="ExpeditionMap">
+  {drawings.map(({ name, frame, g }) => (
+    <svg
+      class={`drawing ${name}`}
+      viewBox={`0 0 ${frame.width} ${frame.height}`}
+      role="group"
+      aria-label={t.label}
+    >
+      <g class="terrain" aria-hidden="true">
+        {g.contours.map((c) => (
+          <path class={c.index ? 'contour index' : 'contour'} d={c.d} />
+        ))}
+      </g>
+      <g class="route" aria-hidden="true">
+        <path class="route-casing" d={g.route} />
+        <path class="route-line" d={g.route} pathLength="1" />
+      </g>
+      {g.pins.map((pin) => {
+        const p = byMajor.get(pin.major)!;
+        const current = spans.get(pin.major)!.current;
+        return (
+          <a
+            class={current ? 'pin current' : 'pin'}
+            href={`#release-${pin.major}`}
+            aria-label={fill(t.pin, {
+              major: p.major,
+              codename: p.codename,
+              elevation: elevation(p.elevationM),
+              years: years(p.major),
+            })}
+          >
+            <circle class="hit" cx={pin.x} cy={pin.y} r="22" />
+            <circle class="ring" cx={pin.x} cy={pin.y} r="8" />
+            <circle class="dot" cx={pin.x} cy={pin.y} r="5" />
+            <text
+              class="label"
+              text-anchor={pin.label.anchor}
+              x={pin.label.x}
+              y={pin.label.y}
+              aria-hidden="true"
+            >
+              <tspan class="label-name">{pin.label.short ? `v${p.major}` : p.codename}</tspan>
+              {name === 'wide' && (
+                <tspan class="label-detail" x={pin.label.x} dy="16">
+                  {elevation(p.elevationM)} · v{p.major}
+                </tspan>
+              )}
+            </text>
+          </a>
+        );
+      })}
+    </svg>
+  ))}
+  <figcaption>{t.caption}</figcaption>
+</figure>
+
+<style>
+  .expedition {
+    margin: 0;
+    border: 1px solid var(--color-rule);
+    border-radius: var(--radius-panel);
+    background: var(--color-surface);
+    overflow: hidden;
+  }
+  .drawing {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .narrow {
+    display: none;
+  }
+  @media (max-width: 719px) {
+    .wide {
+      display: none;
+    }
+    .narrow {
+      display: block;
+    }
+  }
+  figcaption {
+    padding: var(--space-3) var(--space-4);
+    border-top: 1px solid var(--color-rule);
+    font: var(--type-caption);
+    color: var(--color-mute);
+  }
+
+  .contour {
+    fill: none;
+    stroke: var(--color-earth);
+    stroke-width: 1px;
+    stroke-linejoin: round;
+    opacity: 0.45;
+    vector-effect: non-scaling-stroke;
+  }
+  .contour.index {
+    stroke-width: 1.6px;
+    opacity: 0.7;
+  }
+  .route-casing,
+  .route-line {
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    vector-effect: non-scaling-stroke;
+  }
+  .route-casing {
+    stroke: var(--color-surface);
+    stroke-width: 8px;
+  }
+  .route-line {
+    stroke: var(--color-accent-ui);
+    stroke-width: 3.5px;
+  }
+
+  .hit {
+    fill: transparent;
+  }
+  .ring {
+    fill: var(--color-surface);
+    stroke: var(--color-ink);
+    stroke-width: 1.5px;
+    vector-effect: non-scaling-stroke;
+  }
+  .dot {
+    fill: var(--color-ink);
+  }
+  .pin.current .ring {
+    stroke: var(--color-accent-ui);
+  }
+  .pin.current .dot {
+    fill: var(--color-accent-ui);
+  }
+  .label {
+    font-family: var(--font-sans);
+    paint-order: stroke;
+    stroke: var(--color-surface);
+    stroke-width: 4px;
+    stroke-linejoin: round;
+  }
+  .label-name {
+    font-size: 15px;
+    font-weight: 600;
+    fill: var(--color-ink);
+  }
+  .narrow .label-name {
+    font-size: 13px;
+  }
+  .label-detail {
+    font: 12px var(--font-mono);
+    fill: var(--color-mute);
+  }
+  .pin:hover .ring,
+  .pin:focus-visible .ring {
+    stroke: var(--color-accent-ui);
+    stroke-width: 2.5px;
+  }
+  .pin:hover .label-name {
+    text-decoration: underline;
+    text-decoration-color: var(--color-accent-ui);
+  }
+  .pin:focus {
+    outline: none;
+  }
+  .pin:focus-visible .hit {
+    stroke: var(--color-accent-ui);
+    stroke-width: 2px;
+  }
+
+  /* The route draws itself once as the map scrolls in; with reduced motion it's simply there. */
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .expedition {
+        view-timeline-name: --expedition;
+      }
+      .route-line {
+        --expedition-timeline: --expedition;
+        stroke-dasharray: 1;
+        animation-name: route-draw;
+        animation-timing-function: linear;
+        animation-fill-mode: both;
+        animation-timeline: var(--expedition-timeline);
+        animation-range: entry 0% cover 35%;
+      }
+    }
+  }
+  @keyframes route-draw {
+    from {
+      stroke-dashoffset: 1;
+    }
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+</style>

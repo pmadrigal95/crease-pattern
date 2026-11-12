@@ -99,7 +99,18 @@
   },
   "changelogPage": {
     "title": "Changelog",
-    "description": "Pablo Madrigal's career as release notes, from base camp to Irazú."
+    "description": "Pablo Madrigal's career as release notes, from base camp to Irazú.",
+    "intro": "My career as release notes, newest first. Each major version takes the name of a Costa Rican volcano, a higher one each time. Choose a summit on the map to go to its release.",
+    "map": {
+      "label": "Map of the volcanoes behind each release",
+      "pin": "v{major} {codename}, {elevation}, {years}. Go to its release notes.",
+      "caption": "Costa Rica's Central Volcanic Range at real coordinates. Contour lines every 250 m; the route follows the releases in order."
+    },
+    "rail": {
+      "next": "Next",
+      "now": "You are here"
+    },
+    "built": "Built with {stack}"
   },
   "labels": {
     "stack": "Stack",

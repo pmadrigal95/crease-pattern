@@ -6,28 +6,32 @@
       "codename": "Base camp",
       "place": "Cartago",
       "elevationM": 1435,
-      "theme": "Foundations. Every climb starts here."
+      "theme": "Foundations. Every climb starts here.",
+      "location": { "lat": 9.864, "lon": -83.919 }
     },
     {
       "major": 1,
       "codename": "Poás",
       "place": "Poás Volcano",
       "elevationM": 2708,
-      "theme": "Developer"
+      "theme": "Developer",
+      "location": { "lat": 10.198, "lon": -84.233 }
     },
     {
       "major": 2,
       "codename": "Turrialba",
       "place": "Turrialba Volcano",
       "elevationM": 3340,
-      "theme": "Product engineering"
+      "theme": "Product engineering",
+      "location": { "lat": 10.025, "lon": -83.767 }
     },
     {
       "major": 3,
       "codename": "Irazú",
       "place": "Irazú Volcano",
       "elevationM": 3432,
-      "theme": "Architecture and leadership"
+      "theme": "Architecture and leadership",
+      "location": { "lat": 9.979, "lon": -83.852 }
     }
   ],
   "unreleased": [
