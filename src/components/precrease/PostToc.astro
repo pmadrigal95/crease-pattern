@@ -1,0 +1,98 @@
+---
+/**
+ * The side index of a long post (decision 48): its sections, with the one being read marked.
+ * Long means at least MIN_SECTIONS h2 headings; shorter posts don't need a map. Wide screens only:
+ * on narrow ones the post is a single column and the index would push the text down.
+ *
+ * Without JavaScript it is a plain list of links. The script marks the current section with
+ * aria-current, so screen readers announce it too.
+ */
+import type { MarkdownHeading } from 'astro';
+import { copy } from '../../lib/copy';
+
+interface Props {
+  headings: MarkdownHeading[];
+}
+const MIN_SECTIONS = 3;
+const sections = Astro.props.headings.filter((h) => h.depth === 2);
+---
+
+{sections.length >= MIN_SECTIONS && (
+  <nav class="post-toc" aria-labelledby="post-toc-title" data-post-toc data-inspect="PostToc">
+    <p id="post-toc-title" class="title">
+      {copy.precrease.toc}
+    </p>
+    <ol>
+      {sections.map((h) => (
+        <li>
+          <a href={`#${h.slug}`}>{h.text}</a>
+        </li>
+      ))}
+    </ol>
+  </nav>
+)}
+
+<style>
+  .post-toc {
+    position: sticky;
+    top: var(--space-8);
+    align-self: start;
+    font-size: var(--size-sm);
+  }
+  .title {
+    margin: 0 0 var(--space-3);
+    font: var(--type-caption);
+    color: var(--color-mute);
+  }
+  ol {
+    margin: 0;
+    padding: 0 0 0 var(--space-3);
+    list-style: none;
+    border-left: var(--stroke-crease) dashed var(--color-rule);
+  }
+  li + li {
+    margin-top: var(--space-2);
+  }
+  a {
+    display: block;
+    color: var(--color-mute);
+    text-decoration: none;
+    line-height: 1.35;
+  }
+  a:hover,
+  a[aria-current='location'] {
+    color: var(--color-ink);
+  }
+  a[aria-current='location'] {
+    font-weight: 600;
+  }
+  @media (max-width: 1099px) {
+    .post-toc {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  // Self-contained (ENGINEERING.md, "Browser scripts"). Marks the section whose heading was the
+  // last to scroll past the top third of the screen.
+  for (const toc of document.querySelectorAll<HTMLElement>('[data-post-toc]')) {
+    const links = [...toc.querySelectorAll<HTMLAnchorElement>('a[href^="#"]')];
+    const targets = links
+      .map((a) => document.getElementById(decodeURIComponent(a.hash.slice(1))))
+      .filter((el): el is HTMLElement => el !== null);
+    const mark = () => {
+      const line = innerHeight / 3;
+      let current = -1;
+      targets.forEach((el, i) => {
+        if (el.getBoundingClientRect().top <= line) current = i;
+      });
+      links.forEach((a, i) => {
+        if (i === current) a.setAttribute('aria-current', 'location');
+        else a.removeAttribute('aria-current');
+      });
+    };
+    addEventListener('scroll', mark, { passive: true });
+    mark();
+  }
+</script>

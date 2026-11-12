@@ -1,4 +1,5 @@
 ---
+import site from '../../site.config';
 import PageLayout from '../layouts/PageLayout.astro';
 import ReleaseSummary from '../components/site/ReleaseSummary.astro';
 import CopyText from '../components/site/CopyText.astro';
@@ -92,7 +93,7 @@ const commit = manifest.commit.slice(0, 7);
         <p>{fill(work.source, { commit })}</p>
         <p class="actions">
           <a href="/colophon">{work.links.colophon}</a>
-          <a href="https://github.com/pmadrigal95/crease-pattern">{work.links.repo}</a>
+          <a href={site.repository}>{work.links.repo}</a>
         </p>
       </div>
     </div>

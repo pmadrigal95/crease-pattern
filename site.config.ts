@@ -22,6 +22,8 @@ export interface SiteConfig {
    * to its own domain, add that host here and to the Web Analytics site in Cloudflare.
    */
   webAnalytics: { token: string; hosts: string[] };
+  /** The public source repository: footer links, the home page and each post's change history. */
+  repository: string;
 }
 
 const siteConfig: SiteConfig = {
@@ -32,6 +34,7 @@ const siteConfig: SiteConfig = {
     token: 'a9ae426006c346c190a3e268f0de224b',
     hosts: ['crease-pattern.pablomadrigal-1995.workers.dev'],
   },
+  repository: 'https://github.com/pmadrigal95/crease-pattern',
 };
 
 export default siteConfig;
