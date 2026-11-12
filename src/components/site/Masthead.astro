@@ -51,7 +51,7 @@ const path = publicPath(Astro.url.pathname);
 </header>
 
 <script>
-  // Opens the Inspector (decision 44): the button, Shift+I or ?inspect in the URL. Vue and the
+  // Opens the Inspector (decision 44): the button, any [data-inspector-open], Shift+I or ?inspect. Vue and the
   // panel download only now, on first use; hovering the button starts that download early.
   type Handle = { close(): void };
   // Same rule as isTypingTarget in src/lib/keyboard.ts, kept local: this script runs on every page,
@@ -78,6 +78,11 @@ const path = publicPath(Astro.url.pathname);
   const toggle = (trigger: HTMLElement | null) => (handle ? handle.close() : open(trigger));
 
   button?.addEventListener('click', () => toggle(button));
+  // Other openers on the page (the home hero's "Inspect this page") share the same panel.
+  for (const opener of document.querySelectorAll<HTMLElement>('[data-inspector-open]')) {
+    opener.addEventListener('click', () => toggle(opener));
+    opener.addEventListener('pointerenter', () => void load(), { once: true });
+  }
   button?.addEventListener('pointerenter', () => void load(), { once: true });
   addEventListener('keydown', (e) => {
     if (

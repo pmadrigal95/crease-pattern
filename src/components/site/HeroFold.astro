@@ -1,0 +1,306 @@
+---
+/**
+ * The home hero's figure: the site's thesis made visible. The fox is the interface; unfolded, it
+ * becomes the crease pattern that makes it, the architecture (decision 50).
+ *
+ * One value drives it, the fold `--t` from 0 (folded fox) to 1 (crease pattern):
+ * - the pointer hovering or dragging across the figure, or the slider below it (arrow keys);
+ * - opening the Inspector, which unfolds every fox on the page (`.inspecting` on the root);
+ * - a first visit, where the sheet folds into the fox once (`.intro`).
+ * There is no card at rest: the sheet the fox is folded from appears only as it unfolds.
+ *
+ * Without JavaScript the fox stays folded and the Inspector still unfolds it. This SVG is also
+ * the first frame of M4's 3D scene, which takes over this same square when it loads.
+ */
+import { foxFacets, foxMountainFolds, foxSheet, foxValleyFolds, foxViewBox } from '../../lib/fox';
+import { copy } from '../../lib/copy';
+
+const t = copy.home.hero.fold;
+const strings = JSON.stringify({ folded: t.folded, unfolded: t.unfolded });
+---
+
+<figure class="hero-fold" data-hero-fold data-strings={strings} data-inspect="HeroFold">
+  <div class="stage" data-stage>
+    <svg viewBox={foxViewBox} aria-hidden="true" focusable="false">
+      <path class="sheet" d={foxSheet}></path>
+      <path class="mountain" d={foxMountainFolds}></path>
+      <path class="valley" d={foxValleyFolds}></path>
+      <path class="note-line" d="M24 9.2v6.3"></path>
+      <text class="note" x="24" y="7.6" text-anchor="middle">
+        {t.mountain}
+      </text>
+      <path class="note-line" d="M9.5 38.8 16.6 32.4"></path>
+      <text class="note" x="5" y="41.6">
+        {t.valley}
+      </text>
+      <g>
+        {foxFacets.map((f) => (
+          <path class:list={['facet', f.part, `${f.part}-${f.side}`]} d={f.d} />
+        ))}
+      </g>
+    </svg>
+  </div>
+  <div class="scale" hidden data-scale>
+    <span class="end on" data-end="interface">
+      {t.interface}
+    </span>
+    <div
+      class="track"
+      role="slider"
+      tabindex="0"
+      aria-label={t.label}
+      aria-valuemin="0"
+      aria-valuemax="100"
+      aria-valuenow="0"
+      aria-valuetext={t.folded}
+    >
+      <span class="knob"></span>
+    </div>
+    <span class="end" data-end="architecture">
+      {t.architecture}
+    </span>
+  </div>
+  <figcaption>{t.caption}</figcaption>
+</figure>
+
+<style>
+  @property --t {
+    syntax: '<number>';
+    inherits: true;
+    initial-value: 0;
+  }
+  .hero-fold {
+    --t: var(--fold, 0);
+    margin: 0;
+  }
+  /* Inspecting unfolds every fox on the page, this one included. */
+  :global(.inspecting) .hero-fold {
+    --t: 1;
+  }
+  .stage {
+    aspect-ratio: 1;
+    touch-action: pan-y;
+    cursor: ew-resize;
+  }
+  .stage svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+
+  .sheet,
+  .facet,
+  .mountain,
+  .valley,
+  .note,
+  .note-line,
+  .knob {
+    transition:
+      opacity var(--motion-stage) var(--motion-ease-in-out),
+      transform var(--motion-stage) var(--motion-ease-in-out),
+      left var(--motion-stage) var(--motion-ease-in-out);
+  }
+  .scrubbing :is(.sheet, .facet, .mountain, .valley, .note, .note-line),
+  .scrubbing ~ .scale .knob {
+    transition: none;
+  }
+
+  .sheet {
+    fill: var(--color-surface);
+    stroke: var(--color-rule);
+    stroke-width: 0.35;
+    opacity: var(--t);
+    transform-box: fill-box;
+    transform-origin: center;
+    transform: scale(calc(0.94 + var(--t) * 0.06));
+  }
+  .mountain,
+  .valley {
+    fill: none;
+    stroke: var(--color-accent-ui);
+    stroke-width: 0.55;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+    opacity: calc(var(--t) * 1.25 - 0.2);
+  }
+  .valley {
+    stroke-dasharray: 1.4 1.2;
+  }
+  .note {
+    font: 2px var(--font-mono);
+    fill: var(--color-mute);
+    opacity: calc(var(--t) * 2 - 1);
+  }
+  .note-line {
+    stroke: var(--color-mute);
+    stroke-width: 0.2;
+    opacity: calc(var(--t) * 2 - 1);
+  }
+
+  /* Each facet folds along the edge it shares with the head (src/lib/fox.ts). */
+  .facet {
+    transform-box: fill-box;
+  }
+  .head {
+    transform: scaleX(calc(1 - var(--t)));
+    opacity: calc(1 - var(--t) * 0.9);
+  }
+  .head-left {
+    fill: var(--color-accent);
+    transform-origin: right center;
+  }
+  .head-right {
+    fill: var(--color-ink);
+    transform-origin: left center;
+  }
+  .ear,
+  .inner {
+    transform-origin: center bottom;
+    transform: scaleY(calc(1 - var(--t)));
+    opacity: calc(1 - var(--t));
+  }
+  .ear {
+    fill: color-mix(in oklab, var(--color-accent-ui) 75%, var(--color-bg));
+  }
+  .inner {
+    fill: var(--color-ink);
+  }
+
+  .scale {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: var(--space-3);
+    margin-top: var(--space-4);
+    font: var(--type-caption);
+    color: var(--color-mute);
+  }
+  .scale[hidden] {
+    display: none;
+  }
+  .end {
+    font-weight: 500;
+    transition: color var(--motion-base);
+  }
+  .end.on {
+    color: var(--color-ink);
+  }
+  .track {
+    position: relative;
+    height: var(--space-6);
+    cursor: pointer;
+    touch-action: none;
+  }
+  .track::before {
+    content: '';
+    position: absolute;
+    inset: 50% 0 auto;
+    border-top: var(--stroke-crease) dashed var(--color-rule);
+  }
+  .knob {
+    position: absolute;
+    top: 50%;
+    left: calc(var(--t) * 100%);
+    width: 18px;
+    height: 18px;
+    margin: -9px 0 0 -9px;
+    border-radius: var(--radius-pill);
+    background: var(--color-surface);
+    border: var(--stroke-crease) solid var(--color-accent-ui);
+  }
+  figcaption {
+    max-width: 44ch;
+    margin: var(--space-3) 0 0;
+    font: var(--type-caption);
+    color: var(--color-mute);
+  }
+
+  /* First visit: the flat sheet folds into the fox once. */
+  :global(.intro) .hero-fold {
+    animation: sheet-to-fox calc(var(--motion-stage) * 2) var(--motion-ease-in-out) both;
+  }
+  @keyframes sheet-to-fox {
+    from {
+      --t: 1;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .sheet,
+    .facet,
+    .mountain,
+    .valley,
+    .note,
+    .note-line,
+    .knob {
+      transition: none;
+    }
+    :global(.intro) .hero-fold {
+      animation: none;
+    }
+  }
+</style>
+
+<script>
+  // Self-contained on purpose (ENGINEERING.md, "Browser scripts"): Astro inlines it, so the home
+  // page requests nothing extra for it.
+  for (const figure of document.querySelectorAll<HTMLElement>('[data-hero-fold]')) {
+    const stage = figure.querySelector<HTMLElement>('[data-stage]');
+    const scale = figure.querySelector<HTMLElement>('[data-scale]');
+    const track = figure.querySelector<HTMLElement>('[role="slider"]');
+    const ends = figure.querySelectorAll<HTMLElement>('[data-end]');
+    const strings = JSON.parse(figure.dataset.strings ?? '{}') as { folded: string; unfolded: string };
+    if (!stage || !scale || !track) continue;
+
+    // The slider only works with JavaScript, so it only appears with it.
+    scale.hidden = false;
+
+    const current = () => Number(track.getAttribute('aria-valuenow')) / 100;
+    const set = (value: number) => {
+      const t = Math.min(1, Math.max(0, value));
+      figure.style.setProperty('--fold', t.toFixed(3));
+      const unfolded = t >= 0.5;
+      track.setAttribute('aria-valuenow', String(Math.round(t * 100)));
+      track.setAttribute('aria-valuetext', unfolded ? strings.unfolded : strings.folded);
+      ends[0]?.classList.toggle('on', !unfolded);
+      ends[1]?.classList.toggle('on', unfolded);
+    };
+    const fromPointer = (e: PointerEvent, el: HTMLElement) => {
+      const box = el.getBoundingClientRect();
+      return (e.clientX - box.left) / box.width;
+    };
+
+    // Dragging across the figure or along the slider scrubs the fold; letting go settles it.
+    for (const el of [stage, track]) {
+      el.addEventListener('pointerdown', (e) => {
+        if (el === stage && e.pointerType !== 'mouse') return; // touch scrolls the page instead
+        el.setPointerCapture(e.pointerId);
+        figure.classList.add('scrubbing');
+        set(fromPointer(e, el));
+      });
+      el.addEventListener('pointermove', (e) => {
+        if (el.hasPointerCapture(e.pointerId)) set(fromPointer(e, el));
+      });
+      el.addEventListener('pointerup', () => {
+        figure.classList.remove('scrubbing');
+        set(current() >= 0.5 ? 1 : 0);
+      });
+    }
+    // A mouse resting on the fox previews the unfold; leaving folds it back.
+    stage.addEventListener('pointerenter', (e) => {
+      if (e.pointerType === 'mouse' && !e.buttons) set(1);
+    });
+    stage.addEventListener('pointerleave', (e) => {
+      if (e.pointerType === 'mouse' && !e.buttons) set(0);
+    });
+    track.addEventListener('keydown', (e) => {
+      const step = { ArrowRight: 0.1, ArrowUp: 0.1, ArrowLeft: -0.1, ArrowDown: -0.1, Home: -1, End: 1 }[
+        e.key
+      ];
+      if (step === undefined) return;
+      e.preventDefault();
+      set(current() + step);
+    });
+  }
+</script>
