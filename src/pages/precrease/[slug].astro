@@ -4,7 +4,7 @@ import PrecreaseLayout from '../../layouts/PrecreaseLayout.astro';
 import FoldTitle from '../../components/precrease/FoldTitle.astro';
 import PostThumb from '../../components/precrease/PostThumb.astro';
 import PostCard from '../../components/precrease/PostCard.astro';
-import { topics } from '../../config/precrease';
+import { formats, topics } from '../../config/precrease';
 import { copy, fill } from '../../lib/copy';
 import { formatDate, padNumber } from '../../lib/format';
 import { creaseNumber, getPosts, postKind, topicHref, type PostSummary } from '../../lib/precrease';
@@ -51,6 +51,7 @@ const topicFilters = [...new Set(paths.flat().map((topic) => topic.id))];
       <div class="text">
         <p class="kicker" data-pagefind-ignore>
           {creaseNumber(data.number)} · {postKind(post.entry)}
+          <span class="format-note">{formats[data.format].description}</span>
         </p>
         <FoldTitle text={data.title} unfold="load" />
         <p class="lede">{data.description}</p>
@@ -115,6 +116,10 @@ const topicFilters = [...new Set(paths.flat().map((topic) => topic.id))];
   }
   .head :global(.fold-title) {
     font-size: clamp(2.4rem, 6vw, 4.75rem);
+  }
+  .format-note {
+    display: block;
+    margin-top: var(--space-1);
   }
   .kicker {
     font: var(--type-caption);

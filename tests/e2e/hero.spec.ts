@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 
 // The home hero's fox (decision 50): one fold value, reachable by keyboard, and the hero's
-// "Inspect this page" opens the same Inspector as the masthead.
+// "See how this page is built" opens the same Inspector as the masthead.
 test('the fold slider moves with the keyboard and says which side it is on', async ({ page }) => {
   await page.goto('/');
   const slider = page.getByRole('slider', { name: 'Unfold the fox into its crease pattern' });
@@ -16,9 +16,9 @@ test('the fold slider moves with the keyboard and says which side it is on', asy
   await expect(slider).toHaveAttribute('aria-valuetext', 'Folded: the interface');
 });
 
-test('"Inspect this page" opens the Inspector, which unfolds the fox', async ({ page }) => {
+test('"See how this page is built" opens the Inspector, which unfolds the fox', async ({ page }) => {
   await page.goto('/');
-  await page.getByRole('button', { name: 'Inspect this page' }).click();
+  await page.getByRole('button', { name: 'See how this page is built' }).click();
   await expect(page.locator('html')).toHaveClass(/inspecting/);
 });
 
