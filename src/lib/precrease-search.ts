@@ -51,21 +51,45 @@ export function toFilters(selected: Record<string, Set<string>>): Record<string,
   return filters;
 }
 
-/** Splits a Pagefind excerpt into plain and highlighted runs, decoding its entities. */
+const ENTITIES: Record<string, string> = { lt: '<', gt: '>', quot: '"', '#39': "'", '#x27': "'", amp: '&' };
+
+/**
+ * Splits a Pagefind excerpt into plain and highlighted runs. The excerpt is HTML with `<mark>`
+ * around matches; this walks it once, keeps `<mark>` as the only meaning a tag can have, skips
+ * every other tag, and decodes entities in a single pass (so `&amp;lt;` stays the text `&lt;`).
+ * The runs are rendered as text nodes, never parsed as HTML.
+ */
 export function excerptRuns(excerpt: string): { text: string; marked: boolean }[] {
-  const decode = (s: string) =>
-    s
-      .replace(/<[^>]*>/g, '')
-      .replace(/&lt;/g, '<')
-      .replace(/&gt;/g, '>')
-      .replace(/&quot;/g, '"')
-      .replace(/&#39;|&#x27;/g, "'")
-      .replace(/&amp;/g, '&');
-  return excerpt
-    .split(/(<mark>[\s\S]*?<\/mark>)/)
-    .filter(Boolean)
-    .map((part) => ({ marked: part.startsWith('<mark>'), text: decode(part) }))
-    .filter((run) => run.text.length > 0);
+  const decode = (text: string) =>
+    text.replace(/&(lt|gt|quot|#39|#x27|amp);/g, (_, name: string) => ENTITIES[name] ?? '');
+  const runs: { text: string; marked: boolean }[] = [];
+  let marked = false;
+  let pending = '';
+  const flush = () => {
+    if (pending) runs.push({ text: decode(pending), marked });
+    pending = '';
+  };
+  for (let i = 0; i < excerpt.length;) {
+    // A tag starts with `<` followed by a letter or `/`; any other `<` is text.
+    const opensTag = excerpt[i] === '<' && /[a-z/]/i.test(excerpt[i + 1] ?? '');
+    const end = opensTag ? excerpt.indexOf('>', i) : -1;
+    if (end === -1) {
+      pending += excerpt[i];
+      i += 1;
+      continue;
+    }
+    const tag = excerpt
+      .slice(i + 1, end)
+      .trim()
+      .toLowerCase();
+    if (tag === 'mark' || tag === '/mark') {
+      flush();
+      marked = tag === 'mark';
+    }
+    i = end + 1;
+  }
+  flush();
+  return runs;
 }
 
 export function initPrecreaseSearch(): void {

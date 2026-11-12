@@ -137,5 +137,12 @@ describe('Search', () => {
       { text: 'fold', marked: true },
       { text: ' & x<script>', marked: false },
     ]);
+    expect(excerptRuns('&amp;lt;b&amp;gt; stays text')).toEqual([
+      { text: '&lt;b&gt; stays text', marked: false },
+    ]);
+    expect(excerptRuns('5 < 6 and <mark>7</mark>')).toEqual([
+      { text: '5 < 6 and ', marked: false },
+      { text: '7', marked: true },
+    ]);
   });
 });
