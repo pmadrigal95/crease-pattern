@@ -35,12 +35,15 @@ test('reading progress follows the scroll, and steps aside for reduced motion', 
       await expect(progress).toBeHidden();
     } else {
       await page.evaluate(() => scrollTo(0, (document.documentElement.scrollHeight - innerHeight) / 2));
-      const scale = await page.evaluate(() => {
-        const t = getComputedStyle(document.querySelector('.progress')!, '::after').transform;
-        return Number(t.match(/matrix\(([^,]+)/)?.[1] ?? 0);
-      });
-      expect(scale).toBeGreaterThan(0.3);
-      expect(scale).toBeLessThan(0.7);
+      // A scroll timeline updates on the next frame, so wait for the line instead of reading it
+      // once: a slow CI runner reads before that frame lands.
+      const scale = () =>
+        page.evaluate(() => {
+          const t = getComputedStyle(document.querySelector('.progress')!, '::after').transform;
+          return Number(t.match(/matrix\(([^,]+)/)?.[1] ?? 0);
+        });
+      await expect.poll(scale).toBeGreaterThan(0.3);
+      expect(await scale()).toBeLessThan(0.7);
     }
     await page.close();
   }
