@@ -95,7 +95,7 @@ test('on wide screens the page tilts into layers, nested parts sit higher, and c
   await expect(page.locator('html')).toHaveClass(/inspector-3d/);
   await expect(page.locator('main')).not.toHaveCSS('transform', 'none');
   await expect(page.locator('[data-inspect="index#hero"]')).toHaveAttribute('style', /--layer-depth:\s*1/);
-  await expect(page.locator('[data-inspect="ReleaseSummary"]')).toHaveAttribute(
+  await expect(page.locator('[data-inspect="AltitudeProfile"]')).toHaveAttribute(
     'style',
     /--layer-depth:\s*2/,
   );

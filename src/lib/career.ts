@@ -1,5 +1,6 @@
 import { z } from 'astro/zod';
 import raw from '../content/career.json';
+import { decimalYear, yearOf, type Climb } from './altitude';
 
 /**
  * The career changelog: releases (one per major version, named after a Costa Rican
@@ -66,4 +67,31 @@ export function yearsSince(since: string, now: Date = new Date()): number {
   const [y, m = 1] = since.split('-').map(Number);
   const months = (now.getFullYear() - (y ?? 0)) * 12 + (now.getMonth() + 1 - m);
   return Math.floor(months / 12);
+}
+
+/**
+ * Each release as a stretch of time, oldest first, for the drawings: it starts with its first
+ * entry and runs until the next release starts; the current one runs until `now`.
+ */
+export function climbs(now: Date = new Date(), data: Career = career): Climb[] {
+  const starts = data.releases.map((r) => {
+    const own = data.entries.filter((e) => majorOf(e.version) === r.major);
+    if (own.length === 0) throw new Error(`Release v${r.major} has no entries`);
+    return { r, start: Math.min(...own.map((e) => decimalYear(e.start))) };
+  });
+  starts.sort((a, b) => a.start - b.start);
+  return starts.map(({ r, start }, i) => ({
+    major: r.major,
+    codename: r.codename,
+    elevationM: r.elevationM,
+    theme: r.theme,
+    start,
+    end: starts[i + 1]?.start ?? yearOf(now),
+  }));
+}
+
+/** The newest version shipped, as "3.2": the "you are here" on the profile. */
+export function currentVersion(data: Career = career): string {
+  const [latest] = [...data.entries].sort((a, b) => compareVersions(b.version, a.version));
+  return latest ? latest.version.split('.').slice(0, 2).join('.') : '0.0';
 }
