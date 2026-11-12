@@ -1,7 +1,7 @@
 ---
 import PageLayout from '../layouts/PageLayout.astro';
 import ReleaseSummary from '../components/site/ReleaseSummary.astro';
-import CopyEmail from '../components/site/CopyEmail.astro';
+import CopyText from '../components/site/CopyText.astro';
 import HeroFold from '../components/site/HeroFold.astro';
 import { getProfile } from '../lib/profile';
 import { copy, fill } from '../lib/copy';
@@ -135,7 +135,12 @@ const commit = manifest.commit.slice(0, 7);
     <div class="wrap">
       <h2 id="contact-title">{home.contact.heading}</h2>
       <p class="lead">{home.contact.intro}</p>
-      <CopyEmail email={profile.contact.email} />
+      <CopyText
+        value={profile.contact.email}
+        href={`mailto:${profile.contact.email}`}
+        copyLabel={home.contact.copy}
+        copiedLabel={home.contact.copied}
+      />
     </div>
   </section>
 </PageLayout>

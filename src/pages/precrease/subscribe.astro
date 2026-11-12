@@ -1,0 +1,83 @@
+---
+/**
+ * How to follow Precrease, for readers who have never used RSS: the "Subscribe" link lands here
+ * instead of on the raw feed, which a browser shows as XML. The newsletter joins this page in M8,
+ * with the domain (decision 49).
+ */
+import PrecreaseLayout from '../../layouts/PrecreaseLayout.astro';
+import CopyText from '../../components/site/CopyText.astro';
+import { copy, fill } from '../../lib/copy';
+
+const t = copy.precrease.subscribe;
+const feed = new URL('/precrease/rss.xml', Astro.site).href;
+const [before, after] = fill(t.topics, { map: '\u0000' }).split('\u0000');
+---
+
+<PrecreaseLayout title={`${t.title} · ${copy.precrease.name}`} description={t.description}>
+  <div class="wrap" data-inspect="subscribe#page">
+    <div class="page">
+      <h1>{t.heading}</h1>
+      <p class="intro">{t.intro}</p>
+
+      <h2>{t.howTitle}</h2>
+      <ol class="steps">
+        <li>{t.steps.reader}</li>
+        <li>
+          {t.steps.add}
+          <CopyText value={feed} href={feed} copyLabel={t.copy} copiedLabel={t.copied} />
+        </li>
+        <li>{t.steps.done}</li>
+      </ol>
+
+      <h2>{t.topicsTitle}</h2>
+      <p>
+        {before}
+        <a href="/precrease/map">{t.mapLink}</a>
+        {after}
+      </p>
+
+      <p class="note">{t.email}</p>
+    </div>
+  </div>
+</PrecreaseLayout>
+
+<style>
+  .page {
+    max-width: 64ch;
+    padding-block: var(--space-12) var(--space-24);
+  }
+  h1 {
+    margin: 0;
+    font: 600 clamp(2rem, 5vw, 3rem) / 1.05 var(--font-serif);
+    font-variation-settings: 'opsz' 72;
+    letter-spacing: -0.02em;
+  }
+  .intro {
+    margin: var(--space-6) 0 0;
+    font-size: var(--size-lg);
+    color: var(--color-mute);
+  }
+  h2 {
+    margin: var(--space-12) 0 var(--space-4);
+    font-size: var(--size-lg);
+    font-weight: 600;
+  }
+  .steps {
+    display: grid;
+    gap: var(--space-4);
+    margin: 0;
+    padding-left: var(--space-6);
+  }
+  .steps :global(.copy-text) {
+    margin-top: var(--space-3);
+  }
+  .steps :global(.address) {
+    font: 500 var(--size-sm) var(--font-mono);
+  }
+  .note {
+    margin: var(--space-12) 0 0;
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--color-rule);
+    color: var(--color-mute);
+  }
+</style>

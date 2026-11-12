@@ -78,7 +78,7 @@ const path = publicPath(Astro.url.pathname);
   const toggle = (trigger: HTMLElement | null) => (handle ? handle.close() : open(trigger));
 
   button?.addEventListener('click', () => toggle(button));
-  // Other openers on the page (the home hero's "Inspect this page") share the same panel.
+  // Other openers on the page (the home hero's "See how this page is built") share the same panel.
   for (const opener of document.querySelectorAll<HTMLElement>('[data-inspector-open]')) {
     opener.addEventListener('click', () => toggle(opener));
     opener.addEventListener('pointerenter', () => void load(), { once: true });

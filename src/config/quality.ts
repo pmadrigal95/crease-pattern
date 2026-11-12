@@ -14,6 +14,7 @@ export const auditedPages = [
   '/precrease',
   '/precrease/map',
   '/precrease/topics/frontend',
+  '/precrease/subscribe',
   '/this-page-does-not-exist',
 ] as const;
 

@@ -82,10 +82,14 @@ export const topics: readonly Topic[] = [
 ];
 
 export const formats = {
-  essay: { label: 'Essay', family: 'crease' },
-  note: { label: 'Note', family: 'truchet' },
-  'dog-ear': { label: 'Dog-ear', family: 'corner' },
-  'basic-folds': { label: 'Basic Folds', family: 'cells' },
+  essay: { label: 'Essay', description: 'A long read, often with something to try.', family: 'crease' },
+  note: { label: 'Note', description: 'A short note on one idea.', family: 'truchet' },
+  'dog-ear': { label: 'Dog-ear', description: 'Notes on a book, chapter by chapter.', family: 'corner' },
+  'basic-folds': {
+    label: 'Basic Folds',
+    description: 'Engineering fundamentals for people who build with AI.',
+    family: 'cells',
+  },
 } as const;
 
 export type Format = keyof typeof formats;
