@@ -6,7 +6,7 @@
       "codename": "Base camp",
       "place": "Cartago",
       "elevationM": 1435,
-      "theme": "Foundations"
+      "theme": "Foundations. Every climb starts here."
     },
     {
       "major": 1,
@@ -32,7 +32,7 @@
   ],
   "unreleased": [
     "The Inspector: tilt this page into its layers and read its real metrics.",
-    "Parallel code that actually scales: an interactive essay on threads in the browser.",
+    "Parallel code in the browser: an interactive essay on threads.",
     "One unit, thirty shapes: reusable components explained through modular origami."
   ],
   "entries": [
@@ -53,7 +53,7 @@
       "org": "MDG Developers Group",
       "stack": ["Node.js", "Express", "Pug", "OAuth 2.0"],
       "added": [
-        "Delivered about 85% of the team's web application as an intern, in Node.js, Express and Pug.",
+        "Worked on an inherited web system as an intern, in Node.js, Express and Pug.",
         "Integrated Azure and Google sign-in over OAuth 2.0."
       ]
     },
@@ -105,7 +105,7 @@
       "end": "2022-07",
       "title": "Frontend Consultant",
       "org": "Buo",
-      "added": ["Joined Buo, an HR tech company, as its only frontend developer."]
+      "added": ["Joined Buo, an AI people analytics platform, as its only frontend developer."]
     },
     {
       "version": "2.1.0",
@@ -145,7 +145,7 @@
       "added": [
         "Launched this site, built in public: one design system with three visual identities.",
         "Enforced WCAG 2.2 AA contrast with unit tests across every identity and theme.",
-        "Gated every change on accessibility and performance budgets in CI, with automatic deploys."
+        "Every change passes accessibility and performance budgets in CI before it deploys on its own."
       ]
     }
   ]

@@ -11,6 +11,7 @@ const t = copy.notFound;
       <p class="eyebrow">404</p>
       <h1>{t.title}</h1>
       <p>{t.body}</p>
+      <p class="aside">{t.aside}</p>
     </header>
     <p class="back">
       <a href="/">{t.action}</a>
@@ -19,6 +20,9 @@ const t = copy.notFound;
 </PageLayout>
 
 <style>
+  .aside {
+    margin-top: var(--space-2);
+  }
   .back {
     padding-bottom: var(--space-24);
     margin: 0;
