@@ -1,4 +1,5 @@
 ---
+import site from '../../../site.config';
 import { copy } from '../../lib/copy';
 
 interface Props {
@@ -31,10 +32,10 @@ const year = new Date().getFullYear();
         <a href="/privacy">{copy.footer.privacy}</a>
       </li>
       <li>
-        <a href="https://github.com/pmadrigal95/crease-pattern">{copy.footer.source}</a>
+        <a href={site.repository}>{copy.footer.source}</a>
       </li>
     </ul>
-    <a class="license" href="https://github.com/pmadrigal95/crease-pattern/blob/main/LICENSE.md">
+    <a class="license" href={`${site.repository}/blob/main/LICENSE.md`}>
       {copy.footer.license}
     </a>
   </div>

@@ -231,6 +231,8 @@
       "topics": "Every topic has its own feed. Open a topic from the {map} and use its RSS feed link.",
       "mapLink": "topic map",
       "email": "Prefer email? A newsletter is coming once the site moves to its own domain."
-    }
+    },
+    "toc": "On this page",
+    "history": "Change history on GitHub"
   }
 }

@@ -112,6 +112,9 @@ skills before it ships; AGENTS.md says the same to coding agents.
 - No `style` attributes: the CSP forbids them. Dynamic values go through custom properties set from
   script (`el.style.setProperty`) or SVG presentation attributes.
 - Motion uses tokens, respects `prefers-reduced-motion`, and never animates layout properties.
+- Scroll-driven animations set `animation-timeline` where the minifier can't fold it into the
+  `animation` shorthand (a separate rule, or the timeline through a custom property): browsers reject
+  a shorthand that carries a timeline, and the whole declaration is lost.
 - Layout inside a component adapts to its container (container queries) where the component can
   sit in columns of different widths.
 
