@@ -64,7 +64,12 @@
         "added": "Added",
         "changed": "Changed"
       },
-      "full": "Read the full release notes"
+      "full": "Read the full release notes",
+      "profile": {
+        "summary": "My career as an elevation profile, from {from} to today: {releases}. I'm on version {version} now.",
+        "release": "v{major} {codename}, {elevation}, {theme}",
+        "now": "v{version} · {codename} · NOW"
+      }
     },
     "notes": {
       "heading": "Precrease",
@@ -94,7 +99,18 @@
   },
   "changelogPage": {
     "title": "Changelog",
-    "description": "Pablo Madrigal's career as release notes, from base camp to Irazú."
+    "description": "Pablo Madrigal's career as release notes, from base camp to Irazú.",
+    "intro": "My career as release notes, newest first. Each major version takes the name of a Costa Rican volcano, a higher one each time. Choose a summit on the map to go to its release.",
+    "map": {
+      "label": "Map of the volcanoes behind each release",
+      "pin": "v{major} {codename}, {elevation}, {years}. Go to its release notes.",
+      "caption": "Costa Rica's Central Volcanic Range at real coordinates. Contour lines every 250 m; the route follows the releases in order."
+    },
+    "rail": {
+      "next": "Next",
+      "now": "You are here"
+    },
+    "built": "Built with {stack}"
   },
   "labels": {
     "stack": "Stack",
@@ -201,6 +217,7 @@
     "book": "On {title} by {author} ({year})",
     "chapter": "Chapter: {chapter}",
     "draft": "Draft: only visible in development",
+    "scheduled": "Scheduled for {date}: only visible in development",
     "search": {
       "label": "Search Precrease",
       "placeholder": "Search posts",
@@ -231,6 +248,16 @@
       "topics": "Every topic has its own feed. Open a topic from the {map} and use its RSS feed link.",
       "mapLink": "topic map",
       "email": "Prefer email? A newsletter is coming once the site moves to its own domain."
-    }
+    },
+    "chips": {
+      "label": "Filter posts by topic",
+      "all": "All posts"
+    },
+    "marginNote": {
+      "toggle": "Show margin note",
+      "start": "Margin note: "
+    },
+    "toc": "On this page",
+    "history": "Change history on GitHub"
   }
 }

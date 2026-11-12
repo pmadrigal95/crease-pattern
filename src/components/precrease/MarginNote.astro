@@ -1,0 +1,100 @@
+---
+/**
+ * A margin note in a Precrease post (decision 48). In MDX, inside a sentence:
+ *
+ *   The paper is creased first.<MarginNote>Origami folders call this precreasing.</MarginNote>
+ *
+ * Wide screens (≥1280px) show the note in the right margin, next to its line, with a matching
+ * number. Narrower screens show only the number; tapping it opens the note right below the
+ * line. That toggle is a checkbox and its label, so it works without JavaScript.
+ *
+ * Everything here is phrasing content (spans, label, input), so the note can sit inside a
+ * paragraph without breaking the HTML. Keep the note itself to plain text, links and emphasis:
+ * no lists or code blocks. Numbers come from a CSS counter the post body resets.
+ */
+import { copy } from '../../lib/copy';
+
+const t = copy.precrease.marginNote;
+const html = await Astro.slots.render('default');
+// Stable id from the note's own text, so builds are reproducible (FNV-1a, 32 bits).
+let hash = 0x811c9dc5;
+for (const char of html) hash = Math.imul(hash ^ char.charCodeAt(0), 0x01000193) >>> 0;
+const id = `margin-note-${hash.toString(36)}`;
+// The markup below is one line on purpose (prettier-ignore): any whitespace between the pieces
+// would show as a space before the number.
+---
+
+<!-- prettier-ignore -->
+<span class="margin-note"><input type="checkbox" id={id} class="toggle" /><label for={id} class="marker"><span class="sr-only">{t.toggle}</span></label><span class="note" data-inspect="MarginNote"><span class="sr-only">{t.start}</span><Fragment set:html={html} /></span></span>
+
+<style>
+  .marker {
+    counter-increment: margin-note;
+    cursor: pointer;
+    /* Inline target inside a sentence (exempt from WCAG 2.5.8), padded so a thumb still finds it. */
+    padding: 0 0.15em;
+    color: var(--color-accent-ui);
+    font: 600 0.7em/1 var(--font-sans);
+    vertical-align: super;
+  }
+  .marker::after {
+    content: counter(margin-note);
+  }
+  .toggle {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .toggle:focus-visible + .marker {
+    outline: 2px solid var(--color-accent-ui);
+    outline-offset: 2px;
+    border-radius: var(--radius-control);
+  }
+  .note {
+    display: none;
+    font-size: var(--size-sm);
+    line-height: 1.5;
+    color: var(--color-mute);
+  }
+  .note::before {
+    content: counter(margin-note) '\00a0 ';
+    color: var(--color-accent-ui);
+    font-weight: 600;
+  }
+  /* Open, on narrower screens: a short indented block under the line, on a dashed crease. */
+  .toggle:checked + .marker + .note {
+    display: block;
+    margin: var(--space-2) 0 var(--space-3);
+    padding-left: var(--space-3);
+    border-left: var(--stroke-crease) dashed var(--color-rule);
+  }
+
+  /* Wide screens: always shown, in the right margin column the post page reserves (13rem plus
+     the grid gap). The toggle and its pointer go away; the number stays as the link between
+     line and note. */
+  @media (min-width: 1280px) {
+    .toggle {
+      display: none;
+    }
+    .marker {
+      cursor: default;
+      pointer-events: none;
+    }
+    /* Nothing to show or hide here: the note is already on screen, read right after its line. */
+    .marker .sr-only {
+      display: none;
+    }
+    .note,
+    .toggle:checked + .marker + .note {
+      display: block;
+      float: right;
+      clear: right;
+      width: 13rem;
+      margin: 0.3em calc(-13rem - var(--space-8)) var(--space-3) 0;
+      padding: 0;
+      border: 0;
+    }
+  }
+</style>

@@ -1,109 +1,171 @@
 ---
+/**
+ * The full career changelog as a vertical ascent (design debt phase 2): Unreleased at the top,
+ * then each release from the current summit down to base camp. No boxes: a dashed trail runs
+ * down the left with a node at each release, and each release's altitude stays pinned beside it
+ * while its entries scroll past. Each release heading is a target of the map above
+ * (#release-N).
+ */
 import { career, releasesNewestFirst } from '../../lib/career';
-import { formatNumber, formatRange } from '../../lib/format';
+import { formatList, formatNumber, formatRange } from '../../lib/format';
 import { copy, fill } from '../../lib/copy';
 
-/** The full career changelog: Unreleased first, then each release, newest first. */
 const releases = releasesNewestFirst();
-const highest = Math.max(...releases.map((r) => r.elevationM));
+const current = releases[0]?.major;
 const t = copy.home.changelog;
+const page = copy.changelogPage;
 ---
 
-<div class="notes" data-inspect="ReleaseNotes">
-  <section class="release unreleased" aria-labelledby="release-unreleased">
-    <header class="head">
-      <h2 id="release-unreleased">{t.unreleased}</h2>
-    </header>
-    <ul class="changes">
-      {career.unreleased.map((line) => (
-        <li class="add">
-          <span class="sr-only">{t.sections.added}: </span>
-          {line}
-        </li>
-      ))}
-    </ul>
+<div class="ascent" data-inspect="ReleaseNotes">
+  <section class="camp next" aria-labelledby="release-unreleased">
+    <p class="rail" aria-hidden="true">
+      <span class="rail-label">{page.rail.next}</span>
+    </p>
+    <div class="content">
+      <header class="head">
+        <h2 id="release-unreleased">{t.unreleased}</h2>
+      </header>
+      <ul class="changes">
+        {career.unreleased.map((line) => (
+          <li class="add">
+            <span class="sr-only">{t.sections.added}: </span>
+            {line}
+          </li>
+        ))}
+      </ul>
+    </div>
   </section>
 
   {releases.map((r) => (
-    <section class="release" aria-labelledby={`release-${r.major}`}>
-      <header class="head">
-        <p class="major">v{r.major}</p>
-        <h2 id={`release-${r.major}`}>
-          {r.codename}{' '}
-          <span class="elev">{fill(t.elevation, { elevation: formatNumber(r.elevationM) })}</span>
-        </h2>
-        <p class="theme">{r.theme}</p>
-        <svg
-          class="altitude"
-          viewBox="0 0 100 2"
-          preserveAspectRatio="none"
-          aria-hidden="true"
-          focusable="false"
-        >
-          <rect width={((r.elevationM / highest) * 100).toFixed(1)} height="2" />
-        </svg>
-      </header>
-      <ol class="entries">
-        {r.entries.map((e) => (
-          <li class="entry">
-            <div class="meta">
-              <code>{e.version}</code>
-              <span>{formatRange(e.start, e.end, t.present)}</span>
-            </div>
-            <div class="body">
-              <h3>
-                {e.title} <span class="org">· {e.org}</span>
-              </h3>
-              {e.stack && (
-                <ul class="stack" aria-label={copy.labels.stack}>
-                  {e.stack.map((s) => (
-                    <li>{s}</li>
-                  ))}
-                </ul>
-              )}
-              {(e.added || e.changed) && (
-                <ul class="changes">
-                  {e.added?.map((line) => (
-                    <li class="add">
-                      <span class="sr-only">{t.sections.added}: </span>
-                      {line}
-                    </li>
-                  ))}
-                  {e.changed?.map((line) => (
-                    <li class="chg">
-                      <span class="sr-only">{t.sections.changed}: </span>
-                      {line}
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          </li>
-        ))}
-      </ol>
+    <section class={r.major === current ? 'camp current' : 'camp'} aria-labelledby={`release-${r.major}`}>
+      <p class="rail">
+        <span class="rail-value">{formatNumber(r.elevationM)}</span>
+        <span class="rail-unit"> m</span>
+        {r.major === current && <span class="rail-label">{page.rail.now}</span>}
+      </p>
+      <div class="content">
+        <header class="head">
+          <p class="major">v{r.major}</p>
+          <h2 id={`release-${r.major}`}>{r.codename}</h2>
+          <p class="theme">{r.theme}</p>
+        </header>
+        <ol class="entries">
+          {r.entries.map((e) => (
+            <li class="entry">
+              <p class="meta">
+                <code>{e.version}</code>
+                <span>{formatRange(e.start, e.end, t.present)}</span>
+              </p>
+              <div class="body">
+                <h3>
+                  {e.title} <span class="org">· {e.org}</span>
+                </h3>
+                {e.stack && <p class="built">{fill(page.built, { stack: formatList(e.stack) })}</p>}
+                {(e.added || e.changed) && (
+                  <ul class="changes">
+                    {e.added?.map((line) => (
+                      <li class="add">
+                        <span class="sr-only">{t.sections.added}: </span>
+                        {line}
+                      </li>
+                    ))}
+                    {e.changed?.map((line) => (
+                      <li class="chg">
+                        <span class="sr-only">{t.sections.changed}: </span>
+                        {line}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </li>
+          ))}
+        </ol>
+      </div>
     </section>
   ))}
 </div>
 
 <style>
-  .notes {
-    display: grid;
-    gap: var(--space-8);
+  .ascent {
+    --rail: 9rem;
   }
-  .release {
-    border: 1px solid var(--color-rule);
-    border-radius: var(--radius-panel);
-    background: var(--color-surface);
-    overflow: hidden;
-  }
-  .head {
+  .camp {
     position: relative;
     display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
-    gap: var(--space-1) var(--space-4);
-    align-items: baseline;
-    padding: var(--space-6) var(--space-6) var(--space-4);
-    border-bottom: 1px solid var(--color-rule);
+    grid-template-columns: var(--rail) minmax(0, 1fr);
+    column-gap: var(--space-8);
+    padding-bottom: var(--space-16);
+  }
+  .camp:last-child {
+    padding-bottom: 0;
+  }
+  /* The trail: a dashed crease from the next summit down to base camp. */
+  .camp::before {
+    content: '';
+    position: absolute;
+    left: var(--rail);
+    top: 0.9rem;
+    bottom: 0;
+    border-left: var(--stroke-crease) dashed var(--color-rule);
+  }
+  .camp:last-child::before {
+    display: none;
+  }
+  /* One node per release; the current one is filled with the accent, the next one is open. */
+  .camp::after {
+    content: '';
+    position: absolute;
+    left: calc(var(--rail) - 5px);
+    top: 0.55rem;
+    width: 11px;
+    height: 11px;
+    border: var(--stroke-crease) solid var(--color-ink);
+    border-radius: 50%;
+    background: var(--color-bg);
+  }
+  .camp.current::after {
+    border-color: var(--color-accent-ui);
+    background: var(--color-accent-ui);
+    box-shadow: 0 0 0 4px var(--color-bg);
+  }
+  .camp.next::after {
+    border-style: dashed;
+  }
+
+  .rail {
+    position: sticky;
+    top: calc(var(--sticky-offset) + var(--space-4));
+    align-self: start;
+    margin: 0;
+    padding-right: var(--space-6);
+    text-align: right;
+    line-height: 1;
+  }
+  .rail-value {
+    font-size: var(--size-2xl);
+    font-weight: 600;
+    letter-spacing: -0.03em;
+  }
+  .rail-unit {
+    font-size: var(--size-md);
+    color: var(--color-mute);
+  }
+  .rail-label {
+    display: block;
+    margin-top: var(--space-2);
+    font: 600 var(--size-xs) var(--font-mono);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+  }
+  .next .rail-label {
+    margin-top: var(--space-1);
+    color: var(--color-mute);
+  }
+
+  .head {
+    margin-bottom: var(--space-6);
   }
   .major {
     margin: 0;
@@ -111,39 +173,19 @@ const t = copy.home.changelog;
     color: var(--color-accent);
   }
   h2 {
-    margin: 0;
-    font-size: var(--size-xl);
+    margin: var(--space-1) 0;
+    font-size: var(--size-2xl);
     font-weight: 600;
-    letter-spacing: -0.02em;
-    line-height: 1.1;
+    letter-spacing: -0.025em;
+    line-height: 1.05;
   }
-  .unreleased h2 {
+  .next h2 {
+    margin-top: 0;
     font-size: var(--size-lg);
   }
-  .elev {
-    font: 500 var(--size-sm) var(--font-mono);
-    color: var(--color-mute);
-    letter-spacing: 0;
-    white-space: nowrap;
-  }
   .theme {
-    grid-column: 2;
     margin: 0;
     color: var(--color-mute);
-    font-size: var(--size-sm);
-  }
-  /* Altitude bar: each release climbs higher than the last. */
-  /* An SVG rather than an inline style, so the page needs no 'unsafe-inline' in its CSP. */
-  .altitude {
-    position: absolute;
-    left: 0;
-    bottom: -1px;
-    width: 100%;
-    height: 2px;
-    display: block;
-  }
-  .altitude rect {
-    fill: var(--color-earth);
   }
   .entries {
     list-style: none;
@@ -152,18 +194,16 @@ const t = copy.home.changelog;
   }
   .entry {
     display: grid;
-    grid-template-columns: 180px minmax(0, 1fr);
-    gap: var(--space-2) var(--space-6);
-    padding: var(--space-6);
+    grid-template-columns: 9.5rem minmax(0, 1fr);
+    gap: var(--space-1) var(--space-6);
+    padding: var(--space-4) 0;
     border-top: 1px solid var(--color-rule);
-  }
-  .entry:first-child {
-    border-top: 0;
   }
   .meta {
     display: grid;
     gap: var(--space-1);
     align-content: start;
+    margin: 0;
     font: var(--size-xs) / 1.5 var(--font-mono);
     color: var(--color-mute);
   }
@@ -173,7 +213,7 @@ const t = copy.home.changelog;
   }
   .body {
     display: grid;
-    gap: var(--space-3);
+    gap: var(--space-2);
     min-width: 0;
   }
   h3 {
@@ -186,20 +226,10 @@ const t = copy.home.changelog;
     font-weight: 400;
     color: var(--color-mute);
   }
-  .stack {
-    list-style: none;
+  .built {
     margin: 0;
-    padding: 0;
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-2);
-  }
-  .stack li {
-    font: 500 var(--type-caption);
+    font: var(--type-caption);
     color: var(--color-mute);
-    border: 1px solid var(--color-rule);
-    border-radius: var(--radius-pill);
-    padding: 2px var(--space-3);
   }
   .changes {
     list-style: none;
@@ -208,14 +238,10 @@ const t = copy.home.changelog;
     display: grid;
     gap: var(--space-2);
   }
-  .unreleased .changes {
-    padding: var(--space-4) var(--space-6) var(--space-6);
-  }
   .changes li {
     display: grid;
-    grid-template-columns: 20px minmax(0, 1fr);
-    gap: var(--space-1);
-    max-width: 68ch;
+    grid-template-columns: 1.25rem minmax(0, 1fr);
+    max-width: 66ch;
   }
   .changes li::before {
     font: 600 var(--size-sm) / 1.55 var(--font-mono);
@@ -228,45 +254,36 @@ const t = copy.home.changelog;
     content: '~';
     color: var(--color-accent);
   }
+
+  /* Phones: the trail moves to the edge and the altitude sits above the release name. */
   @media (max-width: 720px) {
+    .ascent {
+      --rail: 0px;
+    }
+    .camp {
+      grid-template-columns: minmax(0, 1fr);
+      padding-left: var(--space-6);
+    }
+    .camp::before {
+      left: 0;
+    }
+    .camp::after {
+      left: -5px;
+    }
+    .rail {
+      position: static;
+      padding: 0 0 var(--space-2);
+      text-align: left;
+    }
+    .rail-value {
+      font-size: var(--size-lg);
+    }
+    .rail-label {
+      display: inline;
+      margin-left: var(--space-2);
+    }
     .entry {
       grid-template-columns: minmax(0, 1fr);
-      padding: var(--space-4);
-    }
-    .head {
-      padding: var(--space-4);
-    }
-    .unreleased .changes {
-      padding: var(--space-4);
-    }
-  }
-  /* Each release's altitude bar climbs as it scrolls into view (decision 42). Without
-     scroll-driven animations, or with reduced motion, the bar is simply there. */
-  @supports (animation-timeline: view()) {
-    .altitude rect {
-      transform-box: fill-box;
-      transform-origin: left;
-      animation: altitude-climb linear both;
-    }
-    /* The timeline belongs to the release card (SVG shapes can't host a view timeline). A
-       separate, more specific rule, or the minifier folds it into the shorthand, which
-       browsers reject. */
-    .release {
-      view-timeline: --release block;
-    }
-    .release .altitude rect {
-      animation-timeline: --release;
-      animation-range: entry 10% cover 40%;
-    }
-  }
-  @keyframes altitude-climb {
-    from {
-      transform: scaleX(0);
-    }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .altitude rect {
-      animation: none;
     }
   }
 </style>

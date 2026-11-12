@@ -22,7 +22,10 @@
 
 @layer base {
   html {
-    scroll-padding-top: 72px;
+    /* The sticky site header's height plus a little air. Anchored headings land below it, and
+       anything else sticky (the post's side index) starts below it too. */
+    --sticky-offset: 72px;
+    scroll-padding-top: var(--sticky-offset);
     -webkit-text-size-adjust: 100%;
   }
 

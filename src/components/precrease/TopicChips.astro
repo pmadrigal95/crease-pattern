@@ -1,0 +1,106 @@
+---
+/**
+ * Filter chips for Precrease (decision 48): "All posts" plus every top-level topic that has
+ * posts, each with its count. They are plain links to the topic pages, so filtering works
+ * without JavaScript and every filtered view has its own URL. The same row shows on the index
+ * and on each topic page, with the chip for where the reader is marked: the topic itself, or
+ * its top-level branch when the reader is deeper in the tree.
+ */
+import { topics } from '../../config/precrease';
+import { copy, fill } from '../../lib/copy';
+import { topicHref, type PostSummary } from '../../lib/precrease';
+import { pathTo, postsUnder } from '../../lib/precrease-tree';
+
+interface Props {
+  posts: PostSummary[];
+  /** The topic being shown; omit on the index. */
+  current?: string;
+}
+const { posts, current } = Astro.props;
+const t = copy.precrease.chips;
+const counts = copy.precrease.map;
+// The number shows on its own; screen readers hear "Frontend, 3 posts".
+const spoken = (n: number) => `, ${n === 1 ? counts.countOne : fill(counts.count, { count: n })}`;
+const branch = current ? pathTo(topics, current)[0]?.id : undefined;
+const chips = topics
+  .filter((topic) => !topic.parent)
+  .map((topic) => ({ ...topic, count: postsUnder(topics, posts, topic.id).length }))
+  .filter((topic) => topic.count > 0);
+
+// "page" when the chip is this very page; "true" when the reader is inside that branch.
+const state = (id?: string) => {
+  if (id === current) return 'page';
+  return id !== undefined && id === branch ? 'true' : undefined;
+};
+---
+
+{chips.length > 0 && (
+  <nav class="chips" aria-label={t.label} data-inspect="TopicChips">
+    <ul>
+      <li>
+        <a href="/precrease" aria-current={state(undefined)}>
+          {t.all}
+          <span class="count" aria-hidden="true">
+            {posts.length}
+          </span>
+          <span class="sr-only">{spoken(posts.length)}</span>
+        </a>
+      </li>
+      {chips.map((chip) => (
+        <li>
+          <a href={topicHref(chip.id)} aria-current={state(chip.id)}>
+            {chip.label}
+            <span class="count" aria-hidden="true">
+              {chip.count}
+            </span>
+            <span class="sr-only">{spoken(chip.count)}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </nav>
+)}
+
+<style>
+  .chips ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  a {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: 2.25rem;
+    padding: 0 var(--space-3);
+    border: 1px solid var(--color-rule);
+    border-radius: var(--radius-pill);
+    color: var(--color-mute);
+    font-size: var(--size-sm);
+    text-decoration: none;
+  }
+  a:hover {
+    border-color: var(--color-mute);
+    color: var(--color-ink);
+  }
+  a:focus-visible {
+    outline: 2px solid var(--color-accent-ui);
+    outline-offset: 2px;
+  }
+  .count {
+    font: var(--type-caption);
+  }
+  /* Inside a branch: the chip keeps its outline but in ink, so it reads as "you are in here". */
+  a[aria-current='true'] {
+    border-color: var(--color-ink);
+    color: var(--color-ink);
+  }
+  a[aria-current='page'] {
+    border-color: var(--color-accent);
+    background: var(--color-accent);
+    color: var(--color-bg);
+  }
+</style>

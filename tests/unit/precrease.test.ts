@@ -2,6 +2,7 @@ import { describe, expect, test } from 'vitest';
 import { formats, topics, type Topic } from '../../src/config/precrease';
 import {
   checkNumbers,
+  isLive,
   pathTo,
   postsUnder,
   related,
@@ -74,6 +75,16 @@ describe('Crease numbers', () => {
     expect(() => checkNumbers([post('a', 1, ['craft'], 5), post('b', 2, ['craft'], 2)])).toThrow(
       /dated before/,
     );
+  });
+});
+
+describe('Scheduled publishing', () => {
+  const now = new Date('2026-11-12T12:00:00Z');
+  test('a post is live once its date arrives, unless it is a draft', () => {
+    expect(isLive({ draft: false, date: new Date('2026-11-12') }, now)).toBe(true);
+    expect(isLive({ draft: false, date: new Date('2026-11-01') }, now)).toBe(true);
+    expect(isLive({ draft: false, date: new Date('2026-11-13') }, now)).toBe(false);
+    expect(isLive({ draft: true, date: new Date('2026-11-01') }, now)).toBe(false);
   });
 });
 
