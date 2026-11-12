@@ -157,25 +157,35 @@ const commit = manifest.commit.slice(0, 7);
 </script>
 
 <style>
-  /* Contour lines identity: the hero sits on a topographic sheet (design debt fix 4). The lines
-     come from public/textures/contours.svg (scripts/build-contour-texture.mjs), tinted with the
-     identity's own color, and fade out before they reach the text so contrast never changes.
+  /* Each identity's surface behind the hero (design debt fix 4): contour lines, basalt joints or
+     washi fibers. The tiles come from public/textures/ (scripts/build-textures.mjs), are tinted with
+     the identity's own color, and fade out before they reach the text so contrast never changes.
      Decoration only, so it waits: the script below turns it on once the page has loaded and the
      browser is idle, keeping its download and painting out of the first render. */
   .hero {
     position: relative;
     isolation: isolate;
+    --surface-tile: url('/textures/contours.svg');
+    --surface-strength: 0.16;
   }
-  :global(:root[data-direction='contour-lines'][data-surface]) .hero::before {
+  :global(:root[data-direction='basalt-glacier']) .hero {
+    --surface-tile: url('/textures/basalt.svg');
+    --surface-strength: 0.13;
+  }
+  :global(:root[data-direction='washi-asagi']) .hero {
+    --surface-tile: url('/textures/washi.svg');
+    --surface-strength: 0.2;
+  }
+  :global(:root[data-surface]) .hero::before {
     content: '';
     animation: surface-in var(--motion-stage) var(--motion-ease-out) both;
     position: absolute;
     inset: 0;
     z-index: -1;
     background: var(--color-accent-ui);
-    opacity: 0.16;
+    opacity: var(--surface-strength);
     pointer-events: none;
-    mask-image: url('/textures/contours.svg'), linear-gradient(to left, #000 25%, transparent 70%);
+    mask-image: var(--surface-tile), linear-gradient(to left, #000 25%, transparent 70%);
     mask-size:
       600px 600px,
       100% 100%;
