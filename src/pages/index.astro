@@ -1,7 +1,7 @@
 ---
 import site from '../../site.config';
 import PageLayout from '../layouts/PageLayout.astro';
-import ReleaseSummary from '../components/site/ReleaseSummary.astro';
+import AltitudeProfile from '../components/site/AltitudeProfile.astro';
 import CopyText from '../components/site/CopyText.astro';
 import HeroFold from '../components/site/HeroFold.astro';
 import { getProfile } from '../lib/profile';
@@ -103,7 +103,7 @@ const commit = manifest.commit.slice(0, 7);
     <div class="wrap">
       <h2 id="changelog-title">{home.changelog.heading}</h2>
       <p class="lead">{home.changelog.intro}</p>
-      <ReleaseSummary />
+      <AltitudeProfile />
       <p class="actions">
         <a href="/changelog">{home.changelog.full}</a>
       </p>
