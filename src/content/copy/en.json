@@ -89,6 +89,7 @@
   "notFound": {
     "title": "This page isn't on the map.",
     "body": "The link may be outdated or mistyped.",
+    "aside": "I've taken a few wrong trails myself. This one leads back home.",
     "action": "Back to the home page"
   },
   "changelogPage": {
