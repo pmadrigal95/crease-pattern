@@ -6,13 +6,18 @@ import { career, yearsSince } from '../lib/career';
 import { copy, fill } from '../lib/copy';
 import { formatList } from '../lib/format';
 import FoldedPortrait from '../components/site/FoldedPortrait.astro';
+import { getImage } from 'astro:assets';
 import silhouette from '../assets/portrait/silhouette.png?url';
+import portrait from '../assets/portrait/portrait.jpg';
 
 const page = await getEntry('pages', 'about');
 if (!page) throw new Error('src/content/pages/about.mdx is missing.');
 const { Content } = await render(page);
 const profile = await getProfile();
 const t = copy.about;
+// The portrait is About's LCP element. Preloading the same AVIF the <picture> picks lets its download start
+// with the CSS instead of after the fonts, which on slow connections is most of its delay.
+const portraitAvif = await getImage({ src: portrait, format: 'avif', widths: [360, 720] });
 
 // The side column holds the folded portrait (decision 41) and the facts.
 const facts = [
@@ -33,6 +38,16 @@ const facts = [
     href={silhouette}
     type="image/png"
     media="(prefers-color-scheme: dark)"
+  />
+  <link
+    slot="head"
+    rel="preload"
+    as="image"
+    type="image/avif"
+    href={portraitAvif.src}
+    imagesrcset={portraitAvif.srcSet.attribute}
+    imagesizes="(max-width: 880px) 360px, 300px"
+    fetchpriority="high"
   />
   <div class="wrap">
     <header class="page-head" data-inspect="about#header">
