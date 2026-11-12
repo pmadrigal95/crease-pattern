@@ -27,17 +27,23 @@ interface Strings {
   formats: Record<string, string>;
 }
 
-/** Where scripts/build-search-index.mjs writes the bundle. */
 import { readJsonData } from './dom';
 import { formatCount } from './format';
 import { isTypingTarget } from './keyboard';
 import { fill } from './template';
 
+/** Where scripts/build-search-index.mjs writes the bundle. A constant: no input reaches import(). */
 const BUNDLE = '/pagefind/pagefind.js';
 const MAX_RESULTS = 8;
 
-/** Pagefind reports file URLs (`/precrease/slug.html`); the site serves them without `.html`. */
-export function resultHref(url: string): string {
+/**
+ * A result's link, or null when the index holds anything but a path on this site. The index is
+ * built from our own pages, so this never trips today; it keeps a tampered or broken index from
+ * turning a result into a `javascript:` link or a link to another site.
+ */
+export function resultHref(url: string): string | null {
+  // A path on this site: one leading slash, and no backslash (browsers read "/\host" as "//host").
+  if (!/^\/(?!\/)/.test(url) || url.includes('\\')) return null;
   const clean = url.replace(/(?:\/index)?\.html(?=$|[?#])/, '');
   return clean === '' ? '/' : clean;
 }
@@ -147,7 +153,12 @@ export function initPrecreaseSearch(): void {
       if (current !== run) return;
       const total = found.results.length;
       status!.textContent = formatCount(total, { zero: strings.none, one: strings.one, many: strings.many });
-      list!.replaceChildren(...data.map(renderResult));
+      list!.replaceChildren(
+        ...data.flatMap((result) => {
+          const href = resultHref(result.url);
+          return href ? [renderResult(result, href)] : [];
+        }),
+      );
     } catch (error) {
       if (current !== run) return;
       console.error('Precrease search failed to load', error);
@@ -156,10 +167,10 @@ export function initPrecreaseSearch(): void {
     }
   }
 
-  function renderResult(result: PagefindResult): HTMLLIElement {
+  function renderResult(result: PagefindResult, href: string): HTMLLIElement {
     const li = document.createElement('li');
     const a = document.createElement('a');
-    a.href = resultHref(result.url);
+    a.href = href;
     const kicker = document.createElement('span');
     kicker.className = 'r-kicker';
     const parts = [
@@ -201,7 +212,8 @@ export function initPrecreaseSearch(): void {
   });
   for (const chip of chips) {
     chip.addEventListener('click', () => {
-      const group = selected[chip.dataset.filter ?? ''];
+      const name = chip.dataset.filter ?? '';
+      const group = Object.hasOwn(selected, name) ? selected[name] : undefined;
       const value = chip.dataset.value ?? '';
       if (!group) return;
       const on = !group.has(value);

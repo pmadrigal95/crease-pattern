@@ -125,6 +125,14 @@ describe('Search', () => {
     expect(resultHref('/index.html')).toBe('/');
   });
 
+  test('a result only ever links to a path on this site', () => {
+    expect(resultHref('javascript:alert(1)')).toBeNull();
+    expect(resultHref('https://example.com/precrease/a')).toBeNull();
+    expect(resultHref('//example.com/a')).toBeNull();
+    expect(resultHref('/\\example.com')).toBeNull();
+    expect(resultHref('precrease/a.html')).toBeNull();
+  });
+
   test('only groups with a selection become filters', () => {
     expect(toFilters({ format: new Set(['note', 'essay']), topic: new Set() })).toEqual({
       format: { any: ['essay', 'note'] },
