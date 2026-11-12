@@ -27,17 +27,23 @@ interface Strings {
   formats: Record<string, string>;
 }
 
-/** Where scripts/build-search-index.mjs writes the bundle. */
 import { readJsonData } from './dom';
 import { formatCount } from './format';
 import { isTypingTarget } from './keyboard';
 import { fill } from './template';
 
+/** Where scripts/build-search-index.mjs writes the bundle. A constant: no input reaches import(). */
 const BUNDLE = '/pagefind/pagefind.js';
 const MAX_RESULTS = 8;
 
-/** Pagefind reports file URLs (`/precrease/slug.html`); the site serves them without `.html`. */
-export function resultHref(url: string): string {
+/**
+ * A result's link, or null when the index holds anything but a path on this site. The index is
+ * built from our own pages, so this never trips today; it keeps a tampered or broken index from
+ * turning a result into a `javascript:` link or a link to another site.
+ */
+export function resultHref(url: string): string | null {
+  // A path on this site: one leading slash, and no backslash (browsers read "/\host" as "//host").
+  if (!/^\/(?!\/)/.test(url) || url.includes('\\')) return null;
   const clean = url.replace(/(?:\/index)?\.html(?=$|[?#])/, '');
   return clean === '' ? '/' : clean;
 }
@@ -51,21 +57,45 @@ export function toFilters(selected: Record<string, Set<string>>): Record<string,
   return filters;
 }
 
-/** Splits a Pagefind excerpt into plain and highlighted runs, decoding its entities. */
+const ENTITIES: Record<string, string> = { lt: '<', gt: '>', quot: '"', '#39': "'", '#x27': "'", amp: '&' };
+
+/**
+ * Splits a Pagefind excerpt into plain and highlighted runs. The excerpt is HTML with `<mark>`
+ * around matches; this walks it once, keeps `<mark>` as the only meaning a tag can have, skips
+ * every other tag, and decodes entities in a single pass (so `&amp;lt;` stays the text `&lt;`).
+ * The runs are rendered as text nodes, never parsed as HTML.
+ */
 export function excerptRuns(excerpt: string): { text: string; marked: boolean }[] {
-  const decode = (s: string) =>
-    s
-      .replace(/<[^>]*>/g, '')
-      .replace(/&lt;/g, '<')
-      .replace(/&gt;/g, '>')
-      .replace(/&quot;/g, '"')
-      .replace(/&#39;|&#x27;/g, "'")
-      .replace(/&amp;/g, '&');
-  return excerpt
-    .split(/(<mark>[\s\S]*?<\/mark>)/)
-    .filter(Boolean)
-    .map((part) => ({ marked: part.startsWith('<mark>'), text: decode(part) }))
-    .filter((run) => run.text.length > 0);
+  const decode = (text: string) =>
+    text.replace(/&(lt|gt|quot|#39|#x27|amp);/g, (_, name: string) => ENTITIES[name] ?? '');
+  const runs: { text: string; marked: boolean }[] = [];
+  let marked = false;
+  let pending = '';
+  const flush = () => {
+    if (pending) runs.push({ text: decode(pending), marked });
+    pending = '';
+  };
+  for (let i = 0; i < excerpt.length;) {
+    // A tag starts with `<` followed by a letter or `/`; any other `<` is text.
+    const opensTag = excerpt[i] === '<' && /[a-z/]/i.test(excerpt[i + 1] ?? '');
+    const end = opensTag ? excerpt.indexOf('>', i) : -1;
+    if (end === -1) {
+      pending += excerpt[i];
+      i += 1;
+      continue;
+    }
+    const tag = excerpt
+      .slice(i + 1, end)
+      .trim()
+      .toLowerCase();
+    if (tag === 'mark' || tag === '/mark') {
+      flush();
+      marked = tag === 'mark';
+    }
+    i = end + 1;
+  }
+  flush();
+  return runs;
 }
 
 export function initPrecreaseSearch(): void {
@@ -123,7 +153,12 @@ export function initPrecreaseSearch(): void {
       if (current !== run) return;
       const total = found.results.length;
       status!.textContent = formatCount(total, { zero: strings.none, one: strings.one, many: strings.many });
-      list!.replaceChildren(...data.map(renderResult));
+      list!.replaceChildren(
+        ...data.flatMap((result) => {
+          const href = resultHref(result.url);
+          return href ? [renderResult(result, href)] : [];
+        }),
+      );
     } catch (error) {
       if (current !== run) return;
       console.error('Precrease search failed to load', error);
@@ -132,10 +167,10 @@ export function initPrecreaseSearch(): void {
     }
   }
 
-  function renderResult(result: PagefindResult): HTMLLIElement {
+  function renderResult(result: PagefindResult, href: string): HTMLLIElement {
     const li = document.createElement('li');
     const a = document.createElement('a');
-    a.href = resultHref(result.url);
+    a.href = href;
     const kicker = document.createElement('span');
     kicker.className = 'r-kicker';
     const parts = [
@@ -177,7 +212,8 @@ export function initPrecreaseSearch(): void {
   });
   for (const chip of chips) {
     chip.addEventListener('click', () => {
-      const group = selected[chip.dataset.filter ?? ''];
+      const name = chip.dataset.filter ?? '';
+      const group = Object.hasOwn(selected, name) ? selected[name] : undefined;
       const value = chip.dataset.value ?? '';
       if (!group) return;
       const on = !group.has(value);

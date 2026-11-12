@@ -11,6 +11,10 @@
 import { formats, topics } from '../../config/precrease';
 import { copy } from '../../lib/copy';
 
+// Pagefind compiles WebAssembly. 'wasm-unsafe-eval' allows that and nothing else (eval() stays
+// blocked), and only on pages that carry the search box, not site-wide.
+Astro.csp?.insertScriptResource("'wasm-unsafe-eval'");
+
 const t = copy.precrease.search;
 const formatChips = Object.entries(formats).map(([id, f]) => ({ id, label: f.label }));
 const topicChips = topics
@@ -47,6 +51,7 @@ const strings = JSON.stringify({
       type="search"
       placeholder={t.placeholder}
       autocomplete="off"
+      maxlength="120"
       spellcheck="false"
       aria-controls="precrease-results"
       aria-keyshortcuts="/ Control+K Meta+K"

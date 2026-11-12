@@ -49,8 +49,8 @@ export default defineConfig({
         "object-src 'none'",
       ],
       scriptDirective: {
-        // 'wasm-unsafe-eval' lets Precrease search compile Pagefind's WebAssembly; it does not allow eval().
-        resources: ["'self'", "'wasm-unsafe-eval'", 'https://static.cloudflareinsights.com'],
+        // Precrease search adds 'wasm-unsafe-eval' on its own pages only (PrecreaseSearch.astro).
+        resources: ["'self'", 'https://static.cloudflareinsights.com'],
         hashes: [sha256(restoreIdentityScript), sha256(pageRevealScript)],
       },
     },
