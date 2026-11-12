@@ -22,7 +22,7 @@
         "valley": "valley",
         "caption": "The fox is what you see on screen: the interface. Unfold it and you get the folds that shape it, the architecture. \"See how this page is built\" opens any page here the same way."
       },
-      "who": "{name} · {role} · {location}, remote"
+      "who": "{name} · {role} · {location}"
     },
     "work": {
       "heading": "This site, measured.",
@@ -116,8 +116,7 @@
       "caption": "Interface · architecture",
       "handle": "Fold the portrait",
       "value": "{photo}% photo, {contours}% contour lines"
-    },
-    "locationValue": "{location}, working remotely"
+    }
   },
   "colophonPage": {
     "title": "How this site is built."

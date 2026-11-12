@@ -16,7 +16,7 @@ const t = copy.about;
 
 // The side column holds the folded portrait (decision 41) and the facts.
 const facts = [
-  { term: t.facts.location, value: fill(t.locationValue, { location: profile.location }) },
+  { term: t.facts.location, value: profile.location },
   { term: t.facts.role, value: profile.role },
   { term: t.facts.training, value: profile.training },
   { term: t.facts.vue, value: fill(t.vueYears, { years: yearsSince(career.vueSince) }) },
