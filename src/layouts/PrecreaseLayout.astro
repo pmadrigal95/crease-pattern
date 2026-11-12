@@ -1,10 +1,12 @@
 ---
 /**
  * Every /precrease page: the site's layout plus Precrease's masthead, its display face and its
- * feed. Newsreader loads only here, so the rest of the site pays nothing for it.
+ * feed. Newsreader loads only here (src/styles/newsreader.css), so the rest of the site pays
+ * nothing for it.
  */
-import '@fontsource-variable/newsreader/opsz.css';
-import '@fontsource-variable/newsreader/opsz-italic.css';
+import '../styles/newsreader.css';
+import newsreaderNormal from '@fontsource-variable/newsreader/files/newsreader-latin-opsz-normal.woff2?url';
+import newsreaderItalic from '@fontsource-variable/newsreader/files/newsreader-latin-opsz-italic.woff2?url';
 import PageLayout from './PageLayout.astro';
 import PrecreaseMast from '../components/precrease/PrecreaseMast.astro';
 import { copy } from '../lib/copy';
@@ -26,6 +28,10 @@ const { title, description, image, type, noindex = false, feed, home = false } =
 
 <PageLayout title={title} description={description} image={image} type={type}>
   <Fragment slot="head">
+    <!-- Both faces show above the fold (the wordmark is "Pre" italic + "crease" roman). Preloading them
+         lets font-display: optional use Newsreader on a first visit instead of keeping the fallback. -->
+    <link rel="preload" href={newsreaderNormal} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={newsreaderItalic} as="font" type="font/woff2" crossorigin />
     <link rel="alternate" type="application/rss+xml" title={copy.precrease.name} href="/precrease/rss.xml" />
     {feed && <link rel="alternate" type="application/rss+xml" title={feed.title} href={feed.href} />}
     {noindex && <meta name="robots" content="noindex, follow" />}

@@ -1,0 +1,34 @@
+/*
+ * Newsreader, Precrease's display face (decision 48), loaded only on /precrease pages.
+ *
+ * Declared here instead of through Fontsource's CSS for two reasons:
+ * - font-display: optional. The variable files are large (opsz + wght axes, ~130 KB each), and with
+ *   `swap` a first visit showed the fallback serif and then jumped when Newsreader arrived. With
+ *   `optional` the browser never swaps mid-page: Newsreader is used if it is ready in time (the
+ *   layout preloads both files), otherwise that view keeps the fallback and the next page has it
+ *   cached.
+ * - Latin only (includes accented Spanish letters), so no other subsets are fetched.
+ */
+@font-face {
+  font-family: 'Newsreader Variable';
+  font-style: normal;
+  font-display: optional;
+  font-weight: 200 800;
+  src: url('../../node_modules/@fontsource-variable/newsreader/files/newsreader-latin-opsz-normal.woff2')
+    format('woff2-variations');
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+    U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Newsreader Variable';
+  font-style: italic;
+  font-display: optional;
+  font-weight: 200 800;
+  src: url('../../node_modules/@fontsource-variable/newsreader/files/newsreader-latin-opsz-italic.woff2')
+    format('woff2-variations');
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+    U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
