@@ -8,3 +8,6 @@ allowBuilds:
 overrides:
   '@emnapi/runtime': 1.11.3
   '@emnapi/core': 1.11.3
+  # minimatch 10.x (pulled in by ESLint and its plugins, development only) has a denial-of-service
+  # advisory fixed in 11.0.1; Dependabot can't lift it through the ESLint ranges, so pin it here.
+  'minimatch@>=10 <11': ^11.0.5
