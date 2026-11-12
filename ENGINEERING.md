@@ -71,6 +71,13 @@ and tokens (`tokens/`) are data, read through `lib` and generated CSS.
 - Format when showing a value, never to store, sort or compare it. Dates are calendar days at UTC
   midnight.
 
+## Voice
+
+Everything the site says, from a button to a post, uses the same voice: calm, warm and senior. Facts come
+without adjectives, achievements read as context, learning is treated as ordinary, and the reader is invited
+rather than told. Claims stay within what is measured. New copy goes through the `ux-writing` and `humanizer`
+skills before it ships; AGENTS.md says the same to coding agents.
+
 ## Components
 
 - Astro by default, zero JavaScript by default.

@@ -147,7 +147,7 @@
     "landmarks": "Landmarks",
     "headings": "Headings",
     "metrics": "This visit, measured",
-    "metricsNote": "Real numbers from your browser, not a lab. Thresholds are Google's \"good\" limits.",
+    "metricsNote": "Measured in your browser as you use the page. Thresholds are Google's \"good\" limits.",
     "pass": "good",
     "fail": "needs work",
     "waiting": "interact to measure",
@@ -227,7 +227,7 @@
       "copy": "Copy feed address",
       "copied": "Feed address copied",
       "topicsTitle": "Only some topics?",
-      "topics": "Every topic has its own feed. Open a topic from the {map} and use its Subscribe link.",
+      "topics": "Every topic has its own feed. Open a topic from the {map} and use its RSS feed link.",
       "mapLink": "topic map",
       "email": "Prefer email? A newsletter is coming once the site moves to its own domain."
     }

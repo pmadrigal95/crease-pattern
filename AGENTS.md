@@ -11,6 +11,8 @@ Instructions for AI coding agents working in this repository.
    including the e2e suite.
 5. A refactor must not change what visitors see: take visual baselines first
    (`npm run test:visual -- --update-snapshots`) and compare after.
-6. Never invent content: facts, metrics and opinions on the site are the author's. Leave a clear
+6. Write copy in the site's voice (ENGINEERING.md, "Voice") and run it through the `ux-writing` and
+   `humanizer` skills before proposing it.
+7. Never invent content: facts, metrics and opinions on the site are the author's. Leave a clear
    placeholder in a draft instead of making one up.
-7. Commits and pull requests use conventional prefixes and carry no AI attribution.
+8. Commits and pull requests use conventional prefixes and carry no AI attribution.
