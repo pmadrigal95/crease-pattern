@@ -19,6 +19,8 @@ const schema = z.strictObject({
       place: z.string().min(1),
       elevationM: z.number().int().positive(),
       theme: z.string().min(1),
+      /** Where the release's place is: the crater for a volcano, the town for base camp. */
+      location: z.strictObject({ lat: z.number().min(-90).max(90), lon: z.number().min(-180).max(180) }),
     }),
   ),
   unreleased: z.array(z.string().min(1)),
@@ -95,3 +97,9 @@ export function currentVersion(data: Career = career): string {
   const [latest] = [...data.entries].sort((a, b) => compareVersions(b.version, a.version));
   return latest ? latest.version.split('.').slice(0, 2).join('.') : '0.0';
 }
+
+/** Each release's place on the map, oldest first. */
+export const places = (data: Career = career) =>
+  [...data.releases]
+    .sort((a, b) => a.major - b.major)
+    .map((r) => ({ major: r.major, codename: r.codename, elevationM: r.elevationM, ...r.location }));
