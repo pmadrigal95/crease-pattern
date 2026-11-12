@@ -44,6 +44,11 @@ pnpm test:e2e     # axe in every identity and theme, no overflow at 375px
 pnpm lighthouse   # budgets: LCP < 1.8 s, CLS < 0.05, initial JS < 15 KB
 ```
 
+## Engineering
+
+How code is written here (layers, naming, formatting, CSS, tests) is in
+[ENGINEERING.md](ENGINEERING.md). AI coding agents start at [AGENTS.md](AGENTS.md).
+
 ## Branches
 
 | Branch                         | Purpose                                                                                                                                                        |

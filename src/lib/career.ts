@@ -67,16 +67,3 @@ export function yearsSince(since: string, now: Date = new Date()): number {
   const months = (now.getFullYear() - (y ?? 0)) * 12 + (now.getMonth() + 1 - m);
   return Math.floor(months / 12);
 }
-
-const monthName = new Intl.DateTimeFormat('en', { month: 'short', timeZone: 'UTC' });
-const formatPoint = (value: string) => {
-  const [y, m] = value.split('-').map(Number);
-  return m ? `${monthName.format(new Date(Date.UTC(y ?? 0, m - 1, 1)))} ${y}` : String(y);
-};
-
-/** "Sep 2019 – Jul 2022", "Jul 2024 – Present" or "2015 – 2017". */
-export function formatRange(start: string, end: string | null | undefined, present: string): string {
-  return `${formatPoint(start)} – ${end ? formatPoint(end) : present}`;
-}
-
-export const formatElevation = (meters: number) => new Intl.NumberFormat('en').format(meters);

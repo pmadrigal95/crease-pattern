@@ -3,7 +3,10 @@
  * Drafts show in `astro dev` so they can be previewed, and never in a build.
  */
 import { getCollection, type CollectionEntry } from 'astro:content';
-import { topics } from '../config/precrease';
+import { formats, topics } from '../config/precrease';
+import { copy } from './copy';
+import { padNumber } from './format';
+import { fill } from './template';
 import { checkNumbers, validateTree } from './precrease-tree';
 
 export type Post = CollectionEntry<'precrease'>;
@@ -31,6 +34,17 @@ export async function getPosts(): Promise<PostSummary[]> {
   // Drafts may hold a future number; the sequence rule applies to what is published.
   checkNumbers(posts.filter((p) => !p.entry.data.draft));
   return posts.sort((a, b) => b.number - a.number);
+}
+
+/** "Crease No. 001", worded by the copy file. */
+export const creaseNumber = (value: number): string =>
+  fill(copy.precrease.number, { number: padNumber(value) });
+
+/** What kind of post it is: "Essay", or "Basic Folds 03" inside a series. */
+export function postKind(post: Post): string {
+  const { format, series } = post.data;
+  const label = formats[format].label;
+  return series ? `${label} ${padNumber(series.part, 2)}` : label;
 }
 
 export const postHref = (id: string) => `/precrease/${id}`;

@@ -4,9 +4,10 @@ import PrecreaseLayout from '../../layouts/PrecreaseLayout.astro';
 import FoldTitle from '../../components/precrease/FoldTitle.astro';
 import PostThumb from '../../components/precrease/PostThumb.astro';
 import PostCard from '../../components/precrease/PostCard.astro';
-import { formats, topics } from '../../config/precrease';
+import { topics } from '../../config/precrease';
 import { copy, fill } from '../../lib/copy';
-import { getPosts, topicHref, type PostSummary } from '../../lib/precrease';
+import { formatDate, padNumber } from '../../lib/format';
+import { creaseNumber, getPosts, postKind, topicHref, type PostSummary } from '../../lib/precrease';
 import { pathTo, related } from '../../lib/precrease-tree';
 import { readingMinutes } from '../../lib/reading';
 
@@ -23,9 +24,7 @@ const { post, posts } = Astro.props;
 const { data } = post.entry;
 const { Content } = await render(post.entry);
 const t = copy.precrease;
-const date = new Intl.DateTimeFormat('en', { dateStyle: 'long', timeZone: 'UTC' });
-const number = String(data.number).padStart(3, '0');
-const format = formats[data.format].label;
+const number = padNumber(data.number);
 const paths = data.topics.map((id) => pathTo(topics, id));
 const others = related(topics, posts, post);
 // Search filters: a post counts under each of its topics and every ancestor of them.
@@ -50,9 +49,8 @@ const topicFilters = [...new Set(paths.flat().map((topic) => topic.id))];
     </div>
     <header class="wrap head">
       <div class="text">
-        <p class="kicker">
-          {fill(t.number, { number })} ·{' '}
-          {data.series ? `${format} ${String(data.series.part).padStart(2, '0')}` : format}
+        <p class="kicker" data-pagefind-ignore>
+          {creaseNumber(data.number)} · {postKind(post.entry)}
         </p>
         <FoldTitle text={data.title} unfold="load" />
         <p class="lede">{data.description}</p>
@@ -62,13 +60,11 @@ const topicFilters = [...new Set(paths.flat().map((topic) => topic.id))];
             {data.book.chapter && <> · {fill(t.chapter, { chapter: data.book.chapter })}</>}
           </p>
         )}
-        <p class="facts">
-          <time datetime={data.date.toISOString()}>
-            {fill(t.published, { date: date.format(data.date) })}
-          </time>
+        <p class="facts" data-pagefind-ignore>
+          <time datetime={data.date.toISOString()}>{fill(t.published, { date: formatDate(data.date) })}</time>
           {data.updated && (
             <time datetime={data.updated.toISOString()}>
-              {fill(t.updated, { date: date.format(data.updated) })}
+              {fill(t.updated, { date: formatDate(data.updated) })}
             </time>
           )}
           <span>{fill(t.minutes, { minutes: readingMinutes(post.entry.body ?? '') })}</span>
@@ -121,7 +117,7 @@ const topicFilters = [...new Set(paths.flat().map((topic) => topic.id))];
     font-size: clamp(2.4rem, 6vw, 4.75rem);
   }
   .kicker {
-    font: var(--size-xs) var(--font-mono);
+    font: var(--type-caption);
     color: var(--color-mute);
     margin: 0 0 var(--space-4);
   }
@@ -140,7 +136,7 @@ const topicFilters = [...new Set(paths.flat().map((topic) => topic.id))];
     flex-wrap: wrap;
     gap: var(--space-2) var(--space-4);
     margin: var(--space-6) 0 0;
-    font: var(--size-xs) var(--font-mono);
+    font: var(--type-caption);
     color: var(--color-mute);
   }
   .topics {
@@ -155,7 +151,7 @@ const topicFilters = [...new Set(paths.flat().map((topic) => topic.id))];
     margin: 0;
     padding: 0;
     list-style: none;
-    font: var(--size-xs) var(--font-mono);
+    font: var(--type-caption);
   }
   .topics li + li::before {
     content: '/';
@@ -172,7 +168,7 @@ const topicFilters = [...new Set(paths.flat().map((topic) => topic.id))];
     width: 100%;
   }
   .body {
-    border-top: 6px solid var(--color-accent);
+    border-top: var(--stroke-heavy) solid var(--color-accent);
     padding-top: var(--space-8);
     padding-bottom: var(--space-16);
   }

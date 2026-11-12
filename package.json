@@ -14,7 +14,7 @@
     "predev": "node scripts/build-tokens.mjs && node scripts/build-inspector-manifest.mjs",
     "dev": "astro dev",
     "prebuild": "node scripts/build-tokens.mjs && node scripts/build-inspector-manifest.mjs",
-    "build": "astro build && pagefind --site dist",
+    "build": "astro build && node scripts/build-search-index.mjs",
     "preview": "astro preview",
     "check": "astro check",
     "lint": "eslint .",
@@ -28,7 +28,8 @@
     "test:e2e": "playwright test",
     "lighthouse": "lhci autorun",
     "changeset": "changeset",
-    "deploy": "pnpm build && wrangler deploy"
+    "deploy": "pnpm build && wrangler deploy",
+    "test:visual": "playwright test --config playwright.visual.config.ts"
   },
   "packageManager": "pnpm@12.14.0+sha512.c18ba6d87993d3d164cb5e8948f32b2c06ee854487e06cd8d86781342fb3e5bb4634367034711e86802baa9c37bea906ce1929ad08d70884c97d801df13389a6",
   "dependencies": {

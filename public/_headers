@@ -4,6 +4,11 @@
   Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()
   X-Frame-Options: DENY
   Content-Security-Policy: frame-ancestors 'none'; base-uri 'self'; object-src 'none'
+  Speculation-Rules: "/speculation-rules.json"
+
+# Prefetch rules for the next page (see the file): served with the type browsers require.
+/speculation-rules.json
+  Content-Type: application/speculationrules+json
 
 /_astro/*
   Cache-Control: public, max-age=31536000, immutable

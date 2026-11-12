@@ -58,13 +58,13 @@ const tree = grow(undefined);
     margin: 0;
     padding: var(--space-6) 0 var(--space-24);
     list-style: none;
-    border-top: 6px solid var(--color-accent);
+    border-top: var(--stroke-heavy) solid var(--color-accent);
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: var(--space-8) var(--space-6);
   }
   .tree > :global(li) {
-    border-left: 1.5px dashed var(--color-accent-ui);
+    border-left: var(--stroke-crease) dashed var(--color-accent-ui);
     padding-left: var(--space-4);
   }
   .topic-intro {

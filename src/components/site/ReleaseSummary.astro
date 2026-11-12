@@ -1,5 +1,6 @@
 ---
-import { releasesNewestFirst, formatElevation } from '../../lib/career';
+import { releasesNewestFirst } from '../../lib/career';
+import { formatNumber } from '../../lib/format';
 import { copy, fill } from '../../lib/copy';
 
 /** Compact changelog for the home page: one row per release. */
@@ -20,7 +21,7 @@ const span = (r: (typeof releases)[number]) => {
       <p class="name">
         <span class="major">v{r.major}</span>
         <strong>{r.codename}</strong>
-        <span class="elev">{fill(t.elevation, { elevation: formatElevation(r.elevationM) })}</span>
+        <span class="elev">{fill(t.elevation, { elevation: formatNumber(r.elevationM) })}</span>
       </p>
       <p class="roles">
         {[
@@ -66,7 +67,7 @@ const span = (r: (typeof releases)[number]) => {
   }
   .elev,
   .years {
-    font: var(--size-xs) var(--font-mono);
+    font: var(--type-caption);
     color: var(--color-mute);
     white-space: nowrap;
   }

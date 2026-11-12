@@ -6,7 +6,7 @@ import { getProfile } from '../lib/profile';
 import { career, yearsSince } from '../lib/career';
 import { copy, fill } from '../lib/copy';
 import { getPosts, postHref } from '../lib/precrease';
-import { creaseNumber } from '../lib/precrease-tree';
+import { creaseNumber } from '../lib/precrease';
 
 const profile = await getProfile();
 const home = copy.home;
@@ -115,12 +115,12 @@ const latest = (await getPosts()).slice(0, 3);
   }
   .crease-no {
     display: block;
-    font: var(--size-xs) var(--font-mono);
+    font: var(--type-caption);
     color: var(--color-mute);
   }
   .hint {
     margin: var(--space-2) 0 0;
-    font: 500 var(--size-xs) var(--font-mono);
+    font: 500 var(--type-caption);
     color: var(--color-mute);
   }
   @media (pointer: coarse) {
@@ -154,7 +154,7 @@ const latest = (await getPosts()).slice(0, 3);
     margin: var(--space-8) 0 0;
   }
   .status {
-    font: 500 var(--size-xs) var(--font-mono);
+    font: 500 var(--type-caption);
     color: var(--color-second);
     margin: var(--space-2) 0 0;
   }
@@ -218,7 +218,7 @@ const latest = (await getPosts()).slice(0, 3);
     gap: var(--space-2);
   }
   .chips li {
-    font: 500 var(--size-xs) var(--font-mono);
+    font: 500 var(--type-caption);
     color: var(--color-mute);
     border: 1px solid var(--color-rule);
     border-radius: var(--radius-pill);

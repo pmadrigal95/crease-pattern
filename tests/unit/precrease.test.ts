@@ -2,7 +2,6 @@ import { describe, expect, test } from 'vitest';
 import { formats, topics, type Topic } from '../../src/config/precrease';
 import {
   checkNumbers,
-  creaseNumber,
   pathTo,
   postsUnder,
   related,
@@ -75,11 +74,6 @@ describe('Crease numbers', () => {
     expect(() => checkNumbers([post('a', 1, ['craft'], 5), post('b', 2, ['craft'], 2)])).toThrow(
       /dated before/,
     );
-  });
-
-  test('read as Crease No. 001', () => {
-    expect(creaseNumber(1)).toBe('Crease No. 001');
-    expect(creaseNumber(12)).toBe('Crease No. 012');
   });
 });
 

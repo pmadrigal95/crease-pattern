@@ -96,5 +96,3 @@ export function checkNumbers(posts: readonly PostLike[]): void {
       throw new Error(`Crease No. ${sorted[i]!.number} is dated before No. ${sorted[i - 1]!.number}`);
   }
 }
-
-export const creaseNumber = (n: number) => `Crease No. ${String(n).padStart(3, '0')}`;
