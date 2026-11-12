@@ -18,6 +18,9 @@ for (const path of auditedPages) {
         );
         await page.goto(path);
         await page.evaluate(() => document.fonts.ready);
+        // The home hero's surface texture turns on after load, when the browser is idle.
+        if (path === '/')
+          await page.waitForFunction(() => document.documentElement.hasAttribute('data-surface'));
         const name = `${info.project.name}${path === '/' ? '/home' : path}-${direction}-${theme}.png`;
         await expect(page).toHaveScreenshot(name.replaceAll('/', '_'), {
           fullPage: true,

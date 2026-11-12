@@ -49,7 +49,7 @@ const commit = manifest.commit.slice(0, 7);
     <div class="wrap hero-grid">
       <div class="hero-text">
         <p class="who">
-          {profile.name} · {profile.role} · {profile.location}
+          {fill(home.hero.who, { name: profile.name, role: profile.role, location: profile.location })}
         </p>
         <h1 id="hero-title">{home.hero.title}</h1>
         <p class="sub">{profile.summary}</p>
@@ -145,7 +145,55 @@ const commit = manifest.commit.slice(0, 7);
   </section>
 </PageLayout>
 
+<script>
+  // Self-contained (ENGINEERING.md, "Browser scripts"). Turns on the hero's surface texture after
+  // load, when the browser is idle.
+  const showSurface = () => document.documentElement.setAttribute('data-surface', '');
+  addEventListener('load', () =>
+    'requestIdleCallback' in window
+      ? requestIdleCallback(showSurface, { timeout: 2000 })
+      : setTimeout(showSurface, 300),
+  );
+</script>
+
 <style>
+  /* Contour lines identity: the hero sits on a topographic sheet (design debt fix 4). The lines
+     come from public/textures/contours.svg (scripts/build-contour-texture.mjs), tinted with the
+     identity's own color, and fade out before they reach the text so contrast never changes.
+     Decoration only, so it waits: the script below turns it on once the page has loaded and the
+     browser is idle, keeping its download and painting out of the first render. */
+  .hero {
+    position: relative;
+    isolation: isolate;
+  }
+  :global(:root[data-direction='contour-lines'][data-surface]) .hero::before {
+    content: '';
+    animation: surface-in var(--motion-stage) var(--motion-ease-out) both;
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: var(--color-accent-ui);
+    opacity: 0.16;
+    pointer-events: none;
+    mask-image: url('/textures/contours.svg'), linear-gradient(to left, #000 25%, transparent 70%);
+    mask-size:
+      600px 600px,
+      100% 100%;
+    mask-repeat: repeat, no-repeat;
+    mask-composite: intersect;
+  }
+
+  @keyframes surface-in {
+    from {
+      opacity: 0;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    :global(:root[data-surface]) .hero::before {
+      animation: none;
+    }
+  }
+
   /* Hero: the thesis on the left, the fox that proves it on the right (decision 50). */
   .hero-grid {
     display: grid;
