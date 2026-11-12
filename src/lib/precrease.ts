@@ -7,7 +7,7 @@ import { formats, topics } from '../config/precrease';
 import { copy } from './copy';
 import { padNumber } from './format';
 import { fill } from './template';
-import { checkNumbers, validateTree } from './precrease-tree';
+import { checkNumbers, isLive, validateTree } from './precrease-tree';
 
 export type Post = CollectionEntry<'precrease'>;
 
@@ -17,22 +17,30 @@ export interface PostSummary {
   number: number;
   topics: string[];
   date: Date;
+  /** Published: not a draft and its date has arrived. Only `astro dev` ever sees other posts. */
+  live: boolean;
   entry: Post;
 }
 
 validateTree(topics);
 
+/** One clock per build, so every page agrees on what is out. */
+const buildTime = new Date();
+
 export async function getPosts(): Promise<PostSummary[]> {
-  const entries = await getCollection('precrease', (p) => import.meta.env.DEV || !p.data.draft);
-  const posts = entries.map((entry) => ({
-    id: entry.id,
-    number: entry.data.number,
-    topics: entry.data.topics,
-    date: entry.data.date,
-    entry,
-  }));
-  // Drafts may hold a future number; the sequence rule applies to what is published.
-  checkNumbers(posts.filter((p) => !p.entry.data.draft));
+  const entries = await getCollection('precrease');
+  const posts = entries
+    .map((entry) => ({
+      id: entry.id,
+      number: entry.data.number,
+      topics: entry.data.topics,
+      date: entry.data.date,
+      live: isLive(entry.data, buildTime),
+      entry,
+    }))
+    .filter((p) => import.meta.env.DEV || p.live);
+  // Drafts and scheduled posts may hold a future number; the sequence rule applies to what is out.
+  checkNumbers(posts.filter((p) => p.live));
   return posts.sort((a, b) => b.number - a.number);
 }
 

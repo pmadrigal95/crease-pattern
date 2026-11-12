@@ -3,6 +3,7 @@ import PrecreaseLayout from '../../layouts/PrecreaseLayout.astro';
 import FoldTitle from '../../components/precrease/FoldTitle.astro';
 import PostThumb from '../../components/precrease/PostThumb.astro';
 import PostCard from '../../components/precrease/PostCard.astro';
+import TopicChips from '../../components/precrease/TopicChips.astro';
 import { copy, fill } from '../../lib/copy';
 import { formatDate } from '../../lib/format';
 import { creaseNumber, getPosts, postHref, postKind } from '../../lib/precrease';
@@ -15,6 +16,11 @@ const [featured, ...rest] = posts;
 
 <PrecreaseLayout title={t.name} description={t.description} home>
   <div class="wrap">
+    {featured && (
+      <div class="filters">
+        <TopicChips posts={posts} />
+      </div>
+    )}
     {featured ? (
       <section class="featured fold-host" aria-labelledby="featured-title">
         <div class="text">
@@ -60,6 +66,9 @@ const [featured, ...rest] = posts;
 </PrecreaseLayout>
 
 <style>
+  .filters {
+    padding-top: var(--space-8);
+  }
   .featured {
     display: grid;
     grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);

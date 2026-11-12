@@ -48,7 +48,9 @@ for (const name of readdirSync(DIR).filter((f) => /\.ya?ml$/.test(f))) {
         `${file} job "${job.name}" uses the Cloudflare secrets outside the production environment`,
       );
     }
-    if (!/^ {4}if:\s*github\.ref == 'refs\/heads\/main'\s*$/m.test(body)) {
+    // Extra conditions may narrow the job with `&&` (the scheduled run's "anything due?"), never
+    // widen it: no `||`, which could let another ref through.
+    if (!/^ {4}if:\s*github\.ref == 'refs\/heads\/main'(\s*&&[^|\n]+)?\s*$/m.test(body)) {
       problems.push(`${file} job "${job.name}" uses the Cloudflare secrets without a main-only condition`);
     }
   }

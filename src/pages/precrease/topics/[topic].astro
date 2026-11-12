@@ -1,6 +1,7 @@
 ---
 import PrecreaseLayout from '../../../layouts/PrecreaseLayout.astro';
 import PostCard from '../../../components/precrease/PostCard.astro';
+import TopicChips from '../../../components/precrease/TopicChips.astro';
 import { MIN_POSTS_TO_INDEX, topics, type Topic } from '../../../config/precrease';
 import { copy, fill } from '../../../lib/copy';
 import { getPosts, topicHref, type PostSummary } from '../../../lib/precrease';
@@ -33,6 +34,9 @@ const feedHref = `/precrease/topics/${topic.id}/rss.xml`;
   feed={{ href: feedHref, title: `${t.name}: ${topic.label}` }}
 >
   <div class="wrap">
+    <div class="filters">
+      <TopicChips posts={posts} current={topic.id} />
+    </div>
     <header class="head">
       <nav aria-label={t.breadcrumb}>
         <ol class="crumbs">
@@ -80,8 +84,11 @@ const feedHref = `/precrease/topics/${topic.id}/rss.xml`;
 </PrecreaseLayout>
 
 <style>
+  .filters {
+    padding-top: var(--space-8);
+  }
   .head {
-    padding-block: var(--space-12) var(--space-8);
+    padding-block: var(--space-8);
   }
   .crumbs {
     display: flex;

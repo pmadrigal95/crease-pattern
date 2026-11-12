@@ -84,6 +84,14 @@ export function related<P extends PostLike>(
     .map((x) => x.p);
 }
 
+/**
+ * Whether a post is out: not a draft, and its date has arrived. A post dated in the future is
+ * scheduled; the daily production build (deploy.yml, 12:00 UTC) publishes it on its day. Dates
+ * without a time are midnight UTC, so a post dated today is live in that day's build.
+ */
+export const isLive = (post: { draft: boolean; date: Date }, now: Date): boolean =>
+  !post.draft && post.date.getTime() <= now.getTime();
+
 /** Crease numbers must run 1, 2, 3… with no gaps or repeats, in publication order. */
 export function checkNumbers(posts: readonly PostLike[]): void {
   const sorted = [...posts].sort((a, b) => a.number - b.number);
