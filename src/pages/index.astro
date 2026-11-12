@@ -49,7 +49,7 @@ const commit = manifest.commit.slice(0, 7);
     <div class="wrap hero-grid">
       <div class="hero-text">
         <p class="who">
-          {profile.name} · {profile.role} · {profile.location}
+          {fill(home.hero.who, { name: profile.name, role: profile.role, location: profile.location })}
         </p>
         <h1 id="hero-title">{home.hero.title}</h1>
         <p class="sub">{profile.summary}</p>

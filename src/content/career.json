@@ -53,7 +53,7 @@
       "org": "MDG Developers Group",
       "stack": ["Node.js", "Express", "Pug", "OAuth 2.0"],
       "added": [
-        "Delivered about 85% of the team's web application as an intern, in Node.js, Express and Pug.",
+        "Worked on an inherited web system as an intern, in Node.js, Express and Pug.",
         "Integrated Azure and Google sign-in over OAuth 2.0."
       ]
     },
