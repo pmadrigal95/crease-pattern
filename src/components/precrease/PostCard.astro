@@ -2,7 +2,7 @@
 /** One post in a Precrease list: its number, thumbnail, title and what kind of post it is. */
 import PostThumb from './PostThumb.astro';
 import { copy, fill } from '../../lib/copy';
-import { padNumber } from '../../lib/format';
+import { formatDate, padNumber } from '../../lib/format';
 import { postHref, postKind, type PostSummary } from '../../lib/precrease';
 import { readingMinutes } from '../../lib/reading';
 
@@ -25,6 +25,9 @@ const t = copy.precrease;
     <span>{postKind(post.entry)}</span>
     <span>{fill(t.minutes, { minutes: readingMinutes(post.entry.body ?? '') })}</span>
     {data.draft && <span class="draft">{t.draft}</span>}
+    {!data.draft && !post.live && (
+      <span class="draft">{fill(t.scheduled, { date: formatDate(data.date) })}</span>
+    )}
   </p>
 </article>
 
