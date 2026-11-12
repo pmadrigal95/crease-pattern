@@ -9,7 +9,8 @@ export default defineConfig({
   use: { baseURL: 'http://localhost:4321' },
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
   webServer: {
-    command: 'pnpm build && pnpm preview',
+    // npm, not pnpm: npm ships with Node, so the suite starts on any machine (pnpm may only exist via corepack).
+    command: 'npm run build && npm run preview',
     url: 'http://localhost:4321',
     reuseExistingServer: !process.env.CI,
     timeout: 180_000,

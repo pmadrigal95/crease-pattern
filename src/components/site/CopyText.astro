@@ -1,28 +1,34 @@
 ---
-import { copy } from '../../lib/copy';
-
+/**
+ * A value people copy (the contact email, a feed address): the value as a link, a copy button,
+ * and a live region that confirms the copy. Without clipboard access it selects the text instead.
+ */
 interface Props {
-  email: string;
+  /** The text that gets copied and shown. */
+  value: string;
+  /** Where the value links to (mailto:, the feed). */
+  href: string;
+  copyLabel: string;
+  copiedLabel: string;
 }
-const { email } = Astro.props;
-const t = copy.home.contact;
+const { value, href, copyLabel, copiedLabel } = Astro.props;
 ---
 
-<div class="copy-email" data-inspect="CopyEmail">
-  <a class="address" href={`mailto:${email}`}>
-    {email}
+<div class="copy-text" data-inspect="CopyText">
+  <a class="address" href={href}>
+    {value}
   </a>
-  <button type="button" class="btn" data-copy={email} data-done={t.copied}>
-    {t.copy}
+  <button type="button" class="btn" data-copy={value} data-done={copiedLabel}>
+    {copyLabel}
   </button>
   <span class="status" role="status" aria-live="polite"></span>
 </div>
 
 <script>
-  // Copies the address and confirms in a live region; falls back to selecting the text.
-  for (const button of document.querySelectorAll<HTMLButtonElement>('.copy-email .btn')) {
+  // Copies the value and confirms in a live region; falls back to selecting the text.
+  for (const button of document.querySelectorAll<HTMLButtonElement>('.copy-text .btn')) {
     button.addEventListener('click', async () => {
-      const root = button.closest('.copy-email');
+      const root = button.closest('.copy-text');
       const status = root?.querySelector<HTMLElement>('.status');
       try {
         await navigator.clipboard.writeText(button.dataset.copy ?? '');
@@ -36,7 +42,7 @@ const t = copy.home.contact;
 </script>
 
 <style>
-  .copy-email {
+  .copy-text {
     display: flex;
     flex-wrap: wrap;
     gap: var(--space-3) var(--space-4);
@@ -63,7 +69,7 @@ const t = copy.home.contact;
     border-color: var(--color-accent-ui);
   }
   .status {
-    font: 500 var(--size-xs) var(--font-mono);
+    font: 500 var(--type-caption);
     color: var(--color-second);
   }
 </style>

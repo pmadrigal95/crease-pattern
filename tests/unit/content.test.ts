@@ -1,7 +1,8 @@
 import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, test } from 'vitest';
-import { career, releasesNewestFirst, yearsSince, formatRange } from '../../src/lib/career';
+import { career, releasesNewestFirst, yearsSince } from '../../src/lib/career';
+import { formatRange } from '../../src/lib/format';
 import { copy, fill } from '../../src/lib/copy';
 
 describe('career changelog', () => {

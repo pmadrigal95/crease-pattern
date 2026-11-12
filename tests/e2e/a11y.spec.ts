@@ -1,5 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
+import { auditedPages, themes } from '../../src/config/quality';
 import { allVisualDirections } from '../../src/config/visual-direction';
 
 // axe measures the settled page: mid-fade text would read as low contrast. Scroll-driven
@@ -16,11 +17,10 @@ async function settleEntranceAnimations(page: Page) {
 }
 
 // Every page must pass axe in all 3 identities × 2 themes.
-const pages = ['/', '/changelog', '/about', '/colophon', '/privacy', '/this-page-does-not-exist'];
 
-for (const path of pages) {
+for (const path of auditedPages) {
   for (const direction of allVisualDirections) {
-    for (const theme of ['light', 'dark'] as const) {
+    for (const theme of themes) {
       test(`${path} has no axe violations · ${direction} · ${theme}`, async ({ page }) => {
         await page.addInitScript(
           ([d, t]) => {
@@ -41,7 +41,7 @@ for (const path of pages) {
   }
 }
 
-for (const path of pages) {
+for (const path of auditedPages) {
   test(`${path} has no horizontal overflow on a 375px phone`, async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 812 });
     await page.goto(path);
@@ -50,7 +50,7 @@ for (const path of pages) {
   });
 }
 
-for (const path of pages) {
+for (const path of auditedPages) {
   test(`${path} runs with no Content Security Policy violations`, async ({ page }) => {
     const violations: string[] = [];
     page.on('console', (msg) => {
@@ -67,7 +67,7 @@ for (const path of pages) {
   });
 }
 
-for (const path of pages.filter((p) => p !== '/this-page-does-not-exist')) {
+for (const path of auditedPages.filter((p) => p !== '/this-page-does-not-exist')) {
   test(`${path} links to internal pages that answer 200 without a redirect`, async ({ page }) => {
     await page.goto(path);
     const hrefs = await page.$$eval('a[href^="/"]', (links) =>

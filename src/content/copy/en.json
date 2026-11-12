@@ -2,31 +2,59 @@
   "nav": {
     "work": "Work",
     "changelog": "Changelog",
-    "notes": "Notes",
     "about": "About",
     "colophon": "Colophon",
-    "skip": "Skip to content"
+    "skip": "Skip to content",
+    "precrease": "Precrease"
   },
   "home": {
-    "positioning": "Systems engineer by training. Frontend architect by focus.",
-    "title": "Interfaces built to last.",
-    "status": "v0.1 · Built in public, one release at a time.",
+    "hero": {
+      "title": "Interfaces built to last.",
+      "inspect": "See how this page is built",
+      "releases": "Read the release notes",
+      "fold": {
+        "label": "Unfold the fox into its crease pattern",
+        "interface": "Interface",
+        "architecture": "Architecture",
+        "folded": "Folded: the interface",
+        "unfolded": "Unfolded: the crease pattern",
+        "mountain": "mountain",
+        "valley": "valley",
+        "caption": "The fox is what you see on screen: the interface. Unfold it and you get the folds that shape it, the architecture. \"See how this page is built\" opens any page here the same way."
+      }
+    },
     "work": {
-      "heading": "Work",
-      "intro": "The strongest evidence is the kind you can inspect. This site is open source, from its design tokens to its test suite.",
-      "thisSite": {
-        "title": "This site",
-        "summary": "One design system, three visual identities. Contrast is tested in every theme, and every change has to pass accessibility and performance budgets before it ships.",
-        "links": {
-          "colophon": "Read how it's built",
-          "repo": "Browse the source on GitHub"
+      "heading": "This site, measured.",
+      "eyebrow": "Work",
+      "intro": "These numbers are measured each time the site is published, and all of its code is public, so you can check every claim on this page.",
+      "metrics": {
+        "js": {
+          "unit": "KB",
+          "label": "of JavaScript your browser runs for this page",
+          "note": "the limit is {budget} KB: less code loads faster, even on slow phones"
+        },
+        "axe": {
+          "label": "accessibility errors found by automated checks, across {pages} pages, {identities} visual styles, light and dark",
+          "note": "run with axe on every change"
+        },
+        "parts": {
+          "label": "parts of this site you can open and inspect",
+          "note": "each shows its code, design values and last change"
+        },
+        "identities": {
+          "label": "visual styles, one design system",
+          "note": "switch them in the Inspector; only the colors change"
         }
       },
-      "more": "More case studies are published as they're cleared for release."
+      "source": "Measured on version {commit} of this site, the one you're reading.",
+      "links": {
+        "colophon": "How it's built",
+        "repo": "Source on GitHub"
+      }
     },
     "changelog": {
       "heading": "Changelog",
-      "intro": "My career as release notes. Each major version marks a new level of responsibility. From v1 on, each one is named after a Costa Rican volcano, higher than the last.",
+      "intro": "My career, written like a software changelog. Each major version is a step up in responsibility and takes the name of a Costa Rican volcano, a higher one each time.",
       "years": "{years} years shipping Vue in production",
       "unreleased": "Unreleased",
       "elevation": "{elevation} m",
@@ -38,9 +66,11 @@
       "full": "Read the full release notes"
     },
     "notes": {
-      "heading": "Notes",
-      "empty": "Essays on frontend architecture, performance and accessibility. The first one, on parallel code that actually scales, is in progress.",
-      "follow": "Follow the build on GitHub"
+      "heading": "Precrease",
+      "intro": "Notes on how software gets designed and built, from architecture to working with AI. I write them in public and include what went wrong.",
+      "latest": "Latest posts",
+      "empty": "The first crease is being folded. It introduces who I am and what this blog will cover.",
+      "all": "Read Precrease"
     },
     "contact": {
       "heading": "Contact",
@@ -96,7 +126,6 @@
   "inspector": {
     "open": "Inspect",
     "shortcut": "Shift I",
-    "hint": "Press Shift+I to see how this page is built.",
     "title": "Inspector",
     "close": "Close the inspector",
     "intro": "Hover a block · Click to pin · Esc to leave",
@@ -130,6 +159,76 @@
       "system": "System",
       "light": "Light",
       "dark": "Dark"
+    }
+  },
+  "precrease": {
+    "name": "Precrease",
+    "tagline": "The work before the shape.",
+    "description": "Pablo Madrigal's notes on how software is designed and built, from architecture to AI, written for engineers and for anyone curious about how it works.",
+    "nav": {
+      "latest": "Latest",
+      "map": "Topic map",
+      "rss": "Subscribe"
+    },
+    "number": "Crease No. {number}",
+    "minutes": "{minutes} min read",
+    "published": "Published {date}",
+    "updated": "Updated {date}",
+    "topicsLabel": "Topics",
+    "breadcrumb": "Topic path",
+    "related": "Related posts",
+    "latestHeading": "Latest posts",
+    "empty": "The first post is on its way. Subscribe to hear when it's out.",
+    "map": {
+      "title": "Topic map",
+      "description": "Every Precrease topic as a tree, with how many posts sit in each branch.",
+      "intro": "Topics are organized like a tree. Open one to see the smaller topics inside it; each topic's page collects every post below it.",
+      "count": "{count} posts",
+      "countOne": "1 post",
+      "countZero": "No posts yet",
+      "subtopics": "{count} subtopics",
+      "subtopicsOne": "1 subtopic"
+    },
+    "topic": {
+      "title": "{topic} · Precrease",
+      "heading": "{topic}",
+      "subtopics": "Inside this topic",
+      "empty": "Nothing in this branch yet.",
+      "feed": "RSS feed for this topic"
+    },
+    "book": "On {title} by {author} ({year})",
+    "chapter": "Chapter: {chapter}",
+    "draft": "Draft: only visible in development",
+    "search": {
+      "label": "Search Precrease",
+      "placeholder": "Search posts",
+      "filters": "Filter results",
+      "format": "Format",
+      "topic": "Topic",
+      "clear": "Clear filters",
+      "loading": "Searching…",
+      "one": "1 post",
+      "many": "{count} posts",
+      "none": "No posts match. Try fewer words or clear a filter.",
+      "failed": "Search didn't load. Check your connection and reload the page."
+    },
+    "subscribe": {
+      "title": "Subscribe",
+      "description": "Get new Precrease posts as they come out, with RSS.",
+      "heading": "Get new posts as they come out",
+      "intro": "You don't need an account to follow Precrease. The simplest way is RSS: a feed that a reader app checks for you, so new posts show up there on their own.",
+      "howTitle": "How to subscribe",
+      "steps": {
+        "reader": "Open a feed reader. Feedly and Inoreader work in any browser; NetNewsWire is free on Mac and iPhone.",
+        "add": "Add this address as a new feed:",
+        "done": "New posts appear in your reader as soon as they're published."
+      },
+      "copy": "Copy feed address",
+      "copied": "Feed address copied",
+      "topicsTitle": "Only some topics?",
+      "topics": "Every topic has its own feed. Open a topic from the {map} and use its Subscribe link.",
+      "mapLink": "topic map",
+      "email": "Prefer email? A newsletter is coming once the site moves to its own domain."
     }
   }
 }

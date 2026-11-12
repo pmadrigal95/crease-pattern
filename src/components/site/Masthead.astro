@@ -11,7 +11,7 @@ const { name } = Astro.props;
 const links = [
   { href: '/#work', label: copy.nav.work, match: null },
   { href: '/changelog', label: copy.nav.changelog, match: '/changelog' },
-  { href: '/#notes', label: copy.nav.notes, match: null },
+  { href: '/precrease', label: copy.nav.precrease, match: '/precrease' },
   { href: '/about', label: copy.nav.about, match: '/about' },
 ];
 const path = publicPath(Astro.url.pathname);
@@ -25,7 +25,10 @@ const path = publicPath(Astro.url.pathname);
     </a>
     <nav aria-label={copy.labels.main}>
       {links.map((l) => (
-        <a href={l.href} aria-current={l.match && path === l.match ? 'page' : undefined}>
+        <a
+          href={l.href}
+          aria-current={l.match && (path === l.match || path.startsWith(`${l.match}/`)) ? 'page' : undefined}
+        >
           {l.label}
         </a>
       ))}
@@ -48,9 +51,14 @@ const path = publicPath(Astro.url.pathname);
 </header>
 
 <script>
-  // Opens the Inspector (decision 44): the button, Shift+I or ?inspect in the URL. Vue and the
+  // Opens the Inspector (decision 44): the button, any [data-inspector-open], Shift+I or ?inspect. Vue and the
   // panel download only now, on first use; hovering the button starts that download early.
   type Handle = { close(): void };
+  // Same rule as isTypingTarget in src/lib/keyboard.ts, kept local: this script runs on every page,
+  // and importing a helper shared with Precrease search would add a chained request to each one.
+  const isTypingTarget = (el: EventTarget | null) =>
+    el instanceof HTMLElement &&
+    (el.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(el.tagName));
   const button = document.querySelector<HTMLButtonElement>('[data-inspector-toggle]');
   let handle: Handle | null = null;
   let loading = false;
@@ -68,13 +76,23 @@ const path = publicPath(Astro.url.pathname);
     loading = false;
   }
   const toggle = (trigger: HTMLElement | null) => (handle ? handle.close() : open(trigger));
-  const typing = (el: EventTarget | null) =>
-    el instanceof HTMLElement && (el.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName));
 
   button?.addEventListener('click', () => toggle(button));
+  // Other openers on the page (the home hero's "See how this page is built") share the same panel.
+  for (const opener of document.querySelectorAll<HTMLElement>('[data-inspector-open]')) {
+    opener.addEventListener('click', () => toggle(opener));
+    opener.addEventListener('pointerenter', () => void load(), { once: true });
+  }
   button?.addEventListener('pointerenter', () => void load(), { once: true });
   addEventListener('keydown', (e) => {
-    if (!e.shiftKey || e.ctrlKey || e.metaKey || e.altKey || e.key.toLowerCase() !== 'i' || typing(e.target))
+    if (
+      !e.shiftKey ||
+      e.ctrlKey ||
+      e.metaKey ||
+      e.altKey ||
+      e.key.toLowerCase() !== 'i' ||
+      isTypingTarget(e.target)
+    )
       return;
     e.preventDefault();
     // Focus goes back where it was on close; with nothing focused, to the Inspect button.
@@ -142,7 +160,7 @@ const path = publicPath(Astro.url.pathname);
     margin-left: var(--space-2);
     padding: 0 var(--space-3);
     border: 1px solid var(--color-rule);
-    border-radius: 999px;
+    border-radius: var(--radius-pill);
     background: transparent;
     color: var(--color-ink);
     font: inherit;
@@ -163,7 +181,7 @@ const path = publicPath(Astro.url.pathname);
     stroke-width: 1.5;
   }
   .inspect kbd {
-    font: 500 var(--size-xs) var(--font-mono);
+    font: 500 var(--type-caption);
     color: var(--color-mute);
   }
   @media (pointer: coarse) {

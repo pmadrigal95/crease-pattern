@@ -1,14 +1,43 @@
 ---
 import PageLayout from '../layouts/PageLayout.astro';
 import ReleaseSummary from '../components/site/ReleaseSummary.astro';
-import CopyEmail from '../components/site/CopyEmail.astro';
+import CopyText from '../components/site/CopyText.astro';
+import HeroFold from '../components/site/HeroFold.astro';
 import { getProfile } from '../lib/profile';
-import { career, yearsSince } from '../lib/career';
 import { copy, fill } from '../lib/copy';
+import { creaseNumber, getPosts, postHref } from '../lib/precrease';
+import { auditedPages, jsBudgetKb, themes } from '../config/quality';
+import { allVisualDirections } from '../config/visual-direction';
+import manifest from '../generated/inspector.json';
 
 const profile = await getProfile();
 const home = copy.home;
-const years = fill(home.changelog.years, { years: yearsSince(career.vueSince) });
+const work = home.work;
+const latest = (await getPosts()).slice(0, 3);
+// "This site, measured" (decision 50). The first-load JavaScript is only known after the build:
+// the page renders a placeholder and scripts/stamp-site-metrics.mjs fills it in dist.
+interface Metric {
+  value: string | null;
+  unit?: string;
+  label: string;
+  note: string;
+}
+const m = work.metrics;
+const metrics: Metric[] = [
+  { value: null, unit: m.js.unit, label: m.js.label, note: fill(m.js.note, { budget: jsBudgetKb.page }) },
+  {
+    value: '0',
+    label: fill(m.axe.label, {
+      pages: auditedPages.length,
+      identities: allVisualDirections.length,
+      themes: themes.length,
+    }),
+    note: m.axe.note,
+  },
+  { value: String(Object.keys(manifest.parts).length), label: m.parts.label, note: m.parts.note },
+  { value: String(allVisualDirections.length), label: m.identities.label, note: m.identities.note },
+];
+const commit = manifest.commit.slice(0, 7);
 ---
 
 <PageLayout
@@ -17,51 +46,61 @@ const years = fill(home.changelog.years, { years: yearsSince(career.vueSince) })
   standalone
 >
   <section class="hero" aria-labelledby="hero-title" data-inspect="index#hero">
-    <div class="wrap">
-      <p class="eyebrow">{home.positioning}</p>
-      <h1 id="hero-title">
-        Interfaces built <span class="em">to last.</span>
-      </h1>
-      <p class="sub">{profile.summary}</p>
-      <p class="who">
-        {profile.name} · {profile.role} · {profile.location}
-      </p>
-      <p class="status">{home.status}</p>
-      <p class="hint">{copy.inspector.hint}</p>
+    <div class="wrap hero-grid">
+      <div class="hero-text">
+        <p class="who">
+          {profile.name} · {profile.role} · {profile.location}
+        </p>
+        <h1 id="hero-title">{home.hero.title}</h1>
+        <p class="sub">{profile.summary}</p>
+        <p class="cta">
+          <button class="inspect" type="button" data-inspector-open>
+            {home.hero.inspect}
+            <kbd aria-hidden="true">{copy.inspector.shortcut}</kbd>
+          </button>
+          <a href="/changelog">{home.hero.releases}</a>
+        </p>
+      </div>
+      <HeroFold />
     </div>
   </section>
 
   <section class="sec" id="work" aria-labelledby="work-title" data-inspect="index#work">
     <div class="wrap">
-      <h2 id="work-title">{home.work.heading}</h2>
-      <p class="lead">{home.work.intro}</p>
-      <article class="feature">
-        <h3>{home.work.thisSite.title}</h3>
-        <p>{home.work.thisSite.summary}</p>
-        <ul class="chips" aria-label={copy.labels.stack}>
-          <li>Astro</li>
-          <li>TypeScript</li>
-          <li>DTCG tokens</li>
-          <li>Vitest</li>
-          <li>Playwright + axe</li>
-          <li>Lighthouse CI</li>
-          <li>Cloudflare Workers</li>
-        </ul>
+      <div class="work-head">
+        <div>
+          <p class="eyebrow">{work.eyebrow}</p>
+          <h2 id="work-title">{work.heading}</h2>
+        </div>
+        <p class="lead">{work.intro}</p>
+      </div>
+      <dl class="readout">
+        {metrics.map((metric) => (
+          <div>
+            <dt>
+              {metric.label}
+              <span class="note">{metric.note}</span>
+            </dt>
+            <dd>
+              {metric.value === null ? <span data-metric="first-load-js">—</span> : metric.value}
+              {metric.unit && <span class="unit">{metric.unit}</span>}
+            </dd>
+          </div>
+        ))}
+      </dl>
+      <div class="source">
+        <p>{fill(work.source, { commit })}</p>
         <p class="actions">
-          <a href="/colophon">{home.work.thisSite.links.colophon}</a>
-          <a href="https://github.com/pmadrigal95/crease-pattern">{home.work.thisSite.links.repo}</a>
+          <a href="/colophon">{work.links.colophon}</a>
+          <a href="https://github.com/pmadrigal95/crease-pattern">{work.links.repo}</a>
         </p>
-      </article>
-      <p class="more">{home.work.more}</p>
+      </div>
     </div>
   </section>
 
   <section class="sec" id="changelog" aria-labelledby="changelog-title" data-inspect="index#changelog">
     <div class="wrap">
-      <div class="sec-head">
-        <h2 id="changelog-title">{home.changelog.heading}</h2>
-        <p class="counter">{years}</p>
-      </div>
+      <h2 id="changelog-title">{home.changelog.heading}</h2>
       <p class="lead">{home.changelog.intro}</p>
       <ReleaseSummary />
       <p class="actions">
@@ -70,12 +109,24 @@ const years = fill(home.changelog.years, { years: yearsSince(career.vueSince) })
     </div>
   </section>
 
-  <section class="sec" id="notes" aria-labelledby="notes-title" data-inspect="index#notes">
+  <section class="sec" id="precrease" aria-labelledby="precrease-title" data-inspect="index#precrease">
     <div class="wrap">
-      <h2 id="notes-title">{home.notes.heading}</h2>
-      <p class="lead">{home.notes.empty}</p>
+      <h2 id="precrease-title">{home.notes.heading}</h2>
+      <p class="lead">{latest.length > 0 ? home.notes.intro : home.notes.empty}</p>
+      {latest.length > 0 && (
+        <ul class="creases">
+          {latest.map((p) => (
+            <li>
+              <a href={postHref(p.id)}>
+                <span class="crease-no">{creaseNumber(p.number)}</span>
+                {p.entry.data.title}
+              </a>
+            </li>
+          ))}
+        </ul>
+      )}
       <p class="actions">
-        <a href="https://github.com/pmadrigal95/crease-pattern">{home.notes.follow}</a>
+        <a href="/precrease">{home.notes.all}</a>
       </p>
     </div>
   </section>
@@ -84,52 +135,84 @@ const years = fill(home.changelog.years, { years: yearsSince(career.vueSince) })
     <div class="wrap">
       <h2 id="contact-title">{home.contact.heading}</h2>
       <p class="lead">{home.contact.intro}</p>
-      <CopyEmail email={profile.contact.email} />
+      <CopyText
+        value={profile.contact.email}
+        href={`mailto:${profile.contact.email}`}
+        copyLabel={home.contact.copy}
+        copiedLabel={home.contact.copied}
+      />
     </div>
   </section>
 </PageLayout>
 
 <style>
-  .hint {
-    margin: var(--space-2) 0 0;
-    font: 500 var(--size-xs) var(--font-mono);
+  /* Hero: the thesis on the left, the fox that proves it on the right (decision 50). */
+  .hero-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    gap: var(--space-12);
+    align-items: center;
+    padding-block: var(--space-16);
+  }
+  .who {
+    margin: 0 0 var(--space-6);
+    font: 500 var(--type-caption);
     color: var(--color-mute);
   }
-  @media (pointer: coarse) {
-    .hint {
+  h1 {
+    margin: 0;
+    font-size: clamp(3rem, 8vw, 6.5rem);
+    font-weight: 600;
+    line-height: 0.95;
+    letter-spacing: -0.045em;
+    text-wrap: balance;
+  }
+  .sub {
+    max-width: 34ch;
+    margin: var(--space-8) 0 0;
+    font-size: var(--size-lg);
+    line-height: 1.4;
+    color: var(--color-mute);
+  }
+  .cta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-4) var(--space-8);
+    margin: var(--space-8) 0 0;
+  }
+  .cta a {
+    font-weight: 500;
+  }
+  .inspect {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-3);
+    min-height: 48px;
+    padding: 0 var(--space-6);
+    border: 0;
+    border-radius: var(--radius-control);
+    background: var(--color-accent);
+    color: var(--color-bg);
+    font: 600 var(--size-md) var(--font-sans);
+    cursor: pointer;
+    transition: transform var(--motion-fast) var(--motion-ease-out);
+  }
+  .inspect:active {
+    transform: scale(0.97);
+  }
+  .inspect kbd {
+    padding: 1px var(--space-2);
+    border: 1px solid color-mix(in oklab, var(--color-bg) 45%, transparent);
+    border-radius: var(--radius-control);
+    font: 500 var(--type-caption);
+  }
+  @media (hover: none) {
+    .inspect kbd {
       display: none;
     }
   }
-  .hero .wrap {
-    padding-block: var(--space-24) var(--space-16);
-  }
-  h1 {
-    font-size: var(--size-display);
-    line-height: 0.94;
-    letter-spacing: -0.045em;
-    font-weight: 600;
-    margin: 0;
-    text-wrap: balance;
-  }
-  .em {
-    color: var(--color-accent);
-  }
-  .sub {
-    font-size: var(--size-lg);
-    color: var(--color-mute);
-    max-width: 44ch;
-    margin: var(--space-6) 0 0;
-  }
-  .who {
-    font: 500 var(--size-sm) var(--font-mono);
-    color: var(--color-mute);
-    margin: var(--space-8) 0 0;
-  }
-  .status {
-    font: 500 var(--size-xs) var(--font-mono);
-    color: var(--color-second);
-    margin: var(--space-2) 0 0;
-  }
+
   .sec {
     border-top: 1px solid var(--color-rule);
   }
@@ -144,66 +227,16 @@ const years = fill(home.changelog.years, { years: yearsSince(career.vueSince) })
     margin: 0 0 var(--space-4);
     text-wrap: balance;
   }
-  .sec-head {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: var(--space-2) var(--space-6);
-  }
-  .counter {
-    font: 600 var(--size-sm) var(--font-mono);
-    color: var(--color-second);
-    margin: 0;
-  }
   .lead {
     color: var(--color-mute);
     max-width: 60ch;
     margin: 0 0 var(--space-8);
-  }
-  .feature {
-    background: var(--color-surface);
-    border: 1px solid var(--color-rule);
-    border-radius: var(--radius-panel);
-    padding: var(--space-8);
-    display: grid;
-    gap: var(--space-4);
-    max-width: 760px;
-  }
-  .feature h3 {
-    font-size: var(--size-xl);
-    letter-spacing: -0.02em;
-    margin: 0;
-    font-weight: 600;
-  }
-  .feature p {
-    margin: 0;
-    color: var(--color-mute);
-    max-width: 56ch;
-  }
-  .chips {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-2);
-  }
-  .chips li {
-    font: 500 var(--size-xs) var(--font-mono);
-    color: var(--color-mute);
-    border: 1px solid var(--color-rule);
-    border-radius: var(--radius-pill);
-    padding: 2px var(--space-3);
   }
   .actions {
     display: flex;
     flex-wrap: wrap;
     gap: var(--space-2) var(--space-6);
     margin: var(--space-6) 0 0;
-  }
-  .feature .actions {
-    margin: 0;
   }
   .actions a {
     font-weight: 600;
@@ -212,17 +245,115 @@ const years = fill(home.changelog.years, { years: yearsSince(career.vueSince) })
     display: inline-flex;
     align-items: center;
   }
-  .more {
+
+  /* Work: this site as a measured exhibit. */
+  .work-head {
+    display: grid;
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    gap: var(--space-4) var(--space-12);
+    align-items: end;
+  }
+  .work-head .lead,
+  .work-head h2 {
+    margin: 0;
+  }
+  .eyebrow {
+    margin: 0 0 var(--space-3);
+    font: var(--type-caption);
     color: var(--color-mute);
-    font-size: var(--size-sm);
-    margin: var(--space-6) 0 0;
   }
-  .close .wrap {
-    padding-block: var(--space-24);
+  .readout {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    margin: var(--space-12) 0 0;
+    border-top: var(--stroke-crease) solid var(--color-ink);
   }
-  .close h2 {
-    font-size: clamp(2.5rem, 6.4vw, 5.25rem);
-    letter-spacing: -0.04em;
+  .readout > div {
+    display: flex;
+    flex-direction: column-reverse;
+    justify-content: flex-end;
+    gap: var(--space-2);
+    padding: var(--space-6) var(--space-6) 0 0;
+  }
+  .readout > div + div {
+    padding-left: var(--space-6);
+    border-left: 1px dashed var(--color-rule);
+  }
+  dt {
+    font: var(--type-caption);
+    color: var(--color-mute);
+  }
+  .note {
+    display: block;
+    margin-top: var(--space-2);
+    color: var(--color-second);
+  }
+  dd {
+    margin: 0;
+    font-size: clamp(2.25rem, 4.5vw, 3.5rem);
+    font-weight: 600;
     line-height: 1;
+    letter-spacing: -0.03em;
+  }
+  .unit {
+    margin-left: var(--space-1);
+    font-size: 0.4em;
+    font-weight: 500;
+    letter-spacing: 0;
+    color: var(--color-mute);
+  }
+  .source {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0 var(--space-8);
+    margin-top: var(--space-12);
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--color-rule);
+  }
+  .source > p:first-child {
+    margin: 0;
+    font: var(--type-caption);
+    color: var(--color-mute);
+  }
+  .source .actions {
+    margin: 0;
+  }
+
+  .creases {
+    display: grid;
+    gap: var(--space-3);
+    margin: var(--space-6) 0 0;
+    padding: 0;
+    list-style: none;
+    font-size: var(--size-lg);
+  }
+  .crease-no {
+    display: block;
+    font: var(--type-caption);
+    color: var(--color-mute);
+  }
+
+  @media (max-width: 860px) {
+    .hero-grid,
+    .work-head {
+      grid-template-columns: 1fr;
+      gap: var(--space-8);
+    }
+    .hero-grid {
+      padding-block: var(--space-12);
+    }
+    .hero-grid :global(.hero-fold) {
+      max-width: 300px;
+    }
+    .readout {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      row-gap: var(--space-8);
+    }
+    .readout > div:nth-child(odd) {
+      padding-left: 0;
+      border-left: 0;
+    }
   }
 </style>

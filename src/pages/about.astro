@@ -4,6 +4,7 @@ import PageLayout from '../layouts/PageLayout.astro';
 import { getProfile } from '../lib/profile';
 import { career, yearsSince } from '../lib/career';
 import { copy, fill } from '../lib/copy';
+import { formatList } from '../lib/format';
 import FoldedPortrait from '../components/site/FoldedPortrait.astro';
 import silhouette from '../assets/portrait/silhouette.png?url';
 
@@ -12,7 +13,6 @@ if (!page) throw new Error('src/content/pages/about.mdx is missing.');
 const { Content } = await render(page);
 const profile = await getProfile();
 const t = copy.about;
-const list = new Intl.ListFormat('en', { type: 'conjunction' });
 
 // The side column holds the folded portrait (decision 41) and the facts.
 const facts = [
@@ -20,7 +20,7 @@ const facts = [
   { term: t.facts.role, value: profile.role },
   { term: t.facts.training, value: profile.training },
   { term: t.facts.vue, value: fill(t.vueYears, { years: yearsSince(career.vueSince) }) },
-  { term: t.facts.languages, value: list.format(profile.languages) },
+  { term: t.facts.languages, value: formatList(profile.languages) },
 ];
 ---
 
@@ -97,7 +97,7 @@ const facts = [
     border-top: 0;
   }
   dt {
-    font: 500 var(--size-xs) var(--font-mono);
+    font: 500 var(--type-caption);
     color: var(--color-mute);
   }
   dd {

@@ -7,25 +7,24 @@
  *    (mountain folds solid, valley folds dashed) on the flat sheet it came from.
  * Real 3D folding comes later with the M4 scene.
  */
+import { foxFacets, foxMountainFolds, foxSheet, foxValleyFolds, foxViewBox } from '../../lib/fox';
+
 interface Props {
   size?: number;
 }
 const { size = 26 } = Astro.props;
 ---
 
-<svg class="fox-mark" width={size} height={size} viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+<svg class="fox-mark" width={size} height={size} viewBox={foxViewBox} aria-hidden="true" focusable="false">
   <g class="pattern">
-    <path class="sheet" d="M3 2h42v44H3z"></path>
-    <path class="mountain" d="M6 16h36M6 16l5-13 8 13M29 16l8-13 5 13"></path>
-    <path class="valley" d="M24 16v28M6 16l18 28M42 16 24 44"></path>
+    <path class="sheet" d={foxSheet}></path>
+    <path class="mountain" d={foxMountainFolds}></path>
+    <path class="valley" d={foxValleyFolds}></path>
   </g>
   <g class="fox">
-    <path class="facet ear ear-left" d="M6 16 11 3l8 13z"></path>
-    <path class="facet ear ear-right" d="m29 16 8-13 5 13z"></path>
-    <path class="facet inner inner-left" d="m9.5 16 2-8 4.5 8z"></path>
-    <path class="facet inner inner-right" d="m32 16 4.5-8 2 8z"></path>
-    <path class="facet head head-left" d="M6 16h18v28z"></path>
-    <path class="facet head head-right" d="M24 16h18L24 44z"></path>
+    {foxFacets.map((f) => (
+      <path class:list={['facet', f.part, `${f.part}-${f.side}`]} d={f.d} />
+    ))}
   </g>
 </svg>
 

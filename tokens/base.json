@@ -8,6 +8,18 @@
     "mono": {
       "$type": "fontFamily",
       "$value": "'JetBrains Mono Variable', ui-monospace, 'Cascadia Mono', Menlo, monospace"
+    },
+    "serif": {
+      "$type": "fontFamily",
+      "$value": "'Newsreader Variable', 'Iowan Old Style', Georgia, serif",
+      "$description": "Precrease's display face (decision 48). Loaded only on /precrease pages."
+    }
+  },
+  "type": {
+    "caption": {
+      "$type": "font",
+      "$value": "var(--size-xs) var(--font-mono)",
+      "$description": "Captions, kickers, counts and dates: small mono. Use as `font: var(--type-caption)`."
     }
   },
   "size": {
@@ -34,6 +46,18 @@
     "12": { "$type": "dimension", "$value": "48px" },
     "16": { "$type": "dimension", "$value": "64px" },
     "24": { "$type": "dimension", "$value": "96px" }
+  },
+  "stroke": {
+    "crease": {
+      "$type": "dimension",
+      "$value": "1.5px",
+      "$description": "A dashed valley crease drawn across a headline or a tree"
+    },
+    "heavy": {
+      "$type": "dimension",
+      "$value": "6px",
+      "$description": "Precrease's heavy accent rule under mastheads and above sections"
+    }
   },
   "radius": {
     "none": { "$type": "dimension", "$value": "0" },

@@ -1,44 +1,53 @@
 import { defineCollection } from 'astro:content';
 import { file, glob } from 'astro/loaders';
 import { z } from 'astro/zod';
+import { formatIds, topicIds } from './config/precrease';
 
 /**
- * Notes (the blog). The taxonomy is validated at build time: a wrong category,
- * subcategory or translation link fails the build instead of reaching production.
- * See portfolio-discovery/11-blog-escalable.md for the reasoning.
+ * Precrease (the blog, decisions 46–49). One MDX file per post in src/content/precrease.
+ * The taxonomy lives in src/config/precrease.ts and is validated here: an unknown topic or
+ * format fails the build instead of reaching production. Post numbers ("Crease No. 012")
+ * are checked for gaps and duplicates in src/lib/precrease.ts.
  */
-export const categories = {
-  architecture: ['component-systems', 'state', 'monorepos', 'testing'],
-  performance: ['rendering', 'network', 'web-vitals'],
-  accessibility: ['keyboard', 'screen-readers', 'color'],
-  motion: ['animation', 'microinteractions', '3d'],
-  systems: ['concurrency', 'webassembly', 'workers'],
-  craft: ['ai-assisted-dev', 'leadership', 'writing'],
-} as const;
-
-type Category = keyof typeof categories;
-const categoryNames = Object.keys(categories) as [Category, ...Category[]];
-
-const notes = defineCollection({
-  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/notes' }),
+const precrease = defineCollection({
+  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/precrease' }),
   schema: z
-    .object({
+    .strictObject({
+      /** Publication order: Crease No. 001, 002… Never reused. */
+      number: z.number().int().positive(),
       title: z.string().max(90),
       description: z.string().max(200),
       date: z.coerce.date(),
       updated: z.coerce.date().optional(),
-      type: z.enum(['essay', 'note', 'til']),
-      category: z.enum(categoryNames),
-      subcategory: z.string().optional(),
-      tags: z.array(z.string().toLowerCase()).default([]),
-      series: z.object({ id: z.string(), part: z.number().int().positive() }).optional(),
+      format: z.enum(formatIds),
+      /** One or more topics, at any depth of the tree. */
+      topics: z.array(z.enum(topicIds)).min(1),
+      series: z.strictObject({ id: z.string(), part: z.number().int().positive() }).optional(),
+      /** Dog-ear posts name the book and chapter they comment on. */
+      book: z
+        .strictObject({
+          title: z.string(),
+          author: z.string(),
+          year: z.number().int(),
+          chapter: z.string().optional(),
+          url: z.url(),
+        })
+        .optional(),
+      /** Script for the vertical video made from this post (M9): hook, three beats, close. */
+      reel: z
+        .strictObject({
+          hook: z.string().max(120),
+          beats: z.array(z.string().max(160)).length(3),
+          close: z.string().max(120),
+        })
+        .optional(),
       lang: z.enum(['en', 'es']).default('en'),
       translationOf: z.string().optional(),
       draft: z.boolean().default(false),
     })
-    .refine((n) => !n.subcategory || (categories[n.category] as readonly string[]).includes(n.subcategory), {
-      message: 'subcategory must belong to its category',
-      path: ['subcategory'],
+    .refine((p) => (p.format === 'dog-ear') === Boolean(p.book), {
+      message: 'Dog-ear posts need a book, and only Dog-ear posts have one',
+      path: ['book'],
     }),
 });
 
@@ -73,4 +82,4 @@ const pages = defineCollection({
   }),
 });
 
-export const collections = { notes, profile, pages };
+export const collections = { precrease, profile, pages };

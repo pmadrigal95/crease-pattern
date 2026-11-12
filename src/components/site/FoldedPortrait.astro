@@ -207,12 +207,15 @@ const valueText = (fold: number) => fill(t.value, { photo: fold, contours: 100 -
 
   figcaption {
     margin-top: var(--space-2);
-    font: 500 var(--size-xs) var(--font-mono);
+    font: 500 var(--type-caption);
     color: var(--color-mute);
   }
 </style>
 
 <script>
+  // Self-contained on purpose (ENGINEERING.md, "Browser scripts"): with no imports Astro inlines
+  // this script, and About's LCP doesn't wait for extra requests.
+
   const MIN = 8;
   const MAX = 92;
   const REST = 39;

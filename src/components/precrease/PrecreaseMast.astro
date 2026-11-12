@@ -1,0 +1,126 @@
+---
+/**
+ * Precrease's own masthead, under the site's (decision 48, "same house, own room"): the large
+ * wordmark from the fold-out zine direction, the search, the tagline over a heavy accent rule, and
+ * the blog's sections. On the index the wordmark is the page's h1; elsewhere it links home.
+ */
+import PrecreaseMark from './PrecreaseMark.astro';
+import PrecreaseSearch from './PrecreaseSearch.astro';
+import { copy } from '../../lib/copy';
+import { publicPath } from '../../lib/url';
+
+interface Props {
+  /** The Precrease index, where the wordmark is the h1. */
+  home?: boolean;
+}
+const { home = false } = Astro.props;
+const t = copy.precrease;
+const path = publicPath(Astro.url.pathname);
+const links = [
+  { href: '/precrease', label: t.nav.latest },
+  { href: '/precrease/map', label: t.nav.map },
+  { href: '/precrease/subscribe', label: t.nav.rss },
+];
+const Word = home ? 'h1' : 'p';
+---
+
+<header class="precrease-mast" data-inspect="PrecreaseMast">
+  <div class="wrap">
+    <p class="eyebrow">
+      <PrecreaseMark size={16} />
+      <span>/precrease</span>
+    </p>
+    <div class="row">
+      <Word class="word">
+        {home ? (
+          <>
+            <span class="pre">Pre</span>
+            <span class="crease">crease</span>
+          </>
+        ) : (
+          <a href="/precrease">
+            <span class="pre">Pre</span>
+            <span class="crease">crease</span>
+          </a>
+        )}
+      </Word>
+      <PrecreaseSearch />
+    </div>
+    <p class="tagline">{`${t.tagline} ${t.description}`}</p>
+    <nav aria-label={t.name}>
+      {links.map((l) => (
+        <a href={l.href} aria-current={path === l.href ? 'page' : undefined}>
+          {l.label}
+        </a>
+      ))}
+    </nav>
+  </div>
+</header>
+
+<style>
+  .precrease-mast {
+    padding-top: var(--space-12);
+  }
+  .eyebrow {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin: 0 0 var(--space-4);
+    font: var(--type-caption);
+    color: var(--color-mute);
+  }
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--space-4) var(--space-8);
+  }
+  .word {
+    margin: 0;
+    font-family: var(--font-serif);
+    font-size: clamp(3.75rem, 11vw, 9.25rem);
+    font-variation-settings: 'opsz' 72;
+    /* 1, not tighter: the italic P's ascender would rise into the eyebrow above it. */
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+  .word a {
+    color: inherit;
+    text-decoration: none;
+  }
+  .pre {
+    font-style: italic;
+    font-weight: 300;
+  }
+  .crease {
+    font-weight: 600;
+    color: var(--color-accent);
+  }
+  .tagline {
+    max-width: 60ch;
+    margin: var(--space-6) 0 0;
+    color: var(--color-mute);
+  }
+  nav {
+    display: flex;
+    gap: var(--space-6);
+    margin-top: var(--space-6);
+    padding-top: var(--space-3);
+    border-top: var(--stroke-heavy) solid var(--color-accent);
+    font-size: var(--size-sm);
+  }
+  nav a {
+    color: var(--color-mute);
+    text-decoration: none;
+  }
+  nav a:hover,
+  nav a[aria-current='page'] {
+    color: var(--color-ink);
+  }
+  nav a[aria-current='page'] {
+    text-decoration: underline;
+    text-decoration-color: var(--color-accent-ui);
+    text-underline-offset: 0.3em;
+  }
+</style>

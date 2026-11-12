@@ -1,0 +1,75 @@
+---
+/**
+ * The whole topic tree, folded: each branch is a <details> element, so it opens and closes
+ * without JavaScript and with the keyboard. Counts include every post below a branch.
+ */
+import PrecreaseLayout from '../../layouts/PrecreaseLayout.astro';
+import { topics, type Topic } from '../../config/precrease';
+import TopicBranch, { type Branch } from '../../components/precrease/TopicBranch.astro';
+import { copy } from '../../lib/copy';
+import { getPosts } from '../../lib/precrease';
+import { childrenOf, postsUnder } from '../../lib/precrease-tree';
+
+const t = copy.precrease;
+const posts = await getPosts();
+
+const grow = (parent: string | undefined): (Branch & Topic)[] =>
+  childrenOf(topics, parent).map((topic) => ({
+    ...topic,
+    count: postsUnder(topics, posts, topic.id).length,
+    children: grow(topic.id),
+  }));
+const tree = grow(undefined);
+---
+
+<PrecreaseLayout title={`${t.map.title} · ${t.name}`} description={t.map.description}>
+  <div class="wrap">
+    <header class="head">
+      <h1>{t.map.title}</h1>
+      <p class="intro">{t.map.intro}</p>
+    </header>
+    <ul class="tree">
+      {tree.map((root) => (
+        <TopicBranch branch={root}>
+          <p class="topic-intro">{root.intro}</p>
+        </TopicBranch>
+      ))}
+    </ul>
+  </div>
+</PrecreaseLayout>
+
+<style>
+  .head {
+    padding-block: var(--space-12) var(--space-8);
+  }
+  h1 {
+    margin: 0;
+    font: 600 clamp(2.4rem, 6vw, 4.5rem) / 1 var(--font-serif);
+    font-variation-settings: 'opsz' 72;
+    letter-spacing: -0.02em;
+  }
+  .intro {
+    max-width: 56ch;
+    margin: var(--space-4) 0 0;
+    font-size: var(--size-lg);
+    color: var(--color-mute);
+  }
+  .tree {
+    margin: 0;
+    padding: var(--space-6) 0 var(--space-24);
+    list-style: none;
+    border-top: var(--stroke-heavy) solid var(--color-accent);
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--space-8) var(--space-6);
+  }
+  .tree > :global(li) {
+    border-left: var(--stroke-crease) dashed var(--color-accent-ui);
+    padding-left: var(--space-4);
+  }
+  .topic-intro {
+    margin: var(--space-2) 0 0;
+    font-size: var(--size-sm);
+    color: var(--color-mute);
+  }
+</style>

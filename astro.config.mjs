@@ -49,6 +49,7 @@ export default defineConfig({
         "object-src 'none'",
       ],
       scriptDirective: {
+        // Precrease search adds 'wasm-unsafe-eval' on its own pages only (PrecreaseSearch.astro).
         resources: ["'self'", 'https://static.cloudflareinsights.com'],
         hashes: [sha256(restoreIdentityScript), sha256(pageRevealScript)],
       },

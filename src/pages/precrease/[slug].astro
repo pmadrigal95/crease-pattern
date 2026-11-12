@@ -1,0 +1,212 @@
+---
+import { render } from 'astro:content';
+import PrecreaseLayout from '../../layouts/PrecreaseLayout.astro';
+import FoldTitle from '../../components/precrease/FoldTitle.astro';
+import PostThumb from '../../components/precrease/PostThumb.astro';
+import PostCard from '../../components/precrease/PostCard.astro';
+import { formats, topics } from '../../config/precrease';
+import { copy, fill } from '../../lib/copy';
+import { formatDate, padNumber } from '../../lib/format';
+import { creaseNumber, getPosts, postKind, topicHref, type PostSummary } from '../../lib/precrease';
+import { pathTo, related } from '../../lib/precrease-tree';
+import { readingMinutes } from '../../lib/reading';
+
+export async function getStaticPaths() {
+  const posts = await getPosts();
+  return posts.map((post) => ({ params: { slug: post.id }, props: { post, posts } }));
+}
+
+interface Props {
+  post: PostSummary;
+  posts: PostSummary[];
+}
+const { post, posts } = Astro.props;
+const { data } = post.entry;
+const { Content } = await render(post.entry);
+const t = copy.precrease;
+const number = padNumber(data.number);
+const paths = data.topics.map((id) => pathTo(topics, id));
+const others = related(topics, posts, post);
+// Search filters: a post counts under each of its topics and every ancestor of them.
+const topicFilters = [...new Set(paths.flat().map((topic) => topic.id))];
+---
+
+<PrecreaseLayout
+  title={`${data.title} · ${t.name}`}
+  description={data.description}
+  image={`/precrease/og/${post.id}.png`}
+  type="article"
+>
+  <article class="post" data-pagefind-body>
+    <div hidden data-pagefind-ignore>
+      <span data-pagefind-meta="title">{data.title}</span>
+      <span data-pagefind-meta="number">{number}</span>
+      <span data-pagefind-meta="format">{data.format}</span>
+      <span data-pagefind-filter="format">{data.format}</span>
+      {topicFilters.map((id) => (
+        <span data-pagefind-filter="topic">{id}</span>
+      ))}
+    </div>
+    <header class="wrap head">
+      <div class="text">
+        <p class="kicker" data-pagefind-ignore>
+          {creaseNumber(data.number)} · {postKind(post.entry)}
+          <span class="format-note">{formats[data.format].description}</span>
+        </p>
+        <FoldTitle text={data.title} unfold="load" />
+        <p class="lede">{data.description}</p>
+        {data.book && (
+          <p class="book">
+            {fill(t.book, { title: data.book.title, author: data.book.author, year: data.book.year })}
+            {data.book.chapter && <> · {fill(t.chapter, { chapter: data.book.chapter })}</>}
+          </p>
+        )}
+        <p class="facts" data-pagefind-ignore>
+          <time datetime={data.date.toISOString()}>{fill(t.published, { date: formatDate(data.date) })}</time>
+          {data.updated && (
+            <time datetime={data.updated.toISOString()}>
+              {fill(t.updated, { date: formatDate(data.updated) })}
+            </time>
+          )}
+          <span>{fill(t.minutes, { minutes: readingMinutes(post.entry.body ?? '') })}</span>
+        </p>
+        <nav class="topics" aria-label={t.breadcrumb} data-pagefind-ignore>
+          {paths.map((path) => (
+            <ol>
+              {path.map((topic) => (
+                <li>
+                  <a href={topicHref(topic.id)}>{topic.label}</a>
+                </li>
+              ))}
+            </ol>
+          ))}
+        </nav>
+      </div>
+      <div class="thumb">
+        <PostThumb slug={post.id} format={data.format} />
+      </div>
+    </header>
+
+    <div class="wrap">
+      <div class="prose body">
+        <Content />
+      </div>
+    </div>
+  </article>
+
+  {others.length > 0 && (
+    <section class="wrap related" aria-labelledby="related-title">
+      <h2 id="related-title">{t.related}</h2>
+      <div class="grid">
+        {others.map((p) => (
+          <PostCard post={p} headingLevel="h3" />
+        ))}
+      </div>
+    </section>
+  )}
+</PrecreaseLayout>
+
+<style>
+  .head {
+    display: grid;
+    grid-template-columns: minmax(0, 3fr) minmax(0, 1fr);
+    gap: var(--space-8);
+    align-items: end;
+    padding-block: var(--space-12) var(--space-8);
+  }
+  .head :global(.fold-title) {
+    font-size: clamp(2.4rem, 6vw, 4.75rem);
+  }
+  .format-note {
+    display: block;
+    margin-top: var(--space-1);
+  }
+  .kicker {
+    font: var(--type-caption);
+    color: var(--color-mute);
+    margin: 0 0 var(--space-4);
+  }
+  .lede {
+    margin: var(--space-6) 0 0;
+    max-width: 56ch;
+    font-size: var(--size-lg);
+    color: var(--color-mute);
+  }
+  .book {
+    margin: var(--space-3) 0 0;
+    font: italic 1.05rem var(--font-serif);
+  }
+  .facts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-4);
+    margin: var(--space-6) 0 0;
+    font: var(--type-caption);
+    color: var(--color-mute);
+  }
+  .topics {
+    display: grid;
+    gap: var(--space-1);
+    margin-top: var(--space-3);
+  }
+  .topics ol {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font: var(--type-caption);
+  }
+  .topics li + li::before {
+    content: '/';
+    margin-right: var(--space-2);
+    color: var(--color-mute);
+  }
+  .topics a {
+    color: var(--color-ink);
+    text-decoration-color: var(--color-accent-ui);
+  }
+  .thumb {
+    max-width: 240px;
+    justify-self: end;
+    width: 100%;
+  }
+  .body {
+    border-top: var(--stroke-heavy) solid var(--color-accent);
+    padding-top: var(--space-8);
+    padding-bottom: var(--space-16);
+  }
+  .body :global(h2) {
+    font-family: var(--font-serif);
+    font-variation-settings: 'opsz' 48;
+  }
+  .body :global(blockquote) {
+    margin-left: 0;
+    padding-left: var(--space-4);
+    border-left: 2px dashed var(--color-accent-ui);
+    font: italic 1.15em/1.5 var(--font-serif);
+  }
+  .related {
+    padding-block: var(--space-8) var(--space-24);
+    border-top: 1px solid var(--color-rule);
+  }
+  .related h2 {
+    font: italic 400 var(--size-2xl) var(--font-serif);
+    margin: 0 0 var(--space-8);
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: var(--space-8);
+  }
+  @media (max-width: 760px) {
+    .head {
+      grid-template-columns: 1fr;
+    }
+    .thumb {
+      justify-self: start;
+      max-width: 160px;
+    }
+  }
+</style>

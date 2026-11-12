@@ -29,4 +29,30 @@ export default [
   {
     languageOptions: { globals: { ...globals.browser, ...globals.node } },
   },
+  // Layers (ENGINEERING.md): config → lib → components → layouts → pages. Each layer imports only
+  // from the layers before it, so data and logic never depend on markup.
+  ...layer('src/config/**', ['lib', 'components', 'layouts', 'pages']),
+  ...layer('src/lib/**', ['components', 'layouts', 'pages']),
+  ...layer('src/components/**', ['layouts', 'pages']),
+  ...layer('src/layouts/**', ['pages']),
 ];
+
+/** Forbids `files` from importing any of the `later` layers. */
+function layer(files, later) {
+  return [
+    {
+      files: [files],
+      rules: {
+        'no-restricted-imports': [
+          'error',
+          {
+            patterns: later.map((name) => ({
+              group: [`**/${name}/**`],
+              message: `Layer rule (ENGINEERING.md): ${files.split('/')[1]} must not import from ${name}.`,
+            })),
+          },
+        ],
+      },
+    },
+  ];
+}
