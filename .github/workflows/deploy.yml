@@ -37,6 +37,13 @@ jobs:
           # Full history: the Inspector manifest reads each file's last change from git.
           fetch-depth: 0
       # Uses only Node's standard library, so the runner's own Node is enough here.
+      # The reader-count database must exist before production uses it (ADR 0007, setup step 1).
+      - name: D1 database configured
+        run: |
+          if grep -q 'REPLACE_WITH_THE_ID' wrangler.jsonc; then
+            echo "::error::wrangler.jsonc still has the placeholder database_id. See docs/decisions/0007-reader-counts.md."
+            exit 1
+          fi
       - name: Anything to publish today?
         id: due
         if: github.event_name == 'schedule'
@@ -56,9 +63,12 @@ jobs:
         if: steps.due.outputs.publish != 'false'
         with:
           name: site
+          # The Worker's source travels with the site: it has no npm dependencies, so wrangler
+          # bundles it in the deploy job without installing anything.
           path: |
             dist
             wrangler.jsonc
+            worker
           if-no-files-found: error
           retention-days: 1
 

@@ -24,6 +24,12 @@ export interface SiteConfig {
   webAnalytics: { token: string; hosts: string[] };
   /** The public source repository: footer links, the home page and each post's change history. */
   repository: string;
+  /**
+   * Comments on Precrease posts, through giscus (GitHub Discussions), loaded only when a reader
+   * asks for them. null keeps comments off. The ids come from https://giscus.app after
+   * Discussions is enabled on the repository; they are public by design.
+   */
+  comments: { repo: string; repoId: string; category: string; categoryId: string } | null;
 }
 
 const siteConfig: SiteConfig = {
@@ -35,6 +41,7 @@ const siteConfig: SiteConfig = {
     hosts: ['crease-pattern.pablomadrigal-1995.workers.dev'],
   },
   repository: 'https://github.com/pmadrigal95/crease-pattern',
+  comments: null,
 };
 
 export default siteConfig;

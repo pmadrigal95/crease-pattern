@@ -1,0 +1,341 @@
+---
+/**
+ * The end of a Precrease post (M3a.3, decisions 37 and 48): its public counts (views and reads
+ * to the end), a "This helped" button, sharing without widgets, and comments on request.
+ *
+ * - Counts come from the site's own Worker (/api/stats, worker/stats.ts): totals per post, no
+ *   cookies, no IDs. With Global Privacy Control or Do Not Track on, this page doesn't report the
+ *   view or the read; it still shows the totals. "This helped" is something you press, so it
+ *   always counts, once per browser (remembered in local storage as `pm.helped`).
+ * - Without JavaScript, or if the API doesn't answer, the counts and the button stay hidden and
+ *   the share links still work: they are plain links.
+ * - Comments (giscus) load nothing until the reader presses the button; only then does this page
+ *   allow giscus.app in its CSP and fetch it. Off while site.config.ts has no comments config.
+ */
+import site from '../../../site.config';
+import { copy } from '../../lib/copy';
+
+interface Props {
+  slug: string;
+  title: string;
+  url: string;
+  minutes: number;
+}
+const { slug, title, url, minutes } = Astro.props;
+const t = copy.precrease.readers;
+const comments = site.comments;
+if (comments) {
+  Astro.csp?.insertScriptResource('https://giscus.app');
+  Astro.csp?.insertDirective('frame-src https://giscus.app');
+}
+const encoded = encodeURIComponent(url);
+const shareLinks = [
+  { label: 'LinkedIn', href: `https://www.linkedin.com/sharing/share-offsite/?url=${encoded}` },
+  { label: 'X', href: `https://x.com/intent/post?url=${encoded}&text=${encodeURIComponent(title)}` },
+  { label: 'Bluesky', href: `https://bsky.app/intent/compose?text=${encodeURIComponent(`${title} ${url}`)}` },
+];
+---
+
+<section
+  class="readers"
+  aria-labelledby="readers-title"
+  data-readers
+  data-slug={slug}
+  data-minutes={minutes}
+  data-views={JSON.stringify(t.views)}
+  data-reads={JSON.stringify(t.reads)}
+  data-helped-count={JSON.stringify(t.helpedCount)}
+  data-copied={t.copied}
+  data-thanks={t.thanks}
+  data-inspect="PostReaders"
+>
+  <h2 id="readers-title" class="sr-only">
+    {t.heading}
+  </h2>
+
+  <div class="row" data-stats hidden>
+    <button type="button" class="helped" aria-pressed="false" data-helped>
+      <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+        <path d="M2 9 L8 2 L14 9 M8 2 V15" />
+      </svg>
+      <span>{t.helped}</span>
+      <span class="helped-count" data-helped-count-text></span>
+    </button>
+    <p class="counts" data-counts></p>
+  </div>
+
+  <div class="row share">
+    <p class="label">{t.share}</p>
+    <button type="button" class="action" data-copy={url} hidden>
+      {t.copy}
+    </button>
+    <button type="button" class="action" data-native-share={url} data-title={title} hidden>
+      {t.nativeShare}
+    </button>
+    {shareLinks.map((link) => (
+      <a class="action" href={link.href} target="_blank" rel="noopener noreferrer">
+        {link.label}
+      </a>
+    ))}
+  </div>
+
+  {comments && (
+    <div class="comments">
+      <button
+        type="button"
+        class="action"
+        data-comments
+        data-repo={comments.repo}
+        data-repo-id={comments.repoId}
+        data-category={comments.category}
+        data-category-id={comments.categoryId}
+      >
+        {t.comments}
+      </button>
+      <p class="note">{t.commentsNote}</p>
+      <div class="giscus" data-giscus></div>
+    </div>
+  )}
+
+  <p class="status" role="status" aria-live="polite" data-status></p>
+  <span class="sentinel" aria-hidden="true" data-read-sentinel></span>
+</section>
+
+<style>
+  .readers {
+    display: grid;
+    gap: var(--space-6);
+    padding-block: var(--space-8);
+    border-top: 1px solid var(--color-rule);
+  }
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-3) var(--space-4);
+  }
+  .row[hidden] {
+    display: none;
+  }
+  .helped {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: 2.75rem;
+    padding: 0 var(--space-4);
+    border: 1px solid var(--color-rule);
+    border-radius: var(--radius-pill);
+    background: var(--color-surface);
+    color: var(--color-ink);
+    font: 600 var(--size-sm) var(--font-sans);
+    cursor: pointer;
+    transition:
+      background-color var(--motion-fast) var(--motion-ease-out),
+      border-color var(--motion-fast) var(--motion-ease-out);
+  }
+  .helped svg {
+    width: 1rem;
+    height: 1rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .helped:hover {
+    border-color: var(--color-mute);
+  }
+  .helped[aria-pressed='true'] {
+    border-color: var(--color-accent);
+    background: var(--color-accent);
+    color: var(--color-bg);
+    cursor: default;
+  }
+  .helped-count {
+    font: var(--type-caption);
+    opacity: 0.8;
+  }
+  .counts,
+  .label,
+  .note,
+  .status {
+    margin: 0;
+    font: var(--type-caption);
+    color: var(--color-mute);
+  }
+  .label {
+    min-width: 3.5rem;
+  }
+  .action {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.25rem;
+    padding: 0 var(--space-3);
+    border: 1px solid var(--color-rule);
+    border-radius: var(--radius-pill);
+    background: transparent;
+    color: var(--color-ink);
+    font: var(--size-sm) var(--font-sans);
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .action[hidden] {
+    display: none;
+  }
+  .action:hover {
+    border-color: var(--color-mute);
+  }
+  .helped:focus-visible,
+  .action:focus-visible {
+    outline: 2px solid var(--color-accent-ui);
+    outline-offset: 2px;
+  }
+  .comments {
+    display: grid;
+    gap: var(--space-2);
+    justify-items: start;
+  }
+  .giscus:empty {
+    display: none;
+  }
+  .giscus {
+    width: 100%;
+  }
+  .status:empty {
+    display: none;
+  }
+  .sentinel {
+    display: block;
+    height: 1px;
+  }
+</style>
+
+<script>
+  // Self-contained (ENGINEERING.md, "Browser scripts"): reader counts, "This helped", sharing and
+  // comments on request. Every failure is quiet: the counts simply stay hidden.
+  type Forms = { zero: string; one: string; many: string };
+  const root = document.querySelector<HTMLElement>('[data-readers]');
+  if (root) {
+    const slug = root.dataset.slug ?? '';
+    const api = `/api/stats/${slug}`;
+    const number = new Intl.NumberFormat('en-US');
+    const forms = (key: string): Forms => JSON.parse(root.dataset[key] ?? '{}') as Forms;
+    const say = (n: number, f: Forms) =>
+      n === 0 ? f.zero : n === 1 ? f.one : f.many.replace('{count}', number.format(n));
+    const status = root.querySelector<HTMLElement>('[data-status]')!;
+    const nav = navigator as Navigator & { globalPrivacyControl?: boolean };
+    const quiet = nav.globalPrivacyControl === true || navigator.doNotTrack === '1';
+    const send = (event: string) =>
+      fetch(`${api}/${event}`, { method: 'POST', keepalive: true }).catch(() => undefined);
+
+    // Remembered per browser so the button can't be pressed twice; never sent anywhere.
+    const KEY = 'pm.helped';
+    const helpedBefore = (): string[] => {
+      try {
+        return JSON.parse(localStorage.getItem(KEY) ?? '[]') as string[];
+      } catch {
+        return [];
+      }
+    };
+
+    const helped = root.querySelector<HTMLButtonElement>('[data-helped]')!;
+    const helpedText = root.querySelector<HTMLElement>('[data-helped-count-text]')!;
+    let helpedCount = 0;
+    const showHelped = () => (helpedText.textContent = say(helpedCount, forms('helpedCount')));
+    const markHelped = () => helped.setAttribute('aria-pressed', 'true');
+    if (helpedBefore().includes(slug)) markHelped();
+    helped.addEventListener('click', () => {
+      if (helped.getAttribute('aria-pressed') === 'true') return;
+      markHelped();
+      helpedCount += 1;
+      showHelped();
+      status.textContent = root.dataset.thanks ?? '';
+      try {
+        localStorage.setItem(KEY, JSON.stringify([...helpedBefore(), slug]));
+      } catch {
+        /* Storage blocked: the button still counts once on this page. */
+      }
+      void send('helped');
+    });
+
+    fetch(api)
+      .then((r) => (r.ok ? (r.json() as Promise<{ views: number; reads: number; helped: number }>) : null))
+      .then((c) => {
+        if (!c) return;
+        root.querySelector<HTMLElement>('[data-counts]')!.textContent =
+          `${say(c.views, forms('views'))} · ${say(c.reads, forms('reads'))}`;
+        helpedCount = c.helped;
+        showHelped();
+        root.querySelector<HTMLElement>('[data-stats]')!.hidden = false;
+      })
+      .catch(() => undefined);
+
+    if (!quiet) {
+      // A view: the page was opened. A read: the reader reached the end after spending at least
+      // a third of the estimated reading time on the page (and never less than 20 seconds).
+      void send('view');
+      const needed = Math.max(20, Number(root.dataset.minutes ?? 1) * 20);
+      let active = 0;
+      let atEnd = false;
+      let counted = false;
+      const tick = window.setInterval(() => {
+        if (document.visibilityState === 'visible') active += 1;
+        if (!counted && atEnd && active >= needed) {
+          counted = true;
+          window.clearInterval(tick);
+          void send('read');
+        }
+      }, 1000);
+      new IntersectionObserver(([entry]) => {
+        if (entry?.isIntersecting) atEnd = true;
+      }).observe(root.querySelector('[data-read-sentinel]')!);
+    }
+
+    const copyButton = root.querySelector<HTMLButtonElement>('[data-copy]')!;
+    if (navigator.clipboard) {
+      copyButton.hidden = false;
+      copyButton.addEventListener('click', () => {
+        void navigator.clipboard.writeText(copyButton.dataset.copy ?? location.href).then(() => {
+          status.textContent = root.dataset.copied ?? '';
+        });
+      });
+    }
+    const shareButton = root.querySelector<HTMLButtonElement>('[data-native-share]')!;
+    if ('share' in navigator) {
+      shareButton.hidden = false;
+      shareButton.addEventListener('click', () => {
+        navigator
+          .share({
+            title: shareButton.dataset.title ?? document.title,
+            url: shareButton.dataset.nativeShare ?? location.href,
+          })
+          .catch(() => undefined);
+      });
+    }
+
+    const commentsButton = root.querySelector<HTMLButtonElement>('[data-comments]');
+    commentsButton?.addEventListener('click', () => {
+      const d = commentsButton.dataset;
+      const script = document.createElement('script');
+      script.src = 'https://giscus.app/client.js';
+      script.async = true;
+      script.crossOrigin = 'anonymous';
+      const attrs: Record<string, string> = {
+        'data-repo': d.repo ?? '',
+        'data-repo-id': d.repoId ?? '',
+        'data-category': d.category ?? '',
+        'data-category-id': d.categoryId ?? '',
+        'data-mapping': 'pathname',
+        'data-strict': '1',
+        'data-reactions-enabled': '0',
+        'data-input-position': 'top',
+        'data-theme': 'preferred_color_scheme',
+        'data-lang': 'en',
+        'data-loading': 'eager',
+      };
+      for (const [k, v] of Object.entries(attrs)) script.setAttribute(k, v);
+      root.querySelector('[data-giscus]')!.append(script);
+      commentsButton.hidden = true;
+    });
+  }
+</script>
