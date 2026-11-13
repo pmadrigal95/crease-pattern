@@ -26,4 +26,10 @@ export const jsBudgetKb = {
   page: 15,
   /** What those scripts can import later: today the Inspector. */
   onDemand: 32,
+  /**
+   * Everything one interactive essay (a post public/_headers isolates) can run, Web Workers
+   * included: Crease No. 002 measured 42 KB when this was set. Checked on preview builds, where
+   * drafts exist; a production build skips it until the essay is out.
+   */
+  essay: 45,
 } as const;

@@ -10,6 +10,9 @@ export default defineConfig({
   site: siteConfig.url,
   // Static HTML by default. Vue powers the Inspector only, loaded when a visitor opens it.
   output: 'static',
+  // Code blocks: GitHub's dark theme, the "default" variant, whose comments pass WCAG AA contrast
+  // (the plain variant's grey comments measure 3:1).
+  markdown: { shikiConfig: { theme: 'github-dark-default' } },
   integrations: [vue(), mdx(), sitemap()],
   // The Inspector uses Vue's Composition API only: drop the Options API and devtools hooks from the
   // production runtime to keep the panel inside its 30 KB budget.
