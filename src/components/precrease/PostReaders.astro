@@ -25,7 +25,9 @@ const { slug, title, url, minutes } = Astro.props;
 const t = copy.precrease.readers;
 const comments = site.comments;
 if (comments) {
+  // giscus brings its script, its iframe and one stylesheet that sizes the iframe.
   Astro.csp?.insertScriptResource('https://giscus.app');
+  Astro.csp?.insertStyleResource('https://giscus.app');
   Astro.csp?.insertDirective('frame-src https://giscus.app');
 }
 const encoded = encodeURIComponent(url);

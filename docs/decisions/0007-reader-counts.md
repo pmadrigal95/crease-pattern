@@ -49,3 +49,7 @@ Run with your own Cloudflare login; no token goes into the repository or CI.
   counts quietly if the API fails.
 - Public numbers can be small for a long time. That's accepted (decision 49): they are real.
 - Deleting the D1 database resets the counts; nothing else depends on it.
+- giscus needs its script, its iframe and one stylesheet, so posts add `giscus.app` to `script-src`,
+  `frame-src` and `style-src`. `astro.config.mjs` declares `'self'` for styles explicitly: Astro's
+  `insertStyleResource()` replaces the default list instead of extending it, and without that a post loses
+  its own CSS.

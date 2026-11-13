@@ -55,12 +55,20 @@ each post. With Global Privacy Control or Do Not Track on, the first two events 
 **Sharing.** The LinkedIn, X and Bluesky buttons under a post are plain links. Nothing from those services
 loads until you click one, and then you are on their site, under their privacy policy.
 
+**Comments.** Posts have a "Show comments" button. Until you press it, nothing about comments loads. When
+you do, the page loads [giscus](https://giscus.app/), which shows the post's thread from this site's GitHub
+Discussions: your browser then contacts `giscus.app` and GitHub, under the
+[GitHub Privacy Statement](https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement).
+Reading needs no account. To comment, you sign in with GitHub, and giscus keeps that sign-in inside its own
+comment frame, not on this site. Your comment is public, on GitHub, under your GitHub name.
+
 **Preferences.** The site reads three values from your browser's local storage: `pm.direction` and
 `pm.theme`, to show the visual identity and theme you picked, and `pm.helped`, the posts where you pressed
 "This helped", so the button doesn't count you twice. They are written only when you do those things, they
 never leave your device, and clearing your site data removes them.
 
-**Fonts and everything else** are served from this site itself. No other third party is contacted.
+**Fonts and everything else** are served from this site itself. No other third party is contacted unless you
+open the comments or follow a share link.
 
 ## Why, and your rights
 

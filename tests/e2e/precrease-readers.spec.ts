@@ -69,3 +69,29 @@ test.describe('without JavaScript', () => {
       await expect(readers.getByRole('link', { name })).toBeVisible();
   });
 });
+
+test('comments load nothing from giscus until the reader asks', async ({ page }) => {
+  const giscus: string[] = [];
+  await page.route('https://giscus.app/**', (route) => {
+    giscus.push(route.request().url());
+    return route.abort();
+  });
+  await fakeApi(page);
+  await page.goto(post);
+  await page.waitForLoadState('networkidle');
+  expect(giscus).toEqual([]);
+
+  await page.getByRole('button', { name: 'Show comments' }).click();
+  await expect.poll(() => giscus).toContain('https://giscus.app/client.js');
+  await expect(page.getByRole('button', { name: 'Show comments' })).toBeHidden();
+});
+
+test('only post pages allow giscus in their Content Security Policy', async ({ page }) => {
+  const csp = async (path: string) => {
+    await page.goto(path);
+    return page.locator('meta[http-equiv="content-security-policy"]').getAttribute('content');
+  };
+  expect(await csp(post)).toMatch(/frame-src https:\/\/giscus\.app/);
+  expect(await csp(post)).toMatch(/style-src 'self' https:\/\/giscus\.app/);
+  expect(await csp('/')).not.toContain('giscus');
+});

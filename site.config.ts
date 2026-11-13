@@ -41,7 +41,12 @@ const siteConfig: SiteConfig = {
     hosts: ['crease-pattern.pablomadrigal-1995.workers.dev'],
   },
   repository: 'https://github.com/pmadrigal95/crease-pattern',
-  comments: null,
+  comments: {
+    repo: 'pmadrigal95/crease-pattern',
+    repoId: 'R_kgDOVVicpg',
+    category: 'Precrease',
+    categoryId: 'DIC_kwDOVVicps4DLAZ6',
+  },
 };
 
 export default siteConfig;
