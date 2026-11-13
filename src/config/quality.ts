@@ -13,6 +13,7 @@ export const auditedPages = [
   '/privacy',
   '/precrease',
   '/precrease/map',
+  '/precrease/the-work-before-the-shape',
   '/precrease/topics/frontend',
   '/precrease/subscribe',
   '/this-page-does-not-exist',
