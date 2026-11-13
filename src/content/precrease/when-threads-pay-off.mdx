@@ -18,40 +18,142 @@ import GustafsonDemo from '../../components/threads/GustafsonDemo.astro';
 
 <ThreadsRun />
 
-[Draft] Opening: this is a falling-blocks solver searching every move three pieces ahead, split four ways across your device's cores. The table shows what yours does. The rest of the essay is why.
+This is a solver for a falling-blocks puzzle. Before it places a piece, it tries every way to place the next four
+and keeps the best. The button runs that search on your device in four ways: with one worker, and split across
+several.<MarginNote>A **worker** is a separate thread of work the browser runs at the same time as the page. More workers can mean more of your processor's cores busy at once.</MarginNote>
+On my desktop, the fastest way finished about 8.6 times sooner than one worker. The table shows what yours does.
+
+The rest of this post is about why the same idea can also make code slower. That's what happened the first time I
+wrote this solver.
 
 ## What the solver does
 
-[Draft] The puzzle in plain words, what searching three pieces ahead means, and the four things the score looks at.
+The board is ten columns wide and twenty rows tall. Each of the seven pieces is made of four squares and drops
+straight down. A full row disappears.
+
+To judge a move, the solver looks at the board it leaves and counts four things: how tall the columns are, how
+many holes are buried, how bumpy the surface is, and how many rows it cleared. It's a classic rule of thumb for
+this puzzle.<MarginNote>Programmers call a rule of thumb like this a **heuristic**: a quick way to rate a move that is usually right, without playing the game to the end.</MarginNote>
+
+The work comes from looking ahead. The first piece here can land in 34 places. Each of those leaves a new board
+where the next piece has its own options, and it keeps multiplying. Looking four pieces ahead means trying 344,522
+placements in total. That is what the button splits up.
 
 ## Four ways to split the work
 
 <ThreadsTimeline />
 
-[Draft] One short paragraph per model, and the timeline.
+Each of the first piece's 34 placements is a task: search everything after it and report the best score. Each
+bar above is a task, and each row is a worker. Here are the four ways to hand out the tasks:
+
+- **One worker** does all 34 in order. It's the baseline.
+- **Message passing** gives each worker its own copy of the board and a fixed share of tasks. Workers share
+  nothing; they send back their results.
+- **Fork-join** keeps one board that every worker can read, and gives each worker a fixed share.
+- **Shared memory with a queue** keeps that same board, but no fixed shares. A worker that finishes takes the next
+  task from a list, so a fast worker simply does more.<MarginNote>Three of the four mirror tools used in C: **MPI** (message passing), **OpenMP** (fork-join) and **pthreads** (shared memory). One worker has no tool of its own; it's the baseline the other three are measured against.</MarginNote>
+
+On my desktop the queue won all three of my runs, by a little: 8.6 times faster than one worker, against 7.6 for
+message passing and 7.4 for fork-join. Notice where the rows end, though. Thirty-four tasks for sixteen workers is
+about two each, and whoever gets a third finishes last while the others wait.
 
 ## The version I wrote while studying this
 
-[Draft] The 2022 table and the column loop.
+In 2022 I wrote this solver for a concurrency course (CI0117, Universidad de Costa Rica): first one plain version,
+then three that split the work. These are the times I measured, one run each:
+
+| Version  | Threads | Time    | Speedup |
+| -------- | ------- | ------- | ------- |
+| Plain    | 1       | 0.036 s | 1.00    |
+| pthreads | 8       | 0.058 s | 0.62    |
+| pthreads | 16      | 0.046 s | 0.78    |
+| OpenMP   | 8       | 0.065 s | 0.56    |
+| OpenMP   | 16      | 0.450 s | 0.08    |
+| MPI      | 3       | 0.933 s | 0.04    |
+| MPI      | 5       | 0.028 s | 1.30    |
+| MPI      | 10      | 0.374 s | 0.10    |
+
+A speedup below 1 means slower than the plain version.<MarginNote>**Speedup** is how many times faster something got: plain time divided by new time. 2 means twice as fast; 0.5 means twice as slow.</MarginNote>
+Almost every split was slower. The one exception, MPI with five, is a single run between two much slower ones, so
+I read it as noise.
+
+Three things worked against those threads.
+
+**There was very little work.** That solver chose one piece at a time, and the whole run took 36 milliseconds.
+Starting threads and waiting for them costs time too, and with so little work there was almost nothing to win.
+Move the slider to add a cost per thread:
 
 <AmdahlDemo />
 
+With no cost, more threads always help. With a couple of milliseconds each, the curve peaks early and then falls
+below 1.<MarginNote>This limit is known as **Amdahl's law**: the parts you can't split, and the cost of splitting, decide how much faster you can get.</MarginNote>
+The 2022 numbers live on that falling side.
+
+**The work came in ten pieces.** Each thread took whole columns of the board, in turn. This is my loop from the
+pthreads version:
+
+```c
+// Copyright 2022 Pablo Madrigal. From the pthreads version, Tarea02.
+void insert_by_col(private_data_t *private_data,  figure_t *figure) {
+    // Mapeo Ciclico
+    for (size_t col = private_data->thread_num;
+    col < private_data->input_data->columns;
+    col = col + private_data->num_threads) {
+        validate_insert_figure(private_data, figure, col);
+    }
+}
+```
+
+The board has ten columns, so there were only ten pieces of work, however many threads I started:
+
 <GranularityDemo />
+
+**The threads kept stopping each other.** Every attempt made a fresh copy of the board, every better score was
+saved behind a lock, and every attempt printed a line to the console.<MarginNote>A **lock** lets only one thread at a time touch something shared. The console works the same way: threads take turns writing to it.</MarginNote>
+Each of those is small, but they ran thousands of times in those 36 milliseconds.
 
 ## Give it real work
 
+The new solver checks every combination of the next pieces, so its work grows fast with how far it looks. This
+demo keeps the same device and workers and changes only that:
+
 <GustafsonDemo />
 
-[Draft] Gustafson, with the depth control.
+On my desktop, one piece ahead is 0.8: slower than one worker, just like 2022. Two ahead is 2.2 times faster,
+three is 6.2 and four is 8.5. The threads didn't change. The work grew until the cost of using them stopped
+mattering.<MarginNote>This is **Gustafson's law**, Amdahl's other side: give each thread more work, and the fixed costs shrink in comparison.</MarginNote>
 
-## The decisions that make it scale
+## What makes the new one scale
 
-[Draft] Bitboards, one pool, tasks as indices, a queue on one counter, one reduction, and measuring before optimizing.
+More work is half of the change. The new solver also avoids wasting that work:
+
+- **A board that's cheap to copy.** Each row is stored as one number, so copying the whole board is copying twenty
+  numbers. In 2022 every attempt built a new board in memory.
+- **Workers started once.** They start the first time you press a button and every demo here reuses them. In
+  2022, threads were started again for every piece.
+- **No waiting in line.** In the queue version, taking the next task is a single step on a shared counter, and
+  each task writes its result in its own place. Nobody waits for a lock while searching.
+- **Measuring before optimizing.** I expected a cache of boards already searched to help. On this board it found
+  none to reuse and made the search about twice as slow, so it's off.
 
 ## Before you add threads
 
-[Draft] The checklist, framed as what I check now.
+This is what I check now, before splitting work in any language, including Web Workers on a product page:
+
+- **How long does it take on one thread?** If it's a few milliseconds, starting workers may cost more than you save.
+- **How many pieces of work are there?** Ten pieces for sixteen threads leaves six with nothing to do.
+- **What do the workers share?** Every lock, new allocation or console line inside the loop is a place to wait.
+- **Which worker finishes last?** The whole run is as slow as the slowest one.
 
 ## Run it yourself
 
-[Draft] How it was measured, what changes between devices, Safari, and where the code lives.
+My numbers come from an Intel Core i7-12700K (12 cores, 20 threads) in Chrome, with 16 workers, looking four
+pieces ahead. Each run is the middle value of five, after one warm-up run. Your numbers will differ, and the
+buttons show them.
+
+The demos use as many workers as your device has cores, up to sixteen. Devices with fewer than six cores, like
+most phones, look three pieces ahead so the demos stay quick. Safari doesn't allow shared memory on this page, so
+it runs the one-worker and message-passing versions only.
+
+The solver, the four versions and their tests are in the [repository](https://github.com/pmadrigal95/crease-pattern/tree/main/src/lib/threads).
+If your device gives numbers that surprise you, I'd be glad to hear about them.

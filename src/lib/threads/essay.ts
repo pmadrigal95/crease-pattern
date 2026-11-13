@@ -112,3 +112,16 @@ export function speedupPath(
     .join('');
   return { d, x, y };
 }
+
+/**
+ * What the opening demo shows before anyone presses Run (and all that readers without JavaScript
+ * see): Pablo's desktop, the median of three runs, each the median of five after a warm-up.
+ * Measured 2026-11-13 on a Cloudflare preview of the production build.
+ */
+export const MEASURED = {
+  device: 'an Intel Core i7-12700K (12 cores, 20 threads)',
+  browser: 'Chrome',
+  workers: 16,
+  depth: 4,
+  ms: { serial: 135.8, messages: 17.8, 'fork-join': 18.3, shared: 15.8 },
+} as const;

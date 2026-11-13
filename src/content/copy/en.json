@@ -301,6 +301,8 @@
       "unavailable": "Not available in this browser",
       "needsJs": "The demos on this page run in your browser and need JavaScript.",
       "bestMove": "The move the solver chose",
+      "measuredResult": "On my desktop: {model}, {times}× faster than one worker.",
+      "measuredNote": "Measured on {device} in {browser}, with {workers} workers, four pieces ahead. Press Run to time your own device.",
       "modelLabel": "Model",
       "summary": "{model}: {ms} ms · {tasks} tasks per worker",
       "legendWork": "Searching a task",
