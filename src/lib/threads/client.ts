@@ -7,8 +7,16 @@ import { median } from './essay';
 import { ThreadPool, type RunReport } from './pool';
 import { needsSharedMemory, sharedMemoryAvailable, type Model, type Problem } from './protocol';
 
-/** Workers for this device: its logical cores, at least 2 and at most 8. */
-export const poolSize = (): number => Math.min(8, Math.max(2, navigator.hardwareConcurrency || 2));
+/** Workers for this device: its logical cores, at least 2 and at most 16. */
+export const poolSize = (): number => Math.min(16, Math.max(2, navigator.hardwareConcurrency || 2));
+
+/**
+ * How far ahead the essay's main demos search. Four pieces (344,522 placements on the essay board) gives runs long
+ * enough for stable medians on a desktop; devices with few cores (most phones) search three, so
+ * the demo stays quick there. Measured on an i7-12700K, depth 3 ran in about a millisecond in
+ * parallel, which is mostly noise.
+ */
+export const essayDepth = (): number => ((navigator.hardwareConcurrency || 2) >= 6 ? 4 : 3);
 
 let pool: ThreadPool | null = null;
 export const getPool = (): ThreadPool => (pool ??= new ThreadPool(poolSize()));
