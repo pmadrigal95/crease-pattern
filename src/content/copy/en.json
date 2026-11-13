@@ -272,7 +272,8 @@
       "copied": "Link copied",
       "more": "More…",
       "comments": "Comments",
-      "commentsNote": "From GitHub Discussions · loads when you open it"
+      "commentsNote": "From GitHub Discussions · loads when you open it",
+      "commentsElsewhere": "On GitHub Discussions, for this post"
     },
     "toc": "On this page",
     "history": "Change history on GitHub"

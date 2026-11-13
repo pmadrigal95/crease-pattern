@@ -55,3 +55,37 @@ describe('guards', () => {
     expect(found, 'Remove it, or use console.error for a real failure the visitor cannot see').toEqual([]);
   });
 });
+
+describe('cross-origin isolation', () => {
+  // A post with `isolated: true` runs code on several threads and needs SharedArrayBuffer, which
+  // only exists on pages served with COOP and COEP. Forgetting the headers breaks the essay
+  // silently (it falls back to one thread), so every such post must have its block.
+  const headers = readFileSync(join(SRC, '..', 'public', '_headers'), 'utf8');
+  const blockFor = (path: string) => {
+    const lines = headers.split('\n');
+    const start = lines.findIndex((l) => l.trim() === path);
+    if (start < 0) return '';
+    const end = lines.findIndex((l, i) => i > start && l.length > 0 && !/^\s/.test(l));
+    return lines.slice(start + 1, end < 0 ? undefined : end).join('\n');
+  };
+  const postsDir = join(SRC, 'content', 'precrease');
+  const isolated = readdirSync(postsDir)
+    .filter((f) => /\.mdx?$/.test(f))
+    .filter((f) =>
+      /^isolated:\s*true\b/m.test(readFileSync(join(postsDir, f), 'utf8').split(/^---\s*$/m)[1] ?? ''),
+    )
+    .map((f) => f.replace(/\.mdx?$/, ''));
+
+  test.each(isolated.length ? isolated : ['(none yet)'])('%s is served cross-origin isolated', (slug) => {
+    if (slug === '(none yet)') return;
+    const block = blockFor(`/precrease/${slug}`);
+    expect(block, `Add a /precrease/${slug} block to public/_headers`).toMatch(
+      /Cross-Origin-Opener-Policy: same-origin/,
+    );
+    expect(block).toMatch(/Cross-Origin-Embedder-Policy: credentialless/);
+  });
+
+  test('built assets carry an embedder policy, so workers started by isolated pages are allowed', () => {
+    expect(blockFor('/_astro/*')).toMatch(/Cross-Origin-Embedder-Policy: credentialless/);
+  });
+});

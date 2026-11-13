@@ -10,11 +10,18 @@
 /speculation-rules.json
   Content-Type: application/speculationrules+json
 
+# Built assets. The embedder policy matters only for Web Workers: a worker started by an isolated
+# page must carry one too. On every other page it has no effect.
 /_astro/*
   Cache-Control: public, max-age=31536000, immutable
+  Cross-Origin-Embedder-Policy: credentialless
+  Cross-Origin-Resource-Policy: same-origin
 
-# Cross-origin isolation (SharedArrayBuffer for real threads) only where the
-# Threads essay needs it, so the rest of the site can embed third-party resources.
-/notes/threads/*
+# Cross-origin isolation (SharedArrayBuffer for real threads), only on the posts that set
+# `isolated: true`; tests/unit/guards.test.ts checks every such post has its block here.
+# `credentialless` rather than `require-corp`: third-party scripts such as Cloudflare Web
+# Analytics still load (without credentials). Safari doesn't support it, so there the page isn't
+# isolated and the essay runs the models that don't need shared memory.
+/precrease/parallel-code-that-actually-scales
   Cross-Origin-Opener-Policy: same-origin
-  Cross-Origin-Embedder-Policy: require-corp
+  Cross-Origin-Embedder-Policy: credentialless

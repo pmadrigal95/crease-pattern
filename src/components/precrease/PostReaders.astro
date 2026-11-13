@@ -17,7 +17,8 @@
  *   script only adds Copy and the system share menu ("More…") where they exist.
  * - Without JavaScript, or if the API doesn't answer, the counts and "This helped" stay hidden.
  * - Comments (giscus) load nothing until the reader opens them; only then does this page allow
- *   giscus.app in its CSP and fetch it. Off while site.config.ts has no comments config.
+ *   giscus.app in its CSP and fetch it. Off while site.config.ts has no comments config. On an
+ *   isolated post they are a link to GitHub instead, since isolation blocks the giscus frame.
  */
 import site from '../../../site.config';
 import { copy, fill } from '../../lib/copy';
@@ -29,10 +30,19 @@ interface Props {
   minutes: number;
   /** "Crease No. 001", for the card's kicker. */
   number: string;
+  /**
+   * A cross-origin isolated post (content.config.ts, `isolated`): giscus can't load inside it,
+   * so comments become a link to the post's Discussions category on GitHub.
+   */
+  isolated?: boolean | undefined;
 }
-const { slug, title, url, minutes, number } = Astro.props;
+const { slug, title, url, minutes, number, isolated = false } = Astro.props;
 const t = copy.precrease.readers;
-const comments = site.comments;
+const comments = isolated ? null : site.comments;
+const commentsLink =
+  isolated && site.comments
+    ? `https://github.com/${site.comments.repo}/discussions/categories/${site.comments.category.toLowerCase()}`
+    : null;
 if (comments) {
   // giscus brings its script, its iframe and one stylesheet that sizes the iframe.
   Astro.csp?.insertScriptResource('https://giscus.app');
@@ -161,6 +171,20 @@ const display = url.replace(/^https?:\/\//, '');
       </button>
     </p>
   </div>
+
+  {commentsLink && (
+    <div class="comments-block">
+      <a class="comments" href={commentsLink} target="_blank" rel="noopener noreferrer">
+        <span>
+          <b>{t.comments}</b>
+          <small>{t.commentsElsewhere}</small>
+        </span>
+        <span class="chev" aria-hidden="true">
+          ↗
+        </span>
+      </a>
+    </div>
+  )}
 
   {comments && (
     <div class="comments-block">
@@ -364,6 +388,7 @@ const display = url.replace(/^https?:\/\//, '');
     margin-top: var(--space-4);
   }
   .comments {
+    text-decoration: none;
     display: flex;
     align-items: center;
     gap: var(--space-3);
