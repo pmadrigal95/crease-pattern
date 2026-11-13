@@ -20,11 +20,11 @@ import GustafsonDemo from '../../components/threads/GustafsonDemo.astro';
 
 This is a solver for a falling-blocks puzzle. Before it places a piece, it tries every way to place the next four
 and keeps the best. The button runs that search on your device in four ways: with one worker, and split across
-several.<MarginNote>A **worker** is a separate thread of work the browser runs at the same time as the page. More workers can mean more of your processor's cores busy at once.</MarginNote>
+several.<MarginNote>A **thread** is one line of instructions a program follows, step by step. A **core** is the part of the processor that runs a thread; most computers today have several. In the browser, a **worker** is a thread that runs beside the page, so several workers can keep several cores busy.</MarginNote>
 On my desktop, the fastest way finished about 8.6 times sooner than one worker. The table shows what yours does.
 
 The rest of this post is about why the same idea can also make code slower. That's what happened the first time I
-wrote this solver.
+wrote this solver.<MarginNote>**Concurrent** code is organized as several pieces of work that can move forward independently. **Parallel** code is concurrent code that actually runs those pieces at the same moment, on different cores. This post is about the parallel kind.</MarginNote>
 
 ## What the solver does
 
@@ -43,7 +43,7 @@ placements in total. That is what the button splits up.
 
 <ThreadsTimeline />
 
-Each of the first piece's 34 placements is a task: search everything after it and report the best score. Each
+Each of the first piece's 34 placements is a task: search everything after it and report the best score.<MarginNote>A **task** is one piece of the job that can be done on its own. Splitting work well mostly means choosing good tasks: enough of them, and of similar size.</MarginNote> Each
 bar above is a task, and each row is a worker. Here are the four ways to hand out the tasks:
 
 - **One worker** does all 34 in order. It's the baseline.
