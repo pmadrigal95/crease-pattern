@@ -316,7 +316,7 @@
       "placements": "{count} placements searched",
       "amdahlCaption": "Threads from 1 to 16, with 36 ms of work, as in 2022",
       "depthRow": "{depth} ahead",
-      "runDepths": "Run all three",
+      "runDepths": "Run all four",
       "depthReadout": "{depth} pieces ahead: {times}× faster with {workers} workers"
     },
     "toc": "On this page",

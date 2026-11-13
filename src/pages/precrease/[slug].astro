@@ -41,6 +41,7 @@ const topicFilters = [...new Set(paths.flat().map((topic) => topic.id))];
   title={`${data.title} · ${t.name}`}
   description={data.description}
   image={`/precrease/og/${post.id}.png`}
+  noindex={!post.live}
   type="article"
 >
   <div class="progress" aria-hidden="true"></div>

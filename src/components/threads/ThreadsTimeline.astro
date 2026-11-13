@@ -179,7 +179,7 @@ const t = copy.precrease.threads;
   import { fill } from '../../lib/template';
   // Type only: erased from the bundle, so the copy file still never reaches the browser.
   type ThreadsCopy = (typeof import('../../content/copy/en.json'))['precrease']['threads'];
-  import { canRun, exclusive, getPool } from '../../lib/threads/client';
+  import { canRun, essayDepth, exclusive, getPool } from '../../lib/threads/client';
   import { essayProblem } from '../../lib/threads/essay';
   import type { Model } from '../../lib/threads/protocol';
 
@@ -203,8 +203,8 @@ const t = copy.precrease.threads;
       button.disabled = true;
       const report = await exclusive(async () => {
         const pool = getPool();
-        await pool.run(model, essayProblem(3));
-        return pool.run(model, essayProblem(3));
+        await pool.run(model, essayProblem(essayDepth()));
+        return pool.run(model, essayProblem(essayDepth()));
       });
       const span = report.endedAt - report.startedAt || 1;
       const lane = 24;

@@ -1,7 +1,7 @@
 ---
 /**
  * The depth demo of the Threads essay (Crease No. 002, section 4, Gustafson): the same device and
- * the same workers, only the amount of work changes, from 1 to 3 pieces ahead. The placements
+ * the same workers, only the amount of work changes, from 1 to 4 pieces ahead. The placements
  * searched at each depth are counted at build time; the times are measured live, serial against
  * the best parallel model this browser can run.
  */
@@ -13,7 +13,7 @@ import { search } from '../../lib/threads/search';
 
 const t = copy.precrease.threads;
 const board = boardFromText(ESSAY_BOARD, 20);
-const depths = [1, 2, 3].map((depth) => ({ depth, nodes: search(board, ESSAY_PIECES, depth).nodes }));
+const depths = [1, 2, 3, 4].map((depth) => ({ depth, nodes: search(board, ESSAY_PIECES, depth).nodes }));
 ---
 
 <figure class="depths" data-gustafson data-strings={JSON.stringify(t)} data-inspect="GustafsonDemo">
@@ -144,7 +144,7 @@ const depths = [1, 2, 3].map((depth) => ({ depth, nodes: search(board, ESSAY_PIE
       button.disabled = true;
       button.textContent = t.running;
       const speeds: number[] = [];
-      for (const depth of [1, 2, 3]) {
+      for (const depth of [1, 2, 3, 4]) {
         const serial = await time('serial', essayProblem(depth));
         const fast = await time(parallel, essayProblem(depth));
         const s = speedup(serial.ms, fast.ms);
@@ -159,8 +159,8 @@ const depths = [1, 2, 3].map((depth) => ({ depth, nodes: search(board, ESSAY_PIE
           `${(s / top) * 100}%`;
       });
       readout.textContent = fill(t.depthReadout, {
-        depth: 3,
-        times: formatDecimal(speeds[2] ?? 1),
+        depth: 4,
+        times: formatDecimal(speeds[3] ?? 1),
         workers: poolSize(),
       });
       button.disabled = false;

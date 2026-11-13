@@ -232,7 +232,7 @@ const cells = Array.from({ length: ROWS }, (_, row) => {
   import { fill } from '../../lib/template';
   // Type only: erased from the bundle, so the copy file still never reaches the browser.
   type ThreadsCopy = (typeof import('../../content/copy/en.json'))['precrease']['threads'];
-  import { canRun, nextFrame, poolSize, time } from '../../lib/threads/client';
+  import { canRun, essayDepth, nextFrame, poolSize, time } from '../../lib/threads/client';
   import { essayProblem, speedup } from '../../lib/threads/essay';
   import { ROTATIONS } from '../../lib/threads/pieces';
   import { MODELS, sharedMemoryAvailable } from '../../lib/threads/protocol';
@@ -253,7 +253,7 @@ const cells = Array.from({ length: ROWS }, (_, row) => {
       button.disabled = true;
       button.textContent = t.running;
       readout.textContent = '';
-      const problem = essayProblem(3);
+      const problem = essayProblem(essayDepth());
       const times: Partial<Record<string, number>> = {};
       let chosen: { piece: string; rotation: number; x: number; y: number } | undefined;
 
