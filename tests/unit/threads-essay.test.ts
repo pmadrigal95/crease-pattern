@@ -8,7 +8,7 @@ import {
   median,
   speedup,
 } from '../../src/lib/threads/essay';
-import { rootTasks } from '../../src/lib/threads/search';
+import { rootTasks, search } from '../../src/lib/threads/search';
 
 // The arithmetic behind the Threads essay's demos (Crease No. 002).
 describe('essay helpers', () => {
@@ -53,6 +53,16 @@ describe('essay helpers', () => {
     const p = essayProblem(3);
     const board = { width: p.width, height: p.height, rows: Uint16Array.from(p.rows) };
     expect(rootTasks(board, p.pieces)).toHaveLength(34);
+  });
+
+  // Crease No. 002 cites these counts ("344,522 placements" four pieces ahead, and the depth
+  // demo's labels). If the engine or the essay board changes, update the post with the new ones.
+  test('the placement counts the essay cites: every placement tried, at every level', () => {
+    const p = essayProblem(4);
+    const board = { width: p.width, height: p.height, rows: Uint16Array.from(p.rows) };
+    expect([1, 2, 3, 4].map((depth) => search(board, p.pieces, depth).nodes)).toEqual([
+      34, 612, 10_438, 344_522,
+    ]);
   });
 
   test('the 2022 table keeps the original measurements', () => {
