@@ -11,3 +11,7 @@ overrides:
   # minimatch 10.x (pulled in by ESLint and its plugins, development only) has a denial-of-service
   # advisory fixed in 11.0.1; Dependabot can't lift it through the ESLint ranges, so pin it here.
   'minimatch@>=10 <11': ^11.0.5
+  # basic-ftp 5.x (Lighthouse CI → proxy-agent → get-uri, development only, used just for ftp:// URLs
+  # that this project never fetches) has a denial-of-service advisory fixed in 6.2.4; get-uri still
+  # asks for ^5, so Dependabot can't lift it. Pin it here.
+  'basic-ftp@<6.2.4': ^6.2.4
