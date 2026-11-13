@@ -1,0 +1,122 @@
+---
+/**
+ * Act 6 of Crease No. 003: every component of this site, how often it is used and where, from
+ * src/generated/components.json (scripts/component-usage.mjs), counted from the code on every build.
+ * Each name links to its file on GitHub. A plain table: it needs no JavaScript.
+ */
+import usage from '../../generated/components.json';
+import site from '../../../site.config';
+import { copy, fill } from '../../lib/copy';
+import { formatNumber } from '../../lib/format';
+
+const t = copy.precrease.sonobe.site;
+const { components, totals } = usage;
+const fileHref = (path: string) => `${site.repository}/blob/main/${path}`;
+---
+
+<figure class="site-components" data-inspect="SiteComponents">
+  <p class="summary">
+    {fill(t.summary, {
+      components: formatNumber(totals.components),
+      uses: formatNumber(totals.uses),
+      reused: formatNumber(totals.reused),
+    })}
+  </p>
+  <table>
+    <thead>
+      <tr>
+        <th scope="col">{t.component}</th>
+        <th scope="col" class="group">
+          {t.group}
+        </th>
+        <th scope="col" class="num">
+          {t.uses}
+        </th>
+        <th scope="col" class="num">
+          {t.files}
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      {components.map((c) => (
+        <tr class={c.usedIn.length >= 2 ? 'shared' : undefined}>
+          <th scope="row">
+            <a href={fileHref(c.path)}>{c.name}</a>
+          </th>
+          <td class="group">{c.group}</td>
+          <td class="num">{formatNumber(c.uses)}</td>
+          <td class="num">{formatNumber(c.usedIn.length)}</td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+  <figcaption class="caption">{t.source}</figcaption>
+</figure>
+
+<style>
+  .site-components {
+    display: grid;
+    gap: var(--space-4);
+    margin: var(--space-8) 0;
+    padding: var(--space-6);
+    border-radius: 20px;
+    background: var(--color-surface);
+    box-shadow: inset 0 0 0 1px var(--color-rule);
+    font-family: var(--font-sans);
+  }
+  .summary {
+    margin: 0;
+    font-size: var(--size-md);
+    font-weight: 600;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--size-sm);
+  }
+  th,
+  td {
+    padding: var(--space-2) var(--space-3);
+    border-bottom: 1px solid var(--color-rule);
+    text-align: left;
+  }
+  thead th {
+    font: 600 var(--type-caption);
+    color: var(--color-mute);
+  }
+  /* Row headers are component names: as written in the code, not styled like column headings. */
+  tbody th {
+    font: 400 var(--size-sm) var(--font-mono);
+    color: var(--color-ink);
+    text-transform: none;
+    letter-spacing: normal;
+  }
+  tbody th a {
+    color: var(--color-ink);
+  }
+  .num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+  /* Components used in two or more files: the shared ones, marked by a rule in the accent. */
+  tr.shared th {
+    box-shadow: inset 3px 0 0 var(--color-accent-ui);
+  }
+  .caption {
+    font: var(--type-caption);
+    color: var(--color-mute);
+  }
+  /* On a phone the table keeps what the essay is about: the name, its uses and its files. */
+  @media (max-width: 480px) {
+    .group {
+      display: none;
+    }
+    th,
+    td {
+      padding-inline: var(--space-2);
+    }
+    tbody th {
+      overflow-wrap: anywhere;
+    }
+  }
+</style>

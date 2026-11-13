@@ -347,6 +347,19 @@
         "code": "PostCard's props, read from its file when this page is built.",
         "file": "PostCard.astro on GitHub"
       },
+      "token": {
+        "label": "Paper",
+        "names": "The color names every identity defines",
+        "caption": "All three identities define the same {count} color names. Components ask for a name, never a value, so changing the paper changes no component."
+      },
+      "site": {
+        "summary": "{components} components, {uses} uses, {reused} used in two or more files.",
+        "source": "Counted from the code when this page is built.",
+        "component": "Component",
+        "group": "Group",
+        "uses": "Uses",
+        "files": "Files"
+      },
       "scale": {
         "label": "Model",
         "model": "{count} units",

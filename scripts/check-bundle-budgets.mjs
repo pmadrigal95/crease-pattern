@@ -3,12 +3,13 @@
 // to 32 KB when the Identity switcher joined the panel). Interactive essays have their own budget.
 import { join } from 'node:path';
 import { jsBudgetKb } from '../src/config/quality.ts';
-import { measureBundles, measureEssays, toKb } from './bundle-sizes.mjs';
+import { measureBundles, measureEssays, measureInspectorData, toKb } from './bundle-sizes.mjs';
 import { isolatedPaths } from './dev-isolation.mjs';
 
 const dist = join(import.meta.dirname, '..', 'dist');
 const rows = [
   ...Object.entries(measureBundles(dist)).map(([group, bytes]) => ({ label: group, group, bytes })),
+  { label: 'inspectorData', group: 'inspectorData', bytes: measureInspectorData(dist) },
   ...measureEssays(dist, isolatedPaths()).map(({ path, bytes }) => ({
     label: `essay ${path}`,
     group: 'essay',

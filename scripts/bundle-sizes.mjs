@@ -62,6 +62,18 @@ export function measurePage(dist, page) {
 }
 
 /**
+ * The Inspector's manifest as Vite emits it (/_astro/inspector.<hash>.json), Brotli. Zero when the
+ * build has none.
+ * @returns {number} bytes
+ */
+export function measureInspectorData(dist) {
+  const assets = join(dist, '_astro');
+  return readdirSync(assets)
+    .filter((f) => /^inspector\.[\w-]+\.json$/.test(f))
+    .reduce((sum, f) => sum + brotliCompressSync(readFileSync(join(assets, f))).length, 0);
+}
+
+/**
  * Everything an interactive essay (a post `public/_headers` isolates) can run: the scripts its page
  * references, what they import, and the Web Workers they start, with the workers' own imports.
  * Workers count because a reader who presses Run downloads them. Pages missing from `dist` (drafts

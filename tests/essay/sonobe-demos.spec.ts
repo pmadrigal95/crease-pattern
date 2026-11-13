@@ -117,3 +117,37 @@ test('no Content Security Policy violations while the demos run', async ({ page 
   await page.locator('[data-sonobe-scale] [data-turn]').fill('200');
   expect(violations).toEqual([]);
 });
+
+test('changing the paper repaints every unit with that identity’s real colors', async ({ page }) => {
+  await page.goto(post);
+  const demo = page.locator('[data-token-paper]');
+  await expect(demo.locator('.card:visible')).toHaveCount(1);
+  await demo.getByRole('button', { name: 'Washi & asagi' }).click();
+  const palettes = JSON.parse((await demo.getAttribute('data-palettes'))!) as Record<
+    string,
+    Record<string, string>
+  >;
+  const washi = palettes['washi-asagi']!;
+  await expect(demo.locator('.card.current .sheet')).toHaveAttribute('fill', washi.bg!);
+  const fills = await demo
+    .locator('.card.current polygon')
+    .evaluateAll((ps) =>
+      ps.map((p) => ({ role: p.getAttribute('data-role')!, fill: p.getAttribute('fill') })),
+    );
+  expect(fills.length).toBeGreaterThan(0);
+  for (const { role, fill } of fills) expect(fill).toBe(washi[role]);
+  await expect(demo.locator('.names code')).toHaveCount(Object.keys(washi).length);
+});
+
+test('the component table lists every component, linked to its file', async ({ page }) => {
+  await page.goto(post);
+  const table = page.locator('.site-components');
+  const rows = table.locator('tbody tr');
+  const summary = (await table.locator('.summary').textContent())!;
+  const count = Number(/^(\d+) components/.exec(summary)?.[1]);
+  await expect(rows).toHaveCount(count);
+  await expect(table.getByRole('link', { name: 'PostCard', exact: true })).toHaveAttribute(
+    'href',
+    /\/blob\/main\/src\/components\/precrease\/PostCard\.astro$/,
+  );
+});

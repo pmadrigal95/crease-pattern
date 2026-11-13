@@ -1,0 +1,224 @@
+---
+/**
+ * Act 4 of Crease No. 003: change the paper and every unit changes with it. The 30-unit model is
+ * painted with the real light palette of each of the site's identities (src/generated/tokens.json),
+ * and below it are the color names they all share: what components ask for instead of values.
+ *
+ * Colors go in as SVG presentation attributes (fill="…"), which the Content Security Policy
+ * allows, never as inline styles. Without JavaScript the three identities stand side by side.
+ * With it, CSS under html[data-js] shows one from the first paint and the script repaints it.
+ */
+import tokens from '../../generated/tokens.json';
+import { copy, fill } from '../../lib/copy';
+import { allVisualDirections, visualDirectionLabels } from '../../config/visual-direction';
+import { assembly, project } from '../../lib/sonobe/geometry';
+
+const t = copy.precrease.sonobe.token;
+/** Which palette color each unit takes (unit number mod 5): neighbouring units read apart. */
+const ROLES = ['accent-ui', 'accent', 'second', 'earth', 'ink'] as const;
+type Palette = Record<string, string>;
+const palettes = Object.fromEntries(
+  allVisualDirections.map((id) => [id, (tokens.directions as Record<string, { light: Palette }>)[id]!.light]),
+);
+const names = Object.keys(Object.values(palettes)[0]!);
+const SIZE = Math.SQRT2;
+const facets = project(assembly(30), 0.5, 0.42).map((f) => ({
+  role: ROLES[f.unit % ROLES.length]!,
+  points: f.points.map(([x, y]) => `${(x * SIZE).toFixed(3)},${(y * SIZE).toFixed(3)}`).join(' '),
+  shade: (0.6 + 0.4 * f.light).toFixed(2),
+}));
+---
+
+<figure
+  class="token-paper"
+  data-token-paper
+  data-palettes={JSON.stringify(palettes)}
+  data-inspect="TokenPaper"
+>
+  <div class="picker" role="group" aria-label={t.label}>
+    {allVisualDirections.map((id, i) => (
+      <button type="button" data-pick={id} aria-pressed={i === 0 ? 'true' : 'false'}>
+        {visualDirectionLabels[id].label}
+      </button>
+    ))}
+  </div>
+
+  <div class="cards">
+    {allVisualDirections.map((id, i) => (
+      <figure class={i === 0 ? 'card current' : 'card'} data-card={id}>
+        <svg viewBox="-1.8 -1.8 3.6 3.6" role="img" aria-label={visualDirectionLabels[id].label}>
+          <rect class="sheet" x="-1.8" y="-1.8" width="3.6" height="3.6" rx="0.12" fill={palettes[id]!.bg} />
+          {facets.map((f) => (
+            <polygon
+              points={f.points}
+              data-role={f.role}
+              fill={palettes[id]![f.role]}
+              fill-opacity={f.shade}
+              stroke={palettes[id]!.surface}
+            />
+          ))}
+        </svg>
+        <figcaption>{visualDirectionLabels[id].label}</figcaption>
+      </figure>
+    ))}
+  </div>
+
+  <div class="names">
+    <p class="label">{t.names}</p>
+    <ul>
+      {names.map((n) => (
+        <li>
+          <code>{n}</code>
+        </li>
+      ))}
+    </ul>
+  </div>
+
+  <figcaption class="caption">{fill(t.caption, { count: names.length })}</figcaption>
+</figure>
+
+<style>
+  .token-paper {
+    display: grid;
+    gap: var(--space-4);
+    margin: var(--space-8) 0;
+    padding: var(--space-6);
+    border-radius: 20px;
+    background: var(--color-surface);
+    box-shadow: inset 0 0 0 1px var(--color-rule);
+    font-family: var(--font-sans);
+  }
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-4);
+  }
+  .card {
+    margin: 0;
+  }
+  .card figcaption {
+    margin-top: var(--space-2);
+    font: var(--type-caption);
+    color: var(--color-mute);
+    text-align: center;
+  }
+  svg {
+    display: block;
+    width: 100%;
+    max-width: 22rem;
+    height: auto;
+    margin: 0 auto;
+  }
+  /* :global because the script repaints these polygons. */
+  .token-paper :global(polygon) {
+    stroke-width: 1px;
+    vector-effect: non-scaling-stroke;
+    stroke-linejoin: round;
+    transition:
+      fill var(--motion-stage) var(--motion-ease-out),
+      stroke var(--motion-stage) var(--motion-ease-out);
+  }
+  .sheet {
+    transition: fill var(--motion-stage) var(--motion-ease-out);
+  }
+  .names .label {
+    margin: 0 0 var(--space-2);
+    font: var(--type-caption);
+    color: var(--color-mute);
+  }
+  .names ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .names code {
+    display: inline-block;
+    padding: 2px var(--space-2);
+    border-radius: 6px;
+    background: var(--color-bg);
+    box-shadow: inset 0 0 0 1px var(--color-rule);
+    font: var(--type-caption);
+    font-family: var(--font-mono);
+  }
+  .caption {
+    font: var(--type-caption);
+    color: var(--color-mute);
+  }
+  .picker {
+    display: none;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+  .picker button {
+    min-height: 2.75rem;
+    padding: 0 var(--space-4);
+    border: 1px solid var(--color-rule);
+    border-radius: var(--radius-pill);
+    background: var(--color-bg);
+    color: var(--color-ink);
+    font: 600 var(--size-sm) var(--font-sans);
+    cursor: pointer;
+  }
+  .picker button[aria-pressed='true'] {
+    border-color: var(--color-ink);
+    background: var(--color-ink);
+    color: var(--color-bg);
+  }
+  .picker button:focus-visible {
+    outline: 2px solid var(--color-accent-ui);
+    outline-offset: 2px;
+  }
+
+  /* With JavaScript: one sheet, repainted, from the first paint. */
+  :global(html[data-js]) .picker {
+    display: flex;
+  }
+  :global(html[data-js]) .cards {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  :global(html[data-js]) .card:not(.current) {
+    display: none;
+  }
+  :global(html[data-js]) .card figcaption {
+    display: none;
+  }
+
+  @media (max-width: 640px) {
+    .cards {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .token-paper :global(polygon),
+    .sheet {
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  for (const root of document.querySelectorAll<HTMLElement>('[data-token-paper]')) {
+    const palettes = JSON.parse(root.dataset.palettes ?? '{}') as Record<string, Record<string, string>>;
+    const buttons = [...root.querySelectorAll<HTMLButtonElement>('[data-pick]')];
+    // One sheet is repainted in place, so every unit visibly changes at once.
+    const card = root.querySelector<HTMLElement>('.card.current')!;
+    const sheet = card.querySelector('.sheet')!;
+    const polygons = [...card.querySelectorAll<SVGPolygonElement>('polygon')];
+
+    for (const button of buttons)
+      button.addEventListener('click', () => {
+        const palette = palettes[button.dataset.pick ?? ''];
+        if (!palette) return;
+        buttons.forEach((b) => b.setAttribute('aria-pressed', String(b === button)));
+        sheet.setAttribute('fill', palette.bg ?? '');
+        for (const p of polygons) {
+          p.setAttribute('fill', palette[p.dataset.role ?? ''] ?? '');
+          p.setAttribute('stroke', palette.surface ?? '');
+        }
+        card.querySelector('svg')!.setAttribute('aria-label', button.textContent?.trim() ?? '');
+      });
+  }
+</script>
