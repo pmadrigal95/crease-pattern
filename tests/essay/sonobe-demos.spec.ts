@@ -55,6 +55,9 @@ test('without JavaScript every stage and every model is on the page', async ({ b
   await page.goto(post);
   await expect(page.locator('[data-unit-fold] .stage:visible')).toHaveCount(5);
   await expect(page.locator('[data-sonobe-scale] .model:visible')).toHaveCount(3);
+  await expect(page.locator('[data-contract] .still:visible')).toHaveCount(2);
+  await expect(page.locator('[data-contract] .live')).toBeHidden();
+  await expect(page.locator('[data-exception] .state:visible')).toHaveCount(2);
   await expect(page.locator('[data-unit-fold] .controls')).toBeHidden();
   await context.close();
 });
@@ -150,4 +153,39 @@ test('the component table lists every component, linked to its file', async ({ p
     'href',
     /\/blob\/main\/src\/components\/precrease\/PostCard\.astro$/,
   );
+});
+
+test('two units lock tab into pocket; one more prop and they no longer do', async ({ page }) => {
+  await page.goto(post);
+  const demo = page.locator('[data-contract]');
+  await expect(demo.locator('.still')).toHaveCount(2);
+  await expect(demo.locator('.still').first()).toBeHidden();
+  await demo.getByRole('button', { name: 'Join them' }).click();
+  await expect(demo.locator('[data-status]')).toHaveText('The tab goes into the pocket and the units lock.');
+  await expect(demo.getByRole('button', { name: 'Take them apart' })).toBeVisible();
+  await demo.getByLabel('Give the tab one more prop').check();
+  await expect(demo.locator('[data-status]')).toContainText("The units don't lock.");
+  await expect(demo.locator('.live')).toHaveAttribute('data-extra', 'true');
+});
+
+test('one special unit opens the model, and the counts follow', async ({ page }) => {
+  await page.goto(post);
+  const demo = page.locator('[data-exception]');
+  await expect(demo.locator('.state.closed')).toBeVisible();
+  await expect(demo.locator('.state.open')).toBeHidden();
+  await demo.getByLabel('Make one unit special').check();
+  await expect(demo.locator('.state.open')).toBeVisible();
+  await expect(demo.locator('.state.closed')).toBeHidden();
+  await expect(demo.locator('.meter .when-open').first()).toBeVisible();
+  await expect(demo.locator('.meter .when-open').first()).toHaveText('2');
+  await expect(demo.locator('.meter .when-closed').first()).toBeHidden();
+  await expect(demo.locator('[data-status]')).toContainText('no longer closes');
+});
+
+test("act 5 quotes FoldTitle's real prop and the two pages that set it", async ({ page }) => {
+  await page.goto(post);
+  const code = page.locator('[data-exception] pre');
+  await expect(code).toContainText("unfold?: 'hover' | 'load';");
+  await expect(code).toContainText('unfold="hover"');
+  await expect(code).toContainText('unfold="load"');
 });

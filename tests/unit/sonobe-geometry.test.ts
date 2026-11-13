@@ -4,6 +4,7 @@ import {
   FLAT_UNIT,
   PYRAMID_HEIGHT,
   assembly,
+  displace,
   dot,
   length,
   normal,
@@ -100,4 +101,19 @@ test('the flat unit is a square face between two triangular tabs, three wide and
   expect(area(FLAT_UNIT.face)).toBe(1);
   expect(FLAT_UNIT.tabs.map(area)).toEqual([0.5, 0.5]);
   expect(Math.max(...[...FLAT_UNIT.face, ...FLAT_UNIT.tabs.flat()].map(([x]) => x))).toBe(3);
+});
+
+test('displacing one unit moves only its facets, out along their normals', () => {
+  const model = assembly(12);
+  const moved = displace(model, 3, 0.25);
+  model.facets.forEach((f, i) => {
+    const g = moved.facets[i]!;
+    if (f.unit !== 3) expect(g).toBe(f);
+    else
+      g.points.forEach((p, k) => {
+        const d = sub(p, f.points[k]!);
+        expect(length(d)).toBeCloseTo(0.25, 9);
+        expect(dot(d, normal(f.points))).toBeCloseTo(0.25, 9);
+      });
+  });
 });
