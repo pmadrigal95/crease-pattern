@@ -22,34 +22,32 @@ const fileHref = (path: string) => `${site.repository}/blob/main/${path}`;
       reused: formatNumber(totals.reused),
     })}
   </p>
-  <div class="scroll" tabindex="0" role="region" aria-label={t.component}>
-    <table>
-      <thead>
-        <tr>
-          <th scope="col">{t.component}</th>
-          <th scope="col">{t.group}</th>
-          <th scope="col" class="num">
-            {t.uses}
+  <table>
+    <thead>
+      <tr>
+        <th scope="col">{t.component}</th>
+        <th scope="col" class="group">{t.group}</th>
+        <th scope="col" class="num">
+          {t.uses}
+        </th>
+        <th scope="col" class="num">
+          {t.files}
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      {components.map((c) => (
+        <tr class={c.usedIn.length >= 2 ? 'shared' : undefined}>
+          <th scope="row">
+            <a href={fileHref(c.path)}>{c.name}</a>
           </th>
-          <th scope="col" class="num">
-            {t.files}
-          </th>
+          <td class="group">{c.group}</td>
+          <td class="num">{formatNumber(c.uses)}</td>
+          <td class="num">{formatNumber(c.usedIn.length)}</td>
         </tr>
-      </thead>
-      <tbody>
-        {components.map((c) => (
-          <tr class={c.usedIn.length >= 2 ? 'shared' : undefined}>
-            <th scope="row">
-              <a href={fileHref(c.path)}>{c.name}</a>
-            </th>
-            <td>{c.group}</td>
-            <td class="num">{formatNumber(c.uses)}</td>
-            <td class="num">{formatNumber(c.usedIn.length)}</td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  </div>
+      ))}
+    </tbody>
+  </table>
   <figcaption class="caption">{t.source}</figcaption>
 </figure>
 
@@ -69,15 +67,6 @@ const fileHref = (path: string) => `${site.repository}/blob/main/${path}`;
     font-size: var(--size-md);
     font-weight: 600;
   }
-  .scroll {
-    overflow-x: auto;
-    max-height: 28rem;
-    overflow-y: auto;
-  }
-  .scroll:focus-visible {
-    outline: 2px solid var(--color-accent-ui);
-    outline-offset: 2px;
-  }
   table {
     width: 100%;
     border-collapse: collapse;
@@ -90,9 +79,6 @@ const fileHref = (path: string) => `${site.repository}/blob/main/${path}`;
     text-align: left;
   }
   thead th {
-    position: sticky;
-    top: 0;
-    background: var(--color-surface);
     font: 600 var(--type-caption);
     color: var(--color-mute);
   }
@@ -117,5 +103,18 @@ const fileHref = (path: string) => `${site.repository}/blob/main/${path}`;
   .caption {
     font: var(--type-caption);
     color: var(--color-mute);
+  }
+  /* On a phone the table keeps what the essay is about: the name, its uses and its files. */
+  @media (max-width: 480px) {
+    .group {
+      display: none;
+    }
+    th,
+    td {
+      padding-inline: var(--space-2);
+    }
+    tbody th {
+      overflow-wrap: anywhere;
+    }
   }
 </style>

@@ -28,6 +28,12 @@ export const jsBudgetKb = {
   /** What those scripts can import later: today the Inspector. */
   onDemand: 32,
   /**
+   * The Inspector's manifest (src/generated/inspector.json), fetched when the panel opens. It grows
+   * with every inspectable part, so it lives outside the panel's code with a budget of its own:
+   * 2.2 KB when this was set (Pablo, 2026-11-13, amending decision 44).
+   */
+  inspectorData: 4,
+  /**
    * Everything one interactive essay (a post public/_headers isolates) can run, Web Workers
    * included: Crease No. 002 measured 42 KB when this was set. Checked on every build that has
    * one (production and preview); a build without an isolated post skips it.

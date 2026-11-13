@@ -131,9 +131,11 @@ test('changing the paper repaints every unit with that identity’s real colors'
   await expect(demo.locator('.card.current .sheet')).toHaveAttribute('fill', washi.bg!);
   const fills = await demo
     .locator('.card.current polygon')
-    .evaluateAll((ps) => ps.map((p) => [p.getAttribute('data-role')!, p.getAttribute('fill')!]));
+    .evaluateAll((ps) =>
+      ps.map((p) => ({ role: p.getAttribute('data-role')!, fill: p.getAttribute('fill') })),
+    );
   expect(fills.length).toBeGreaterThan(0);
-  for (const [role, fill] of fills) expect(fill).toBe(washi[role]);
+  for (const { role, fill } of fills) expect(fill).toBe(washi[role]);
   await expect(demo.locator('.names code')).toHaveCount(Object.keys(washi).length);
 });
 

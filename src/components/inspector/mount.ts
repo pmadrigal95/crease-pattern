@@ -4,7 +4,10 @@
  */
 import { createApp, type App } from 'vue';
 import InspectorPanel, { type Manifest } from './InspectorPanel.vue';
-import manifest from '../../generated/inspector.json';
+// The manifest is a file of its own (Vite emits it hashed under /_astro/), fetched when the panel
+// loads, not bundled into it: it grows with every inspectable part, and the panel's code
+// shouldn't. Its size has its own budget (src/config/quality.ts, inspectorData).
+import manifestUrl from '../../generated/inspector.json?url';
 import { inspector as t } from '../../content/copy/en.json';
 // Imported as text, not as a stylesheet: a CSS import here would make Astro add it to every
 // page's <head> as render-blocking CSS. It is adopted only when the Inspector opens.
@@ -24,7 +27,29 @@ function adoptStyles() {
   document.adoptedStyleSheets = [...document.adoptedStyleSheets, styles];
 }
 
-export function openInspector(trigger: HTMLElement | null, onClosed: () => void): InspectorHandle {
+let manifestRequest: Promise<Manifest> | null = null;
+
+/** Starts (or reuses) the manifest download; a failed one is forgotten, so the next open retries. */
+function loadManifest(): Promise<Manifest> {
+  manifestRequest ??= fetch(manifestUrl)
+    .then((r) =>
+      r.ok ? (r.json() as Promise<Manifest>) : Promise.reject(new Error(`manifest: ${r.status}`)),
+    )
+    .catch((error: unknown) => {
+      manifestRequest = null;
+      throw error;
+    });
+  return manifestRequest;
+}
+// This module loads when a visitor first reaches for the Inspector (hovering its button counts), so
+// start the manifest now, alongside Vue, instead of after it.
+void loadManifest().catch(() => undefined);
+
+export async function openInspector(
+  trigger: HTMLElement | null,
+  onClosed: () => void,
+): Promise<InspectorHandle> {
+  const manifest = await loadManifest();
   adoptStyles();
   const host = document.createElement('aside');
   host.id = 'inspector';
@@ -33,7 +58,7 @@ export function openInspector(trigger: HTMLElement | null, onClosed: () => void)
   document.documentElement.classList.add('inspecting');
 
   let app: App | null = createApp(InspectorPanel, {
-    manifest: manifest as Manifest,
+    manifest,
     openedAt: performance.now(),
     onClose: () => handle.close(),
   });
