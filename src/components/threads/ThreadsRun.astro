@@ -90,9 +90,12 @@ const cells = Array.from({ length: ROWS }, (_, row) => {
         </li>
       ))}
     </ol>
-    <button type="button" class="run" data-run>
+    <button type="button" class="run" data-run aria-describedby="threads-run-battery">
       {t.run}
     </button>
+    <p class="note" id="threads-run-battery">
+      {t.batteryNote}
+    </p>
     <p class="note" data-note>
       {fill(t.measuredNote, {
         device: MEASURED.device,
@@ -168,8 +171,15 @@ const cells = Array.from({ length: ROWS }, (_, row) => {
     align-items: center;
     font-size: var(--size-sm);
   }
-  .results li.off {
-    opacity: 0.5;
+  /* A model this browser can't run (no shared memory): the note says why. Its text keeps full
+     contrast; only the bar steps back, drawn as an empty outline. */
+  .results li.off .track {
+    fill: none;
+    stroke: var(--color-rule);
+    stroke-dasharray: 3 3;
+  }
+  .results li.off .fill {
+    display: none;
   }
   .name small {
     display: block;

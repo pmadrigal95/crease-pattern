@@ -28,6 +28,7 @@
     "test:e2e": "playwright test",
     "test:e2e:essay": "playwright test --config playwright.essay.config.ts",
     "lighthouse": "lhci autorun",
+    "lighthouse:essay": "lhci autorun --config=lighthouserc.essay.json",
     "changeset": "changeset",
     "deploy": "pnpm build && wrangler deploy",
     "test:visual": "playwright test --config playwright.visual.config.ts",
