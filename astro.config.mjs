@@ -4,6 +4,7 @@ import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
 import siteConfig from './site.config.ts';
 import { pageRevealScript, restoreIdentityScript, sha256 } from './scripts/csp-hashes.mjs';
+import { devIsolation } from './scripts/dev-isolation.mjs';
 
 export default defineConfig({
   site: siteConfig.url,
@@ -20,6 +21,9 @@ export default defineConfig({
       assetsInlineLimit: (file, content) =>
         file.endsWith('.css') && content.length < 12288 ? true : undefined,
     },
+    // Development only: the same cross-origin isolation public/_headers gives production, so the
+    // Threads essay runs its shared-memory models under `astro dev`.
+    plugins: [devIsolation()],
     define: {
       __VUE_OPTIONS_API__: false,
       __VUE_PROD_DEVTOOLS__: false,

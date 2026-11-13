@@ -1,0 +1,57 @@
+---
+number: 2
+title: When threads pay off
+description: Adding threads can make code slower. A solver you can run in your browser shows when it does, and the design that makes the threads pay.
+date: 2026-12-01
+format: essay
+topics: [concurrency, performance]
+lang: en
+draft: true
+isolated: true
+---
+
+import ThreadsRun from '../../components/threads/ThreadsRun.astro';
+import ThreadsTimeline from '../../components/threads/ThreadsTimeline.astro';
+import AmdahlDemo from '../../components/threads/AmdahlDemo.astro';
+import GranularityDemo from '../../components/threads/GranularityDemo.astro';
+import GustafsonDemo from '../../components/threads/GustafsonDemo.astro';
+
+<ThreadsRun />
+
+[Draft] Opening: this is a falling-blocks solver searching every move three pieces ahead, split four ways across your device's cores. The table shows what yours does. The rest of the essay is why.
+
+## What the solver does
+
+[Draft] The puzzle in plain words, what searching three pieces ahead means, and the four things the score looks at.
+
+## Four ways to split the work
+
+<ThreadsTimeline />
+
+[Draft] One short paragraph per model, and the timeline.
+
+## The version I wrote while studying this
+
+[Draft] The 2022 table and the column loop.
+
+<AmdahlDemo />
+
+<GranularityDemo />
+
+## Give it real work
+
+<GustafsonDemo />
+
+[Draft] Gustafson, with the depth control.
+
+## The decisions that make it scale
+
+[Draft] Bitboards, one pool, tasks as indices, a queue on one counter, one reduction, and measuring before optimizing.
+
+## Before you add threads
+
+[Draft] The checklist, framed as what I check now.
+
+## Run it yourself
+
+[Draft] How it was measured, what changes between devices, Safari, and where the code lives.
