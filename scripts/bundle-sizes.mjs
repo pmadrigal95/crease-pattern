@@ -60,3 +60,39 @@ export function measurePage(dist, page) {
     .filter((code) => code.trim());
   return [...external, ...inline].reduce((sum, code) => sum + brotliCompressSync(code).length, 0);
 }
+
+/**
+ * Everything an interactive essay (a post `public/_headers` isolates) can run: the scripts its page
+ * references, what they import, and the Web Workers they start, with the workers' own imports.
+ * Workers count because a reader who presses Run downloads them. Pages missing from `dist` (drafts
+ * in a production build) are skipped, so this returns an empty list there.
+ * @param {string[]} paths site paths, such as "/precrease/when-threads-pay-off"
+ * @returns {{ path: string, bytes: number }[]} Brotli
+ */
+export function measureEssays(dist, paths) {
+  const assets = join(dist, '_astro');
+  const read = (file) => readFileSync(join(assets, file), 'utf8');
+  const size = (file) => brotliCompressSync(readFileSync(join(assets, file))).length;
+  const scripts = new Set(readdirSync(assets).filter((f) => f.endsWith('.js')));
+  const linksOf = (file) => [
+    ...[...read(file).matchAll(/(?:from|import)\s*\(?\s*["'`]\.\/([^"'`]+\.js)["'`]/g)].map((m) => m[1]),
+    ...[...read(file).matchAll(/new URL\(\s*["'`]\/_astro\/([^"'`]+\.js)["'`]/g)].map((m) => m[1]),
+  ];
+  return paths.flatMap((path) => {
+    let html;
+    try {
+      html = readFileSync(join(dist, `${path}.html`), 'utf8');
+    } catch {
+      return [];
+    }
+    const seen = new Set();
+    const queue = [...html.matchAll(/\/_astro\/([^"'\s]+\.js)/g)].map((m) => m[1]);
+    while (queue.length) {
+      const file = queue.pop();
+      if (seen.has(file) || !scripts.has(file)) continue;
+      seen.add(file);
+      queue.push(...linksOf(file));
+    }
+    return [{ path, bytes: [...seen].reduce((sum, f) => sum + size(f), 0) }];
+  });
+}

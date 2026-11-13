@@ -256,6 +256,10 @@ const topicFilters = [...new Set(paths.flat().map((topic) => topic.id))];
     color: var(--color-mute);
   }
   .topics a {
+    /* 24px tall at least, so each link is a comfortable target (WCAG 2.5.8). */
+    display: inline-flex;
+    align-items: center;
+    min-height: 24px;
     color: var(--color-ink);
     text-decoration-color: var(--color-accent-ui);
   }

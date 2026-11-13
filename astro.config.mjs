@@ -10,6 +10,9 @@ export default defineConfig({
   site: siteConfig.url,
   // Static HTML by default. Vue powers the Inspector only, loaded when a visitor opens it.
   output: 'static',
+  // Code blocks: Prism marks tokens with classes, styled in base.css with the site's own colors.
+  // Shiki (the default) writes inline style attributes, which the Content Security Policy blocks.
+  markdown: { syntaxHighlight: 'prism' },
   integrations: [vue(), mdx(), sitemap()],
   // The Inspector uses Vue's Composition API only: drop the Options API and devtools hooks from the
   // production runtime to keep the panel inside its 30 KB budget.

@@ -76,10 +76,10 @@ const idle = split.filter((cols) => cols.length === 0).length;
     border-radius: 10px;
     background: var(--color-bg);
   }
+  /* Idle reads as an empty outline, not as faded text, so its number keeps full contrast. */
   .threads :global(li.idle) {
     background: transparent;
     box-shadow: inset 0 0 0 1px var(--color-rule);
-    opacity: 0.6;
   }
   .threads :global(.label) {
     min-width: 1.6rem;
@@ -92,8 +92,10 @@ const idle = split.filter((cols) => cols.length === 0).length;
     width: 1.5rem;
     height: 1.5rem;
     border-radius: 5px;
-    background: var(--color-accent-ui);
-    color: var(--color-bg);
+    /* Ink on a tint of the accent: small mono digits stay readable in every identity. */
+    background: color-mix(in oklab, var(--color-accent-ui) 28%, var(--color-surface));
+    box-shadow: inset 0 0 0 1px var(--color-accent-ui);
+    color: var(--color-ink);
     font: 600 11px var(--font-mono);
   }
   .control {

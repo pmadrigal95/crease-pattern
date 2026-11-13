@@ -109,6 +109,36 @@
   .prose code {
     font: 0.9em var(--font-mono);
   }
+  /* Code blocks, highlighted by Prism with classes only (the CSP allows no inline styles). Colors
+     come from the identity, so they hold contrast in every identity and theme: keywords carry
+     weight, comments step back. */
+  .prose pre {
+    overflow-x: auto;
+    margin: var(--space-6) 0;
+    padding: var(--space-4) var(--space-6);
+    border-radius: 12px;
+    background: var(--color-surface);
+    box-shadow: inset 0 0 0 1px var(--color-rule);
+    color: var(--color-ink);
+    font-size: var(--size-sm);
+    line-height: 1.6;
+    tab-size: 4;
+  }
+  .prose pre code {
+    font-size: 1em;
+  }
+  .prose pre:focus-visible {
+    outline: 2px solid var(--color-accent-ui);
+    outline-offset: 2px;
+  }
+  .prose .token.keyword,
+  .prose .token.function {
+    font-weight: 600;
+  }
+  .prose .token.comment {
+    color: var(--color-mute);
+    font-style: italic;
+  }
 
   /* Page header shared by inner pages. */
   .page-head {
