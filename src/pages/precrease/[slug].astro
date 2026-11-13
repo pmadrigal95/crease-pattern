@@ -104,6 +104,7 @@ const topicFilters = [...new Set(paths.flat().map((topic) => topic.id))];
           url={new URL(postHref(post.id), site.url).href}
           minutes={readingMinutes(post.entry.body ?? '')}
           number={creaseNumber(data.number)}
+          isolated={data.isolated}
         />
       </div>
       <PostToc headings={headings} />
