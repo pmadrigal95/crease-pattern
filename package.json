@@ -10,10 +10,10 @@
   },
   "scripts": {
     "tokens": "node scripts/build-tokens.mjs",
-    "generate": "node scripts/build-tokens.mjs && node scripts/build-inspector-manifest.mjs",
-    "predev": "node scripts/build-tokens.mjs && node scripts/build-inspector-manifest.mjs",
+    "generate": "node scripts/build-tokens.mjs && node scripts/build-inspector-manifest.mjs && node scripts/component-usage.mjs",
+    "predev": "node scripts/build-tokens.mjs && node scripts/build-inspector-manifest.mjs && node scripts/component-usage.mjs",
     "dev": "astro dev",
-    "prebuild": "node scripts/build-tokens.mjs && node scripts/build-inspector-manifest.mjs",
+    "prebuild": "node scripts/build-tokens.mjs && node scripts/build-inspector-manifest.mjs && node scripts/component-usage.mjs",
     "build": "astro build && node scripts/sync-inline-style-hashes.mjs && node scripts/build-search-index.mjs && node scripts/stamp-site-metrics.mjs",
     "preview": "astro preview",
     "check": "astro check",
