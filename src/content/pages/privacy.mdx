@@ -3,7 +3,7 @@ title: Privacy
 description: What this site collects, what it doesn't, and how to check it yourself.
 ---
 
-_Last updated 7 November 2026. Every change to this page is in [its history on GitHub](https://github.com/pmadrigal95/crease-pattern/commits/main/src/content/pages/privacy.mdx)._
+_Last updated 12 November 2026. Every change to this page is in [its history on GitHub](https://github.com/pmadrigal95/crease-pattern/commits/main/src/content/pages/privacy.mdx)._
 
 This is the personal site of Pablo Madrigal, an individual based in Costa Rica. It sells nothing, has no
 accounts and no forms. If you have a question about this page, write to the email address in the footer.
@@ -13,9 +13,11 @@ accounts and no forms. If you have a question about this page, write to the emai
 - **No cookies.** This site sets none, and neither does anything it loads.
 - **No profiles.** Visits are counted in aggregate. Nothing here can tell that two visits came from the same
   person.
+- **Post counts are totals.** Each Precrease post shows how many times it was opened, read to the end and
+  marked as helpful. Only those three numbers are stored.
 - **No ads, no third-party trackers, no data sold or shared** for marketing.
 - **Your browser's privacy signals are respected.** With Global Privacy Control or Do Not Track turned on,
-  the analytics script is never loaded.
+  the analytics script is never loaded, and posts don't report your view or your read.
 
 ## What happens when you visit
 
@@ -38,11 +40,35 @@ only ever see totals, such as views per page or visits per country, and I don't 
 Cloudflare is a U.S. company and may process this data outside your country, as described in its privacy
 policy.
 
-**Preferences.** The site reads two preferences from your browser's local storage, `pm.direction` and
-`pm.theme`, to show the visual identity and theme you picked. They are written only when you make that
-choice, they never leave your device, and clearing your site data removes them.
+**Post counts.** On a Precrease post, the page tells this site's own server (`/api/stats`) three things,
+each as a bare event with no identifier:
 
-**Fonts and everything else** are served from this site itself. No other third party is contacted.
+- that the post was opened;
+- that you reached the end after spending some time on it;
+- that you pressed "This helped", if you do.
+
+The server adds one to that post's total and keeps nothing else: no IP address, no time of the event, no
+browser details. To stop one person from inflating the numbers, Cloudflare's rate limiter looks at your IP
+address in memory for about a minute and discards it; it is never written down. The totals are public, under
+each post. With Global Privacy Control or Do Not Track on, the first two events are not sent.
+
+**Sharing.** The LinkedIn, X and Bluesky buttons under a post are plain links. Nothing from those services
+loads until you click one, and then you are on their site, under their privacy policy.
+
+**Comments.** Posts have a "Show comments" button. Until you press it, nothing about comments loads. When
+you do, the page loads [giscus](https://giscus.app/), which shows the post's thread from this site's GitHub
+Discussions: your browser then contacts `giscus.app` and GitHub, under the
+[GitHub Privacy Statement](https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement).
+Reading needs no account. To comment, you sign in with GitHub, and giscus keeps that sign-in inside its own
+comment frame, not on this site. Your comment is public, on GitHub, under your GitHub name.
+
+**Preferences.** The site reads three values from your browser's local storage: `pm.direction` and
+`pm.theme`, to show the visual identity and theme you picked, and `pm.helped`, the posts where you pressed
+"This helped", so the button doesn't count you twice. They are written only when you do those things, they
+never leave your device, and clearing your site data removes them.
+
+**Fonts and everything else** are served from this site itself. No other third party is contacted unless you
+open the comments or follow a share link.
 
 ## Why, and your rights
 
@@ -58,8 +84,9 @@ also complain to your data protection authority: in Costa Rica, the
 Open your browser's developer tools on any page:
 
 - **Application → Cookies:** empty.
-- **Application → Local storage:** empty, or only `pm.direction` and `pm.theme` if you chose them.
-- **Network:** requests to this site, plus `static.cloudflareinsights.com` and `cloudflareinsights.com` unless
-  your browser sends a privacy signal.
+- **Application → Local storage:** empty, or only `pm.direction`, `pm.theme` and `pm.helped` if you used
+  them.
+- **Network:** requests to this site, including `/api/stats` on posts, plus `static.cloudflareinsights.com`
+  and `cloudflareinsights.com` unless your browser sends a privacy signal.
 
 If anything you see doesn't match this page, that's a bug. Please tell me.
