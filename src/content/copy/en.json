@@ -323,6 +323,38 @@
       "depthReadout": "{depth} pieces ahead: {times}× faster with {workers} workers"
     },
     "toc": "On this page",
-    "history": "Change history on GitHub"
+    "history": "Change history on GitHub",
+    "sonobe": {
+      "unit": {
+        "label": "Folding one Sonobe unit",
+        "stage": "Stage {n} of {total}",
+        "previous": "Previous stage",
+        "next": "Next stage",
+        "stages": {
+          "s1": "A square of paper.",
+          "s2": "Folded in half and opened: one crease across the middle.",
+          "s3": "Both edges folded to that crease: a strip, half as tall.",
+          "s4": "Two opposite corners folded in.",
+          "s5": "The unit: a square face between two tabs. The edges of the face are its pockets."
+        },
+        "decisions": {
+          "s1": "Start from one need: show a post in a list.",
+          "s2": "Decide what it takes: one post.",
+          "s3": "Leave the rest to the page: where the card sits and how wide it is.",
+          "s4": "Decide what may change: the heading level.",
+          "s5": "What it accepts, and nothing else."
+        },
+        "code": "PostCard's props, read from its file when this page is built.",
+        "file": "PostCard.astro on GitHub"
+      },
+      "scale": {
+        "label": "Model",
+        "model": "{count} units",
+        "turn": "Turn the model",
+        "designed": "Units designed",
+        "folded": "Units folded",
+        "caption": "The same unit every time. What changes is how many, and where they meet."
+      }
+    }
   }
 }

@@ -1,0 +1,288 @@
+---
+/**
+ * Act 1 of Crease No. 003: one Sonobe unit, folded in five stages (src/lib/sonobe/steps.ts), beside
+ * this site's PostCard props, read from PostCard.astro when the page is built so they can't drift.
+ * Each stage pairs a fold with a decision about the component.
+ *
+ * Without JavaScript the five stages show as a numbered grid. With it, CSS under html[data-js]
+ * (set before the first paint) shows one stage at a time from the start, so nothing shifts when
+ * the script runs; the script only moves between stages and highlights the props they mention.
+ */
+import postCardSource from '../precrease/PostCard.astro?raw';
+import site from '../../../site.config';
+import { copy, fill } from '../../lib/copy';
+import { STAGES } from '../../lib/sonobe/steps';
+import { FLAT_UNIT, type Vec2 } from '../../lib/sonobe/geometry';
+
+const t = copy.precrease.sonobe.unit;
+const stageText = Object.values(t.stages);
+const decisions = Object.values(t.decisions);
+
+// The finished unit is 3 × 1; draw it as wide as the paper and centred, so the stages read at one scale.
+const UNIT_SCALE = 4 / 3;
+const unitAt = ([x, y]: Vec2): Vec2 => [x * UNIT_SCALE, y * UNIT_SCALE + (4 - UNIT_SCALE) / 2];
+const pts = (points: readonly Vec2[], map = (p: Vec2) => p) =>
+  points
+    .map(map)
+    .map(([x, y]) => `${x},${y}`)
+    .join(' ');
+const last = STAGES.length - 1;
+
+/** Props each stage's decision is about, by the prop's name. */
+const HIGHLIGHT: Record<number, string[]> = { 1: ['post'], 3: ['headingLevel'], 4: ['post', 'headingLevel'] };
+
+const props = /interface Props \{[\s\S]*?\n\}/.exec(postCardSource)?.[0] ?? '';
+const codeLines = props.split('\n').map((text) => ({
+  text,
+  prop: /^\s+(\w+)\??:/.exec(text)?.[1],
+}));
+const fileHref = `${site.repository}/blob/main/src/components/precrease/PostCard.astro`;
+---
+
+<figure
+  class="unit-fold"
+  data-unit-fold
+  data-strings={JSON.stringify({ stage: t.stage })}
+  data-highlight={JSON.stringify(HIGHLIGHT)}
+  data-inspect="UnitFold"
+>
+  <div class="layout">
+    <ol class="stages" aria-label={t.label}>
+      {STAGES.map((stage, i) => (
+        <li class={i === 0 ? 'stage current' : 'stage'} data-stage={i}>
+          <svg viewBox="-0.3 -0.3 4.6 4.6" aria-hidden="true">
+            {i < last ? (
+              <>
+                <polygon class="paper" points={pts(stage.outline)} />
+                {stage.flaps.map((flap) => (
+                  <polygon class="flap" points={pts(flap)} />
+                ))}
+                {stage.creases.map(([a, b]) => (
+                  <line class="crease" x1={a[0]} y1={a[1]} x2={b[0]} y2={b[1]} />
+                ))}
+              </>
+            ) : (
+              <>
+                {FLAT_UNIT.tabs.map((tab) => (
+                  <polygon class="tab" points={pts(tab, unitAt)} />
+                ))}
+                <polygon class="face" points={pts(FLAT_UNIT.face, unitAt)} />
+                {FLAT_UNIT.pockets.map(([a, b]) => {
+                  const [p, q] = [unitAt(a), unitAt(b)];
+                  return <line class="pocket" x1={p[0]} y1={p[1]} x2={q[0]} y2={q[1]} />;
+                })}
+              </>
+            )}
+          </svg>
+          <p class="what">
+            <span class="n">{i + 1}</span>
+            {stageText[i]}
+          </p>
+          <p class="why">{decisions[i]}</p>
+        </li>
+      ))}
+    </ol>
+
+    <div class="code">
+      <pre><code>{codeLines.map((line) => (
+        <span class="line" data-prop={line.prop}>{line.text}</span>
+      ))}</code></pre>
+      <p class="note">
+        {t.code} <a href={fileHref}>{t.file}</a>
+      </p>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button type="button" data-prev disabled>
+      {t.previous}
+    </button>
+    <p class="status" data-status aria-live="polite">
+      {fill(t.stage, { n: 1, total: STAGES.length })}
+    </p>
+    <button type="button" data-next>
+      {t.next}
+    </button>
+  </div>
+</figure>
+
+<style>
+  .unit-fold {
+    display: grid;
+    gap: var(--space-4);
+    margin: var(--space-8) 0;
+    padding: var(--space-6);
+    border-radius: 20px;
+    background: var(--color-surface);
+    box-shadow: inset 0 0 0 1px var(--color-rule);
+    font-family: var(--font-sans);
+  }
+  .layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: var(--space-6);
+    align-items: start;
+  }
+  .stages {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(7rem, 1fr));
+    gap: var(--space-4);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  svg {
+    display: block;
+    width: 100%;
+    max-width: 16rem;
+    height: auto;
+  }
+  .paper,
+  .tab,
+  .face {
+    /* Paper a step off the background, so the sheet reads in both themes. */
+    fill: color-mix(in oklab, var(--color-ink) 7%, var(--color-bg));
+    stroke: var(--color-ink);
+    stroke-width: 1.5px;
+    vector-effect: non-scaling-stroke;
+    stroke-linejoin: round;
+  }
+  .flap,
+  .tab {
+    fill: color-mix(in oklab, var(--color-accent-ui) 22%, var(--color-bg));
+    stroke: var(--color-ink);
+    stroke-width: 1px;
+    vector-effect: non-scaling-stroke;
+  }
+  .face {
+    fill: color-mix(in oklab, var(--color-accent-ui) 45%, var(--color-bg));
+  }
+  .crease {
+    stroke: var(--color-mute);
+    stroke-width: 1px;
+    stroke-dasharray: 4 3;
+    vector-effect: non-scaling-stroke;
+  }
+  .pocket {
+    stroke: var(--color-accent-ui);
+    stroke-width: 4px;
+    vector-effect: non-scaling-stroke;
+    stroke-linecap: round;
+  }
+  .what,
+  .why {
+    margin: var(--space-2) 0 0;
+    font-size: var(--size-sm);
+  }
+  .why {
+    color: var(--color-mute);
+  }
+  .n {
+    margin-right: var(--space-2);
+    font: 600 var(--type-caption);
+    font-family: var(--font-mono);
+  }
+  .code pre {
+    overflow-x: auto;
+    margin: 0;
+    padding: var(--space-4);
+    border-radius: 12px;
+    background: var(--color-bg);
+    box-shadow: inset 0 0 0 1px var(--color-rule);
+    font: var(--size-sm) / 1.6 var(--font-mono);
+  }
+  .line {
+    /* One block per line: the highlight spans the whole row, and copying keeps the line breaks. */
+    display: block;
+    border-radius: 4px;
+    transition: background-color var(--motion-base) var(--motion-ease-out);
+  }
+  .line.on {
+    background: color-mix(in oklab, var(--color-accent-ui) 22%, transparent);
+  }
+  .note {
+    margin: var(--space-2) 0 0;
+    font: var(--type-caption);
+    color: var(--color-mute);
+  }
+  .note a {
+    color: var(--color-ink);
+  }
+  .controls {
+    display: none;
+    align-items: center;
+    gap: var(--space-4);
+  }
+  .controls button {
+    min-height: 2.75rem;
+    padding: 0 var(--space-6);
+    border: 0;
+    border-radius: var(--radius-pill);
+    background: var(--color-ink);
+    color: var(--color-bg);
+    font: 600 var(--size-sm) var(--font-sans);
+    cursor: pointer;
+  }
+  .controls button:disabled {
+    opacity: 0.6;
+    cursor: default;
+  }
+  .controls button:focus-visible {
+    outline: 2px solid var(--color-accent-ui);
+    outline-offset: 2px;
+  }
+  .status {
+    margin: 0;
+    font: var(--type-caption);
+    font-family: var(--font-mono);
+  }
+
+  /* With JavaScript: one stage at a time, from the first paint. */
+  :global(html[data-js]) .stages {
+    display: block;
+  }
+  :global(html[data-js]) .stage:not(.current) {
+    display: none;
+  }
+  :global(html[data-js]) .controls {
+    display: flex;
+  }
+
+  @media (max-width: 640px) {
+    .layout {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .line {
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  import { fill } from '../../lib/template';
+
+  for (const root of document.querySelectorAll<HTMLElement>('[data-unit-fold]')) {
+    const t = JSON.parse(root.dataset.strings ?? '{}') as { stage: string };
+    const highlight = JSON.parse(root.dataset.highlight ?? '{}') as Record<string, string[]>;
+    const stages = [...root.querySelectorAll<HTMLElement>('[data-stage]')];
+    const lines = [...root.querySelectorAll<HTMLElement>('.line[data-prop]')];
+    const prev = root.querySelector<HTMLButtonElement>('[data-prev]')!;
+    const next = root.querySelector<HTMLButtonElement>('[data-next]')!;
+    const status = root.querySelector<HTMLElement>('[data-status]')!;
+    let current = 0;
+
+    const show = (i: number) => {
+      current = Math.max(0, Math.min(stages.length - 1, i));
+      stages.forEach((s, k) => s.classList.toggle('current', k === current));
+      const on = new Set(highlight[current] ?? []);
+      lines.forEach((l) => l.classList.toggle('on', on.has(l.dataset.prop ?? '')));
+      prev.disabled = current === 0;
+      next.disabled = current === stages.length - 1;
+      status.textContent = fill(t.stage, { n: current + 1, total: stages.length });
+    };
+    prev.addEventListener('click', () => show(current - 1));
+    next.addEventListener('click', () => show(current + 1));
+  }
+</script>
