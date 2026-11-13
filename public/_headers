@@ -22,6 +22,6 @@
 # `credentialless` rather than `require-corp`: third-party scripts such as Cloudflare Web
 # Analytics still load (without credentials). Safari doesn't support it, so there the page isn't
 # isolated and the essay runs the models that don't need shared memory.
-/precrease/parallel-code-that-actually-scales
+/precrease/when-threads-pay-off
   Cross-Origin-Opener-Policy: same-origin
   Cross-Origin-Embedder-Policy: credentialless
