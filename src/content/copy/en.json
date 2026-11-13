@@ -257,6 +257,24 @@
       "toggle": "Show margin note",
       "start": "Margin note: "
     },
+    "readers": {
+      "heading": "Readers",
+      "views": { "zero": "No views yet", "one": "1 view", "many": "{count} views" },
+      "reads": {
+        "zero": "nobody has read to the end yet",
+        "one": "1 read to the end",
+        "many": "{count} read to the end"
+      },
+      "helped": "This helped",
+      "helpedCount": { "zero": "Be the first", "one": "1 reader", "many": "{count} readers" },
+      "thanks": "Thanks. That tells me what to write more of.",
+      "share": "Share",
+      "copy": "Copy link",
+      "copied": "Link copied",
+      "nativeShare": "Share…",
+      "comments": "Show comments",
+      "commentsNote": "Comments load from giscus.app and GitHub when you open them. To comment, you sign in with GitHub there."
+    },
     "toc": "On this page",
     "history": "Change history on GitHub"
   }

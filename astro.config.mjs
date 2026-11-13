@@ -55,6 +55,11 @@ export default defineConfig({
         "form-action 'self'",
         "object-src 'none'",
       ],
+      // Declared explicitly so a page can add a source (giscus on posts) without replacing 'self':
+      // Astro's insertStyleResource() overrides the default list instead of extending it.
+      styleDirective: {
+        resources: ["'self'"],
+      },
       scriptDirective: {
         // Precrease search adds 'wasm-unsafe-eval' on its own pages only (PrecreaseSearch.astro).
         resources: ["'self'", 'https://static.cloudflareinsights.com'],

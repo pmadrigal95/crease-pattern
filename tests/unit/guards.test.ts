@@ -41,6 +41,8 @@ describe('guards', () => {
   test('values are formatted only in lib/format.ts', () => {
     const found = offenders(/new Intl\.|\.toLocale(Date|Time)?String\(|\.padStart\(/, {
       'lib/format.ts': 'the one place that formats',
+      'components/precrease/PostReaders.astro':
+        'its browser script formats counts that arrive at runtime, and browser scripts stay self-contained',
     });
     expect(
       found,
