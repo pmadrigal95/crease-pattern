@@ -14,7 +14,7 @@
     "predev": "node scripts/build-tokens.mjs && node scripts/build-inspector-manifest.mjs",
     "dev": "astro dev",
     "prebuild": "node scripts/build-tokens.mjs && node scripts/build-inspector-manifest.mjs",
-    "build": "astro build && node scripts/build-search-index.mjs && node scripts/stamp-site-metrics.mjs",
+    "build": "astro build && node scripts/sync-inline-style-hashes.mjs && node scripts/build-search-index.mjs && node scripts/stamp-site-metrics.mjs",
     "preview": "astro preview",
     "check": "astro check",
     "lint": "eslint .",
