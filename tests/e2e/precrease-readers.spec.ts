@@ -1,8 +1,8 @@
 import { expect, test, type Page } from '@playwright/test';
 
-// The end of a post (M3a.3): public counts from the site's own API, "This helped", sharing
-// without widgets. The Worker isn't part of the static preview, so the API is simulated here;
-// tests/unit/reader-stats.test.ts covers the API itself.
+// The end of a post (M3a.3): public counts from the site's own API, "This helped" with the
+// folded corner, the share sheet and comments on request. The Worker isn't part of the static
+// preview, so the API is simulated here; tests/unit/reader-stats.test.ts covers the API itself.
 const post = '/precrease/the-work-before-the-shape';
 const api = '**/api/stats/the-work-before-the-shape';
 
@@ -15,58 +15,99 @@ async function fakeApi(page: Page, counts = { views: 1204, reads: 312, helped: 1
   });
   return events;
 }
+const readers = (page: Page) => page.getByRole('region', { name: 'Readers' });
+// The footer has its own LinkedIn link, so sheet links are looked up inside the sheet.
+const sheet = (page: Page) => page.locator('#share-sheet');
+const count = (page: Page, key: string) => readers(page).locator(`[data-count="${key}"]`);
 
 test('shows the public counts and counts the view', async ({ page }) => {
   const events = await fakeApi(page);
   await page.goto(post);
-  const readers = page.getByRole('region', { name: 'Readers' });
-  await expect(readers.getByText('1,204 views · 312 read to the end')).toBeVisible();
-  await expect(readers.getByRole('button', { name: /This helped/ })).toContainText('12 readers');
+  await expect(count(page, 'views')).toHaveText('1,204');
+  await expect(count(page, 'reads')).toHaveText('312');
+  await expect(count(page, 'helped')).toHaveText('12');
+  await expect(readers(page).getByRole('button', { name: /This helped/ })).toBeVisible();
   await expect.poll(() => events).toContain('view');
 });
 
-test('"This helped" counts once and is remembered', async ({ page }) => {
+test('"This helped" folds the corner, counts once and is remembered', async ({ page }) => {
   const events = await fakeApi(page);
   await page.goto(post);
-  const button = page.getByRole('button', { name: /This helped/ });
+  const button = readers(page).locator('[data-helped]');
   await button.click();
   await expect(button).toHaveAttribute('aria-pressed', 'true');
-  await expect(button).toContainText('13 readers');
-  await expect(page.getByRole('status')).toHaveText(/Thanks/);
+  await expect(button).toContainText('Thanks');
+  await expect(count(page, 'helped')).toHaveText('13');
+  await expect(readers(page).getByRole('status')).toHaveText(/Thanks/);
   await button.click();
   await expect.poll(() => events.filter((e) => e === 'helped')).toHaveLength(1);
 
   await page.reload();
-  await expect(page.getByRole('button', { name: /This helped/ })).toHaveAttribute('aria-pressed', 'true');
+  await expect(readers(page).locator('[data-helped]')).toHaveAttribute('aria-pressed', 'true');
 });
 
 test('with Global Privacy Control on, nothing is reported, and the totals still show', async ({ page }) => {
   await page.addInitScript(() => Object.defineProperty(navigator, 'globalPrivacyControl', { value: true }));
   const events = await fakeApi(page);
   await page.goto(post);
-  await expect(page.getByText('1,204 views · 312 read to the end')).toBeVisible();
+  await expect(count(page, 'views')).toHaveText('1,204');
   await page.waitForTimeout(500);
   expect(events).toEqual([]);
 });
 
-test('if the API is down, the counts stay hidden and sharing still works', async ({ page }) => {
-  await page.route(`${api}**`, (route) => route.fulfill({ status: 503 }));
+test('the share sheet opens beside the button, works with the keyboard and returns focus', async ({
+  page,
+}) => {
+  await fakeApi(page);
+  await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto(post);
-  const readers = page.getByRole('region', { name: 'Readers' });
-  await expect(readers.getByRole('button', { name: /This helped/ })).toBeHidden();
-  await expect(readers.getByRole('link', { name: 'LinkedIn' })).toHaveAttribute(
+  const share = readers(page).getByRole('button', { name: 'Share' });
+  await share.click();
+  const linkedin = sheet(page).getByRole('link', { name: 'LinkedIn' });
+  await expect(linkedin).toBeVisible();
+  await expect(linkedin).toHaveAttribute(
     'href',
     /^https:\/\/www\.linkedin\.com\/sharing\/share-offsite\/\?url=https%3A%2F%2F.+%2Fprecrease%2Fthe-work-before-the-shape$/,
   );
+  await page.keyboard.press('Escape');
+  await expect(linkedin).toBeHidden();
+  await expect(share).toBeFocused();
+});
+
+test('on a phone the share sheet rises from the bottom of the screen', async ({ page }) => {
+  await fakeApi(page);
+  await page.setViewportSize({ width: 375, height: 812 });
+  await page.goto(post);
+  await readers(page).getByRole('button', { name: 'Share' }).click();
+  await expect(sheet(page)).toBeVisible();
+  // Measured once the slide-up has finished.
+  await expect
+    .poll(async () => {
+      const box = (await sheet(page).boundingBox())!;
+      return Math.round(box.y + box.height);
+    })
+    .toBe(812);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
+});
+
+test('if the API is down, the counts and "This helped" stay hidden and sharing still works', async ({
+  page,
+}) => {
+  await page.route(`${api}**`, (route) => route.fulfill({ status: 503 }));
+  await page.goto(post);
+  await expect(readers(page).locator('[data-helped]')).toBeHidden();
+  await expect(readers(page).locator('[data-metrics]')).toBeHidden();
+  await readers(page).getByRole('button', { name: 'Share' }).click();
+  await expect(sheet(page).getByRole('link', { name: 'Bluesky' })).toBeVisible();
 });
 
 test.describe('without JavaScript', () => {
   test.use({ javaScriptEnabled: false });
-  test('the share links are plain links', async ({ page }) => {
+  test('Share still opens, and its links are plain links', async ({ page }) => {
     await page.goto(post);
-    const readers = page.getByRole('region', { name: 'Readers' });
+    await readers(page).getByRole('button', { name: 'Share' }).click();
     for (const name of ['LinkedIn', 'X', 'Bluesky'])
-      await expect(readers.getByRole('link', { name })).toBeVisible();
+      await expect(sheet(page).getByRole('link', { name })).toBeVisible();
   });
 });
 
@@ -81,9 +122,10 @@ test('comments load nothing from giscus until the reader asks', async ({ page })
   await page.waitForLoadState('networkidle');
   expect(giscus).toEqual([]);
 
-  await page.getByRole('button', { name: 'Show comments' }).click();
+  const comments = readers(page).getByRole('button', { name: /^Comments/ });
+  await comments.click();
   await expect.poll(() => giscus).toContain('https://giscus.app/client.js');
-  await expect(page.getByRole('button', { name: 'Show comments' })).toBeHidden();
+  await expect(comments).toHaveAttribute('aria-expanded', 'true');
 });
 
 test('only post pages allow giscus in their Content Security Policy', async ({ page }) => {

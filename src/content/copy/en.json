@@ -259,21 +259,20 @@
     },
     "readers": {
       "heading": "Readers",
-      "views": { "zero": "No views yet", "one": "1 view", "many": "{count} views" },
-      "reads": {
-        "zero": "nobody has read to the end yet",
-        "one": "1 read to the end",
-        "many": "{count} read to the end"
-      },
+      "kicker": "End of {number}",
+      "title": "Thanks for reading to the end.",
+      "metrics": { "views": "views", "reads": "read to the end", "helped": "found it helpful" },
       "helped": "This helped",
-      "helpedCount": { "zero": "Be the first", "one": "1 reader", "many": "{count} readers" },
+      "helpedDone": "Thanks",
       "thanks": "Thanks. That tells me what to write more of.",
       "share": "Share",
+      "shareTitle": "Share “{title}”",
       "copy": "Copy link",
+      "copyShort": "Copy",
       "copied": "Link copied",
-      "nativeShare": "Share…",
-      "comments": "Show comments",
-      "commentsNote": "Comments load from giscus.app and GitHub when you open them. To comment, you sign in with GitHub there."
+      "more": "More…",
+      "comments": "Comments",
+      "commentsNote": "From GitHub Discussions · loads when you open it"
     },
     "toc": "On this page",
     "history": "Change history on GitHub"
