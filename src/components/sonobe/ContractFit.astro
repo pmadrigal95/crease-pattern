@@ -1,42 +1,50 @@
 ---
 /**
  * Act 2 of Crease No. 003: two units join only when a tab goes into a pocket. A schematic, not a
- * folding diagram: the left unit's tab slides into the right unit's pocket and they lock. Give the
- * tab one more prop and it grows wider than the pocket's mouth, so it stops there.
+ * folding diagram: the left unit's tab slides into the right unit's pocket and they lock.
  *
- * The same drawing appears three times: the live one, and two fixed ones ("fits" and "doesn't
- * fit") for readers without JavaScript. CSS under html[data-js] picks which show from the first
- * paint. The script only flips two attributes; the motion is a CSS transform, and reduced motion
- * turns it off.
+ * The reader picks what the tab carries, and the drawing tells the two cases apart:
+ * - one optional prop: the tab gets one more crease but keeps its size, so it still fits; the
+ *   contract grew by one case to test;
+ * - one required prop: the tab changes shape, grows wider than the pocket's mouth and stops there,
+ *   as every place that uses the component has to change.
+ *
+ * The same drawing appears four times: the live one, and three fixed ones for readers without
+ * JavaScript. CSS under html[data-js] picks which show from the first paint. The script only sets
+ * two attributes; the motion is a CSS transform, and reduced motion turns it off.
  */
 import { copy } from '../../lib/copy';
 
 const t = copy.precrease.sonobe.contract;
+const CHOICES = [
+  { id: 'none', label: t.asIs },
+  { id: 'optional', label: t.optional },
+  { id: 'required', label: t.required },
+] as const;
 const figures = [
-  { kind: 'live', state: 'apart', extra: 'false', caption: '' },
-  { kind: 'still', state: 'joined', extra: 'false', caption: t.fitsFigure },
-  { kind: 'still', state: 'joined', extra: 'true', caption: t.noFitFigure },
+  { kind: 'live', state: 'apart', tab: 'none', caption: '' },
+  { kind: 'still', state: 'joined', tab: 'none', caption: t.fitsFigure },
+  { kind: 'still', state: 'joined', tab: 'optional', caption: t.optionalFigure },
+  { kind: 'still', state: 'joined', tab: 'required', caption: t.noFitFigure },
 ];
+const strings = {
+  join: t.join,
+  apart: t.apart,
+  apartStatus: t.apartStatus,
+  none: t.fits,
+  optional: t.fitsOptional,
+  required: t.noFit,
+};
 ---
 
-<figure
-  class="contract"
-  data-contract
-  data-strings={JSON.stringify({
-    join: t.join,
-    apart: t.apart,
-    apartStatus: t.apartStatus,
-    fits: t.fits,
-    noFit: t.noFit,
-  })}
-  data-inspect="ContractFit"
->
+<figure class="contract" data-contract data-strings={JSON.stringify(strings)} data-inspect="ContractFit">
   {figures.map((f) => (
-    <figure class={`drawing ${f.kind}`} data-state={f.state} data-extra={f.extra}>
+    <figure class={`drawing ${f.kind}`} data-state={f.state} data-tab={f.tab}>
       <svg viewBox="0 0 10 4" role="img" aria-label={f.caption || t.label}>
         <g class="left">
           <polygon class="face" points="0.5,1 3,1 3,3 0.5,3" />
           <polygon class="tab narrow" points="3,1.3 3,2.7 4.4,2" />
+          <line class="tab-crease" x1="3.35" y1="1.48" x2="3.35" y2="2.52" />
           <polygon class="tab wide" points="3,0.75 3,3.25 4.4,2" />
         </g>
         <g class="right">
@@ -53,10 +61,15 @@ const figures = [
     <button type="button" data-join>
       {t.join}
     </button>
-    <label class="extra">
-      <input type="checkbox" data-extra-toggle />
-      <span>{t.extra}</span>
-    </label>
+    <fieldset class="choices">
+      <legend>{t.props}</legend>
+      {CHOICES.map((c, i) => (
+        <label>
+          <input type="radio" name="contract-tab" value={c.id} checked={i === 0} data-tab-choice />
+          <span>{c.label}</span>
+        </label>
+      ))}
+    </fieldset>
   </div>
   <p class="status" data-status aria-live="polite">
     {t.apartStatus}
@@ -105,20 +118,31 @@ const figures = [
   .tab {
     fill: color-mix(in oklab, var(--color-accent-ui) 22%, var(--color-bg));
   }
+  .tab-crease {
+    display: none;
+    stroke: var(--color-ink);
+    stroke-width: 1px;
+    stroke-dasharray: 2 2;
+    vector-effect: non-scaling-stroke;
+  }
   .pocket {
     stroke: var(--color-accent-ui);
     stroke-width: 4px;
     vector-effect: non-scaling-stroke;
     stroke-linecap: round;
   }
-  .wide,
-  [data-extra='true'] .narrow {
-    display: none;
-  }
-  [data-extra='true'] .wide {
+  /* An optional prop: one more crease on the same tab. A required one: a different, wider tab. */
+  [data-tab='optional'] .tab-crease {
     display: inline;
   }
-  [data-extra='true'] .pocket {
+  .wide,
+  [data-tab='required'] .narrow {
+    display: none;
+  }
+  [data-tab='required'] .wide {
+    display: inline;
+  }
+  [data-tab='required'] .pocket {
     stroke: var(--color-mute);
     stroke-dasharray: 3 3;
   }
@@ -130,7 +154,7 @@ const figures = [
     transform: translateX(2px);
   }
   /* A wider tab gets only its tip past the mouth. */
-  [data-state='joined'][data-extra='true'] .left {
+  [data-state='joined'][data-tab='required'] .left {
     transform: translateX(0.8px);
   }
 
@@ -151,11 +175,26 @@ const figures = [
     cursor: pointer;
   }
   .controls button:focus-visible,
-  .extra input:focus-visible {
+  .choices input:focus-visible {
     outline: 2px solid var(--color-accent-ui);
     outline-offset: 2px;
   }
-  .extra {
+  .choices {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-4);
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+  .choices legend {
+    width: 100%;
+    margin-bottom: var(--space-1);
+    padding: 0;
+    font: var(--type-caption);
+    color: var(--color-mute);
+  }
+  .choices label {
     display: inline-flex;
     align-items: center;
     gap: var(--space-2);
@@ -163,7 +202,7 @@ const figures = [
     font-size: var(--size-sm);
     cursor: pointer;
   }
-  .extra input {
+  .choices input {
     width: 1.25rem;
     height: 1.25rem;
     accent-color: var(--color-accent-ui);
@@ -174,7 +213,7 @@ const figures = [
     font-size: var(--size-sm);
   }
 
-  /* Without JavaScript: the two fixed drawings. With it: the live one and its controls. */
+  /* Without JavaScript: the three fixed drawings. With it: the live one and its controls. */
   .live {
     display: none;
   }
@@ -199,25 +238,27 @@ const figures = [
 </style>
 
 <script>
-  type Strings = { join: string; apart: string; apartStatus: string; fits: string; noFit: string };
+  type Tab = 'none' | 'optional' | 'required';
+  type Strings = Record<Tab, string> & { join: string; apart: string; apartStatus: string };
 
   for (const root of document.querySelectorAll<HTMLElement>('[data-contract]')) {
     const t = JSON.parse(root.dataset.strings ?? '{}') as Strings;
     const live = root.querySelector<HTMLElement>('.live')!;
     const join = root.querySelector<HTMLButtonElement>('[data-join]')!;
-    const extra = root.querySelector<HTMLInputElement>('[data-extra-toggle]')!;
+    const choices = [...root.querySelectorAll<HTMLInputElement>('[data-tab-choice]')];
     const status = root.querySelector<HTMLElement>('[data-status]')!;
 
     const render = () => {
       const joined = live.dataset.state === 'joined';
-      live.dataset.extra = String(extra.checked);
+      const tab = (choices.find((c) => c.checked)?.value ?? 'none') as Tab;
+      live.dataset.tab = tab;
       join.textContent = joined ? t.apart : t.join;
-      status.textContent = !joined ? t.apartStatus : extra.checked ? t.noFit : t.fits;
+      status.textContent = joined ? t[tab] : t.apartStatus;
     };
     join.addEventListener('click', () => {
       live.dataset.state = live.dataset.state === 'joined' ? 'apart' : 'joined';
       render();
     });
-    extra.addEventListener('change', render);
+    for (const choice of choices) choice.addEventListener('change', render);
   }
 </script>

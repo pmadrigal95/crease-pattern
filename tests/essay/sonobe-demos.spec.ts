@@ -55,7 +55,7 @@ test('without JavaScript every stage and every model is on the page', async ({ b
   await page.goto(post);
   await expect(page.locator('[data-unit-fold] .stage:visible')).toHaveCount(5);
   await expect(page.locator('[data-sonobe-scale] .model:visible')).toHaveCount(3);
-  await expect(page.locator('[data-contract] .still:visible')).toHaveCount(2);
+  await expect(page.locator('[data-contract] .still:visible')).toHaveCount(3);
   await expect(page.locator('[data-contract] .live')).toBeHidden();
   await expect(page.locator('[data-exception] .state:visible')).toHaveCount(2);
   await expect(page.locator('[data-unit-fold] .controls')).toBeHidden();
@@ -155,17 +155,21 @@ test('the component table lists every component, linked to its file', async ({ p
   );
 });
 
-test('two units lock tab into pocket; one more prop and they no longer do', async ({ page }) => {
+test('an optional prop still fits; a required one stops the tab at the pocket', async ({ page }) => {
   await page.goto(post);
   const demo = page.locator('[data-contract]');
-  await expect(demo.locator('.still')).toHaveCount(2);
+  const status = demo.locator('[data-status]');
+  await expect(demo.locator('.still')).toHaveCount(3);
   await expect(demo.locator('.still').first()).toBeHidden();
   await demo.getByRole('button', { name: 'Join them' }).click();
-  await expect(demo.locator('[data-status]')).toHaveText('The tab goes into the pocket and the units lock.');
+  await expect(status).toHaveText('The tab goes into the pocket and the units lock.');
   await expect(demo.getByRole('button', { name: 'Take them apart' })).toBeVisible();
-  await demo.getByLabel('Give the tab one more prop').check();
-  await expect(demo.locator('[data-status]')).toContainText("The units don't lock.");
-  await expect(demo.locator('.live')).toHaveAttribute('data-extra', 'true');
+  await demo.getByLabel('One optional prop', { exact: true }).check();
+  await expect(demo.locator('.live')).toHaveAttribute('data-tab', 'optional');
+  await expect(status).toContainText('The units still lock.');
+  await demo.getByLabel('One required prop', { exact: true }).check();
+  await expect(demo.locator('.live')).toHaveAttribute('data-tab', 'required');
+  await expect(status).toContainText('every place that uses it has to change');
 });
 
 test('one special unit opens the model, and the counts follow', async ({ page }) => {
