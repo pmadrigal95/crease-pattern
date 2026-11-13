@@ -7,7 +7,7 @@ import { existsSync, readFileSync, statSync } from 'node:fs';
 import { extname, join, normalize } from 'node:path';
 
 const root = join(import.meta.dirname, '..', 'dist');
-const port = Number(process.argv[2] ?? 4323);
+const port = Number(process.argv[2] ?? 4410);
 
 /** `_headers` as rules: a path (exact, or ending in `*`) and the headers it adds. */
 function headerRules() {
@@ -61,4 +61,4 @@ createServer((req, res) => {
   const served = file ?? join(root, '404.html');
   res.setHeader('Content-Type', TYPES[extname(served)] ?? 'application/octet-stream');
   res.end(readFileSync(served));
-}).listen(port, () => console.log(`dist/ with _headers on http://localhost:${port}`));
+}).listen(port, '127.0.0.1', () => console.log(`dist/ with _headers on http://127.0.0.1:${port}`));
