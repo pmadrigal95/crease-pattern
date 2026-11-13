@@ -1,0 +1,311 @@
+---
+/**
+ * The opening demo of the Threads essay (Crease No. 002): the essay's board, a button, and the
+ * four models timed on the reader's own device (a warm-up run, then the median of five). Ends by
+ * marking on the board the move the solver chose, which every model agrees on.
+ *
+ * The board is drawn at build time, so it shows without JavaScript; the timings need it and say
+ * so. Models that need shared memory are skipped, with a note, where the browser doesn't allow it.
+ */
+import { copy } from '../../lib/copy';
+import { boardFromText } from '../../lib/threads/board';
+import { ESSAY_BOARD, ESSAY_PIECES } from '../../lib/threads/essay';
+import { MODELS } from '../../lib/threads/protocol';
+
+const t = copy.precrease.threads;
+const board = boardFromText(ESSAY_BOARD, 20);
+const ROWS = 12;
+const CELL = 16;
+const cells = Array.from({ length: ROWS }, (_, row) => {
+  const y = ROWS - 1 - row;
+  return Array.from({ length: board.width }, (_, x) => ({
+    x,
+    y,
+    filled: Boolean(board.rows[y]! & (1 << x)),
+  }));
+}).flat();
+---
+
+<figure class="threads-run" data-threads-run data-strings={JSON.stringify(t)} data-inspect="ThreadsRun">
+  <div class="stage">
+    <svg
+      class="board"
+      viewBox={`0 0 ${board.width * CELL} ${ROWS * CELL}`}
+      role="img"
+      aria-label={t.bestMove}
+    >
+      {cells.map((c) => (
+        <rect
+          class={c.filled ? 'cell filled' : 'cell'}
+          x={c.x * CELL + 1}
+          y={(ROWS - 1 - c.y) * CELL + 1}
+          width={CELL - 2}
+          height={CELL - 2}
+          rx="2"
+          data-x={c.x}
+          data-y={c.y}
+        />
+      ))}
+    </svg>
+    <p class="next">
+      {t.next}: <b>{ESSAY_PIECES.slice(0, 3).join(' · ')}</b>
+    </p>
+  </div>
+
+  <div class="panel">
+    <p class="readout" data-readout aria-live="polite"></p>
+    <ol class="results">
+      {MODELS.map((model) => (
+        <li data-model={model}>
+          <span class="name">
+            {t.models[model]}
+            <small>{t.modelNotes[model]}</small>
+          </span>
+          <span class="bar" aria-hidden="true">
+            <span class="fill" data-fill></span>
+          </span>
+          <span class="time" data-time>
+            —
+          </span>
+          <span class="speed" data-speed></span>
+        </li>
+      ))}
+    </ol>
+    <button type="button" class="run" data-run>
+      {t.run}
+    </button>
+    <p class="note" data-note></p>
+    <noscript>
+      <p class="note">{t.needsJs}</p>
+    </noscript>
+  </div>
+</figure>
+
+<style>
+  .threads-run {
+    display: grid;
+    grid-template-columns: minmax(0, 12rem) minmax(0, 1fr);
+    gap: var(--space-8);
+    align-items: start;
+    margin: var(--space-8) 0;
+    padding: var(--space-6);
+    border-radius: 20px;
+    background: var(--color-surface);
+    box-shadow: inset 0 0 0 1px var(--color-rule);
+    font-family: var(--font-sans);
+  }
+  .board {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .cell {
+    fill: var(--color-bg);
+    stroke: var(--color-rule);
+    stroke-width: 1;
+  }
+  .cell.filled {
+    fill: var(--color-ink);
+    fill-opacity: 0.75;
+    stroke: none;
+  }
+  .cell.chosen {
+    fill: var(--color-accent-ui);
+    stroke: none;
+    transition: fill var(--motion-base) var(--motion-ease-out);
+  }
+  .next {
+    margin: var(--space-3) 0 0;
+    font: var(--type-caption);
+    color: var(--color-mute);
+  }
+  .next b {
+    color: var(--color-ink);
+  }
+  .readout {
+    min-height: 1.4em;
+    margin: 0 0 var(--space-4);
+    font-size: var(--size-lg);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+  .results {
+    display: grid;
+    gap: var(--space-3);
+    margin: 0 0 var(--space-6);
+    padding: 0;
+    list-style: none;
+  }
+  .results li {
+    display: grid;
+    grid-template-columns: minmax(0, 11rem) minmax(0, 1fr) 4.5rem 3.5rem;
+    gap: var(--space-3);
+    align-items: center;
+    font-size: var(--size-sm);
+  }
+  .results li.off {
+    opacity: 0.5;
+  }
+  .name small {
+    display: block;
+    font-size: var(--size-xs);
+    color: var(--color-mute);
+  }
+  .bar {
+    height: 8px;
+    border-radius: 999px;
+    background: var(--color-bg);
+    overflow: hidden;
+  }
+  .fill {
+    display: block;
+    width: 0;
+    height: 100%;
+    border-radius: inherit;
+    background: var(--color-accent-ui);
+    transition: width var(--motion-stage) var(--motion-ease-out);
+  }
+  li[data-model='serial'] .fill {
+    background: var(--color-mute);
+  }
+  .time,
+  .speed {
+    font: var(--type-caption);
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+  .speed {
+    color: var(--color-ink);
+    font-weight: 600;
+  }
+  .run {
+    min-height: 2.75rem;
+    padding: 0 var(--space-6);
+    border: 0;
+    border-radius: var(--radius-pill);
+    background: var(--color-ink);
+    color: var(--color-bg);
+    font: 600 var(--size-md) var(--font-sans);
+    cursor: pointer;
+  }
+  .run:disabled {
+    opacity: 0.6;
+    cursor: progress;
+  }
+  .run:focus-visible {
+    outline: 2px solid var(--color-accent-ui);
+    outline-offset: 2px;
+  }
+  .note {
+    margin: var(--space-3) 0 0;
+    font-size: var(--size-xs);
+    color: var(--color-mute);
+  }
+  .note:empty {
+    display: none;
+  }
+  @media (max-width: 640px) {
+    .threads-run {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .stage {
+      max-width: 12rem;
+    }
+    .results li {
+      grid-template-columns: minmax(0, 1fr) 4rem 3rem;
+    }
+    .bar {
+      grid-column: 1 / -1;
+      grid-row: 2;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .fill,
+    .cell.chosen {
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  import { formatDecimal } from '../../lib/format';
+  import { fill } from '../../lib/template';
+  // Type only: erased from the bundle, so the copy file still never reaches the browser.
+  type ThreadsCopy = (typeof import('../../content/copy/en.json'))['precrease']['threads'];
+  import { canRun, nextFrame, poolSize, time } from '../../lib/threads/client';
+  import { essayProblem, speedup } from '../../lib/threads/essay';
+  import { ROTATIONS } from '../../lib/threads/pieces';
+  import { MODELS, sharedMemoryAvailable } from '../../lib/threads/protocol';
+
+  for (const root of document.querySelectorAll<HTMLElement>('[data-threads-run]')) {
+    // Strings come from the page (data-strings), so the copy file never ships to the browser.
+    const t = JSON.parse(root.dataset.strings ?? '{}') as ThreadsCopy;
+    const button = root.querySelector<HTMLButtonElement>('[data-run]')!;
+    const note = root.querySelector<HTMLElement>('[data-note]')!;
+    const readout = root.querySelector<HTMLElement>('[data-readout]')!;
+    const row = (model: string) => root.querySelector<HTMLElement>(`li[data-model="${model}"]`)!;
+
+    note.textContent = fill(t.cores, { cores: navigator.hardwareConcurrency || 1, workers: poolSize() });
+    if (!sharedMemoryAvailable()) note.textContent += ` ${t.noShared}`;
+    for (const model of MODELS) if (!canRun(model)) row(model).classList.add('off');
+
+    button.addEventListener('click', async () => {
+      button.disabled = true;
+      button.textContent = t.running;
+      readout.textContent = '';
+      const problem = essayProblem(3);
+      const times: Partial<Record<string, number>> = {};
+      let chosen: { piece: string; rotation: number; x: number; y: number } | undefined;
+
+      for (const model of MODELS) {
+        const r = row(model);
+        if (!canRun(model)) {
+          r.querySelector('[data-time]')!.textContent = '';
+          r.querySelector('[data-speed]')!.textContent = '';
+          r.title = t.unavailable;
+          continue;
+        }
+        const timed = await time(model, problem);
+        times[model] = timed.ms;
+        chosen ??= timed.report.result.moves[0];
+        r.querySelector('[data-time]')!.textContent = `${formatDecimal(timed.ms)} ms`;
+        await nextFrame();
+      }
+
+      const serial = times.serial ?? 0;
+      const speeds = MODELS.map((m) => (times[m] ? speedup(serial, times[m]!) : 0));
+      const top = Math.max(...speeds, 1);
+      MODELS.forEach((m, i) => {
+        if (!times[m]) return;
+        row(m).querySelector('[data-speed]')!.textContent = `${formatDecimal(speeds[i]!)}×`;
+        row(m).querySelector<HTMLElement>('[data-fill]')!.style.width = `${(speeds[i]! / top) * 100}%`;
+      });
+      // Name whichever model won here: it differs between devices, and the essay says so.
+      const fastest = MODELS.filter((m) => m !== 'serial' && times[m]).reduce<(typeof MODELS)[number] | null>(
+        (best, m) => (best === null || times[m]! < times[best]! ? m : best),
+        null,
+      );
+      if (fastest)
+        readout.textContent = fill(t.result, {
+          model: t.models[fastest].toLowerCase(),
+          times: formatDecimal(speedup(serial, times[fastest]!)),
+        });
+
+      // Mark the chosen move's cells on the board.
+      root.querySelectorAll('.cell.chosen').forEach((c) => c.classList.remove('chosen'));
+      const move = chosen;
+      if (move) {
+        const rotation = ROTATIONS[move.piece as keyof typeof ROTATIONS][move.rotation]!;
+        rotation.rows.forEach((mask, dy) => {
+          for (let dx = 0; dx < rotation.width; dx++)
+            if (mask & (1 << dx))
+              root
+                .querySelector(`[data-x="${move.x + dx}"][data-y="${move.y + dy}"]`)
+                ?.classList.add('chosen');
+        });
+      }
+      button.disabled = false;
+      button.textContent = t.runAgain;
+    });
+  }
+</script>

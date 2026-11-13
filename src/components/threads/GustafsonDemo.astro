@@ -1,0 +1,170 @@
+---
+/**
+ * The depth demo of the Threads essay (Crease No. 002, section 4, Gustafson): the same device and
+ * the same workers, only the amount of work changes, from 1 to 3 pieces ahead. The placements
+ * searched at each depth are counted at build time; the times are measured live, serial against
+ * the best parallel model this browser can run.
+ */
+import { copy, fill } from '../../lib/copy';
+import { formatNumber } from '../../lib/format';
+import { boardFromText } from '../../lib/threads/board';
+import { ESSAY_BOARD, ESSAY_PIECES } from '../../lib/threads/essay';
+import { search } from '../../lib/threads/search';
+
+const t = copy.precrease.threads;
+const board = boardFromText(ESSAY_BOARD, 20);
+const depths = [1, 2, 3].map((depth) => ({ depth, nodes: search(board, ESSAY_PIECES, depth).nodes }));
+---
+
+<figure class="depths" data-gustafson data-strings={JSON.stringify(t)} data-inspect="GustafsonDemo">
+  <p class="readout" data-readout aria-live="polite"></p>
+  <ol class="rows">
+    {depths.map((d) => (
+      <li data-depth={d.depth}>
+        <span class="name">
+          {fill(t.depthRow, { depth: d.depth })}
+          <small>{fill(t.placements, { count: formatNumber(d.nodes) })}</small>
+        </span>
+        <span class="bar" aria-hidden="true">
+          <span class="fill" data-fill></span>
+        </span>
+        <span class="speed" data-speed>
+          —
+        </span>
+      </li>
+    ))}
+  </ol>
+  <button type="button" class="run" data-run>
+    {t.runDepths}
+  </button>
+  <noscript>
+    <p class="note">{t.needsJs}</p>
+  </noscript>
+</figure>
+
+<style>
+  .depths {
+    display: grid;
+    gap: var(--space-4);
+    margin: var(--space-8) 0;
+    padding: var(--space-6);
+    border-radius: 20px;
+    background: var(--color-surface);
+    box-shadow: inset 0 0 0 1px var(--color-rule);
+    font-family: var(--font-sans);
+  }
+  .readout {
+    min-height: 1.4em;
+    margin: 0;
+    font-size: var(--size-md);
+    font-weight: 600;
+  }
+  .rows {
+    display: grid;
+    gap: var(--space-3);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .rows li {
+    display: grid;
+    grid-template-columns: minmax(0, 11rem) minmax(0, 1fr) 3.5rem;
+    gap: var(--space-3);
+    align-items: center;
+    font-size: var(--size-sm);
+  }
+  .name small {
+    display: block;
+    font-size: var(--size-xs);
+    color: var(--color-mute);
+  }
+  .bar {
+    height: 8px;
+    border-radius: 999px;
+    background: var(--color-bg);
+    overflow: hidden;
+  }
+  .fill {
+    display: block;
+    width: 0;
+    height: 100%;
+    border-radius: inherit;
+    background: var(--color-accent-ui);
+    transition: width var(--motion-stage) var(--motion-ease-out);
+  }
+  .speed {
+    font: 600 var(--size-xs) var(--font-mono);
+    text-align: right;
+  }
+  .run {
+    justify-self: start;
+    min-height: 2.75rem;
+    padding: 0 var(--space-6);
+    border: 0;
+    border-radius: var(--radius-pill);
+    background: var(--color-ink);
+    color: var(--color-bg);
+    font: 600 var(--size-md) var(--font-sans);
+    cursor: pointer;
+  }
+  .run:disabled {
+    opacity: 0.6;
+    cursor: progress;
+  }
+  .run:focus-visible {
+    outline: 2px solid var(--color-accent-ui);
+    outline-offset: 2px;
+  }
+  .note {
+    margin: 0;
+    font-size: var(--size-xs);
+    color: var(--color-mute);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .fill {
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  import { formatDecimal } from '../../lib/format';
+  import { fill } from '../../lib/template';
+  // Type only: erased from the bundle, so the copy file still never reaches the browser.
+  type ThreadsCopy = (typeof import('../../content/copy/en.json'))['precrease']['threads'];
+  import { canRun, nextFrame, poolSize, time } from '../../lib/threads/client';
+  import { essayProblem, speedup } from '../../lib/threads/essay';
+
+  for (const root of document.querySelectorAll<HTMLElement>('[data-gustafson]')) {
+    const t = JSON.parse(root.dataset.strings ?? '{}') as ThreadsCopy;
+    const button = root.querySelector<HTMLButtonElement>('[data-run]')!;
+    const readout = root.querySelector<HTMLElement>('[data-readout]')!;
+    const parallel = canRun('shared') ? 'shared' : 'messages';
+    button.addEventListener('click', async () => {
+      button.disabled = true;
+      button.textContent = t.running;
+      const speeds: number[] = [];
+      for (const depth of [1, 2, 3]) {
+        const serial = await time('serial', essayProblem(depth));
+        const fast = await time(parallel, essayProblem(depth));
+        const s = speedup(serial.ms, fast.ms);
+        speeds.push(s);
+        const row = root.querySelector<HTMLElement>(`li[data-depth="${depth}"]`)!;
+        row.querySelector('[data-speed]')!.textContent = `${formatDecimal(s)}×`;
+        await nextFrame();
+      }
+      const top = Math.max(...speeds, 1);
+      speeds.forEach((s, i) => {
+        root.querySelector<HTMLElement>(`li[data-depth="${i + 1}"] [data-fill]`)!.style.width =
+          `${(s / top) * 100}%`;
+      });
+      readout.textContent = fill(t.depthReadout, {
+        depth: 3,
+        times: formatDecimal(speeds[2] ?? 1),
+        workers: poolSize(),
+      });
+      button.disabled = false;
+      button.textContent = t.runAgain;
+    });
+  }
+</script>

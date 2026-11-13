@@ -15,6 +15,7 @@ const LOCALE = 'en';
 const longDate = new Intl.DateTimeFormat(LOCALE, { dateStyle: 'long', timeZone: 'UTC' });
 const shortMonth = new Intl.DateTimeFormat(LOCALE, { month: 'short', timeZone: 'UTC' });
 const integer = new Intl.NumberFormat(LOCALE);
+const oneDecimal = new Intl.NumberFormat(LOCALE, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 const andList = new Intl.ListFormat(LOCALE, { type: 'conjunction' });
 
 /** "November 11, 2026". */
@@ -35,6 +36,9 @@ export function formatRange(start: string, end: string | null | undefined, prese
 export const formatNumber = (value: number): string => integer.format(value);
 
 /** "English, Spanish and Japanese". */
+/** "2.4": speedups and milliseconds in the Threads essay, always one decimal. */
+export const formatDecimal = (value: number): string => oneDecimal.format(value);
+
 export const formatList = (items: readonly string[]): string => andList.format(items);
 
 /** Fixed-width serials: 1 → "001". */
