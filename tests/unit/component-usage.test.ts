@@ -87,3 +87,23 @@ test('every component of this site is in use', () => {
   expect(totals.components).toBeGreaterThan(0);
   expect(totals.unused).toEqual([]);
 });
+
+test('each use records the string props it passes, not expressions', () => {
+  const { components } = componentUsage(
+    [
+      {
+        path: 'src/pages/index.astro',
+        source: `import PostCard from '../components/precrease/PostCard.astro';\n<PostCard post={p} headingLevel="h3" />\n<PostCard post={q} headingLevel="h2" />`,
+      },
+      {
+        path: 'src/pages/precrease/[topic].astro',
+        source: `import PostCard from '../../components/precrease/PostCard.astro';\n<PostCard post={p} />`,
+      },
+    ],
+    [card],
+  );
+  expect(components[0]!.usedIn).toEqual([
+    { file: 'src/pages/index.astro', count: 2, props: { headingLevel: ['h2', 'h3'] } },
+    { file: 'src/pages/precrease/[topic].astro', count: 1 },
+  ]);
+});

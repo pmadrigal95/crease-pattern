@@ -196,6 +196,21 @@ export function normal(points: readonly Vec3[]): Vec3 {
   return scale(n, 1 / length(n));
 }
 
+/**
+ * The same model with one unit pushed `distance` out along each of its facets' normals: a unit
+ * that no longer sits where the others expect it, so the model doesn't close (act 5).
+ */
+export function displace(model: Assembly, unit: number, distance: number): Assembly {
+  return {
+    units: model.units,
+    facets: model.facets.map((f) => {
+      if (f.unit !== unit) return f;
+      const offset = scale(normal(f.points), distance);
+      return { unit: f.unit, points: f.points.map((p) => add(p, offset)) };
+    }),
+  };
+}
+
 export interface Projected {
   unit: number;
   points: readonly Vec2[];

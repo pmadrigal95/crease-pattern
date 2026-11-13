@@ -32,13 +32,29 @@ const list = (root, dir, match) =>
 const tagsOf = (name, source) => [...source.matchAll(new RegExp(`<${name}(?=[\\s/>])`, 'g'))].length;
 
 /**
+ * The string-literal props a file passes to a component (`unfold="load"` → { unfold: ['load'] }),
+ * merged over its tags. Expressions (`text={data.title}`) are skipped: their value isn't known
+ * until the page renders. Reads up to the tag's first `>`, enough for the props this site writes.
+ */
+function literalProps(name, source) {
+  /** @type {Record<string, Set<string>>} */
+  const props = {};
+  for (const [, attrs] of source.matchAll(new RegExp(`<${name}(?=[\\s/>])([^>]*)>`, 'g')))
+    for (const [, key, value] of attrs.matchAll(/([\w-]+)="([^"]*)"/g)) (props[key] ??= new Set()).add(value);
+  return Object.fromEntries(Object.entries(props).map(([k, v]) => [k, [...v].sort()]));
+}
+
+/**
  * @param {{ path: string, source: string }[]} files repository-relative paths, forward slashes
  * @param {string[]} components repository-relative paths of the component files
  */
 export function componentUsage(files, components) {
-  /** @type {Map<string, Map<string, number>>} component path → (file → uses) */
+  /** @type {Map<string, Map<string, { count: number, props: Record<string, string[]> }>>} component → file → use */
   const uses = new Map(components.map((c) => [c, new Map()]));
-  const add = (target, file, count) => uses.get(target).set(file, (uses.get(target).get(file) ?? 0) + count);
+  const add = (target, file, count, props = {}) => {
+    const prev = uses.get(target).get(file);
+    uses.get(target).set(file, { count: (prev?.count ?? 0) + count, props: { ...prev?.props, ...props } });
+  };
   const posts = files.filter((f) => f.path.endsWith('.mdx'));
 
   for (const { path, source } of files) {
@@ -52,10 +68,10 @@ export function componentUsage(files, components) {
       if (handedToContent.has(name)) {
         for (const post of posts) {
           const count = tagsOf(name, post.source);
-          if (count) add(target, post.path, count);
+          if (count) add(target, post.path, count, literalProps(name, post.source));
         }
       } else {
-        add(target, path, Math.max(tagsOf(name, source), 1));
+        add(target, path, Math.max(tagsOf(name, source), 1), literalProps(name, source));
       }
     }
   }
@@ -63,7 +79,7 @@ export function componentUsage(files, components) {
   const entries = components
     .map((path) => {
       const usedIn = [...uses.get(path)]
-        .map(([file, count]) => ({ file, count }))
+        .map(([file, { count, props }]) => ({ file, count, ...(Object.keys(props).length ? { props } : {}) }))
         .sort((a, b) => b.count - a.count || a.file.localeCompare(b.file));
       return {
         name: posix.basename(path).replace(COMPONENT_FILE, ''),
