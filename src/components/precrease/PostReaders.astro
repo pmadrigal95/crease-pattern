@@ -1,27 +1,36 @@
 ---
 /**
- * The end of a Precrease post (M3a.3, decisions 37 and 48): its public counts (views and reads
- * to the end), a "This helped" button, sharing without widgets, and comments on request.
+ * The end of a Precrease post (M3a.3, decisions 37 and 48; design chosen 2026-11-13): public
+ * counts, "This helped", sharing and comments.
+ *
+ * One markup, two layouts by the block's own width (container query): narrow, a line of counts
+ * and two equal buttons; wide, a closing card with the three counts as figures. "This helped"
+ * carries the site's gesture: its icon is a page whose corner folds when pressed.
  *
  * - Counts come from the site's own Worker (/api/stats, worker/stats.ts): totals per post, no
- *   cookies, no IDs. With Global Privacy Control or Do Not Track on, this page doesn't report the
- *   view or the read; it still shows the totals. "This helped" is something you press, so it
- *   always counts, once per browser (remembered in local storage as `pm.helped`).
- * - Without JavaScript, or if the API doesn't answer, the counts and the button stay hidden and
- *   the share links still work: they are plain links.
- * - Comments (giscus) load nothing until the reader presses the button; only then does this page
- *   allow giscus.app in its CSP and fetch it. Off while site.config.ts has no comments config.
+ *   cookies, no IDs. With Global Privacy Control or Do Not Track on, the page doesn't report the
+ *   view or the read; it still shows the totals. "This helped" counts once per browser
+ *   (`pm.helped` in local storage).
+ * - Share opens a sheet built on the Popover API (popovertarget), so it opens, closes with Escape
+ *   or a tap outside, and returns focus without JavaScript. On narrow screens it rises from the
+ *   bottom with a backdrop; on wide ones it sits beside the button. Its links are plain links;
+ *   script only adds Copy and the system share menu ("More…") where they exist.
+ * - Without JavaScript, or if the API doesn't answer, the counts and "This helped" stay hidden.
+ * - Comments (giscus) load nothing until the reader opens them; only then does this page allow
+ *   giscus.app in its CSP and fetch it. Off while site.config.ts has no comments config.
  */
 import site from '../../../site.config';
-import { copy } from '../../lib/copy';
+import { copy, fill } from '../../lib/copy';
 
 interface Props {
   slug: string;
   title: string;
   url: string;
   minutes: number;
+  /** "Crease No. 001", for the card's kicker. */
+  number: string;
 }
-const { slug, title, url, minutes } = Astro.props;
+const { slug, title, url, minutes, number } = Astro.props;
 const t = copy.precrease.readers;
 const comments = site.comments;
 if (comments) {
@@ -32,10 +41,23 @@ if (comments) {
 }
 const encoded = encodeURIComponent(url);
 const shareLinks = [
-  { label: 'LinkedIn', href: `https://www.linkedin.com/sharing/share-offsite/?url=${encoded}` },
-  { label: 'X', href: `https://x.com/intent/post?url=${encoded}&text=${encodeURIComponent(title)}` },
-  { label: 'Bluesky', href: `https://bsky.app/intent/compose?text=${encodeURIComponent(`${title} ${url}`)}` },
-];
+  {
+    label: 'LinkedIn',
+    mark: 'linkedin',
+    href: `https://www.linkedin.com/sharing/share-offsite/?url=${encoded}`,
+  },
+  {
+    label: 'X',
+    mark: 'x',
+    href: `https://x.com/intent/post?url=${encoded}&text=${encodeURIComponent(title)}`,
+  },
+  {
+    label: 'Bluesky',
+    mark: 'bluesky',
+    href: `https://bsky.app/intent/compose?text=${encodeURIComponent(`${title} ${url}`)}`,
+  },
+] as const;
+const display = url.replace(/^https?:\/\//, '');
 ---
 
 <section
@@ -44,57 +66,122 @@ const shareLinks = [
   data-readers
   data-slug={slug}
   data-minutes={minutes}
-  data-views={JSON.stringify(t.views)}
-  data-reads={JSON.stringify(t.reads)}
-  data-helped-count={JSON.stringify(t.helpedCount)}
   data-copied={t.copied}
   data-thanks={t.thanks}
+  data-done={t.helpedDone}
   data-inspect="PostReaders"
 >
   <h2 id="readers-title" class="sr-only">
     {t.heading}
   </h2>
-
-  <div class="row" data-stats hidden>
-    <button type="button" class="helped" aria-pressed="false" data-helped>
-      <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
-        <path d="M2 9 L8 2 L14 9 M8 2 V15" />
-      </svg>
-      <span>{t.helped}</span>
-      <span class="helped-count" data-helped-count-text></span>
-    </button>
-    <p class="counts" data-counts></p>
+  <div class="inner">
+    <p class="kicker" aria-hidden="true">
+      {fill(t.kicker, { number })}
+    </p>
+    <p class="title" aria-hidden="true">
+      {t.title}
+    </p>
+    <dl class="metrics" data-metrics hidden>
+      <div>
+        <dt>{t.metrics.views}</dt>
+        <dd data-count="views"></dd>
+      </div>
+      <div>
+        <dt>{t.metrics.reads}</dt>
+        <dd data-count="reads"></dd>
+      </div>
+      <div class="helped-metric">
+        <dt>{t.metrics.helped}</dt>
+        <dd data-count="helped"></dd>
+      </div>
+    </dl>
+    <div class="actions">
+      <button type="button" class="btn helped" aria-pressed="false" data-helped hidden>
+        <span class="corner" aria-hidden="true">
+          <span class="page"></span>
+          <span class="edge"></span>
+          <span class="flap"></span>
+        </span>
+        <span data-helped-label>{t.helped}</span>
+        <span class="n" data-helped-n></span>
+      </button>
+      <button type="button" class="btn share" popovertarget="share-sheet">
+        <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+          <path d="M10 13V2 M6 6l4-4 4 4 M4 9v8h12V9"></path>
+        </svg>
+        {t.share}
+      </button>
+    </div>
   </div>
 
-  <div class="row share">
-    <p class="label">{t.share}</p>
-    <button type="button" class="action" data-copy={url} hidden>
-      {t.copy}
-    </button>
-    <button type="button" class="action" data-native-share={url} data-title={title} hidden>
-      {t.nativeShare}
-    </button>
-    {shareLinks.map((link) => (
-      <a class="action" href={link.href} target="_blank" rel="noopener noreferrer">
-        {link.label}
-      </a>
-    ))}
+  <div id="share-sheet" class="sheet" popover aria-labelledby="share-title">
+    <p id="share-title" class="sheet-title">
+      {fill(t.shareTitle, { title })}
+    </p>
+    <div class="tiles">
+      <button type="button" class="tile" data-copy={url} hidden>
+        <span class="ic">
+          <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+            <path d="M8 12l4-4 M7 9.5 5 11.5a2.8 2.8 0 0 0 4 4l2-2 M13 10.5l2-2a2.8 2.8 0 0 0-4-4l-2 2"></path>
+          </svg>
+        </span>
+        {t.copy}
+      </button>
+      {shareLinks.map((link) => (
+        <a class="tile" href={link.href} target="_blank" rel="noopener noreferrer">
+          <span class={`ic mark-${link.mark}`} aria-hidden="true">
+            {link.mark === 'linkedin' && 'in'}
+            {link.mark === 'x' && (
+              <svg viewBox="0 0 20 20" focusable="false">
+                <path d="M4 3 L16 17 M16 3 L4 17"></path>
+              </svg>
+            )}
+            {link.mark === 'bluesky' && (
+              <svg viewBox="0 0 20 20" focusable="false">
+                <path d="M10 9C8.5 6 5.5 3.5 3.5 3.5 2.5 3.5 2.5 6 3.5 8.5 4.3 10.5 6 11 8 11 5.5 11.8 5 14 7 15.5 8.5 16.5 9.5 14 10 12 10.5 14 11.5 16.5 13 15.5 15 14 14.5 11.8 12 11 14 11 15.7 10.5 16.5 8.5 17.5 6 17.5 3.5 16.5 3.5 14.5 3.5 11.5 6 10 9Z"></path>
+              </svg>
+            )}
+          </span>
+          {link.label}
+        </a>
+      ))}
+      <button type="button" class="tile" data-native-share={url} data-title={title} hidden>
+        <span class="ic">
+          <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+            <path d="M5 10h.01M10 10h.01M15 10h.01"></path>
+          </svg>
+        </span>
+        {t.more}
+      </button>
+    </div>
+    <p class="copyrow">
+      <span class="url">{display}</span>
+      <button type="button" data-copy={url} hidden>
+        {t.copyShort}
+      </button>
+    </p>
   </div>
 
   {comments && (
-    <div class="comments">
+    <div class="comments-block">
       <button
         type="button"
-        class="action"
+        class="comments"
+        aria-expanded="false"
         data-comments
         data-repo={comments.repo}
         data-repo-id={comments.repoId}
         data-category={comments.category}
         data-category-id={comments.categoryId}
       >
-        {t.comments}
+        <span>
+          <b>{t.comments}</b>
+          <small>{t.commentsNote}</small>
+        </span>
+        <span class="chev" aria-hidden="true">
+          ›
+        </span>
       </button>
-      <p class="note">{t.commentsNote}</p>
       <div class="giscus" data-giscus></div>
     </div>
   )}
@@ -105,103 +192,440 @@ const shareLinks = [
 
 <style>
   .readers {
+    container: readers / inline-size;
+    --fold: 420ms;
+    margin-top: var(--space-8);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .readers {
+      --fold: 0ms;
+    }
+  }
+  .inner {
     display: grid;
-    gap: var(--space-6);
-    padding-block: var(--space-8);
+    gap: var(--space-4);
+    padding-top: var(--space-6);
     border-top: 1px solid var(--color-rule);
   }
-  .row {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: var(--space-3) var(--space-4);
-  }
-  .row[hidden] {
+  .kicker,
+  .title {
     display: none;
   }
-  .helped {
+  /* Narrow: one line of counts. */
+  .metrics {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 var(--space-2);
+    margin: 0;
+    font-size: var(--size-sm);
+    color: var(--color-mute);
+  }
+  .metrics[hidden] {
+    display: none;
+  }
+  .metrics div {
+    display: flex;
+    gap: var(--space-1);
+  }
+  .metrics div + div::before {
+    content: '·';
+    order: -2;
+    margin-right: var(--space-2);
+  }
+  .metrics dt,
+  .metrics dd {
+    margin: 0;
+  }
+  .metrics dd {
+    order: -1;
+    font-weight: 600;
+    color: var(--color-ink);
+  }
+  .metrics .helped-metric {
+    display: none;
+  }
+
+  .actions {
+    display: flex;
+    gap: var(--space-3);
+  }
+  .btn {
+    flex: 1;
     display: inline-flex;
+    justify-content: center;
     align-items: center;
     gap: var(--space-2);
-    min-height: 2.75rem;
+    min-height: 3rem;
     padding: 0 var(--space-4);
-    border: 1px solid var(--color-rule);
-    border-radius: var(--radius-pill);
+    border: 0;
+    border-radius: 14px;
     background: var(--color-surface);
+    box-shadow: inset 0 0 0 1px var(--color-rule);
     color: var(--color-ink);
-    font: 600 var(--size-sm) var(--font-sans);
+    font: 600 var(--size-md) var(--font-sans);
+    white-space: nowrap;
     cursor: pointer;
     transition:
-      background-color var(--motion-fast) var(--motion-ease-out),
-      border-color var(--motion-fast) var(--motion-ease-out);
+      transform var(--motion-fast) var(--motion-ease-out),
+      background-color var(--motion-base) var(--motion-ease-out),
+      color var(--motion-base) var(--motion-ease-out);
   }
-  .helped svg {
-    width: 1rem;
-    height: 1rem;
+  .btn[hidden] {
+    display: none;
+  }
+  .btn:active {
+    transform: scale(0.97);
+  }
+  .btn:focus-visible,
+  .tile:focus-visible,
+  .comments:focus-visible,
+  .copyrow button:focus-visible {
+    outline: 2px solid var(--color-accent-ui);
+    outline-offset: 2px;
+  }
+  .btn svg {
+    width: 18px;
+    height: 18px;
     fill: none;
     stroke: currentColor;
     stroke-width: 1.8;
     stroke-linecap: round;
     stroke-linejoin: round;
   }
-  .helped:hover {
-    border-color: var(--color-mute);
-  }
-  .helped[aria-pressed='true'] {
-    border-color: var(--color-accent);
-    background: var(--color-accent);
-    color: var(--color-bg);
-    cursor: default;
-  }
-  .helped-count {
-    font: var(--type-caption);
-    opacity: 0.8;
-  }
-  .counts,
-  .label,
-  .note,
-  .status {
-    margin: 0;
-    font: var(--type-caption);
+  .n {
+    font-weight: 500;
     color: var(--color-mute);
   }
-  .label {
-    min-width: 3.5rem;
+  .helped[aria-pressed='true'] {
+    background: var(--color-accent);
+    color: var(--color-bg);
+    box-shadow: none;
+    cursor: default;
   }
-  .action {
-    display: inline-flex;
-    align-items: center;
-    min-height: 2.25rem;
-    padding: 0 var(--space-3);
-    border: 1px solid var(--color-rule);
-    border-radius: var(--radius-pill);
-    background: transparent;
-    color: var(--color-ink);
-    font: var(--size-sm) var(--font-sans);
-    text-decoration: none;
-    cursor: pointer;
+  .helped[aria-pressed='true'] .n {
+    color: inherit;
+    opacity: 0.85;
   }
-  .action[hidden] {
-    display: none;
+
+  /* The folded corner: a page whose top-right corner folds down, the gesture of the site. */
+  .corner {
+    position: relative;
+    flex: none;
+    width: 16px;
+    height: 20px;
   }
-  .action:hover {
-    border-color: var(--color-mute);
+  .page,
+  .edge {
+    position: absolute;
+    inset: 0;
+    border-radius: 2px;
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+    transition: clip-path var(--fold) var(--motion-ease-out);
   }
-  .helped:focus-visible,
-  .action:focus-visible {
-    outline: 2px solid var(--color-accent-ui);
-    outline-offset: 2px;
+  .page {
+    background: currentColor;
+    opacity: 0.18;
+  }
+  .edge {
+    border: 1.6px solid currentColor;
+  }
+  .flap {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 0;
+    height: 0;
+    background: linear-gradient(225deg, transparent 50%, currentColor 50%);
+    transition:
+      width var(--fold) var(--motion-ease-out),
+      height var(--fold) var(--motion-ease-out);
+  }
+  @media (hover: hover) {
+    .helped:hover:not([aria-pressed='true']) :is(.page, .edge) {
+      clip-path: polygon(0 0, 78% 0, 100% 18%, 100% 100%, 0 100%);
+    }
+    .helped:hover:not([aria-pressed='true']) .flap {
+      width: 22%;
+      height: 18%;
+    }
+  }
+  .helped[aria-pressed='true'] :is(.page, .edge) {
+    clip-path: polygon(0 0, 50% 0, 100% 40%, 100% 100%, 0 100%);
+  }
+  .helped[aria-pressed='true'] .page {
+    opacity: 0.35;
+  }
+  .helped[aria-pressed='true'] .flap {
+    width: 50%;
+    height: 40%;
+  }
+
+  .comments-block {
+    margin-top: var(--space-4);
   }
   .comments {
-    display: grid;
-    gap: var(--space-2);
-    justify-items: start;
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    width: 100%;
+    padding: var(--space-4) 0;
+    border: 0;
+    border-block: 1px solid var(--color-rule);
+    background: none;
+    color: var(--color-ink);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+  }
+  .comments b {
+    font-weight: 600;
+  }
+  .comments small {
+    display: block;
+    font-size: var(--size-xs);
+    color: var(--color-mute);
+  }
+  .chev {
+    margin-left: auto;
+    color: var(--color-mute);
+    transition: transform var(--motion-base) var(--motion-ease-out);
+  }
+  .comments[aria-expanded='true'] .chev {
+    transform: rotate(90deg);
+  }
+  .giscus {
+    margin-top: var(--space-4);
   }
   .giscus:empty {
     display: none;
   }
-  .giscus {
-    width: 100%;
+
+  /* Wide: the closing card, with the counts as figures. */
+  @container readers (min-width: 560px) {
+    .inner {
+      gap: var(--space-6);
+      padding: var(--space-6);
+      border: 0;
+      border-radius: 20px;
+      background: var(--color-surface);
+      box-shadow: inset 0 0 0 1px var(--color-rule);
+    }
+    .kicker {
+      display: block;
+      margin: 0;
+      font: 600 var(--size-xs) var(--font-mono);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--color-accent);
+    }
+    .title {
+      display: block;
+      margin: calc(-1 * var(--space-4)) 0 0;
+      font: 500 var(--size-lg) / 1.2 var(--font-serif);
+    }
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-4);
+      padding: var(--space-4) 0;
+      border-block: 1px solid var(--color-rule);
+    }
+    .metrics div {
+      display: grid;
+      gap: 2px;
+    }
+    .metrics div + div::before {
+      content: none;
+    }
+    .metrics dt {
+      font-size: var(--size-xs);
+    }
+    .metrics dd {
+      font-size: var(--size-xl);
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+    }
+    .metrics .helped-metric {
+      display: grid;
+    }
+    .metrics .helped-metric dd {
+      color: var(--color-accent);
+    }
+    .btn {
+      flex: none;
+      min-height: 2.75rem;
+      padding: 0 var(--space-6);
+      border-radius: var(--radius-pill);
+    }
+    .helped {
+      background: var(--color-ink);
+      color: var(--color-bg);
+      box-shadow: none;
+    }
+    .helped .n {
+      display: none;
+    }
+    .comments {
+      padding: var(--space-4) var(--space-6);
+      border: 0;
+      border-radius: 14px;
+      box-shadow: inset 0 0 0 1px var(--color-rule);
+    }
+  }
+
+  /* The share sheet: a popover in the top layer. Wide: beside the Share button. */
+  .sheet {
+    width: min(360px, calc(100vw - 2 * var(--space-4)));
+    padding: var(--space-4);
+    border: 0;
+    border-radius: 18px;
+    background: var(--color-surface);
+    color: var(--color-ink);
+    box-shadow:
+      0 0 0 1px var(--color-rule),
+      0 18px 48px rgb(0 0 0 / 0.18);
+  }
+  .share {
+    anchor-name: --share;
+  }
+  .sheet:popover-open {
+    animation: sheet-pop var(--fold) var(--motion-ease-out);
+  }
+  /* Wide, where anchor positioning exists: the sheet opens beside the button. Elsewhere it stays
+     centered on screen, the popover's own default. */
+  @container readers (min-width: 560px) {
+    @supports (position-area: top) {
+      .sheet:popover-open {
+        position-anchor: --share;
+        inset: auto;
+        margin: 0 0 var(--space-2);
+        position-area: top span-left;
+        position-try-fallbacks: flip-block;
+      }
+    }
+  }
+  /* Narrow: it rises from the bottom of the screen, like a phone's share sheet. */
+  @container readers (max-width: 559px) {
+    .sheet:popover-open {
+      position: fixed;
+      inset: auto 0 0;
+      width: min(440px, 100%);
+      margin: 0 auto;
+      padding: var(--space-3) var(--space-4) calc(var(--space-6) + env(safe-area-inset-bottom, 0px));
+      border-radius: 18px 18px 0 0;
+      animation-name: sheet-rise;
+    }
+    .sheet::before {
+      content: '';
+      display: block;
+      width: 36px;
+      height: 5px;
+      margin: 0 auto var(--space-3);
+      border-radius: 3px;
+      background: var(--color-rule);
+    }
+    .sheet::backdrop {
+      background: rgb(0 0 0 / 0.28);
+    }
+  }
+  @keyframes sheet-pop {
+    from {
+      opacity: 0;
+      transform: scale(0.96) translateY(6px);
+    }
+  }
+  @keyframes sheet-rise {
+    from {
+      transform: translateY(100%);
+    }
+  }
+  .sheet-title {
+    margin: 0 0 var(--space-3);
+    font-size: var(--size-sm);
+    font-weight: 600;
+  }
+  .tiles {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(56px, 1fr));
+    gap: 2px;
+  }
+  .tile {
+    display: grid;
+    justify-items: center;
+    gap: 6px;
+    padding: var(--space-2) 2px;
+    border: 0;
+    border-radius: 12px;
+    background: transparent;
+    color: var(--color-mute);
+    font: 11px / 1.3 var(--font-sans);
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .tile[hidden] {
+    display: none;
+  }
+  .tile:hover {
+    background: var(--color-bg);
+  }
+  .ic {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: var(--color-bg);
+    box-shadow: inset 0 0 0 1px var(--color-rule);
+    color: var(--color-ink);
+    font: 700 15px var(--font-sans);
+  }
+  .ic svg {
+    width: 20px;
+    height: 20px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .mark-bluesky svg {
+    fill: currentColor;
+    stroke: none;
+  }
+  .copyrow {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin: var(--space-3) 0 0;
+    padding: var(--space-2) var(--space-3);
+    border-radius: 10px;
+    background: var(--color-bg);
+    font: var(--type-caption);
+    color: var(--color-mute);
+  }
+  .url {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    user-select: all;
+  }
+  .copyrow button {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--color-accent);
+    font: 600 var(--size-xs) var(--font-sans);
+    cursor: pointer;
+  }
+  .copyrow button[hidden] {
+    display: none;
+  }
+
+  .status {
+    margin: var(--space-3) 0 0;
+    font-size: var(--size-sm);
+    color: var(--color-mute);
   }
   .status:empty {
     display: none;
@@ -213,22 +637,26 @@ const shareLinks = [
 </style>
 
 <script>
-  // Self-contained (ENGINEERING.md, "Browser scripts"): reader counts, "This helped", sharing and
-  // comments on request. Every failure is quiet: the counts simply stay hidden.
-  type Forms = { zero: string; one: string; many: string };
+  // Self-contained (ENGINEERING.md, "Browser scripts"): reader counts, "This helped", Copy and
+  // the system share menu, comments on request. Every failure is quiet: the counts stay hidden.
   const root = document.querySelector<HTMLElement>('[data-readers]');
   if (root) {
     const slug = root.dataset.slug ?? '';
     const api = `/api/stats/${slug}`;
     const number = new Intl.NumberFormat('en-US');
-    const forms = (key: string): Forms => JSON.parse(root.dataset[key] ?? '{}') as Forms;
-    const say = (n: number, f: Forms) =>
-      n === 0 ? f.zero : n === 1 ? f.one : f.many.replace('{count}', number.format(n));
     const status = root.querySelector<HTMLElement>('[data-status]')!;
     const nav = navigator as Navigator & { globalPrivacyControl?: boolean };
     const quiet = nav.globalPrivacyControl === true || navigator.doNotTrack === '1';
     const send = (event: string) =>
       fetch(`${api}/${event}`, { method: 'POST', keepalive: true }).catch(() => undefined);
+    const counts = { views: 0, reads: 0, helped: 0 };
+    const show = () => {
+      for (const key of ['views', 'reads', 'helped'] as const)
+        root.querySelector<HTMLElement>(`[data-count="${key}"]`)!.textContent = number.format(counts[key]);
+      root.querySelector<HTMLElement>('[data-helped-n]')!.textContent = counts.helped
+        ? number.format(counts.helped)
+        : '';
+    };
 
     // Remembered per browser so the button can't be pressed twice; never sent anywhere.
     const KEY = 'pm.helped';
@@ -239,18 +667,17 @@ const shareLinks = [
         return [];
       }
     };
-
     const helped = root.querySelector<HTMLButtonElement>('[data-helped]')!;
-    const helpedText = root.querySelector<HTMLElement>('[data-helped-count-text]')!;
-    let helpedCount = 0;
-    const showHelped = () => (helpedText.textContent = say(helpedCount, forms('helpedCount')));
-    const markHelped = () => helped.setAttribute('aria-pressed', 'true');
+    const markHelped = () => {
+      helped.setAttribute('aria-pressed', 'true');
+      root.querySelector<HTMLElement>('[data-helped-label]')!.textContent = root.dataset.done ?? '';
+    };
     if (helpedBefore().includes(slug)) markHelped();
     helped.addEventListener('click', () => {
       if (helped.getAttribute('aria-pressed') === 'true') return;
       markHelped();
-      helpedCount += 1;
-      showHelped();
+      counts.helped += 1;
+      show();
       status.textContent = root.dataset.thanks ?? '';
       try {
         localStorage.setItem(KEY, JSON.stringify([...helpedBefore(), slug]));
@@ -261,14 +688,13 @@ const shareLinks = [
     });
 
     fetch(api)
-      .then((r) => (r.ok ? (r.json() as Promise<{ views: number; reads: number; helped: number }>) : null))
+      .then((r) => (r.ok ? (r.json() as Promise<typeof counts>) : null))
       .then((c) => {
         if (!c) return;
-        root.querySelector<HTMLElement>('[data-counts]')!.textContent =
-          `${say(c.views, forms('views'))} · ${say(c.reads, forms('reads'))}`;
-        helpedCount = c.helped;
-        showHelped();
-        root.querySelector<HTMLElement>('[data-stats]')!.hidden = false;
+        Object.assign(counts, c);
+        show();
+        root.querySelector<HTMLElement>('[data-metrics]')!.hidden = false;
+        helped.hidden = false;
       })
       .catch(() => undefined);
 
@@ -293,23 +719,34 @@ const shareLinks = [
       }).observe(root.querySelector('[data-read-sentinel]')!);
     }
 
-    const copyButton = root.querySelector<HTMLButtonElement>('[data-copy]')!;
+    const sheet = root.querySelector<HTMLElement>('.sheet')!;
+    const closeSheet = () => {
+      try {
+        sheet.hidePopover();
+      } catch {
+        /* Already closed. */
+      }
+    };
     if (navigator.clipboard) {
-      copyButton.hidden = false;
-      copyButton.addEventListener('click', () => {
-        void navigator.clipboard.writeText(copyButton.dataset.copy ?? location.href).then(() => {
-          status.textContent = root.dataset.copied ?? '';
+      for (const button of root.querySelectorAll<HTMLButtonElement>('[data-copy]')) {
+        button.hidden = false;
+        button.addEventListener('click', () => {
+          void navigator.clipboard.writeText(button.dataset.copy ?? location.href).then(() => {
+            closeSheet();
+            status.textContent = root.dataset.copied ?? '';
+          });
         });
-      });
+      }
     }
-    const shareButton = root.querySelector<HTMLButtonElement>('[data-native-share]')!;
+    const more = root.querySelector<HTMLButtonElement>('[data-native-share]')!;
     if ('share' in navigator) {
-      shareButton.hidden = false;
-      shareButton.addEventListener('click', () => {
+      more.hidden = false;
+      more.addEventListener('click', () => {
+        closeSheet();
         navigator
           .share({
-            title: shareButton.dataset.title ?? document.title,
-            url: shareButton.dataset.nativeShare ?? location.href,
+            title: more.dataset.title ?? document.title,
+            url: more.dataset.nativeShare ?? location.href,
           })
           .catch(() => undefined);
       });
@@ -317,6 +754,8 @@ const shareLinks = [
 
     const commentsButton = root.querySelector<HTMLButtonElement>('[data-comments]');
     commentsButton?.addEventListener('click', () => {
+      if (commentsButton.getAttribute('aria-expanded') === 'true') return;
+      commentsButton.setAttribute('aria-expanded', 'true');
       const d = commentsButton.dataset;
       const script = document.createElement('script');
       script.src = 'https://giscus.app/client.js';
@@ -337,7 +776,6 @@ const shareLinks = [
       };
       for (const [k, v] of Object.entries(attrs)) script.setAttribute(k, v);
       root.querySelector('[data-giscus]')!.append(script);
-      commentsButton.hidden = true;
     });
   }
 </script>
