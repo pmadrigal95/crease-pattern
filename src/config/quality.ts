@@ -29,8 +29,8 @@ export const jsBudgetKb = {
   onDemand: 32,
   /**
    * Everything one interactive essay (a post public/_headers isolates) can run, Web Workers
-   * included: Crease No. 002 measured 42 KB when this was set. Checked on preview builds, where
-   * drafts exist; a production build skips it until the essay is out.
+   * included: Crease No. 002 measured 42 KB when this was set. Checked on every build that has
+   * one (production and preview); a build without an isolated post skips it.
    */
   essay: 45,
 } as const;
