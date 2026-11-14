@@ -7,6 +7,7 @@ import PostCard from '../../components/precrease/PostCard.astro';
 import MarginNote from '../../components/precrease/MarginNote.astro';
 import PostToc from '../../components/precrease/PostToc.astro';
 import PostReaders from '../../components/precrease/PostReaders.astro';
+import PostReferences from '../../components/precrease/PostReferences.astro';
 import site from '../../../site.config';
 import { formats, topics } from '../../config/precrease';
 import { copy, fill } from '../../lib/copy';
@@ -99,6 +100,7 @@ const topicFilters = [...new Set(paths.flat().map((topic) => topic.id))];
     <div class="wrap reading">
       <div class="prose body">
         <Content components={{ MarginNote }} />
+        <PostReferences references={data.references ?? []} />
         <PostReaders
           slug={post.id}
           title={data.title}

@@ -1,0 +1,90 @@
+---
+/**
+ * The end of a Precrease post: what it draws on ("Sources") and where to keep learning ("To keep
+ * learning"), from the post's `references` front matter. A group with no entries doesn't show, and
+ * nothing renders when a post has none. Plain links, no JavaScript.
+ */
+import { copy } from '../../lib/copy';
+
+type Reference = {
+  title: string;
+  author?: string | undefined;
+  year?: number | undefined;
+  url: string;
+  note?: string | undefined;
+  kind: 'source' | 'further';
+};
+
+interface Props {
+  references: readonly Reference[];
+}
+const { references } = Astro.props;
+const t = copy.precrease.references;
+const groups = [
+  { kind: 'source', title: t.sources, note: t.sourcesNote },
+  { kind: 'further', title: t.further, note: t.furtherNote },
+]
+  .map((g) => ({ ...g, items: references.filter((r) => r.kind === g.kind) }))
+  .filter((g) => g.items.length > 0);
+const byline = (r: Reference) => [r.author, r.year].filter(Boolean).join(', ');
+---
+
+{groups.length > 0 && (
+  <section class="references" aria-labelledby="references-title" data-inspect="PostReferences">
+    <h2 id="references-title">{t.title}</h2>
+    {groups.map((g) => (
+      <div class="group">
+        <h3>{g.title}</h3>
+        <p class="group-note">{g.note}</p>
+        <ul>
+          {g.items.map((r) => (
+            <li>
+              <a href={r.url}>{r.title}</a>
+              {byline(r) && <span class="byline">{byline(r)}</span>}
+              {r.note && <span class="note">{r.note}</span>}
+            </li>
+          ))}
+        </ul>
+      </div>
+    ))}
+  </section>
+)}
+
+<style>
+  .references {
+    margin-top: var(--space-12);
+    padding-top: var(--space-6);
+    border-top: 1px solid var(--color-rule);
+  }
+  h2 {
+    margin: 0 0 var(--space-4);
+  }
+  .group + .group {
+    margin-top: var(--space-6);
+  }
+  h3 {
+    margin: 0;
+    font-size: var(--size-md);
+  }
+  .group-note {
+    margin: var(--space-1) 0 var(--space-3);
+    font: var(--type-caption);
+    color: var(--color-mute);
+  }
+  ul {
+    display: grid;
+    gap: var(--space-3);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  li {
+    display: grid;
+    gap: 2px;
+  }
+  .byline,
+  .note {
+    font-size: var(--size-sm);
+    color: var(--color-mute);
+  }
+</style>
