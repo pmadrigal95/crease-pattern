@@ -74,14 +74,14 @@ export function measureInspectorData(dist) {
 }
 
 /**
- * Everything an interactive essay (a post `public/_headers` isolates) can run: the scripts its page
- * references, what they import, and the Web Workers they start, with the workers' own imports.
- * Workers count because a reader who presses Run downloads them. Pages missing from `dist` (drafts
- * in a production build) are skipped, so this returns an empty list there.
+ * Everything one Precrease post can run: the scripts its page references, what they import, and
+ * the Web Workers they start, with the workers' own imports. Workers count because a reader who
+ * presses Run downloads them. Pages missing from `dist` (drafts in a production build) are
+ * skipped, so a production build measures only the posts that are out.
  * @param {string[]} paths site paths, such as "/precrease/when-threads-pay-off"
  * @returns {{ path: string, bytes: number }[]} Brotli
  */
-export function measureEssays(dist, paths) {
+export function measurePosts(dist, paths) {
   const assets = join(dist, '_astro');
   const read = (file) => readFileSync(join(assets, file), 'utf8');
   const size = (file) => brotliCompressSync(readFileSync(join(assets, file))).length;
