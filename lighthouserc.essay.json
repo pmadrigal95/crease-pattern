@@ -2,7 +2,10 @@
   "ci": {
     "collect": {
       "staticDistDir": "./dist",
-      "url": ["http://localhost/precrease/when-threads-pay-off.html"],
+      "url": [
+        "http://localhost/precrease/when-threads-pay-off.html",
+        "http://localhost/precrease/one-unit-thirty-shapes.html"
+      ],
       "numberOfRuns": 3,
       "settings": {
         "formFactor": "mobile",

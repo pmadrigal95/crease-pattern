@@ -5,8 +5,8 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-/** The posts public/_headers isolates (COOP + COEP), as site paths. Also read by the essay budget. */
-export function isolatedPaths() {
+/** The posts public/_headers isolates (COOP + COEP), as site paths. */
+function isolatedPaths() {
   const lines = readFileSync(join(import.meta.dirname, '..', 'public', '_headers'), 'utf8').split('\n');
   const paths = [];
   lines.forEach((line, i) => {

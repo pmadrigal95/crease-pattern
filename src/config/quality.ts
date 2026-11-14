@@ -34,9 +34,10 @@ export const jsBudgetKb = {
    */
   inspectorData: 4,
   /**
-   * Everything one interactive essay (a post public/_headers isolates) can run, Web Workers
-   * included: Crease No. 002 measured 42 KB when this was set. Checked on every build that has
-   * one (production and preview); a build without an isolated post skips it.
+   * Everything one Precrease post can run, Web Workers included, checked for every post in the
+   * build (drafts only exist in preview builds). Set at 45 KB for Crease No. 002, the heaviest
+   * (42 KB); widened from interactive essays to every post when No. 003 brought its own demos.
+   * It includes the Inspector every page can open (about 30 KB), so a post's own share is the rest.
    */
-  essay: 45,
+  post: 45,
 } as const;
