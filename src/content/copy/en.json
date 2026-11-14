@@ -272,9 +272,137 @@
       "copied": "Link copied",
       "more": "More…",
       "comments": "Comments",
-      "commentsNote": "From GitHub Discussions · loads when you open it"
+      "commentsNote": "From GitHub Discussions · loads when you open it",
+      "commentsElsewhere": "On GitHub Discussions, for this post"
+    },
+    "threads": {
+      "models": {
+        "serial": "One worker",
+        "messages": "Message passing",
+        "fork-join": "Fork-join",
+        "shared": "Shared memory, with a queue"
+      },
+      "modelNotes": {
+        "serial": "The baseline",
+        "messages": "Like MPI",
+        "fork-join": "Like OpenMP",
+        "shared": "Like pthreads"
+      },
+      "run": "Run on this device",
+      "running": "Running…",
+      "runAgain": "Run again",
+      "next": "Next pieces",
+      "time": "Time",
+      "speedup": "Speedup",
+      "faster": "{times}× faster",
+      "result": "Fastest on this device: {model}, {times}× faster than one worker.",
+      "cores": "This device reports {cores} cores; the demos use {workers} workers.",
+      "noShared": "This browser doesn't allow shared memory here, so the two models that need it are skipped. Chrome, Edge and Firefox run all four.",
+      "unavailable": "Not available in this browser",
+      "needsJs": "The demos on this page run in your browser and need JavaScript.",
+      "bestMove": "The move the solver chose",
+      "measuredResult": "On my desktop: {model}, {times}× faster than one worker.",
+      "batteryNote": "A run keeps your processor's cores busy for about a second, so it uses a little battery.",
+      "measuredNote": "Measured on {device} in {browser}, with {workers} workers, four pieces ahead. Press Run to time your own device.",
+      "modelLabel": "Model",
+      "summary": "{model}: {ms} ms · {tasks} tasks per worker",
+      "legendWork": "Searching a task",
+      "legendCopy": "Copying the board",
+      "legendStart": "Waiting to start",
+      "worker": "Worker {n}",
+      "idle": "{idle} of {threads} threads have nothing to do",
+      "allBusy": "Every thread has work",
+      "threadsLabel": "Threads",
+      "costLabel": "Cost per thread",
+      "best": "Best: {times}× with {threads} threads",
+      "depthLabel": "Pieces ahead",
+      "placements": "{count} placements searched",
+      "amdahlCaption": "Threads from 1 to 16, with 36 ms of work, as in 2022",
+      "depthRow": "{depth} ahead",
+      "runDepths": "Run all four",
+      "depthReadout": "{depth} pieces ahead: {times}× faster with {workers} workers"
     },
     "toc": "On this page",
-    "history": "Change history on GitHub"
+    "history": "Change history on GitHub",
+    "references": {
+      "title": "References",
+      "sources": "Sources",
+      "sourcesNote": "What this post draws on.",
+      "further": "To keep learning",
+      "furtherNote": "For going deeper into the same ideas."
+    },
+    "sonobe": {
+      "unit": {
+        "label": "Folding one Sonobe unit",
+        "stage": "Stage {n} of {total}",
+        "previous": "Previous stage",
+        "next": "Next stage",
+        "stages": {
+          "s1": "A square of paper.",
+          "s2": "Folded in half and opened: one crease across the middle.",
+          "s3": "Both edges folded to that crease: a strip, half as tall.",
+          "s4": "Two opposite corners folded in.",
+          "s5": "The unit: a square face between two tabs. The edges of the face are its pockets."
+        },
+        "decisions": {
+          "s1": "Start from one need: show a post in a list.",
+          "s2": "Decide what it takes: one post.",
+          "s3": "Leave the rest to the page: where the card sits and how wide it is.",
+          "s4": "Decide what may change: the heading level.",
+          "s5": "What it accepts, and nothing else."
+        },
+        "code": "PostCard's props, read from its file when this page is built.",
+        "file": "PostCard.astro on GitHub"
+      },
+      "contract": {
+        "label": "Two units, a tab and a pocket",
+        "join": "Join them",
+        "apart": "Take them apart",
+        "props": "The tab's props",
+        "asIs": "As it is",
+        "optional": "One optional prop",
+        "required": "One required prop",
+        "apartStatus": "Two units, side by side.",
+        "fits": "The tab goes into the pocket and the units lock.",
+        "fitsOptional": "The units still lock. The contract grew: one more case to test.",
+        "noFit": "A required prop changes the tab. It no longer fits, and every place that uses it has to change.",
+        "fitsFigure": "As it is: the tab goes into the pocket.",
+        "optionalFigure": "One optional prop: it still fits, with one more case to test.",
+        "noFitFigure": "One required prop: the tab stops at the pocket."
+      },
+      "exception": {
+        "label": "The 12-unit model, one unit made special",
+        "toggle": "Make one unit special",
+        "closed": "Every unit is the same, and the model closes.",
+        "open": "One unit is different now, and the model no longer closes.",
+        "variants": "Kinds of unit",
+        "checks": "Shapes to check",
+        "closedFigure": "Every unit the same: the model closes.",
+        "openFigure": "One special unit: the model doesn't close.",
+        "code": "FoldTitle's prop, and the two places that use it, read from the code when this page is built.",
+        "file": "FoldTitle.astro on GitHub"
+      },
+      "token": {
+        "label": "Paper",
+        "names": "The color names every identity defines",
+        "caption": "All three identities define the same {count} color names. Components ask for a name, never a value, so changing the paper changes no component."
+      },
+      "site": {
+        "summary": "{components} components, {uses} uses, {reused} used in two or more files.",
+        "source": "Counted from the code when this page is built.",
+        "component": "Component",
+        "group": "Group",
+        "uses": "Uses",
+        "files": "Files"
+      },
+      "scale": {
+        "label": "Model",
+        "model": "{count} units",
+        "turn": "Turn the model",
+        "designed": "Units designed",
+        "folded": "Units folded",
+        "caption": "The same unit every time. What changes is how many, and where they meet."
+      }
+    }
   }
 }

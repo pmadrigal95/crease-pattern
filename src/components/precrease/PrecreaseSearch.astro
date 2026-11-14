@@ -5,7 +5,9 @@
  * ancestor, so "Frontend" finds a post filed under Performance.
  *
  * Nothing loads until the visitor uses the box: Pagefind's script, its WebAssembly and the index
- * fragments download on first focus. Without JavaScript the box stays hidden, since it can't work.
+ * fragments download on first focus. Without JavaScript the box stays hidden, since it can't work:
+ * it shows only under `html[data-js]`, which restore-identity.js sets before the first paint, so
+ * the box never appears late and pushes the page down on phones, where it wraps to its own line.
  * Shortcuts: "/" or Ctrl/Cmd+K focus it; Escape closes the results.
  */
 import { formats, topics } from '../../config/precrease';
@@ -31,13 +33,7 @@ const strings = JSON.stringify({
 });
 ---
 
-<div
-  class="precrease-search"
-  data-precrease-search
-  data-strings={strings}
-  hidden
-  data-inspect="PrecreaseSearch"
->
+<div class="precrease-search" data-precrease-search data-strings={strings} data-inspect="PrecreaseSearch">
   <form role="search" aria-label={t.label}>
     <label for="precrease-q" class="sr-only">
       {t.label}
@@ -86,9 +82,13 @@ const strings = JSON.stringify({
 
 <style>
   .precrease-search {
+    display: none;
     position: relative;
     flex: 0 1 20rem;
     margin-bottom: var(--space-2);
+  }
+  :global(html[data-js]) .precrease-search {
+    display: block;
   }
   form {
     position: relative;

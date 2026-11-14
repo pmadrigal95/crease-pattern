@@ -7,10 +7,17 @@
         "http://localhost/changelog.html",
         "http://localhost/about.html",
         "http://localhost/colophon.html",
-        "http://localhost/privacy.html"
+        "http://localhost/privacy.html",
+        "http://localhost/precrease.html",
+        "http://localhost/precrease/map.html",
+        "http://localhost/precrease/the-work-before-the-shape.html"
       ],
       "numberOfRuns": 3,
-      "settings": { "formFactor": "mobile", "throttlingMethod": "simulate" }
+      "settings": {
+        "formFactor": "mobile",
+        "throttlingMethod": "simulate",
+        "blockedUrlPatterns": ["*/api/*"]
+      }
     },
     "assert": {
       "assertions": {

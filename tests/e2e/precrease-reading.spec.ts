@@ -48,3 +48,14 @@ test('reading progress follows the scroll, and steps aside for reduced motion', 
     await page.close();
   }
 });
+
+test('a post ends with its references, grouped and linked', async ({ page }) => {
+  await page.goto(post);
+  const refs = page.getByRole('region', { name: 'References' });
+  await expect(refs).toBeVisible();
+  await expect(refs.getByRole('heading', { name: 'To keep learning' })).toBeVisible();
+  await expect(refs.getByRole('link', { name: 'Origami Design Secrets, 2nd Edition' })).toHaveAttribute(
+    'href',
+    /^https:\/\/langorigami\.com\//,
+  );
+});

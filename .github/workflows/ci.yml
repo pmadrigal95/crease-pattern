@@ -66,3 +66,14 @@ jobs:
 
       - name: Lighthouse budgets
         run: pnpm lighthouse
+
+      # Last, because it rebuilds dist/ as a preview (drafts included): interactive essays run
+      # end to end with real Web Workers, then their JavaScript is checked against its budget and
+      # Lighthouse audits the route. Accessibility and best practices must score 100; speed is
+      # reported as warnings until this runner has measured it (lighthouserc.essay.json). Reports
+      # stay on the runner: a public upload would show the draft before it is out.
+      - name: Interactive essays (preview build, end to end, budget, Lighthouse)
+        run: |
+          pnpm test:e2e:essay
+          pnpm check:budgets
+          pnpm lighthouse:essay

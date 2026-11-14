@@ -11,19 +11,32 @@
 import { fill } from './template';
 
 const LOCALE = 'en';
+
+/**
+ * Each formatter is built the first time it's used. Building one loads locale data, which on a
+ * slow phone costs tens of milliseconds; browser scripts that import this module use one or two
+ * of them, and shouldn't pay for all five while the page loads.
+ */
+const lazy = <T>(make: () => T): (() => T) => {
+  let value: T | undefined;
+  return () => (value ??= make());
+};
 // Dates are calendar days, stored at midnight UTC: formatting in local time would show the day before.
-const longDate = new Intl.DateTimeFormat(LOCALE, { dateStyle: 'long', timeZone: 'UTC' });
-const shortMonth = new Intl.DateTimeFormat(LOCALE, { month: 'short', timeZone: 'UTC' });
-const integer = new Intl.NumberFormat(LOCALE);
-const andList = new Intl.ListFormat(LOCALE, { type: 'conjunction' });
+const longDate = lazy(() => new Intl.DateTimeFormat(LOCALE, { dateStyle: 'long', timeZone: 'UTC' }));
+const shortMonth = lazy(() => new Intl.DateTimeFormat(LOCALE, { month: 'short', timeZone: 'UTC' }));
+const integer = lazy(() => new Intl.NumberFormat(LOCALE));
+const oneDecimal = lazy(
+  () => new Intl.NumberFormat(LOCALE, { minimumFractionDigits: 1, maximumFractionDigits: 1 }),
+);
+const andList = lazy(() => new Intl.ListFormat(LOCALE, { type: 'conjunction' }));
 
 /** "November 11, 2026". */
-export const formatDate = (date: Date): string => longDate.format(date);
+export const formatDate = (date: Date): string => longDate().format(date);
 
 /** "Sep 2019" from `2019-09`; a bare year stays as it is. */
 export function formatMonth(value: string): string {
   const [year, month] = value.split('-').map(Number);
-  return month ? `${shortMonth.format(new Date(Date.UTC(year ?? 0, month - 1, 1)))} ${year}` : String(year);
+  return month ? `${shortMonth().format(new Date(Date.UTC(year ?? 0, month - 1, 1)))} ${year}` : String(year);
 }
 
 /** "Sep 2019 – Jul 2022", "Jul 2024 – Present" or "2015 – 2017". */
@@ -32,10 +45,13 @@ export function formatRange(start: string, end: string | null | undefined, prese
 }
 
 /** "3,432". */
-export const formatNumber = (value: number): string => integer.format(value);
+export const formatNumber = (value: number): string => integer().format(value);
+
+/** "2.4": speedups and milliseconds in the Threads essay, always one decimal. */
+export const formatDecimal = (value: number): string => oneDecimal().format(value);
 
 /** "English, Spanish and Japanese". */
-export const formatList = (items: readonly string[]): string => andList.format(items);
+export const formatList = (items: readonly string[]): string => andList().format(items);
 
 /** Fixed-width serials: 1 → "001". */
 export const padNumber = (value: number, digits = 3): string => String(value).padStart(digits, '0');

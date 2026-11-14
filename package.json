@@ -10,11 +10,11 @@
   },
   "scripts": {
     "tokens": "node scripts/build-tokens.mjs",
-    "generate": "node scripts/build-tokens.mjs && node scripts/build-inspector-manifest.mjs",
-    "predev": "node scripts/build-tokens.mjs && node scripts/build-inspector-manifest.mjs",
+    "generate": "node scripts/build-tokens.mjs && node scripts/build-inspector-manifest.mjs && node scripts/component-usage.mjs",
+    "predev": "node scripts/build-tokens.mjs && node scripts/build-inspector-manifest.mjs && node scripts/component-usage.mjs",
     "dev": "astro dev",
-    "prebuild": "node scripts/build-tokens.mjs && node scripts/build-inspector-manifest.mjs",
-    "build": "astro build && node scripts/build-search-index.mjs && node scripts/stamp-site-metrics.mjs",
+    "prebuild": "node scripts/build-tokens.mjs && node scripts/build-inspector-manifest.mjs && node scripts/component-usage.mjs",
+    "build": "astro build && node scripts/sync-inline-style-hashes.mjs && node scripts/build-search-index.mjs && node scripts/stamp-site-metrics.mjs",
     "preview": "astro preview",
     "check": "astro check",
     "lint": "eslint .",
@@ -26,10 +26,14 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
+    "test:e2e:essay": "playwright test --config playwright.essay.config.ts",
     "lighthouse": "lhci autorun",
+    "lighthouse:essay": "lhci autorun --config=lighthouserc.essay.json",
     "changeset": "changeset",
     "deploy": "pnpm build && wrangler deploy",
-    "test:visual": "playwright test --config playwright.visual.config.ts"
+    "test:visual": "playwright test --config playwright.visual.config.ts",
+    "bench:threads": "vitest run --config vitest.bench.config.ts",
+    "preview:upload": "node scripts/preview-upload.mjs"
   },
   "packageManager": "pnpm@12.14.0+sha512.c18ba6d87993d3d164cb5e8948f32b2c06ee854487e06cd8d86781342fb3e5bb4634367034711e86802baa9c37bea906ce1929ad08d70884c97d801df13389a6",
   "dependencies": {

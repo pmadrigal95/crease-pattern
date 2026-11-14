@@ -33,6 +33,23 @@ const precrease = defineCollection({
           url: z.url(),
         })
         .optional(),
+      /**
+       * What the post draws on (`source`) and where to keep learning (`further`), shown at the end
+       * of the post. Every link is opened and checked by hand before it's added; HTTPS only.
+       */
+      references: z
+        .array(
+          z.strictObject({
+            title: z.string().min(1),
+            author: z.string().optional(),
+            year: z.number().int().optional(),
+            url: z.url().startsWith('https://'),
+            /** One line on why it's here. */
+            note: z.string().max(160).optional(),
+            kind: z.enum(['source', 'further']),
+          }),
+        )
+        .optional(),
       /** Script for the vertical video made from this post (M9): hook, three beats, close. */
       reel: z
         .strictObject({
@@ -44,6 +61,13 @@ const precrease = defineCollection({
       lang: z.enum(['en', 'es']).default('en'),
       translationOf: z.string().optional(),
       draft: z.boolean().default(false),
+      /**
+       * Interactive essays that run code on several threads need SharedArrayBuffer, which
+       * browsers only allow on cross-origin isolated pages. True adds COOP/COEP to this post's
+       * route (public/_headers, checked by tests/unit/guards.test.ts) and replaces embedded
+       * comments with a link to GitHub, since isolation blocks the giscus frame.
+       */
+      isolated: z.boolean().default(false),
     })
     .refine((p) => (p.format === 'dog-ear') === Boolean(p.book), {
       message: 'Dog-ear posts need a book, and only Dog-ear posts have one',

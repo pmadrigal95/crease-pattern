@@ -1,0 +1,155 @@
+---
+/**
+ * The Amdahl demo of the Threads essay (Crease No. 002, section 3): how much faster 2022's solver
+ * could get with more threads, given its 36 ms of work and a fixed cost per thread (starting it,
+ * joining it, waiting on a lock). The cost model is in essay.ts (`costCurve`). Drawn at build time
+ * with the default cost, so it reads without JavaScript; the slider redraws it.
+ */
+import { copy, fill } from '../../lib/copy';
+import { bestPoint, costCurve, speedupPath, type ChartFrame } from '../../lib/threads/essay';
+import { formatDecimal } from '../../lib/format';
+
+const t = copy.precrease.threads;
+const WORK_MS = 36;
+const DEFAULT_COST = 2;
+const frame: ChartFrame = { width: 560, height: 220, pad: 28, maxX: 16, maxY: 4 };
+const points = costCurve(WORK_MS, DEFAULT_COST, frame.maxX);
+const best = bestPoint(points);
+const { d, x, y } = speedupPath(points, frame);
+---
+
+<figure
+  class="amdahl"
+  data-amdahl
+  data-work={WORK_MS}
+  data-strings={JSON.stringify({ best: t.best })}
+  data-inspect="AmdahlDemo"
+>
+  <p class="readout" data-readout aria-live="polite">
+    {fill(t.best, { times: formatDecimal(best.speedup), threads: best.threads })}
+  </p>
+  <svg viewBox={`0 0 ${frame.width} ${frame.height}`} class="chart" aria-hidden="true">
+    {[1, 2, 3, 4].map((s) => (
+      <g>
+        <line
+          class={s === 1 ? 'guide one' : 'guide'}
+          x1={frame.pad}
+          x2={frame.width - frame.pad}
+          y1={y(s)}
+          y2={y(s)}
+        />
+        <text class="axis" x={frame.width - frame.pad + 4} y={y(s) + 4}>
+          {s}×
+        </text>
+      </g>
+    ))}
+    {[1, 4, 8, 12, 16].map((n) => (
+      <text class="axis" x={x(n)} y={frame.height - 6} text-anchor="middle">
+        {n}
+      </text>
+    ))}
+    <path class="curve" d={d} data-curve />
+    <circle class="best" cx={x(best.threads)} cy={y(best.speedup)} r="5" data-best-dot />
+  </svg>
+  <label class="control">
+    <span>
+      {t.costLabel}: <output data-cost-out>{formatDecimal(DEFAULT_COST)} ms</output>
+    </span>
+    <input type="range" min="0" max="10" step="0.5" value={DEFAULT_COST} data-cost />
+  </label>
+  <figcaption class="caption">{t.amdahlCaption}</figcaption>
+</figure>
+
+<style>
+  .amdahl {
+    display: grid;
+    gap: var(--space-4);
+    margin: var(--space-8) 0;
+    padding: var(--space-6);
+    border-radius: 20px;
+    background: var(--color-surface);
+    box-shadow: inset 0 0 0 1px var(--color-rule);
+    font-family: var(--font-sans);
+  }
+  .readout {
+    margin: 0;
+    font-size: var(--size-md);
+    font-weight: 600;
+  }
+  .chart {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .guide {
+    stroke: var(--color-rule);
+    stroke-width: 1;
+  }
+  .guide.one {
+    stroke: var(--color-mute);
+    stroke-dasharray: 4 4;
+  }
+  .axis {
+    font: 11px var(--font-mono);
+    fill: var(--color-mute);
+  }
+  .curve {
+    fill: none;
+    stroke: var(--color-accent-ui);
+    stroke-width: 2.5;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
+  .best {
+    fill: var(--color-accent-ui);
+    stroke: var(--color-surface);
+    stroke-width: 3;
+  }
+  .control {
+    display: grid;
+    gap: var(--space-2);
+    font-size: var(--size-sm);
+  }
+  .control input {
+    width: 100%;
+    accent-color: var(--color-accent-ui);
+  }
+  .control input:focus-visible {
+    outline: 2px solid var(--color-accent-ui);
+    outline-offset: 4px;
+  }
+  .caption {
+    font: var(--type-caption);
+    color: var(--color-mute);
+  }
+</style>
+
+<script>
+  import { formatDecimal } from '../../lib/format';
+  import { fill } from '../../lib/template';
+  import { bestPoint, costCurve, speedupPath } from '../../lib/threads/essay';
+
+  const frame = { width: 560, height: 220, pad: 28, maxX: 16, maxY: 4 };
+
+  for (const root of document.querySelectorAll<HTMLElement>('[data-amdahl]')) {
+    const input = root.querySelector<HTMLInputElement>('[data-cost]')!;
+    const out = root.querySelector<HTMLElement>('[data-cost-out]')!;
+    const curve = root.querySelector<SVGPathElement>('[data-curve]')!;
+    const dot = root.querySelector<SVGCircleElement>('[data-best-dot]')!;
+    const readout = root.querySelector<HTMLElement>('[data-readout]')!;
+    const work = Number(root.dataset.work ?? 36);
+    const t = JSON.parse(root.dataset.strings ?? '{}') as { best: string };
+    const draw = () => {
+      const cost = Number(input.value);
+      const points = costCurve(work, cost, frame.maxX);
+      const best = bestPoint(points);
+      const { d, x, y } = speedupPath(points, frame);
+      curve.setAttribute('d', d);
+      dot.setAttribute('cx', String(x(best.threads)));
+      dot.setAttribute('cy', String(y(best.speedup)));
+      out.textContent = `${formatDecimal(cost)} ms`;
+      readout.textContent = fill(t.best, { times: formatDecimal(best.speedup), threads: best.threads });
+    };
+    input.addEventListener('input', draw);
+  }
+</script>

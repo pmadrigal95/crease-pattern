@@ -1,0 +1,152 @@
+---
+/**
+ * The granularity demo of the Threads essay (Crease No. 002, section 3): 2022's solver split its
+ * work by board column, ten units dealt round-robin. With more threads than columns, some threads
+ * get nothing. Drawn at build time for 16 threads (2022's largest run); the slider redraws it.
+ */
+import { copy, fill } from '../../lib/copy';
+import { cyclicColumns } from '../../lib/threads/essay';
+
+const t = copy.precrease.threads;
+const COLUMNS = 10;
+const DEFAULT_THREADS = 16;
+const split = cyclicColumns(COLUMNS, DEFAULT_THREADS);
+const idle = split.filter((cols) => cols.length === 0).length;
+---
+
+<figure
+  class="granularity"
+  data-granularity
+  data-columns={COLUMNS}
+  data-strings={JSON.stringify({ idle: t.idle, allBusy: t.allBusy })}
+  data-inspect="GranularityDemo"
+>
+  <p class="readout" data-readout aria-live="polite">
+    {idle ? fill(t.idle, { idle, threads: DEFAULT_THREADS }) : t.allBusy}
+  </p>
+  <ol class="threads" data-threads aria-hidden="true">
+    {split.map((cols, i) => (
+      <li class={cols.length ? '' : 'idle'}>
+        <span class="label">{i + 1}</span>
+        {cols.map((c) => (
+          <span class="unit">{c + 1}</span>
+        ))}
+      </li>
+    ))}
+  </ol>
+  <label class="control">
+    <span>
+      {t.threadsLabel}: <output data-out>{DEFAULT_THREADS}</output>
+    </span>
+    <input type="range" min="1" max="16" step="1" value={DEFAULT_THREADS} data-input />
+  </label>
+</figure>
+
+<style>
+  .granularity {
+    display: grid;
+    gap: var(--space-4);
+    margin: var(--space-8) 0;
+    padding: var(--space-6);
+    border-radius: 20px;
+    background: var(--color-surface);
+    box-shadow: inset 0 0 0 1px var(--color-rule);
+    font-family: var(--font-sans);
+  }
+  .readout {
+    margin: 0;
+    font-size: var(--size-md);
+    font-weight: 600;
+  }
+  .threads {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(7.5rem, 1fr));
+    gap: var(--space-2);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .threads :global(li) {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px;
+    min-height: 2rem;
+    padding: 4px 8px;
+    border-radius: 10px;
+    background: var(--color-bg);
+  }
+  /* Idle reads as an empty outline, not as faded text, so its number keeps full contrast. */
+  .threads :global(li.idle) {
+    background: transparent;
+    box-shadow: inset 0 0 0 1px var(--color-rule);
+  }
+  .threads :global(.label) {
+    min-width: 1.6rem;
+    font: var(--type-caption);
+    color: var(--color-mute);
+  }
+  .threads :global(.unit) {
+    display: inline-grid;
+    place-items: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 5px;
+    /* Ink on a tint of the accent: small mono digits stay readable in every identity. */
+    background: color-mix(in oklab, var(--color-accent-ui) 28%, var(--color-surface));
+    box-shadow: inset 0 0 0 1px var(--color-accent-ui);
+    color: var(--color-ink);
+    font: 600 11px var(--font-mono);
+  }
+  .control {
+    display: grid;
+    gap: var(--space-2);
+    font-size: var(--size-sm);
+  }
+  .control input {
+    width: 100%;
+    accent-color: var(--color-accent-ui);
+  }
+  .control input:focus-visible {
+    outline: 2px solid var(--color-accent-ui);
+    outline-offset: 4px;
+  }
+</style>
+
+<script>
+  import { fill } from '../../lib/template';
+  import { cyclicColumns } from '../../lib/threads/essay';
+
+  for (const root of document.querySelectorAll<HTMLElement>('[data-granularity]')) {
+    const input = root.querySelector<HTMLInputElement>('[data-input]')!;
+    const out = root.querySelector<HTMLElement>('[data-out]')!;
+    const list = root.querySelector<HTMLElement>('[data-threads]')!;
+    const readout = root.querySelector<HTMLElement>('[data-readout]')!;
+    const columns = Number(root.dataset.columns ?? 10);
+    const t = JSON.parse(root.dataset.strings ?? '{}') as { idle: string; allBusy: string };
+    input.addEventListener('input', () => {
+      const threads = Number(input.value);
+      const split = cyclicColumns(columns, threads);
+      const idle = split.filter((c) => c.length === 0).length;
+      list.replaceChildren(
+        ...split.map((cols, i) => {
+          const li = document.createElement('li');
+          if (!cols.length) li.className = 'idle';
+          const label = document.createElement('span');
+          label.className = 'label';
+          label.textContent = String(i + 1);
+          li.append(label);
+          for (const c of cols) {
+            const unit = document.createElement('span');
+            unit.className = 'unit';
+            unit.textContent = String(c + 1);
+            li.append(unit);
+          }
+          return li;
+        }),
+      );
+      out.textContent = String(threads);
+      readout.textContent = idle ? fill(t.idle, { idle, threads }) : t.allBusy;
+    });
+  }
+</script>

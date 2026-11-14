@@ -7,6 +7,7 @@ import PostCard from '../../components/precrease/PostCard.astro';
 import MarginNote from '../../components/precrease/MarginNote.astro';
 import PostToc from '../../components/precrease/PostToc.astro';
 import PostReaders from '../../components/precrease/PostReaders.astro';
+import PostReferences from '../../components/precrease/PostReferences.astro';
 import site from '../../../site.config';
 import { formats, topics } from '../../config/precrease';
 import { copy, fill } from '../../lib/copy';
@@ -41,6 +42,7 @@ const topicFilters = [...new Set(paths.flat().map((topic) => topic.id))];
   title={`${data.title} · ${t.name}`}
   description={data.description}
   image={`/precrease/og/${post.id}.png`}
+  noindex={!post.live}
   type="article"
 >
   <div class="progress" aria-hidden="true"></div>
@@ -98,12 +100,14 @@ const topicFilters = [...new Set(paths.flat().map((topic) => topic.id))];
     <div class="wrap reading">
       <div class="prose body">
         <Content components={{ MarginNote }} />
+        <PostReferences references={data.references ?? []} />
         <PostReaders
           slug={post.id}
           title={data.title}
           url={new URL(postHref(post.id), site.url).href}
           minutes={readingMinutes(post.entry.body ?? '')}
           number={creaseNumber(data.number)}
+          isolated={data.isolated}
         />
       </div>
       <PostToc headings={headings} />
@@ -254,6 +258,10 @@ const topicFilters = [...new Set(paths.flat().map((topic) => topic.id))];
     color: var(--color-mute);
   }
   .topics a {
+    /* 24px tall at least, so each link is a comfortable target (WCAG 2.5.8). */
+    display: inline-flex;
+    align-items: center;
+    min-height: 24px;
     color: var(--color-ink);
     text-decoration-color: var(--color-accent-ui);
   }

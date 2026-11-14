@@ -24,6 +24,13 @@ export interface PostSummary {
 
 validateTree(topics);
 
+/**
+ * Preview builds (`pnpm preview:upload`) include drafts and scheduled posts, so they can be read on
+ * a real device through a Cloudflare preview URL before they're published. Those posts get
+ * `noindex`. The production deploy never sets this.
+ */
+export const PREVIEW = process.env.PRECREASE_PREVIEW === '1';
+
 /** One clock per build, so every page agrees on what is out. */
 const buildTime = new Date();
 
@@ -38,7 +45,7 @@ export async function getPosts(): Promise<PostSummary[]> {
       live: isLive(entry.data, buildTime),
       entry,
     }))
-    .filter((p) => import.meta.env.DEV || p.live);
+    .filter((p) => import.meta.env.DEV || PREVIEW || p.live);
   // Drafts and scheduled posts may hold a future number; the sequence rule applies to what is out.
   checkNumbers(posts.filter((p) => p.live));
   return posts.sort((a, b) => b.number - a.number);

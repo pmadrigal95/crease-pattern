@@ -67,13 +67,19 @@ const path = publicPath(Astro.url.pathname);
   async function open(trigger: HTMLElement | null) {
     if (handle || loading) return;
     loading = true;
-    const { openInspector } = await load();
-    handle = openInspector(trigger, () => {
-      handle = null;
-      button?.setAttribute('aria-expanded', 'false');
-    });
-    button?.setAttribute('aria-expanded', 'true');
-    loading = false;
+    try {
+      const { openInspector } = await load();
+      handle = await openInspector(trigger, () => {
+        handle = null;
+        button?.setAttribute('aria-expanded', 'false');
+      });
+      button?.setAttribute('aria-expanded', 'true');
+    } catch (error) {
+      // Offline, or the manifest didn't arrive: the page stays as it was, and the next try retries.
+      console.warn('Inspector could not open', error);
+    } finally {
+      loading = false;
+    }
   }
   const toggle = (trigger: HTMLElement | null) => (handle ? handle.close() : open(trigger));
 
