@@ -35,31 +35,105 @@ import UnitFold from '../../components/sonobe/UnitFold.astro';
 import ContractFit from '../../components/sonobe/ContractFit.astro';
 import ScaleDemo from '../../components/sonobe/ScaleDemo.astro';
 import TokenPaper from '../../components/sonobe/TokenPaper.astro';
-import SiteComponents from '../../components/sonobe/SiteComponents.astro';
 import ExceptionUnit from '../../components/sonobe/ExceptionUnit.astro';
+import SiteComponents from '../../components/sonobe/SiteComponents.astro';
 
-{/* Draft: the demos for the six acts (M3b.3). The text comes in M3b.4, from the approved outline in the studio. */}
+A Sonobe unit starts as a square of paper. You fold it the same way every time and end up with a small
+parallelogram: a square in the middle and a triangle at each end. Six of them make a cube. Twelve make a star
+with eight points, and thirty make one with twenty points. Nobody designs a new piece for the bigger model. You
+fold more of the same one: the same decision, made thirty times.<MarginNote>**Sonobe** units take their name from Mitsunobu Sonobe: the earliest known Sonobe model is a cube credited to him in 1968. Who first designed the unit isn't certain. Origami built from many identical folded pieces is called **modular origami**.</MarginNote>
+
+People make the same promise about components: build a piece once, use it everywhere. This post folds the unit,
+joins a few, and then checks that promise against this site's own code. Every number here comes from the site's
+build, so it's current each time the page is published.
 
 ## The unit
 
 <UnitFold />
 
+Each stage of the fold settles something for good. The first crease decides where the middle is. The corners
+decide the angle every later unit will share.
+
+Writing a component feels much the same. PostCard, which shows one post in a list on this site, came from one
+need and three decisions: what it takes (a post), what it leaves to the page (where it sits and how wide it is),
+and what may change from place to place (the heading level).<MarginNote>A **component** is a piece of interface written once and used by name, a little like a function that returns markup. Its **props** are the values you hand it each time you use it.</MarginNote>
+Two props is a small surface, and that's on purpose. Anything PostCard doesn't take is something no page has to
+think about.
+
 ## The contract
 
 <ContractFit />
+
+Units hold together without glue. A tab slides into a pocket, the paper grips, and the joint is as strong as the
+fold. Two units fit because each one expects very little from the other: a tab of one size, a pocket of the same
+size.
+
+Sonobe shows two ideas that often get mixed up. Reusing is using the same piece in several places: PostCard
+appears in three files. Composing is building something larger from pieces that don't know how the others are
+made: PostCard carries PostThumb, each post's small drawing, inside it.<MarginNote>**Composition** is building a piece out of other pieces. Each one keeps its own job and only meets the others at its edges.</MarginNote>
+
+Components join through their interfaces. An optional prop breaks nothing: the places that already use the
+component keep working as they are. What grows is the contract, with one more combination to test. A required
+prop is different, because every place that uses the component has to change.<MarginNote>An **interface** is what a piece of code shows the rest of the code. For a component, that's its props and what it renders. Small interfaces join easily because there's less to agree on.</MarginNote>
 
 ## The scale
 
 <ScaleDemo />
 
+Six units, then twelve, then thirty. The count of units designed stays at one. What changes is how many you fold
+and where they meet. The bigger star takes longer to fold and no extra design.
+
+This is the part of the metaphor that holds up best. Once a unit is right, growing is mostly repetition.
+
 ## The token
 
 <TokenPaper />
+
+Change the paper and every unit changes with it. Nothing gets refolded.
+
+This site has three identities: Basalt & glacier, Washi & asagi and Contour lines. Each one defines the same nine
+color names, from `bg` to `earth`, with values of its own. Components ask for a name like `accent` or `rule`,
+never for a hex value, so switching identity doesn't touch a single component.<MarginNote>A **design token** is a named design value, such as a color or a spacing step. Components use the name; each theme decides the value.</MarginNote>
 
 ## The exception
 
 <ExceptionUnit />
 
+Now make one unit special: a slightly different tab, just for one spot. The model no longer closes, and there
+are two kinds of unit to fold and two shapes to check.
+
+This site has a small example of its own. FoldTitle, the large title that unfolds across Precrease, takes an
+`unfold` prop with two values: `hover` on the index and `load` on a post. One value for each place.<MarginNote>A **variant** is one version of a component, picked with a prop: a size, a style, a behavior. Each one is another case to build and test.</MarginNote>
+A variant that changes how something looks or when it moves fits inside one component. Once a variant starts
+doing other work, like loading different data or serving another purpose, it's two components sharing a name.
+FoldTitle is the first kind: `hover` and `load` only change when the title unfolds.
+
 ## This site
 
 <SiteComponents />
+
+That's every component of crease-pattern, counted from the code when this page was built. The table includes this
+post's six demos. Without them, when I wrote this, the site had 27 components and 42 uses, and only 5 components
+were used in more than one file: PostCard, PostThumb, CopyText, FoldTitle and TopicChips.
+
+That's less reuse than the metaphor suggests, and I think it's fine. Most pieces of a small site exist for one
+place: the home page's opening, the folded portrait on About, the demos in this post. Writing them as components
+still pays off, because each page is composed of them, and each one has a clear edge and a small interface. Reuse is what happens when a second place
+needs the same thing. Before that, making something generic only adds props nobody uses yet.
+
+What every page does share is the paper: the same color names, the same spacing steps, the same type sizes.
+That's where this site repeats itself most, and where one change reaches everything at once.
+
+## Before you make it reusable
+
+This is what I check now before turning a piece into a shared component:
+
+- **Does a second place need it today?** If not, keep it where it is, with a clear edge.
+- **How small can the interface be?** Every prop is a decision for everyone who uses it.
+- **Does it ask for tokens or for values?** Names carry across themes; hex values don't.
+- **Does a new variant change the look, or the job?** A new job is a new component.
+
+The thirty-unit star comes from one unit done well and from knowing where it joins the next. That's what I look
+for in a component.
+
+The components, their counts and the code behind this post are in the [repository](https://github.com/pmadrigal95/crease-pattern/tree/main/src/components).
