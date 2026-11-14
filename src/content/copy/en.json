@@ -351,12 +351,17 @@
         "label": "Two units, a tab and a pocket",
         "join": "Join them",
         "apart": "Take them apart",
-        "extra": "Give the tab one more prop",
+        "props": "The tab's props",
+        "asIs": "As it is",
+        "optional": "One optional prop",
+        "required": "One required prop",
         "apartStatus": "Two units, side by side.",
         "fits": "The tab goes into the pocket and the units lock.",
-        "noFit": "With one more prop the tab is too wide for the pocket. The units don't lock.",
-        "fitsFigure": "Fits: the tab goes into the pocket.",
-        "noFitFigure": "Doesn't fit: one more prop, and the tab stops at the pocket."
+        "fitsOptional": "The units still lock. The contract grew: one more case to test.",
+        "noFit": "A required prop changes the tab. It no longer fits, and every place that uses it has to change.",
+        "fitsFigure": "As it is: the tab goes into the pocket.",
+        "optionalFigure": "One optional prop: it still fits, with one more case to test.",
+        "noFitFigure": "One required prop: the tab stops at the pocket."
       },
       "exception": {
         "label": "The 12-unit model, one unit made special",
