@@ -8,6 +8,45 @@ topics: [concurrency, performance]
 lang: en
 draft: false
 isolated: true
+references:
+  - title: Validity of the single processor approach to achieving large scale computing capabilities
+    author: Gene M. Amdahl
+    year: 1967
+    url: https://doi.org/10.1145/1465482.1465560
+    note: The paper behind Amdahl's law.
+    kind: source
+  - title: Reevaluating Amdahl's law
+    author: John L. Gustafson
+    year: 1988
+    url: https://doi.org/10.1145/42411.42415
+    note: The paper behind Gustafson's law.
+    kind: source
+  - title: Using Web Workers
+    author: MDN Web Docs
+    url: https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Using_web_workers
+    note: How the browser runs code on other threads.
+    kind: further
+  - title: SharedArrayBuffer
+    author: MDN Web Docs
+    url: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/SharedArrayBuffer
+    note: The memory the shared models in this post read and write.
+    kind: further
+  - title: Atomics
+    author: MDN Web Docs
+    url: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Atomics
+    note: The single-step operations behind the shared queue.
+    kind: further
+  - title: Make your website "cross-origin isolated" using COOP and COEP
+    author: web.dev
+    url: https://web.dev/articles/coop-coep
+    note: Why this page needs special headers before it can share memory.
+    kind: further
+  - title: Tetris AI – The (Near) Perfect Bot
+    author: Yiyuan Lee
+    year: 2013
+    url: https://codemyroad.wordpress.com/2013/04/14/tetris-ai-the-near-perfect-player/
+    note: The four measures this solver scores a board with (height, lines, holes, bumpiness), and weights tuned by a genetic algorithm.
+    kind: further
 ---
 
 import ThreadsRun from '../../components/threads/ThreadsRun.astro';

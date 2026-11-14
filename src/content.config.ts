@@ -33,6 +33,23 @@ const precrease = defineCollection({
           url: z.url(),
         })
         .optional(),
+      /**
+       * What the post draws on (`source`) and where to keep learning (`further`), shown at the end
+       * of the post. Every link is opened and checked by hand before it's added; HTTPS only.
+       */
+      references: z
+        .array(
+          z.strictObject({
+            title: z.string().min(1),
+            author: z.string().optional(),
+            year: z.number().int().optional(),
+            url: z.url().startsWith('https://'),
+            /** One line on why it's here. */
+            note: z.string().max(160).optional(),
+            kind: z.enum(['source', 'further']),
+          }),
+        )
+        .optional(),
       /** Script for the vertical video made from this post (M9): hook, three beats, close. */
       reel: z
         .strictObject({

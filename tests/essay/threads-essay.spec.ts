@@ -122,3 +122,13 @@ test('no Content Security Policy violations, demos included', async ({ page }) =
   violations.push(...(await page.evaluate(() => (window as unknown as { __csp?: string[] }).__csp ?? [])));
   expect(violations).toEqual([]);
 });
+
+test('the essay cites Amdahl and Gustafson as sources', async ({ page }) => {
+  await page.goto(essay);
+  const refs = page.getByRole('region', { name: 'References' });
+  await expect(refs.getByRole('heading', { name: 'Sources' })).toBeVisible();
+  await expect(refs.getByRole('link', { name: "Reevaluating Amdahl's law" })).toHaveAttribute(
+    'href',
+    'https://doi.org/10.1145/42411.42415',
+  );
+});
