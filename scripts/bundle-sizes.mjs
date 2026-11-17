@@ -4,13 +4,19 @@
 //  - page: every script an HTML page references directly.
 //  - onDemand: what those scripts can import later, found by following their imports. Files
 //    nothing references never reach a visitor and don't count.
+//  - scene3d: M4's 3D scene (src/components/inspector/scene3d.ts) and what only it imports
+//    (three.js). It loads only on the home page, on capable devices, so it has a budget of its own
+//    and the other groups stop at it.
 import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { brotliCompressSync } from 'node:zlib';
 
 export const toKb = (bytes) => Math.round((bytes / 1024) * 10) / 10;
 
-/** @returns {{ page: number, onDemand: number }} bytes, Brotli */
+/** The 3D scene's entry chunk, as Vite names it after its source file. */
+const isScene3d = (file) => /^scene3d\.[\w-]+\.js$/.test(file);
+
+/** @returns {{ page: number, onDemand: number, scene3d: number }} bytes, Brotli */
 export function measureBundles(dist) {
   const assets = join(dist, '_astro');
   const read = (file) => readFileSync(join(assets, file), 'utf8');
@@ -25,19 +31,25 @@ export function measureBundles(dist) {
   const importsOf = (file) =>
     [...read(file).matchAll(/(?:from|import)\s*\(?\s*["'`]\.\/([^"'`]+\.js)["'`]/g)].map((m) => m[1]);
 
-  const page = scripts.filter((f) => html.includes(`/_astro/${f}`));
-  const onDemand = new Set();
-  const queue = page.flatMap(importsOf);
-  while (queue.length) {
-    const file = queue.pop();
-    if (page.includes(file) || onDemand.has(file) || !scripts.includes(file)) continue;
-    onDemand.add(file);
-    queue.push(...importsOf(file));
-  }
-  return {
-    page: page.reduce((sum, f) => sum + size(f), 0),
-    onDemand: [...onDemand].reduce((sum, f) => sum + size(f), 0),
+  /** Every chunk reachable from `start`, minus `skip` and anything `stop` matches. */
+  const closure = (start, skip, stop = () => false) => {
+    const seen = new Set();
+    const queue = [...start];
+    while (queue.length) {
+      const file = queue.pop();
+      if (seen.has(file) || skip.has(file) || stop(file) || !scripts.includes(file)) continue;
+      seen.add(file);
+      queue.push(...importsOf(file));
+    }
+    return seen;
   };
+  const sum = (files) => [...files].reduce((total, f) => total + size(f), 0);
+
+  const page = new Set(scripts.filter((f) => html.includes(`/_astro/${f}`)));
+  const onDemand = closure([...page].flatMap(importsOf), page, isScene3d);
+  // A chunk the scene shares with the panel (Vite's helpers) is already counted in onDemand.
+  const scene3d = closure(scripts.filter(isScene3d), new Set([...page, ...onDemand]));
+  return { page: sum(page), onDemand: sum(onDemand), scene3d: sum(scene3d) };
 }
 
 /**
@@ -101,7 +113,8 @@ export function measurePosts(dist, paths) {
     const queue = [...html.matchAll(/\/_astro\/([^"'\s]+\.js)/g)].map((m) => m[1]);
     while (queue.length) {
       const file = queue.pop();
-      if (seen.has(file) || !scripts.has(file)) continue;
+      // The 3D scene loads only where the hero fox is, never on a post.
+      if (seen.has(file) || !scripts.has(file) || isScene3d(file)) continue;
       seen.add(file);
       queue.push(...linksOf(file));
     }
