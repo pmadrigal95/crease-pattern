@@ -43,6 +43,25 @@ test('inspecting on a capable device hands the hero to the 3D fox, and closing h
   await expect(page.locator(canvas)).toHaveCount(0);
 });
 
+test('changing identity while inspecting exchanges the scene in the same canvas', async ({ page }) => {
+  await allowSoftwareGl(page);
+  const errors: string[] = [];
+  page.on('pageerror', (e) => errors.push(e.message));
+  page.on('console', (m) => {
+    if (m.type() === 'error' || /3D scene unavailable/.test(m.text())) errors.push(m.text());
+  });
+  await page.goto('/?inspect');
+  await expect(page.locator('[data-hero-fold]')).toHaveClass(/scene-3d/, sceneReady);
+  for (const name of ['Basalt & glacier', 'Washi & asagi', 'Contour lines']) {
+    await page.getByRole('radio', { name }).check();
+    await expect(page.locator(canvas)).toHaveCount(1);
+    await expect(page.locator('[data-hero-fold]')).toHaveClass(/scene-3d/);
+  }
+  await page.getByRole('radio', { name: 'Dark' }).check();
+  await page.waitForTimeout(2_000); // the last exchange settles
+  expect(errors).toEqual([]);
+});
+
 test('reduced motion keeps the SVG fox and never downloads the scene', async ({ browser }) => {
   const context = await browser.newContext({ reducedMotion: 'reduce' });
   const page = await context.newPage();
