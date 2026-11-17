@@ -78,9 +78,18 @@ const strings = JSON.stringify({ folded: t.folded, unfolded: t.unfolded });
     --t: 1;
   }
   .stage {
+    position: relative;
     aspect-ratio: 1;
     touch-action: pan-y;
     cursor: ew-resize;
+  }
+  /* M4's 3D fox (src/components/inspector/scene3d.ts) takes over this square once its first frame
+     is drawn; the SVG, its first frame, steps back and returns when the scene leaves. */
+  .stage svg {
+    transition: opacity 300ms ease-out;
+  }
+  .hero-fold.scene-3d .stage svg {
+    opacity: 0;
   }
   .stage svg {
     display: block;

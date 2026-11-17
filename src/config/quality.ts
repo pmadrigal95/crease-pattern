@@ -34,6 +34,11 @@ export const jsBudgetKb = {
    */
   inspectorData: 4,
   /**
+   * M4's 3D scene and three.js, loaded only on the home page when the Inspector opens on a device
+   * that can run it (src/lib/scene3d-support.ts). Set at 180 KB in the M4 plan; about 100 KB at M4.1.
+   */
+  scene3d: 180,
+  /**
    * Everything one Precrease post can run, Web Workers included, checked for every post in the
    * build (drafts only exist in preview builds). Set at 45 KB for Crease No. 002, the heaviest
    * (42 KB); widened from interactive essays to every post when No. 003 brought its own demos.

@@ -90,6 +90,11 @@ const path = publicPath(Astro.url.pathname);
     opener.addEventListener('pointerenter', () => void load(), { once: true });
   }
   button?.addEventListener('pointerenter', () => void load(), { once: true });
+  // A pointer resting on the hero's fox preloads too: loading the Inspector also starts M4's 3D
+  // scene on devices that can run it (decision 50), so it's ready if the visitor opens it.
+  document
+    .querySelector('[data-hero-fold] [data-stage]')
+    ?.addEventListener('pointerenter', () => void load(), { once: true });
   addEventListener('keydown', (e) => {
     if (
       !e.shiftKey ||
