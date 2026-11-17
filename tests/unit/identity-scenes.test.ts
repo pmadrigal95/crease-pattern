@@ -1,12 +1,13 @@
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { expect, test } from 'vitest';
 import {
   IRAZU,
-  TERRAIN,
+  IRAZU_DEM,
   WASHI,
   basaltColumns,
   contourFront,
-  irazuHeight,
-  irazuScale,
+  irazuModel,
   ringProgress,
   seeded,
   sheetProgress,
@@ -20,19 +21,24 @@ test('the seeded sequence is the same on every visit', () => {
   expect(run(seeded(7)).every((x) => x > 0 && x < 1)).toBe(true);
 });
 
-test('the Irazú model spans its real heights: base at 1,400 m, summit at 3,432 m', () => {
-  let hmax = 0;
-  const step = TERRAIN.size / 40;
-  for (let x = -TERRAIN.size / 2; x <= TERRAIN.size / 2; x += step)
-    for (let z = -TERRAIN.size / 2; z <= TERRAIN.size / 2; z += step) {
-      const h = irazuHeight(x, z);
-      expect(h).toBeGreaterThanOrEqual(0);
-      hmax = Math.max(hmax, h);
-    }
-  const { toMetres, unitsPer } = irazuScale(hmax);
-  expect(toMetres(0)).toBe(IRAZU.base);
-  expect(toMetres(hmax)).toBeCloseTo(IRAZU.summit);
-  expect(unitsPer(IRAZU.summit - IRAZU.base)).toBeCloseTo(hmax);
+test('the Irazú grid is real Copernicus data: the right size, up to the summit', () => {
+  const file = readFileSync(join(import.meta.dirname, '../../src/assets/scenes/irazu-dem.bin'));
+  const metres = new Uint16Array(file.buffer, file.byteOffset, file.byteLength / 2);
+  expect(metres.length).toBe(IRAZU_DEM.size ** 2);
+  const model = irazuModel(metres);
+  // Averaging ~84 m cells shaves a little off the 3,432 m summit, never adds to it.
+  expect(model.top).toBeLessThanOrEqual(IRAZU.summit);
+  expect(model.top).toBeGreaterThan(IRAZU.summit - 40);
+  expect(model.base).toBeGreaterThan(1000);
+  // The highest grid point sits near the centre of the crop, where the summit is.
+  const peak = metres.indexOf(model.top);
+  const [row, col] = [Math.floor(peak / IRAZU_DEM.size), peak % IRAZU_DEM.size];
+  expect(Math.abs(row - 80)).toBeLessThan(12);
+  expect(Math.abs(col - 80)).toBeLessThan(12);
+  // One scale for the lines and the figures.
+  expect(model.toMetres(0)).toBe(model.base);
+  expect(model.toMetres(model.hmax)).toBeCloseTo(model.top);
+  expect(model.unitsPer(model.top - model.base)).toBeCloseTo(model.hmax);
 });
 
 test('the tracing contour walks down from above the summit to below the base', () => {

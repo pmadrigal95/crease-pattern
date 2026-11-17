@@ -86,6 +86,18 @@ export function measureInspectorData(dist) {
 }
 
 /**
+ * The 3D scenes' data files as Vite emits them (/_astro/*.<hash>.bin, such as the Irazú's height
+ * grid), Brotli. They download with the scene, on the home page only.
+ * @returns {number} bytes
+ */
+export function measureSceneData(dist) {
+  const assets = join(dist, '_astro');
+  return readdirSync(assets)
+    .filter((f) => f.endsWith('.bin'))
+    .reduce((sum, f) => sum + brotliCompressSync(readFileSync(join(assets, f))).length, 0);
+}
+
+/**
  * Everything one Precrease post can run: the scripts its page references, what they import, and
  * the Web Workers they start, with the workers' own imports. Workers count because a reader who
  * presses Run downloads them. Pages missing from `dist` (drafts in a production build) are

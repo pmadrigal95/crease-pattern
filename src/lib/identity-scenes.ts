@@ -4,7 +4,7 @@
  * and the tests read the same numbers. Each scene is posed by Inspect's phases
  * (inspectPhases in src/lib/fold3d.ts): it rises, then its details trace in.
  *
- * - Contour lines: the Irazú volcano, scaled to its real summit, contours every 100 m.
+ * - Contour lines: the Irazú volcano from real elevation data, contours every 100 m.
  * - Basalt & glacier: hexagonal columns rising ring by ring, frosted with ice.
  * - Washi & asagi: a stack of fibred sheets lifting one by one, then an ink stain spreading.
  *
@@ -18,7 +18,7 @@ const clamp01 = (x: number) => Math.min(1, Math.max(0, x));
 /** Changing identity while inspecting: the old scene sinks, the new one rises this much later. */
 export const EXCHANGE_DELAY_MS = 120;
 
-/** A seeded random sequence (Park–Miller): the same paper and the same terrain on every visit. */
+/** A seeded random sequence (Park–Miller): the same paper on every visit. */
 export function seeded(seed: number): () => number {
   let s = seed;
   return () => (s = (s * 16807) % 2147483647) / 2147483647;
@@ -27,37 +27,55 @@ export function seeded(seed: number): () => number {
 // ---------- Contour lines: the Irazú ----------
 
 /**
- * Real numbers: the Irazú's summit is 3,432 m above sea level. The model's base is set at 1,400 m.
- * The shape is procedural until real elevation data replaces it (Copernicus GLO-30, 21-m4-plan.md).
+ * The Irazú from real elevation data: Copernicus GLO-30 (30 m), cropped to 0.12° (about 13.4 km)
+ * around the summit and averaged down to a 161 × 161 grid of whole metres
+ * (src/assets/scenes/irazu-dem.bin: uint16, little-endian, rows north to south, columns west to
+ * east). The summit is 3,432 m; averaging over each ~84 m cell leaves the grid's top a little
+ * lower. Contours every 100 m, bold every 500 m, on the grid's real heights.
  */
-export const IRAZU = { summit: 3432, base: 1400, interval: 100, major: 500 } as const;
+export const IRAZU = { summit: 3432, interval: 100, major: 500 } as const;
+export const IRAZU_DEM = {
+  /** Vertices per side. */
+  size: 161,
+  /** Width of the crop, in metres. */
+  across: 13_360,
+  /** Heights are drawn this much taller than true scale, so the relief reads at hero size. */
+  exaggeration: 2,
+} as const;
 
 /** The terrain plane: its size in scene units and how many segments each side has. */
-export const TERRAIN = { size: 9, segments: 160 } as const;
+export const TERRAIN = { size: 9, segments: IRAZU_DEM.size - 1 } as const;
 
-/**
- * The volcano's height at a point of the terrain plane (scene units, before scaling): a cone with
- * a crater, a side vent and a little noise. Never below 0, the flat ground around it.
- */
-export function irazuHeight(x: number, z: number): number {
-  const zc = z + 1.2;
-  const r = Math.hypot(x * 0.9, zc);
-  const cone = Math.max(0, 1.55 - r * 0.62) ** 1.6;
-  const crater = -0.28 * Math.exp(-((r - 0.05) ** 2) / 0.05);
-  const side = 0.35 * Math.exp(-((x + 1.4) ** 2 + (zc + 0.6) ** 2) / 0.5);
-  const noise =
-    Math.sin(x * 1.7 + zc * 0.6) * 0.06 +
-    Math.sin(zc * 2.3 - x * 1.1) * 0.05 +
-    Math.sin((x + zc) * 4.1) * 0.02;
-  return Math.max(0, cone + crater + side + noise);
+export interface IrazuModel {
+  /** Model height per vertex (scene units), 0 at the grid's lowest point. */
+  heights: Float32Array;
+  /** The highest model height. */
+  hmax: number;
+  /** The grid's lowest and highest points, in metres above sea level. */
+  base: number;
+  top: number;
+  /** Model height ↔ metres above sea level: one source for the lines and any figure. */
+  toMetres(h: number): number;
+  unitsPer(metres: number): number;
 }
 
-/** Model height ↔ metres, given the model's highest point: one source for lines and figures. */
-export function irazuScale(hmax: number) {
-  const span = IRAZU.summit - IRAZU.base;
+/** Turns the grid's metres into model heights, on the plane's scale times the exaggeration. */
+export function irazuModel(metres: ArrayLike<number>): IrazuModel {
+  let base = Infinity;
+  let top = -Infinity;
+  for (let i = 0; i < metres.length; i++) {
+    base = Math.min(base, metres[i]!);
+    top = Math.max(top, metres[i]!);
+  }
+  const unitsPerMetre = (TERRAIN.size / IRAZU_DEM.across) * IRAZU_DEM.exaggeration;
+  const heights = Float32Array.from(metres, (m) => (m - base) * unitsPerMetre);
   return {
-    toMetres: (h: number) => IRAZU.base + (h / hmax) * span,
-    unitsPer: (metres: number) => (metres / span) * hmax,
+    heights,
+    hmax: (top - base) * unitsPerMetre,
+    base,
+    top,
+    toMetres: (h) => base + h / unitsPerMetre,
+    unitsPer: (m) => m * unitsPerMetre,
   };
 }
 
