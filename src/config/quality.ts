@@ -39,6 +39,11 @@ export const jsBudgetKb = {
    */
   scene3d: 180,
   /**
+   * The 3D scenes' data, fetched with the scene: today the Irazú's height grid from Copernicus
+   * GLO-30 (src/assets/scenes/irazu-dem.bin), 28.5 KB. The M4 plan capped it at 150 KB.
+   */
+  sceneData: 150,
+  /**
    * Everything one Precrease post can run, Web Workers included, checked for every post in the
    * build (drafts only exist in preview builds). Set at 45 KB for Crease No. 002, the heaviest
    * (42 KB); widened from interactive essays to every post when No. 003 brought its own demos.

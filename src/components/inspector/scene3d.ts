@@ -172,7 +172,7 @@ export function mountFoxScene(stage: HTMLElement): FoxScene {
   const actor = (id: VisualDirection) => {
     let a = actors.get(id);
     if (!a) {
-      a = { scene: makeIdentityScene(id), q: new Progress() };
+      a = { scene: makeIdentityScene(id, requestFrame), q: new Progress() };
       a.scene.group.visible = false;
       a.scene.paint(css);
       world.add(a.scene.group);

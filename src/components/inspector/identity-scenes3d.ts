@@ -34,16 +34,34 @@ import {
   BASALT,
   IRAZU,
   TERRAIN,
+  irazuModel,
   WASHI,
   basaltColumns,
   contourFront,
-  irazuHeight,
-  irazuScale,
   ringProgress,
   seeded,
   sheetProgress,
 } from '../../lib/identity-scenes';
 import type { VisualDirection } from '../../config/visual-direction';
+// The Irazú's real heights (src/lib/identity-scenes.ts, IRAZU_DEM): a file of its own, fetched
+// with this module and counted in the sceneData budget.
+import irazuDemUrl from '../../assets/scenes/irazu-dem.bin?url';
+
+let irazuDem: Promise<Uint16Array> | null = null;
+/** Starts (or reuses) the height grid's download; a failed one is forgotten, so a later try retries. */
+function loadIrazuDem() {
+  irazuDem ??= fetch(irazuDemUrl)
+    .then((r) => (r.ok ? r.arrayBuffer() : Promise.reject(new Error(`irazu-dem: ${r.status}`))))
+    // uint16 little-endian, which every browser's typed arrays read natively.
+    .then((buffer) => new Uint16Array(buffer))
+    .catch((error: unknown) => {
+      irazuDem = null;
+      throw error;
+    });
+  return irazuDem;
+}
+// Contour lines is the default identity, so the grid starts downloading with the scene's code.
+void loadIrazuDem().catch(() => undefined);
 
 /** Reads a colour token of the active identity. */
 export type Tokens = (name: string) => Color;
@@ -60,24 +78,25 @@ const presence = (rise: number, alpha: number, speed = 3) => Math.min(1, rise * 
 
 // ---------- Contour lines: the Irazú ----------
 
-function contourLines(): IdentityScene {
+/** How far the terrain tips toward the camera, in radians. */
+const TERRAIN_TILT = 0.42;
+
+function contourLines(redraw: () => void): IdentityScene {
   const geometry = new PlaneGeometry(TERRAIN.size, TERRAIN.size, TERRAIN.segments, TERRAIN.segments);
   geometry.rotateX(-Math.PI / 2);
-  const position = geometry.attributes.position!;
-  const heights = new Float32Array(position.count);
+  // Flat until the grid arrives (a few dozen KB, usually before the scene starts to rise). The
+  // plane's vertices run row by row from the back (north) and west to east, like the grid.
+  const heights = new BufferAttribute(new Float32Array(geometry.attributes.position!.count), 1);
+  geometry.setAttribute('h', heights);
   let hmax = 0;
-  for (let i = 0; i < position.count; i++) {
-    heights[i] = irazuHeight(position.getX(i), position.getZ(i));
-    hmax = Math.max(hmax, heights[i]!);
-  }
-  geometry.setAttribute('h', new BufferAttribute(heights, 1));
-  const { unitsPer } = irazuScale(hmax);
   const material = new ShaderMaterial({
     transparent: true,
     uniforms: {
       rise: { value: 0 },
-      front: { value: hmax + 1 },
-      interval: { value: unitsPer(IRAZU.interval) },
+      front: { value: 1 },
+      interval: { value: 1 },
+      // The grid's lowest point, in model units above sea level: lines fall on real altitudes.
+      offset: { value: 0 },
       every: { value: IRAZU.major / IRAZU.interval },
       ground: { value: new Color() },
       line: { value: new Color() },
@@ -86,38 +105,53 @@ function contourLines(): IdentityScene {
       fade: { value: 0 },
     },
     vertexShader: /* glsl */ `
-      attribute float h; uniform float rise; varying float vH; varying vec3 vPos;
+      attribute float h; uniform float rise; varying float vH; varying vec3 vPos; varying vec2 vXZ;
       void main() {
-        vec3 p = position; p.y = h * rise; vH = h;
+        vec3 p = position; p.y = h * rise; vH = h; vXZ = position.xz;
         vPos = (modelMatrix * vec4(p, 1.)).xyz;
         gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 1.);
       }`,
     fragmentShader: /* glsl */ `
-      uniform vec3 ground, line, accent, mist; uniform float rise, front, interval, every, fade;
-      varying float vH; varying vec3 vPos;
+      uniform vec3 ground, line, accent, mist; uniform float rise, front, interval, offset, every, fade;
+      varying float vH; varying vec3 vPos; varying vec2 vXZ;
       void main() {
         vec3 n = normalize(cross(dFdx(vPos), dFdy(vPos)));
         vec3 c = ground * (clamp(dot(n, normalize(vec3(-0.6, 0.9, 0.4))), 0., 1.) * 0.35 + 0.65);
-        float f = vH / interval, w = max(fwidth(f), 1e-4);
+        float f = (vH + offset) / interval, w = max(fwidth(f), 1e-4);
         float on = 1. - clamp(abs(fract(f - 0.5) - 0.5) / w - 0.5, 0., 1.);
         float major = mod(floor(f + 0.5), every) < 0.5 ? 1. : 0.;
-        // The flat ground at height 0 sits on a line's centre: no line there.
-        on *= step(interval * 0.5, vH);
+        // No line on the flat ground before the grid arrives.
+        on *= step(1e-3, vH);
         // Lines exist above the front; the line at the front is the accent, the one being traced.
         float traced = smoothstep(front - interval * 0.5, front, vH);
         float atFront = 1. - smoothstep(0., interval * 0.9, abs(vH - front));
         c = mix(c, mix(line, accent, atFront), on * max(traced * (major > 0.5 ? 0.85 : 0.45), atFront));
         c = mix(c, mist, (1. - smoothstep(0., 0.35, vH * rise)) * 0.3);
-        float edge = 1. - smoothstep(2.6, 4.2, length(vPos.xz - vec2(1.3, -3.6)));
+        float edge = 1. - smoothstep(2.6, 4.2, length(vXZ));
         gl_FragColor = vec4(c, fade * edge);
       }`,
   });
   const mesh = new Mesh(geometry, material);
-  // Behind and to the right of the fox: one focal point, the summit never under the fox.
-  mesh.position.set(1.3, -1.35, -3.6);
+  // Behind and to the right of the fox, the summit clear of it, and tilted toward the camera so
+  // the contours read as rings around the craters rather than stripes (teardown rule 6).
   const group = new Group();
+  group.position.set(1.9, -1.3, -3.8);
+  group.rotation.x = TERRAIN_TILT;
+  group.scale.setScalar(0.8);
   group.add(mesh);
   const u = material.uniforms;
+  loadIrazuDem()
+    .then((metres) => {
+      const model = irazuModel(metres);
+      (heights.array as Float32Array).set(model.heights);
+      heights.needsUpdate = true;
+      hmax = model.hmax;
+      u.interval!.value = model.unitsPer(IRAZU.interval);
+      u.offset!.value = model.unitsPer(model.base);
+      redraw();
+    })
+    // Without the grid the ground stays flat and unlined: the fox and the panel still work.
+    .catch((error: unknown) => console.warn('Irazú heights unavailable', error));
   return {
     group,
     paint(css) {
@@ -322,10 +356,12 @@ function washiAsagi(): IdentityScene {
   };
 }
 
-const builders: Record<VisualDirection, () => IdentityScene> = {
+const builders: Record<VisualDirection, (redraw: () => void) => IdentityScene> = {
   'contour-lines': contourLines,
   'basalt-glacier': basaltGlacier,
   'washi-asagi': washiAsagi,
 };
 
-export const makeIdentityScene = (direction: VisualDirection): IdentityScene => builders[direction]();
+/** Builds one identity's scene; `redraw` asks for a frame when data arrives after it's shown. */
+export const makeIdentityScene = (direction: VisualDirection, redraw: () => void): IdentityScene =>
+  builders[direction](redraw);

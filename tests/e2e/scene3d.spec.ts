@@ -72,7 +72,7 @@ test('reduced motion keeps the SVG fox and never downloads the scene', async ({ 
   await expect(page.locator(panel)).toBeVisible(sceneReady);
   await page.waitForLoadState('networkidle');
   await expect(page.locator(canvas)).toHaveCount(0);
-  expect(requested.filter((url) => /\/_astro\/scene3d\./.test(url))).toEqual([]);
+  expect(requested.filter((url) => /\/_astro\/(scene3d|irazu-dem)\./.test(url))).toEqual([]);
   await context.close();
 });
 
@@ -83,7 +83,23 @@ test('a page without the hero fox never downloads the scene', async ({ page }) =
   await page.goto('/about?inspect');
   await expect(page.locator(panel)).toBeVisible(sceneReady);
   await page.waitForLoadState('networkidle');
-  expect(requested.filter((url) => /\/_astro\/scene3d\./.test(url))).toEqual([]);
+  expect(requested.filter((url) => /\/_astro\/(scene3d|irazu-dem)\./.test(url))).toEqual([]);
+});
+
+test('Contour lines draws the Irazú from its real height grid', async ({ page }) => {
+  await allowSoftwareGl(page);
+  const warnings: string[] = [];
+  page.on('console', (m) => {
+    if (/Irazú heights unavailable|3D scene unavailable/.test(m.text())) warnings.push(m.text());
+  });
+  const grid = page.waitForResponse((r) => /\/_astro\/irazu-dem\.[\w-]+\.bin$/.test(r.url()), sceneReady);
+  await page.goto('/?inspect');
+  const response = await grid;
+  expect(response.status()).toBe(200);
+  expect((await response.body()).byteLength).toBe(161 * 161 * 2);
+  await expect(page.locator('[data-hero-fold]')).toHaveClass(/scene-3d/, sceneReady);
+  await page.waitForTimeout(2_000);
+  expect(warnings).toEqual([]);
 });
 
 test('the 3D scene raises no Content Security Policy violations', async ({ page }) => {
