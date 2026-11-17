@@ -4,19 +4,26 @@
 //  - page: every script an HTML page references directly.
 //  - onDemand: what those scripts can import later, found by following their imports. Files
 //    nothing references never reach a visitor and don't count.
-//  - scene3d: M4's 3D scene (src/components/inspector/scene3d.ts) and what only it imports
-//    (three.js). It loads only on the home page, on capable devices, so it has a budget of its own
-//    and the other groups stop at it.
+//  - workModel: the Work section's Sonobe animator (src/components/site/work-model.ts), loaded on
+//    the home page as the section approaches.
+//  - scene3d: M4's 3D scenes, the hero's fox (src/components/inspector/scene3d.ts) and the Work
+//    star (src/components/site/work3d.ts), and what only they import (three.js, shared). They load
+//    only on the home page, on capable devices.
+//  The last two have budgets of their own, and the other groups stop at them.
 import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { brotliCompressSync } from 'node:zlib';
 
 export const toKb = (bytes) => Math.round((bytes / 1024) * 10) / 10;
 
-/** The 3D scene's entry chunk, as Vite names it after its source file. */
-const isScene3d = (file) => /^scene3d\.[\w-]+\.js$/.test(file);
+/** The 3D scenes' entry chunks, as Vite names them after their source files. */
+const isScene3d = (file) => /^(scene3d|work3d)\.[\w-]+\.js$/.test(file);
+/** The Work animator's entry chunk. */
+const isWorkModel = (file) => /^work-model\.[\w-]+\.js$/.test(file);
+/** Where the page and on-demand groups stop: home-only code with budgets of its own. */
+const isHomeOnly = (file) => isScene3d(file) || isWorkModel(file);
 
-/** @returns {{ page: number, onDemand: number, scene3d: number }} bytes, Brotli */
+/** @returns {{ page: number, onDemand: number, workModel: number, scene3d: number }} bytes, Brotli */
 export function measureBundles(dist) {
   const assets = join(dist, '_astro');
   const read = (file) => readFileSync(join(assets, file), 'utf8');
@@ -46,10 +53,11 @@ export function measureBundles(dist) {
   const sum = (files) => [...files].reduce((total, f) => total + size(f), 0);
 
   const page = new Set(scripts.filter((f) => html.includes(`/_astro/${f}`)));
-  const onDemand = closure([...page].flatMap(importsOf), page, isScene3d);
-  // A chunk the scene shares with the panel (Vite's helpers) is already counted in onDemand.
-  const scene3d = closure(scripts.filter(isScene3d), new Set([...page, ...onDemand]));
-  return { page: sum(page), onDemand: sum(onDemand), scene3d: sum(scene3d) };
+  const onDemand = closure([...page].flatMap(importsOf), page, isHomeOnly);
+  // A chunk shared with an earlier group (Vite's helpers, the capability check) counts there once.
+  const workModel = closure(scripts.filter(isWorkModel), new Set([...page, ...onDemand]), isScene3d);
+  const scene3d = closure(scripts.filter(isScene3d), new Set([...page, ...onDemand, ...workModel]));
+  return { page: sum(page), onDemand: sum(onDemand), workModel: sum(workModel), scene3d: sum(scene3d) };
 }
 
 /**
@@ -125,8 +133,8 @@ export function measurePosts(dist, paths) {
     const queue = [...html.matchAll(/\/_astro\/([^"'\s]+\.js)/g)].map((m) => m[1]);
     while (queue.length) {
       const file = queue.pop();
-      // The 3D scene loads only where the hero fox is, never on a post.
-      if (seen.has(file) || !scripts.has(file) || isScene3d(file)) continue;
+      // The 3D scenes and the Work animator load only on the home page, never on a post.
+      if (seen.has(file) || !scripts.has(file) || isHomeOnly(file)) continue;
       seen.add(file);
       queue.push(...linksOf(file));
     }

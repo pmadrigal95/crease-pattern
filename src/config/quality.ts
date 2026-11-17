@@ -34,8 +34,14 @@ export const jsBudgetKb = {
    */
   inspectorData: 4,
   /**
-   * M4's 3D scene and three.js, loaded only on the home page when the Inspector opens on a device
-   * that can run it (src/lib/scene3d-support.ts). Set at 180 KB in the M4 plan; about 100 KB at M4.1.
+   * The Work section's Sonobe animator (src/components/site/work-model.ts), loaded on the home
+   * page as the section approaches: the star's geometry, its two inputs and the SVG renderer.
+   */
+  workModel: 8,
+  /**
+   * M4's 3D scenes, the hero's fox and the Work star, which share one three.js. They load only on
+   * the home page, on a device that can run them (src/lib/scene3d-support.ts). Set at 180 KB in
+   * the M4 plan; about 100 KB at M4.1.
    */
   scene3d: 180,
   /**

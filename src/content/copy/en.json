@@ -28,6 +28,15 @@
       "heading": "This site, measured.",
       "eyebrow": "Work",
       "intro": "These numbers are measured each time the site is published, and all of its code is public, so you can check every claim on this page.",
+      "model": {
+        "label": "A Sonobe star: 30 copies of one folded paper unit",
+        "caption": "One folded unit, repeated 30 times, locks into this star. Open the Inspector to take it apart and count the pieces this site is built from.",
+        "counts": {
+          "components": "components",
+          "uses": "uses across the site",
+          "reused": "used in more than one file"
+        }
+      },
       "metrics": {
         "js": {
           "unit": "KB",
@@ -261,7 +270,11 @@
       "heading": "Readers",
       "kicker": "End of {number}",
       "title": "Thanks for reading to the end.",
-      "metrics": { "views": "views", "reads": "read to the end", "helped": "found it helpful" },
+      "metrics": {
+        "views": "views",
+        "reads": "read to the end",
+        "helped": "found it helpful"
+      },
       "helped": "This helped",
       "helpedDone": "Thanks",
       "thanks": "Thanks. That tells me what to write more of.",
