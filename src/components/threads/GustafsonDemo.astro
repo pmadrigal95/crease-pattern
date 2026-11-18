@@ -5,11 +5,14 @@
  * searched at each depth are counted at build time; the times are measured live, serial against
  * the best parallel model this browser can run.
  */
-import { copy, fill } from '../../lib/copy';
+import { copyFor, fill } from '../../lib/copy';
 import { formatNumber } from '../../lib/format';
 import { boardFromText } from '../../lib/threads/board';
 import { ESSAY_BOARD, ESSAY_PIECES } from '../../lib/threads/essay';
 import { search } from '../../lib/threads/search';
+import { langOf } from '../../lib/i18n';
+const lang = langOf(Astro.currentLocale);
+const copy = copyFor(Astro.currentLocale);
 
 const t = copy.precrease.threads;
 const board = boardFromText(ESSAY_BOARD, 20);
@@ -23,7 +26,7 @@ const depths = [1, 2, 3, 4].map((depth) => ({ depth, nodes: search(board, ESSAY_
       <li data-depth={d.depth}>
         <span class="name">
           {fill(t.depthRow, { depth: d.depth })}
-          <small>{fill(t.placements, { count: formatNumber(d.nodes) })}</small>
+          <small>{fill(t.placements, { count: formatNumber(d.nodes, lang) })}</small>
         </span>
         <span class="bar" aria-hidden="true">
           <span class="fill" data-fill></span>

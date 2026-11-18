@@ -10,8 +10,9 @@
 import foldTitleSource from '../precrease/FoldTitle.astro?raw';
 import usage from '../../generated/components.json';
 import site from '../../../site.config';
-import { copy } from '../../lib/copy';
+import { copyFor } from '../../lib/copy';
 import { assembly, displace, project } from '../../lib/sonobe/geometry';
+const copy = copyFor(Astro.currentLocale);
 
 const t = copy.precrease.sonobe.exception;
 const YAW = 0.55;

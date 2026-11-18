@@ -1,14 +1,17 @@
 ---
 import { getEntry, render } from 'astro:content';
-import PageLayout from '../layouts/PageLayout.astro';
-import { getProfile } from '../lib/profile';
-import { career, yearsSince } from '../lib/career';
-import { copy, fill } from '../lib/copy';
-import { formatList } from '../lib/format';
-import FoldedPortrait from '../components/site/FoldedPortrait.astro';
+import PageLayout from '../../layouts/PageLayout.astro';
+import { getProfile } from '../../lib/profile';
+import { career, yearsSince } from '../../lib/career';
+import { copyFor, fill } from '../../lib/copy';
+import { formatList } from '../../lib/format';
+import FoldedPortrait from '../../components/site/FoldedPortrait.astro';
 import { getImage } from 'astro:assets';
-import silhouette from '../assets/portrait/silhouette.png?url';
-import portrait from '../assets/portrait/portrait.jpg';
+import silhouette from '../../assets/portrait/silhouette.png?url';
+import portrait from '../../assets/portrait/portrait.jpg';
+import { langOf, localeStaticPaths } from '../../lib/i18n';
+const lang = langOf(Astro.currentLocale);
+const copy = copyFor(Astro.currentLocale);
 
 const page = await getEntry('pages', 'about');
 if (!page) throw new Error('src/content/pages/about.mdx is missing.');
@@ -25,8 +28,11 @@ const facts = [
   { term: t.facts.role, value: profile.role },
   { term: t.facts.training, value: profile.training },
   { term: t.facts.vue, value: fill(t.vueYears, { years: yearsSince(career.vueSince) }) },
-  { term: t.facts.languages, value: formatList(profile.languages) },
+  { term: t.facts.languages, value: formatList(profile.languages, lang) },
 ];
+
+/** This page in every language: "/" and "/es" (src/lib/i18n.ts). */
+export const getStaticPaths = localeStaticPaths;
 ---
 
 <PageLayout title={page.data.title} description={page.data.description} image="/og/about.png">

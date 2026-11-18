@@ -1,11 +1,16 @@
 ---
 import { getEntry, render } from 'astro:content';
-import PageLayout from '../layouts/PageLayout.astro';
-import { copy } from '../lib/copy';
+import PageLayout from '../../layouts/PageLayout.astro';
+import { copyFor } from '../../lib/copy';
+import { localeStaticPaths } from '../../lib/i18n';
+const copy = copyFor(Astro.currentLocale);
 
 const page = await getEntry('pages', 'colophon');
 if (!page) throw new Error('src/content/pages/colophon.mdx is missing.');
 const { Content } = await render(page);
+
+/** This page in every language: "/" and "/es" (src/lib/i18n.ts). */
+export const getStaticPaths = localeStaticPaths;
 ---
 
 <PageLayout title={page.data.title} description={page.data.description} image="/og/colophon.png">

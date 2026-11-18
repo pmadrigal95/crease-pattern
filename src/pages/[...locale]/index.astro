@@ -1,16 +1,18 @@
 ---
-import site from '../../site.config';
-import PageLayout from '../layouts/PageLayout.astro';
-import AltitudeProfile from '../components/site/AltitudeProfile.astro';
-import CopyText from '../components/site/CopyText.astro';
-import HeroFold from '../components/site/HeroFold.astro';
-import HomePrecrease from '../components/site/HomePrecrease.astro';
-import WorkModel from '../components/site/WorkModel.astro';
-import { getProfile } from '../lib/profile';
-import { copy, fill } from '../lib/copy';
-import { auditedPages, jsBudgetKb, themes } from '../config/quality';
-import { allVisualDirections } from '../config/visual-direction';
-import manifest from '../generated/inspector.json';
+import site from '../../../site.config';
+import PageLayout from '../../layouts/PageLayout.astro';
+import AltitudeProfile from '../../components/site/AltitudeProfile.astro';
+import CopyText from '../../components/site/CopyText.astro';
+import HeroFold from '../../components/site/HeroFold.astro';
+import HomePrecrease from '../../components/site/HomePrecrease.astro';
+import WorkModel from '../../components/site/WorkModel.astro';
+import { getProfile } from '../../lib/profile';
+import { copyFor, fill } from '../../lib/copy';
+import { auditedPages, jsBudgetKb, themes } from '../../config/quality';
+import { allVisualDirections } from '../../config/visual-direction';
+import manifest from '../../generated/inspector.json';
+import { localeStaticPaths } from '../../lib/i18n';
+const copy = copyFor(Astro.currentLocale);
 
 const profile = await getProfile();
 const home = copy.home;
@@ -39,6 +41,9 @@ const metrics: Metric[] = [
   { value: String(allVisualDirections.length), label: m.identities.label, note: m.identities.note },
 ];
 const commit = manifest.commit.slice(0, 7);
+
+/** This page in every language: "/" and "/es" (src/lib/i18n.ts). */
+export const getStaticPaths = localeStaticPaths;
 ---
 
 <PageLayout

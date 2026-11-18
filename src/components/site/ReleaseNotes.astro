@@ -8,7 +8,10 @@
  */
 import { career, releasesNewestFirst } from '../../lib/career';
 import { formatList, formatNumber, formatRange } from '../../lib/format';
-import { copy, fill } from '../../lib/copy';
+import { copyFor, fill } from '../../lib/copy';
+import { langOf } from '../../lib/i18n';
+const lang = langOf(Astro.currentLocale);
+const copy = copyFor(Astro.currentLocale);
 
 const releases = releasesNewestFirst();
 const current = releases[0]?.major;
@@ -39,7 +42,7 @@ const page = copy.changelogPage;
   {releases.map((r) => (
     <section class={r.major === current ? 'camp current' : 'camp'} aria-labelledby={`release-${r.major}`}>
       <p class="rail">
-        <span class="rail-value">{formatNumber(r.elevationM)}</span>
+        <span class="rail-value">{formatNumber(r.elevationM, lang)}</span>
         <span class="rail-unit"> m</span>
         {r.major === current && <span class="rail-label">{page.rail.now}</span>}
       </p>
@@ -54,13 +57,13 @@ const page = copy.changelogPage;
             <li class="entry">
               <p class="meta">
                 <code>{e.version}</code>
-                <span>{formatRange(e.start, e.end, t.present)}</span>
+                <span>{formatRange(e.start, e.end, t.present, lang)}</span>
               </p>
               <div class="body">
                 <h3>
                   {e.title} <span class="org">· {e.org}</span>
                 </h3>
-                {e.stack && <p class="built">{fill(page.built, { stack: formatList(e.stack) })}</p>}
+                {e.stack && <p class="built">{fill(page.built, { stack: formatList(e.stack, lang) })}</p>}
                 {(e.added || e.changed) && (
                   <ul class="changes">
                     {e.added?.map((line) => (

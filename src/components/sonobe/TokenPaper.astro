@@ -9,9 +9,10 @@
  * With it, CSS under html[data-js] shows one from the first paint and the script repaints it.
  */
 import tokens from '../../generated/tokens.json';
-import { copy, fill } from '../../lib/copy';
+import { copyFor, fill } from '../../lib/copy';
 import { allVisualDirections, visualDirectionLabels } from '../../config/visual-direction';
 import { assembly, project } from '../../lib/sonobe/geometry';
+const copy = copyFor(Astro.currentLocale);
 
 const t = copy.precrease.sonobe.token;
 /** Which palette color each unit takes (unit number mod 5): neighbouring units read apart. */

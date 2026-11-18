@@ -12,7 +12,8 @@
  * over as ?q=); Escape closes the results.
  */
 import { formats, topics } from '../../config/precrease';
-import { copy } from '../../lib/copy';
+import { copyFor } from '../../lib/copy';
+const copy = copyFor(Astro.currentLocale);
 
 // Pagefind compiles WebAssembly. 'wasm-unsafe-eval' allows that and nothing else (eval() stays
 // blocked), and only on pages that carry the search box, not site-wide.

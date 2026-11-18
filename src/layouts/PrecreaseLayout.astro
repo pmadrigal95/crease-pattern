@@ -9,7 +9,9 @@ import newsreaderNormal from '@fontsource-variable/newsreader/files/newsreader-l
 import newsreaderItalic from '@fontsource-variable/newsreader/files/newsreader-latin-opsz-italic.woff2?url';
 import PageLayout from './PageLayout.astro';
 import PrecreaseMast from '../components/precrease/PrecreaseMast.astro';
-import { copy } from '../lib/copy';
+import { copyFor } from '../lib/copy';
+import type { Translations } from '../lib/i18n';
+const copy = copyFor(Astro.currentLocale);
 
 interface Props {
   title: string;
@@ -22,11 +24,13 @@ interface Props {
   feed?: { href: string; title: string };
   /** The Precrease index: its masthead wordmark becomes the page's h1. */
   home?: boolean;
+  /** A post's pair in the other language (M5.4). */
+  translations?: Translations | undefined;
 }
-const { title, description, image, type, noindex = false, feed, home = false } = Astro.props;
+const { title, description, image, type, noindex = false, feed, home = false, translations } = Astro.props;
 ---
 
-<PageLayout title={title} description={description} image={image} type={type}>
+<PageLayout title={title} description={description} image={image} type={type} translations={translations}>
   <Fragment slot="head">
     <!-- Both faces show above the fold (the wordmark is "Pre" italic + "crease" roman). Preloading them
          lets font-display: optional use Newsreader on a first visit instead of keeping the fallback. -->

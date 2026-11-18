@@ -4,7 +4,8 @@
  */
 import { getCollection, type CollectionEntry } from 'astro:content';
 import { formats, topics } from '../config/precrease';
-import { copy } from './copy';
+import { copyFor } from './copy';
+import { DEFAULT_LANG, type Lang } from './i18n';
 import { padNumber } from './format';
 import { fill } from './template';
 import { checkNumbers, isLive, validateTree } from './precrease-tree';
@@ -51,9 +52,9 @@ export async function getPosts(): Promise<PostSummary[]> {
   return posts.sort((a, b) => b.number - a.number);
 }
 
-/** "Crease No. 001", worded by the copy file. */
-export const creaseNumber = (value: number): string =>
-  fill(copy.precrease.number, { number: padNumber(value) });
+/** "Crease No. 001", worded by the copy file of the page's language. */
+export const creaseNumber = (value: number, lang: Lang = DEFAULT_LANG): string =>
+  fill(copyFor(lang).precrease.number, { number: padNumber(value) });
 
 /** What kind of post it is: "Essay", or "Basic Folds 03" inside a series. */
 export function postKind(post: Post): string {

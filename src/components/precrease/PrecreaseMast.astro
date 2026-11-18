@@ -6,8 +6,9 @@
  */
 import PrecreaseMark from './PrecreaseMark.astro';
 import PrecreaseSearch from './PrecreaseSearch.astro';
-import { copy } from '../../lib/copy';
+import { copyFor } from '../../lib/copy';
 import { publicPath } from '../../lib/url';
+const copy = copyFor(Astro.currentLocale);
 
 interface Props {
   /** The Precrease index, where the wordmark is the h1. */

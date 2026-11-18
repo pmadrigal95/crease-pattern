@@ -1,17 +1,23 @@
 ---
-import PrecreaseLayout from '../../layouts/PrecreaseLayout.astro';
-import FoldTitle from '../../components/precrease/FoldTitle.astro';
-import PostThumb from '../../components/precrease/PostThumb.astro';
-import PostCard from '../../components/precrease/PostCard.astro';
-import TopicChips from '../../components/precrease/TopicChips.astro';
-import { copy, fill } from '../../lib/copy';
-import { formatDate } from '../../lib/format';
-import { creaseNumber, getPosts, postHref, postKind } from '../../lib/precrease';
-import { readingMinutes } from '../../lib/reading';
+import PrecreaseLayout from '../../../layouts/PrecreaseLayout.astro';
+import FoldTitle from '../../../components/precrease/FoldTitle.astro';
+import PostThumb from '../../../components/precrease/PostThumb.astro';
+import PostCard from '../../../components/precrease/PostCard.astro';
+import TopicChips from '../../../components/precrease/TopicChips.astro';
+import { copyFor, fill } from '../../../lib/copy';
+import { formatDate } from '../../../lib/format';
+import { creaseNumber, getPosts, postHref, postKind } from '../../../lib/precrease';
+import { readingMinutes } from '../../../lib/reading';
+import { langOf, localeStaticPaths } from '../../../lib/i18n';
+const lang = langOf(Astro.currentLocale);
+const copy = copyFor(Astro.currentLocale);
 
 const t = copy.precrease;
 const posts = await getPosts();
 const [featured, ...rest] = posts;
+
+/** This page in every language: "/" and "/es" (src/lib/i18n.ts). */
+export const getStaticPaths = localeStaticPaths;
 ---
 
 <PrecreaseLayout title={t.name} description={t.description} home>
@@ -25,7 +31,7 @@ const [featured, ...rest] = posts;
       <section class="featured fold-host" aria-labelledby="featured-title">
         <div class="text">
           <p class="kicker">
-            {creaseNumber(featured.number)} · {postKind(featured.entry)} ·{' '}
+            {creaseNumber(featured.number, lang)} · {postKind(featured.entry)} ·{' '}
             {fill(t.minutes, { minutes: readingMinutes(featured.entry.body ?? '') })}
           </p>
           <FoldTitle
@@ -37,7 +43,7 @@ const [featured, ...rest] = posts;
           />
           <p class="lede">{featured.entry.data.description}</p>
           <p class="date">
-            <time datetime={featured.date.toISOString()}>{formatDate(featured.date)}</time>
+            <time datetime={featured.date.toISOString()}>{formatDate(featured.date, lang)}</time>
           </p>
         </div>
         <a class="thumb" href={postHref(featured.id)} tabindex="-1" aria-hidden="true">

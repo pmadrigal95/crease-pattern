@@ -1,10 +1,15 @@
 ---
-import PageLayout from '../layouts/PageLayout.astro';
-import ExpeditionMap from '../components/site/ExpeditionMap.astro';
-import ReleaseNotes from '../components/site/ReleaseNotes.astro';
-import { copy } from '../lib/copy';
+import PageLayout from '../../layouts/PageLayout.astro';
+import ExpeditionMap from '../../components/site/ExpeditionMap.astro';
+import ReleaseNotes from '../../components/site/ReleaseNotes.astro';
+import { copyFor } from '../../lib/copy';
+import { localeStaticPaths } from '../../lib/i18n';
+const copy = copyFor(Astro.currentLocale);
 
 const page = copy.changelogPage;
+
+/** This page in every language: "/" and "/es" (src/lib/i18n.ts). */
+export const getStaticPaths = localeStaticPaths;
 ---
 
 <PageLayout title={page.title} description={page.description} image="/og/changelog.png">

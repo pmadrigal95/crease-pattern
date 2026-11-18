@@ -15,8 +15,11 @@
  */
 import { climbs, currentVersion } from '../../lib/career';
 import { profile, type Frame } from '../../lib/altitude';
-import { copy, fill } from '../../lib/copy';
+import { copyFor, fill } from '../../lib/copy';
 import { formatList, formatNumber } from '../../lib/format';
+import { langOf } from '../../lib/i18n';
+const lang = langOf(Astro.currentLocale);
+const copy = copyFor(Astro.currentLocale);
 
 const t = copy.home.changelog;
 const data = climbs();
@@ -61,10 +64,11 @@ const summary = fill(t.profile.summary, {
       fill(t.profile.release, {
         major: c.major,
         codename: c.codename,
-        elevation: fill(t.elevation, { elevation: formatNumber(c.elevationM) }),
+        elevation: fill(t.elevation, { elevation: formatNumber(c.elevationM, lang) }),
         theme: c.theme,
       }),
     ),
+    lang,
   ),
   version,
 });
@@ -89,7 +93,7 @@ const summary = fill(t.profile.summary, {
         <g>
           <line class="guide" x1="0" x2={p.plotRight} y1={g.y} y2={g.y} />
           <text class="guide-label" x={p.plotRight + 8} y={g.y} dy="0.35em">
-            {fill(t.elevation, { elevation: formatNumber(g.m) })}
+            {fill(t.elevation, { elevation: formatNumber(g.m, lang) })}
           </text>
         </g>
       ))}
@@ -128,7 +132,7 @@ const summary = fill(t.profile.summary, {
                   : `v${c.major} · ${c.codename.toUpperCase()}`}
               </text>
               <text x="0" y={name === 'wide' ? 66 : 56}>
-                <tspan class="readout-value">{formatNumber(c.elevationM)}</tspan>
+                <tspan class="readout-value">{formatNumber(c.elevationM, lang)}</tspan>
                 <tspan class="readout-unit"> m</tspan>
               </text>
               <text class="readout-detail" x="0" y={name === 'wide' ? 92 : 80}>

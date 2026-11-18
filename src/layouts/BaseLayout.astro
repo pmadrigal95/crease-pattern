@@ -6,6 +6,8 @@ import '../styles/base.css';
 import site from '../../site.config';
 import { getProfile } from '../lib/profile';
 import { publicPath } from '../lib/url';
+import { copyFor } from '../lib/copy';
+import { DEFAULT_LANG, htmlLang, langOf, type Lang, type Translations } from '../lib/i18n';
 import WebAnalytics from '../components/site/WebAnalytics.astro';
 // Written in TypeScript, inlined as the JavaScript type stripping leaves (scripts/inline-script.ts):
 // the same output scripts/csp-hashes.ts hashes for the CSP.
@@ -22,7 +24,8 @@ const pageRevealScript = toInlineScript(pageRevealSource);
 interface Props {
   title: string;
   description: string;
-  lang?: 'en' | 'es';
+  /** Where this page lives in each language it exists in (PageLayout, src/lib/i18n.ts). */
+  translations: Translations;
   /**
    * Absolute or root-relative URL of the social preview image (1200 × 630 PNG). Pages without one
    * of their own share the home page's card (src/pages/og/[page].png.ts), so every link shows one.
@@ -32,19 +35,30 @@ interface Props {
   type?: 'website' | 'article' | undefined;
 }
 
-const { title, description, lang = 'en', image = '/og/home.png', type = 'website' } = Astro.props;
+const { title, description, translations, image = '/og/home.png', type = 'website' } = Astro.props;
+const lang = langOf(Astro.currentLocale);
 const canonical = new URL(publicPath(Astro.url.pathname), site.url);
+// hreflang only for pages that exist in more than one language; x-default is the English one.
+const alternates = Object.entries(translations) as [Lang, string][];
+const ogLocale: Record<Lang, string> = { en: 'en_US', es: 'es_CR' };
 const profile = await getProfile();
 ---
 
 <!doctype html>
-<html lang={lang} data-direction={site.visualDirection}>
+<html lang={htmlLang[lang]} data-direction={site.visualDirection}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
+    {alternates.length > 1 &&
+      alternates.map(([l, href]) => (
+        <link rel="alternate" hreflang={htmlLang[l]} href={new URL(href, site.url)} />
+      ))}
+    {alternates.length > 1 && translations[DEFAULT_LANG] && (
+      <link rel="alternate" hreflang="x-default" href={new URL(translations[DEFAULT_LANG], site.url)} />
+    )}
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="preload" href={sansLatin} as="font" type="font/woff2" crossorigin />
     <link rel="preload" href={monoLatin} as="font" type="font/woff2" crossorigin />
@@ -53,6 +67,7 @@ const profile = await getProfile();
     <meta property="og:description" content={description} />
     <meta property="og:type" content={type} />
     <meta property="og:url" content={canonical} />
+    <meta property="og:locale" content={ogLocale[lang]} />
     <meta property="og:image" content={new URL(image, site.url)} />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
@@ -71,7 +86,7 @@ const profile = await getProfile();
     <!-- Runs before first render: the page-to-page fold or the first-load entrance (decision 42). -->
     <script is:inline set:html={pageRevealScript} />
     <a class="skip-link" href="#main">
-      Skip to content
+      {copyFor(lang).nav.skip}
     </a>
     <slot />
     <div class="vt-crease" aria-hidden="true"></div>

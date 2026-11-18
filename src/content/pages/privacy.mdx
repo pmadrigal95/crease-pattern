@@ -3,7 +3,7 @@ title: Privacy
 description: What this site collects, what it doesn't, and how to check it yourself.
 ---
 
-_Last updated 12 November 2026. Every change to this page is in [its history on GitHub](https://github.com/pmadrigal95/crease-pattern/commits/main/src/content/pages/privacy.mdx)._
+_Last updated 18 November 2026. Every change to this page is in [its history on GitHub](https://github.com/pmadrigal95/crease-pattern/commits/main/src/content/pages/privacy.mdx)._
 
 This is the personal site of Pablo Madrigal, an individual based in Costa Rica. It sells nothing, has no
 accounts and no forms. If you have a question about this page, write to the email address in the footer.
@@ -64,10 +64,13 @@ comment frame, not on this site. Your comment is public, on GitHub, under your G
 code on several threads can't embed that frame; there, "Comments" is a plain link to the thread on
 GitHub.
 
-**Preferences.** The site reads three values from your browser's local storage: `pm.direction` and
-`pm.theme`, to show the visual identity and theme you picked, and `pm.helped`, the posts where you pressed
-"This helped", so the button doesn't count you twice. They are written only when you do those things, they
-never leave your device, and clearing your site data removes them.
+**Preferences.** The site reads five values from your browser's local storage: `pm.direction` and
+`pm.theme`, to show the visual identity and theme you picked; `pm.lang`, the language you chose with the
+language switch, so the home page opens in it; `pm.langHint`, so the suggestion to read a page in your
+browser's language stays closed once you close it; and `pm.helped`, the posts where you pressed "This helped",
+so the button doesn't count you twice. They are written only when you do those things, they never leave your
+device, and clearing your site data removes them. To make that suggestion, the page compares its language
+with your browser's language settings on your device; nothing about them is sent anywhere.
 
 **Fonts and everything else** are served from this site itself. No other third party is contacted unless you
 open the comments or follow a share link.
@@ -86,8 +89,8 @@ also complain to your data protection authority: in Costa Rica, the
 Open your browser's developer tools on any page:
 
 - **Application → Cookies:** empty.
-- **Application → Local storage:** empty, or only `pm.direction`, `pm.theme` and `pm.helped` if you used
-  them.
+- **Application → Local storage:** empty, or only `pm.direction`, `pm.theme`, `pm.lang`, `pm.langHint` and
+  `pm.helped` if you used them.
 - **Network:** requests to this site, including `/api/stats` on posts, plus `static.cloudflareinsights.com`
   and `cloudflareinsights.com` unless your browser sends a privacy signal.
 
