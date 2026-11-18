@@ -15,4 +15,5 @@ export const pageRevealScript = readFileSync(
   'utf8',
 ).trim();
 
-export const sha256 = (source) => `sha256-${createHash('sha256').update(source).digest('base64')}`;
+export const sha256 = (source: string): string =>
+  `sha256-${createHash('sha256').update(source).digest('base64')}`;

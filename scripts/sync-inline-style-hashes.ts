@@ -16,7 +16,7 @@ import { join } from 'node:path';
 const dist = join(import.meta.dirname, '..', 'dist');
 const check = process.argv.includes('--check');
 
-function* htmlFiles(dir) {
+function* htmlFiles(dir: string): Generator<string> {
   for (const name of readdirSync(dir)) {
     const path = join(dir, name);
     if (statSync(path).isDirectory()) yield* htmlFiles(path);
@@ -24,7 +24,8 @@ function* htmlFiles(dir) {
   }
 }
 
-const hashOf = (text) => `'sha256-${createHash('sha256').update(text, 'utf8').digest('base64')}'`;
+const hashOf = (text: string): string =>
+  `'sha256-${createHash('sha256').update(text, 'utf8').digest('base64')}'`;
 const META = /(<meta\s+http-equiv="content-security-policy"\s+content=")([^"]*)(")/i;
 
 let pages = 0;
@@ -33,9 +34,9 @@ for (const file of htmlFiles(dist)) {
   const html = readFileSync(file, 'utf8');
   const meta = META.exec(html);
   if (!meta) continue;
-  const policy = meta[2];
+  const policy = meta[2] ?? '';
   const missing = [...html.matchAll(/<style(?:\s[^>]*)?>([\s\S]*?)<\/style>/g)]
-    .map((m) => hashOf(m[1]))
+    .map((m) => hashOf(m[1] ?? ''))
     .filter((hash, i, all) => all.indexOf(hash) === i && !policy.includes(hash));
   if (missing.length === 0) continue;
   pages++;

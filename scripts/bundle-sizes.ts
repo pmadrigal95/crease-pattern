@@ -1,6 +1,6 @@
 // Measures the JavaScript a visitor receives, the way Cloudflare serves it (Brotli). Shared by the
-// budget check (scripts/check-bundle-budgets.mjs) and the home page's measured figures
-// (scripts/stamp-site-metrics.mjs), so the number shown is the number enforced.
+// budget check (scripts/check-bundle-budgets.ts) and the home page's measured figures
+// (scripts/stamp-site-metrics.ts), so the number shown is the number enforced.
 //  - page: every script an HTML page references directly.
 //  - onDemand: what those scripts can import later, found by following their imports. Files
 //    nothing references never reach a visitor and don't count.
@@ -16,22 +16,28 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { brotliCompressSync } from 'node:zlib';
 
-export const toKb = (bytes) => Math.round((bytes / 1024) * 10) / 10;
+export const toKb = (bytes: number): number => Math.round((bytes / 1024) * 10) / 10;
 
 /** The 3D scenes' entry chunks, as Vite names them after their source files. */
-const isScene3d = (file) => /^(scene3d|work3d)\.[\w-]+\.js$/.test(file);
+const isScene3d = (file: string): boolean => /^(scene3d|work3d)\.[\w-]+\.js$/.test(file);
 /** The Work animator's entry chunk. */
-const isWorkModel = (file) => /^work-model\.[\w-]+\.js$/.test(file);
+const isWorkModel = (file: string): boolean => /^work-model\.[\w-]+\.js$/.test(file);
 /** The command menu's entry chunk. */
-const isCommandMenu = (file) => /^command-menu\.[\w-]+\.js$/.test(file);
+const isCommandMenu = (file: string): boolean => /^command-menu\.[\w-]+\.js$/.test(file);
 /** Where the page and on-demand groups stop: code with budgets of its own. */
-const isOwnBudget = (file) => isScene3d(file) || isWorkModel(file) || isCommandMenu(file);
+const isOwnBudget = (file: string): boolean => isScene3d(file) || isWorkModel(file) || isCommandMenu(file);
 
-/** @returns {{ page: number, onDemand: number, workModel: number, scene3d: number, commandMenu: number }} bytes, Brotli */
-export function measureBundles(dist) {
+/** Bytes, Brotli, per group. */
+export function measureBundles(dist: string): {
+  page: number;
+  onDemand: number;
+  workModel: number;
+  scene3d: number;
+  commandMenu: number;
+} {
   const assets = join(dist, '_astro');
-  const read = (file) => readFileSync(join(assets, file), 'utf8');
-  const size = (file) => brotliCompressSync(readFileSync(join(assets, file))).length;
+  const read = (file: string): string => readFileSync(join(assets, file), 'utf8');
+  const size = (file: string): number => brotliCompressSync(readFileSync(join(assets, file))).length;
   const scripts = readdirSync(assets).filter((f) => f.endsWith('.js'));
   const html = readdirSync(dist)
     .filter((f) => f.endsWith('.html'))
@@ -39,22 +45,26 @@ export function measureBundles(dist) {
     .join('\n');
 
   // Static (`from"./x.js"`, `import"./x.js"`) and dynamic (`import("./x.js")`) imports between chunks.
-  const importsOf = (file) =>
-    [...read(file).matchAll(/(?:from|import)\s*\(?\s*["'`]\.\/([^"'`]+\.js)["'`]/g)].map((m) => m[1]);
+  const importsOf = (file: string): string[] =>
+    [...read(file).matchAll(/(?:from|import)\s*\(?\s*["'`]\.\/([^"'`]+\.js)["'`]/g)].map((m) => m[1] ?? '');
 
   /** Every chunk reachable from `start`, minus `skip` and anything `stop` matches. */
-  const closure = (start, skip, stop = () => false) => {
-    const seen = new Set();
+  const closure = (
+    start: string[],
+    skip: Set<string>,
+    stop: (file: string) => boolean = () => false,
+  ): Set<string> => {
+    const seen = new Set<string>();
     const queue = [...start];
     while (queue.length) {
-      const file = queue.pop();
+      const file = queue.pop() ?? '';
       if (seen.has(file) || skip.has(file) || stop(file) || !scripts.includes(file)) continue;
       seen.add(file);
       queue.push(...importsOf(file));
     }
     return seen;
   };
-  const sum = (files) => [...files].reduce((total, f) => total + size(f), 0);
+  const sum = (files: Iterable<string>): number => [...files].reduce((total, f) => total + size(f), 0);
 
   const page = new Set(scripts.filter((f) => html.includes(`/_astro/${f}`)));
   const onDemand = closure([...page].flatMap(importsOf), page, isOwnBudget);
@@ -75,19 +85,18 @@ export function measureBundles(dist) {
  * Everything one page runs on load: the external scripts it references plus the scripts Astro
  * inlined into it (small ones with no imports), each Brotli-compressed. This is what the home
  * page's "JavaScript on first load" figure reports.
- * @returns {number} bytes, Brotli
  */
-export function measurePage(dist, page) {
+export function measurePage(dist: string, page: string): number {
   const html = readFileSync(join(dist, page), 'utf8');
   const external = [...html.matchAll(/<script[^>]*\ssrc="\/_astro\/([^"]+\.js)"/g)].map((m) =>
-    readFileSync(join(dist, '_astro', m[1])),
+    readFileSync(join(dist, '_astro', m[1] ?? '')),
   );
   const inline = [
     ...html.matchAll(
       /<script(?![^>]*\ssrc=)(?![^>]*type="application\/ld\+json")[^>]*>([\s\S]*?)<\/script>/g,
     ),
   ]
-    .map((m) => m[1])
+    .map((m) => m[1] ?? '')
     .filter((code) => code.trim());
   return [...external, ...inline].reduce((sum, code) => sum + brotliCompressSync(code).length, 0);
 }
@@ -95,9 +104,8 @@ export function measurePage(dist, page) {
 /**
  * The Inspector's manifest as Vite emits it (/_astro/inspector.<hash>.json), Brotli. Zero when the
  * build has none.
- * @returns {number} bytes
  */
-export function measureInspectorData(dist) {
+export function measureInspectorData(dist: string): number {
   const assets = join(dist, '_astro');
   return readdirSync(assets)
     .filter((f) => /^inspector\.[\w-]+\.json$/.test(f))
@@ -107,9 +115,8 @@ export function measureInspectorData(dist) {
 /**
  * The Inspector's styles as Vite emits them (/_astro/inspector.<hash>.css), Brotli: fetched when
  * the panel opens, like its manifest. Zero when the build has none.
- * @returns {number} bytes
  */
-export function measureInspectorStyles(dist) {
+export function measureInspectorStyles(dist: string): number {
   const assets = join(dist, '_astro');
   return readdirSync(assets)
     .filter((f) => /^inspector\.[\w-]+\.css$/.test(f))
@@ -119,18 +126,16 @@ export function measureInspectorStyles(dist) {
 /**
  * The command menu's index (/commands.json, scripts/build-command-index.ts), Brotli: fetched the
  * first time the menu opens.
- * @returns {number} bytes
  */
-export function measureCommandData(dist) {
+export function measureCommandData(dist: string): number {
   return brotliCompressSync(readFileSync(join(dist, 'commands.json'))).length;
 }
 
 /**
  * The 3D scenes' data files as Vite emits them (/_astro/*.<hash>.bin, such as the Irazú's height
  * grid), Brotli. They download with the scene, on the home page only.
- * @returns {number} bytes
  */
-export function measureSceneData(dist) {
+export function measureSceneData(dist: string): number {
   const assets = join(dist, '_astro');
   return readdirSync(assets)
     .filter((f) => f.endsWith('.bin'))
@@ -142,29 +147,29 @@ export function measureSceneData(dist) {
  * the Web Workers they start, with the workers' own imports. Workers count because a reader who
  * presses Run downloads them. Pages missing from `dist` (drafts in a production build) are
  * skipped, so a production build measures only the posts that are out.
- * @param {string[]} paths site paths, such as "/precrease/when-threads-pay-off"
- * @returns {{ path: string, bytes: number }[]} Brotli
  */
-export function measurePosts(dist, paths) {
+export function measurePosts(dist: string, paths: string[]): { path: string; bytes: number }[] {
   const assets = join(dist, '_astro');
-  const read = (file) => readFileSync(join(assets, file), 'utf8');
-  const size = (file) => brotliCompressSync(readFileSync(join(assets, file))).length;
+  const read = (file: string): string => readFileSync(join(assets, file), 'utf8');
+  const size = (file: string): number => brotliCompressSync(readFileSync(join(assets, file))).length;
   const scripts = new Set(readdirSync(assets).filter((f) => f.endsWith('.js')));
-  const linksOf = (file) => [
-    ...[...read(file).matchAll(/(?:from|import)\s*\(?\s*["'`]\.\/([^"'`]+\.js)["'`]/g)].map((m) => m[1]),
-    ...[...read(file).matchAll(/new URL\(\s*["'`]\/_astro\/([^"'`]+\.js)["'`]/g)].map((m) => m[1]),
+  const linksOf = (file: string): string[] => [
+    ...[...read(file).matchAll(/(?:from|import)\s*\(?\s*["'`]\.\/([^"'`]+\.js)["'`]/g)].map(
+      (m) => m[1] ?? '',
+    ),
+    ...[...read(file).matchAll(/new URL\(\s*["'`]\/_astro\/([^"'`]+\.js)["'`]/g)].map((m) => m[1] ?? ''),
   ];
   return paths.flatMap((path) => {
-    let html;
+    let html: string;
     try {
       html = readFileSync(join(dist, `${path}.html`), 'utf8');
     } catch {
       return [];
     }
-    const seen = new Set();
-    const queue = [...html.matchAll(/\/_astro\/([^"'\s]+\.js)/g)].map((m) => m[1]);
+    const seen = new Set<string>();
+    const queue = [...html.matchAll(/\/_astro\/([^"'\s]+\.js)/g)].map((m) => m[1] ?? '');
     while (queue.length) {
-      const file = queue.pop();
+      const file = queue.pop() ?? '';
       // The 3D scenes and the Work animator load only on the home page, never on a post.
       if (seen.has(file) || !scripts.has(file) || isOwnBudget(file)) continue;
       seen.add(file);

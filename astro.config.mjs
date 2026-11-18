@@ -3,8 +3,8 @@ import vue from '@astrojs/vue';
 import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
 import siteConfig from './site.config.ts';
-import { pageRevealScript, restoreIdentityScript, sha256 } from './scripts/csp-hashes.mjs';
-import { devIsolation } from './scripts/dev-isolation.mjs';
+import { pageRevealScript, restoreIdentityScript, sha256 } from './scripts/csp-hashes.ts';
+import { devIsolation } from './scripts/dev-isolation.ts';
 
 export default defineConfig({
   site: siteConfig.url,

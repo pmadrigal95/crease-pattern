@@ -1,7 +1,7 @@
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { basename, join } from 'node:path';
 import { describe, expect, test } from 'vitest';
-import { buildManifest } from '../../scripts/build-inspector-manifest.mjs';
+import { buildManifest } from '../../scripts/build-inspector-manifest.ts';
 
 const root = process.cwd();
 const manifest = buildManifest(root);

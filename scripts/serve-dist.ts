@@ -1,7 +1,7 @@
 // Serves dist/ with the headers in public/_headers, the way Cloudflare does: `astro preview` ignores
 // that file, so a page there is never cross-origin isolated. The essay's end-to-end tests run
 // against this (playwright.essay.config.ts) to exercise real Web Workers and SharedArrayBuffer.
-// Test use only: no caching, no compression. Usage: node scripts/serve-dist.mjs [port]
+// Test use only: no caching, no compression. Usage: node scripts/serve-dist.ts [port]
 import { createServer } from 'node:http';
 import { existsSync, readFileSync, statSync } from 'node:fs';
 import { extname, join, normalize } from 'node:path';
@@ -10,25 +10,23 @@ const root = join(import.meta.dirname, '..', 'dist');
 const port = Number(process.argv[2] ?? 4410);
 
 /** `_headers` as rules: a path (exact, or ending in `*`) and the headers it adds. */
-function headerRules() {
-  const rules = [];
+function headerRules(): { path: string; headers: [name: string, value: string][] }[] {
+  const rules: { path: string; headers: [name: string, value: string][] }[] = [];
   for (const line of readFileSync(join(root, '_headers'), 'utf8').split('\n')) {
     if (!line.trim() || line.trimStart().startsWith('#')) continue;
     if (!/^\s/.test(line)) rules.push({ path: line.trim(), headers: [] });
-    else
-      rules.at(-1)?.headers.push(
-        line
-          .trim()
-          .split(/:\s*(.*)/s)
-          .slice(0, 2),
-      );
+    else {
+      const [name = '', value = ''] = line.trim().split(/:\s*(.*)/s);
+      rules.at(-1)?.headers.push([name, value]);
+    }
   }
   return rules;
 }
 const rules = headerRules();
-const matches = (rule, path) => (rule.endsWith('*') ? path.startsWith(rule.slice(0, -1)) : path === rule);
+const matches = (rule: string, path: string): boolean =>
+  rule.endsWith('*') ? path.startsWith(rule.slice(0, -1)) : path === rule;
 
-const TYPES = {
+const TYPES: Record<string, string> = {
   '.html': 'text/html; charset=utf-8',
   '.js': 'text/javascript; charset=utf-8',
   '.css': 'text/css; charset=utf-8',
@@ -43,7 +41,7 @@ const TYPES = {
 };
 
 /** `/about` → about.html (build.format 'file'), `/` → index.html; null outside dist or missing. */
-function fileFor(path) {
+function fileFor(path: string): string | null {
   const candidates = path.endsWith('/') ? [`${path}index.html`] : [path, `${path}.html`];
   for (const candidate of candidates) {
     const file = normalize(join(root, decodeURIComponent(candidate)));

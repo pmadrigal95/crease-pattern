@@ -12,7 +12,7 @@ import {
   measurePosts,
   measureSceneData,
   toKb,
-} from './bundle-sizes.mjs';
+} from './bundle-sizes.ts';
 
 const root = join(import.meta.dirname, '..');
 const dist = join(root, 'dist');
@@ -20,15 +20,20 @@ const dist = join(root, 'dist');
 const postPaths = readdirSync(join(root, 'src/content/precrease'))
   .filter((f) => /\.mdx?$/.test(f))
   .map((f) => `/precrease/${f.replace(/\.mdx?$/, '')}`);
-const rows = [
-  ...Object.entries(measureBundles(dist)).map(([group, bytes]) => ({ label: group, group, bytes })),
+type Group = keyof typeof jsBudgetKb;
+const rows: { label: string; group: Group; bytes: number }[] = [
+  ...Object.entries(measureBundles(dist)).map(([group, bytes]) => ({
+    label: group,
+    group: group as Group,
+    bytes,
+  })),
   { label: 'inspectorData', group: 'inspectorData', bytes: measureInspectorData(dist) },
   { label: 'inspectorStyles', group: 'inspectorStyles', bytes: measureInspectorStyles(dist) },
   { label: 'commandData', group: 'commandData', bytes: measureCommandData(dist) },
   { label: 'sceneData', group: 'sceneData', bytes: measureSceneData(dist) },
   ...measurePosts(dist, postPaths).map(({ path, bytes }) => ({
     label: `post ${path}`,
-    group: 'post',
+    group: 'post' as const,
     bytes,
   })),
 ];

@@ -22,7 +22,7 @@ import {
   type VisualDirection,
 } from '../../config/visual-direction';
 
-/** Built by scripts/build-inspector-manifest.mjs: facts per file, and each part's file. */
+/** Built by scripts/build-inspector-manifest.ts: facts per file, and each part's file. */
 export interface Manifest {
   repository: string;
   commit: string;

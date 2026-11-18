@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { buildComponentUsage, componentUsage } from '../../scripts/component-usage.mjs';
+import { buildComponentUsage, componentUsage } from '../../scripts/component-usage.ts';
 
 const card = 'src/components/precrease/PostCard.astro';
 const note = 'src/components/precrease/MarginNote.astro';

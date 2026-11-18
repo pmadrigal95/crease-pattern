@@ -10,7 +10,7 @@ const env = {
   ASTRO_TELEMETRY_DISABLED: '1',
   WRANGLER_SEND_METRICS: 'false',
 };
-const run = (command) => execSync(command, { stdio: 'inherit', env });
+const run = (command: string) => execSync(command, { stdio: 'inherit', env });
 
 run('corepack pnpm build');
 run('corepack pnpm exec wrangler versions upload --message "Preview with drafts"');

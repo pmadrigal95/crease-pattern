@@ -4,7 +4,7 @@
 // It fails the build if a placeholder is missing or left unfilled: a dash must never ship.
 import { readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { measurePage, toKb } from './bundle-sizes.mjs';
+import { measurePage, toKb } from './bundle-sizes.ts';
 
 const dist = join(import.meta.dirname, '..', 'dist');
 const file = join(dist, 'index.html');

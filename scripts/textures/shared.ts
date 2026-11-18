@@ -1,8 +1,11 @@
-// Shared by the surface-texture generators (scripts/build-textures.mjs): a seeded random source, the
+// Shared by the surface-texture generators (scripts/build-textures.ts): a seeded random source, the
 // compact path encoding and the SVG wrapper, so every tile is built and sized the same way.
 
+/** A point in tile units. */
+export type Point = [x: number, y: number];
+
 /** Small deterministic PRNG (mulberry32): same seed, same tile, so the files can be committed. */
-export function random(seed) {
+export function random(seed: number): () => number {
   let a = seed >>> 0;
   return () => {
     a = (a + 0x6d2b79f5) >>> 0;
@@ -16,11 +19,11 @@ export function random(seed) {
 export const SCALE = 2;
 
 /** Polylines (arrays of [x, y] in tile units) as one path in relative moves. */
-export function pathFrom(polylines, { closed = false } = {}) {
+export function pathFrom(polylines: Point[][], { closed = false } = {}): string {
   return polylines
     .map((line) => {
-      const pts = line.map(([x, y]) => [Math.round(x * SCALE), Math.round(y * SCALE)]);
-      const [first, ...rest] = pts;
+      const pts = line.map(([x, y]): Point => [Math.round(x * SCALE), Math.round(y * SCALE)]);
+      const [first = [0, 0], ...rest] = pts;
       let [px, py] = first;
       const moves = rest.map(([x, y]) => {
         const move = `${x - px} ${y - py}`;
@@ -33,7 +36,7 @@ export function pathFrom(polylines, { closed = false } = {}) {
 }
 
 /** A square tile: one stroked path per layer, black on transparent (the CSS uses it as a mask). */
-export function tileSvg(tile, layers) {
+export function tileSvg(tile: number, layers: { d: string; width: number }[]): string {
   const size = tile * SCALE;
   const paths = layers
     .map(({ d, width }) => `<path d="${d}" fill="none" stroke="#000" stroke-width="${width * SCALE}"/>`)

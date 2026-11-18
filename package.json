@@ -9,20 +9,20 @@
     "node": ">=22"
   },
   "scripts": {
-    "tokens": "node scripts/build-tokens.mjs",
-    "generate": "node scripts/build-tokens.mjs && node scripts/build-inspector-manifest.mjs && node scripts/component-usage.mjs",
-    "predev": "node scripts/build-tokens.mjs && node scripts/build-inspector-manifest.mjs && node scripts/component-usage.mjs",
+    "tokens": "node scripts/build-tokens.ts",
+    "generate": "node scripts/build-tokens.ts && node scripts/build-inspector-manifest.ts && node scripts/component-usage.ts",
+    "predev": "node scripts/build-tokens.ts && node scripts/build-inspector-manifest.ts && node scripts/component-usage.ts",
     "dev": "astro dev",
-    "prebuild": "node scripts/build-tokens.mjs && node scripts/build-inspector-manifest.mjs && node scripts/component-usage.mjs",
-    "build": "astro build && node scripts/sync-inline-style-hashes.mjs && node scripts/build-search-index.mjs && node scripts/build-command-index.ts && node scripts/stamp-site-metrics.mjs",
+    "prebuild": "node scripts/build-tokens.ts && node scripts/build-inspector-manifest.ts && node scripts/component-usage.ts",
+    "build": "astro build && node scripts/sync-inline-style-hashes.ts && node scripts/build-search-index.ts && node scripts/build-command-index.ts && node scripts/stamp-site-metrics.ts",
     "preview": "astro preview",
     "check": "astro check",
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "check:sizes": "node scripts/check-file-sizes.mjs",
-    "check:budgets": "node scripts/check-bundle-budgets.mjs",
-    "check:workflows": "node scripts/check-workflows.mjs",
+    "check:sizes": "node scripts/check-file-sizes.ts",
+    "check:budgets": "node scripts/check-bundle-budgets.ts",
+    "check:workflows": "node scripts/check-workflows.ts",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
@@ -33,7 +33,7 @@
     "deploy": "pnpm build && wrangler deploy",
     "test:visual": "playwright test --config playwright.visual.config.ts",
     "bench:threads": "vitest run --config vitest.bench.config.ts",
-    "preview:upload": "node scripts/preview-upload.mjs"
+    "preview:upload": "node scripts/preview-upload.ts"
   },
   "packageManager": "pnpm@12.14.0+sha512.c18ba6d87993d3d164cb5e8948f32b2c06ee854487e06cd8d86781342fb3e5bb4634367034711e86802baa9c37bea906ce1929ad08d70884c97d801df13389a6",
   "dependencies": {

@@ -22,46 +22,54 @@ const IMPORT = /import\s+(\w+)(?:\s*,\s*\{[^}]*\})?\s+from\s+['"]([^'"]+\.(?:ast
 /** Components handed to post content: `components={{ MarginNote, Figure }}`. */
 const CONTENT_MAP = /components=\{\{([^}]*)\}\}/g;
 
-const list = (root, dir, match) =>
+const list = (root: string, dir: string, match: RegExp): string[] =>
   readdirSync(join(root, dir), { withFileTypes: true }).flatMap((entry) => {
     const path = posix.join(dir, entry.name);
     if (entry.isDirectory()) return list(root, path, match);
     return match.test(entry.name) ? [path] : [];
   });
 
-const tagsOf = (name, source) => [...source.matchAll(new RegExp(`<${name}(?=[\\s/>])`, 'g'))].length;
+const tagsOf = (name: string, source: string): number =>
+  [...source.matchAll(new RegExp(`<${name}(?=[\\s/>])`, 'g'))].length;
 
 /**
  * The string-literal props a file passes to a component (`unfold="load"` → { unfold: ['load'] }),
  * merged over its tags. Expressions (`text={data.title}`) are skipped: their value isn't known
  * until the page renders. Reads up to the tag's first `>`, enough for the props this site writes.
  */
-function literalProps(name, source) {
-  /** @type {Record<string, Set<string>>} */
-  const props = {};
-  for (const [, attrs] of source.matchAll(new RegExp(`<${name}(?=[\\s/>])([^>]*)>`, 'g')))
-    for (const [, key, value] of attrs.matchAll(/([\w-]+)="([^"]*)"/g)) (props[key] ??= new Set()).add(value);
+function literalProps(name: string, source: string): Record<string, string[]> {
+  const props: Record<string, Set<string>> = {};
+  for (const [, attrs = ''] of source.matchAll(new RegExp(`<${name}(?=[\\s/>])([^>]*)>`, 'g')))
+    for (const [, key = '', value = ''] of attrs.matchAll(/([\w-]+)="([^"]*)"/g))
+      (props[key] ??= new Set()).add(value);
   return Object.fromEntries(Object.entries(props).map(([k, v]) => [k, [...v].sort()]));
 }
 
+interface Use {
+  count: number;
+  props: Record<string, string[]>;
+}
+
 /**
- * @param {{ path: string, source: string }[]} files repository-relative paths, forward slashes
- * @param {string[]} components repository-relative paths of the component files
+ * `files`: repository-relative paths (forward slashes) with their source; `components`: the
+ * repository-relative paths of the component files.
  */
-export function componentUsage(files, components) {
-  /** @type {Map<string, Map<string, { count: number, props: Record<string, string[]> }>>} component → file → use */
-  const uses = new Map(components.map((c) => [c, new Map()]));
-  const add = (target, file, count, props = {}) => {
-    const prev = uses.get(target).get(file);
-    uses.get(target).set(file, { count: (prev?.count ?? 0) + count, props: { ...prev?.props, ...props } });
+export function componentUsage(files: { path: string; source: string }[], components: string[]) {
+  /** component → file → use */
+  const uses = new Map<string, Map<string, Use>>(components.map((c) => [c, new Map()]));
+  const add = (target: string, file: string, count: number, props: Record<string, string[]> = {}) => {
+    const byFile = uses.get(target);
+    if (!byFile) return;
+    const prev = byFile.get(file);
+    byFile.set(file, { count: (prev?.count ?? 0) + count, props: { ...prev?.props, ...props } });
   };
   const posts = files.filter((f) => f.path.endsWith('.mdx'));
 
   for (const { path, source } of files) {
     const handedToContent = new Set(
-      [...source.matchAll(CONTENT_MAP)].flatMap((m) => m[1].split(',').map((n) => n.trim())),
+      [...source.matchAll(CONTENT_MAP)].flatMap((m) => (m[1] ?? '').split(',').map((n) => n.trim())),
     );
-    for (const [, name, spec] of source.matchAll(IMPORT)) {
+    for (const [, name = '', spec = ''] of source.matchAll(IMPORT)) {
       if (!spec.startsWith('.')) continue;
       const target = posix.normalize(posix.join(posix.dirname(path), spec));
       if (!uses.has(target) || target === path) continue;
@@ -78,7 +86,7 @@ export function componentUsage(files, components) {
 
   const entries = components
     .map((path) => {
-      const usedIn = [...uses.get(path)]
+      const usedIn = [...(uses.get(path) ?? [])]
         .map(([file, { count, props }]) => ({ file, count, ...(Object.keys(props).length ? { props } : {}) }))
         .sort((a, b) => b.count - a.count || a.file.localeCompare(b.file));
       return {
@@ -103,7 +111,7 @@ export function componentUsage(files, components) {
   };
 }
 
-export function buildComponentUsage(root) {
+export function buildComponentUsage(root: string) {
   const components = list(root, COMPONENTS, COMPONENT_FILE);
   const files = SOURCES.flatMap((dir) => list(root, dir, SOURCE_FILE)).map((path) => ({
     path,

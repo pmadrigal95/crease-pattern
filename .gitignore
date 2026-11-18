@@ -7,7 +7,7 @@ playwright-report/
 test-results/
 coverage/
 
-# generated from tokens/ by scripts/build-tokens.mjs
+# generated from tokens/ by scripts/build-tokens.ts
 src/styles/tokens.css
 src/generated/
 

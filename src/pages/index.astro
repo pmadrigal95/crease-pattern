@@ -16,7 +16,7 @@ const profile = await getProfile();
 const home = copy.home;
 const work = home.work;
 // "This site, measured" (decision 50). The first-load JavaScript is only known after the build:
-// the page renders a placeholder and scripts/stamp-site-metrics.mjs fills it in dist.
+// the page renders a placeholder and scripts/stamp-site-metrics.ts fills it in dist.
 interface Metric {
   value: string | null;
   unit?: string;
@@ -141,7 +141,7 @@ const commit = manifest.commit.slice(0, 7);
 
 <style>
   /* Each identity's surface behind the hero (design debt fix 4): contour lines, basalt joints or
-     washi fibers. The tiles come from public/textures/ (scripts/build-textures.mjs), are tinted with
+     washi fibers. The tiles come from public/textures/ (scripts/build-textures.ts), are tinted with
      the identity's own color, and fade out before they reach the text so contrast never changes.
      Decoration only, so it waits: the script below turns it on once the page has loaded and the
      browser is idle, keeping its download and painting out of the first render. */
