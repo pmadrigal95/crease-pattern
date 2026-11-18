@@ -3,12 +3,14 @@ import '@fontsource-variable/schibsted-grotesk';
 import '@fontsource-variable/jetbrains-mono';
 import '../styles/tokens.css';
 import '../styles/base.css';
+import '../styles/origami.css';
 import site from '../../site.config';
 import { getProfile } from '../lib/profile';
 import { publicPath } from '../lib/url';
 import { copyFor } from '../i18n/dictionary';
 import { DEFAULT_LANG, LOCALES, langOf, type Lang, type Translations } from '../i18n/routing';
 import WebAnalytics from '../components/site/WebAnalytics.astro';
+import OrigamiSprite from '../components/site/OrigamiSprite.astro';
 // Written in TypeScript, inlined as the JavaScript type stripping leaves (scripts/inline-script.ts):
 // the same output scripts/csp-hashes.ts hashes for the CSP.
 import restoreIdentitySource from '../scripts/restore-identity.ts?raw';
@@ -84,6 +86,8 @@ const profile = await getProfile(Astro.currentLocale);
     <script is:inline set:html={restoreIdentityScript} />
     <!-- Runs before first render: the page-to-page fold or the first-load entrance (decision 42). -->
     <script is:inline set:html={pageRevealScript} />
+    <!-- Every origami figure, once; the marks on the page place them (src/styles/origami.css). -->
+    <OrigamiSprite />
     <a class="skip-link" href="#main">
       {copyFor(lang).nav.skip}
     </a>

@@ -1,18 +1,20 @@
 ---
 /**
- * The home hero's figure: the site's thesis made visible. The fox is the interface; unfolded, it
- * becomes the crease pattern that makes it, the architecture (decision 50).
+ * The home hero's figure: the site's thesis made visible. The origami figure of the visitor's
+ * identity is the interface; unfolded, it becomes the crease pattern that makes it, the
+ * architecture (decision 50). Which figure shows is src/styles/origami.css's call.
  *
- * One value drives it, the fold `--t` from 0 (folded fox) to 1 (crease pattern):
+ * One value drives it, the fold `--t` from 0 (the folded figure) to 1 (its crease pattern):
  * - the pointer hovering or dragging across the figure, or the slider below it (arrow keys);
- * - opening the Inspector, which unfolds every fox on the page (`.inspecting` on the root);
- * - a first visit, where the sheet folds into the fox once (`.intro`).
- * There is no card at rest: the sheet the fox is folded from appears only as it unfolds.
+ * - opening the Inspector, which unfolds every figure on the page (`.inspecting` on the root);
+ * - a first visit, where the sheet folds into the figure once (`.intro`).
  *
- * Without JavaScript the fox stays folded and the Inspector still unfolds it. This SVG is also
- * the first frame of M4's 3D scene, which takes over this same square when it loads.
+ * Without JavaScript the figure stays folded and the Inspector still unfolds it. This SVG is also
+ * the first frame of the 3D scene (src/components/inspector/scene3d.ts), which takes over this same
+ * square when it loads and folds the same geometry for real.
  */
-import { foxFacets, foxMountainFolds, foxSheet, foxValleyFolds, foxViewBox } from '../../lib/fox';
+import { MODEL_IDS } from '../../lib/origami/models';
+import { VIEWBOX } from '../../lib/origami/marks';
 import { copyFor } from '../../i18n/dictionary';
 const copy = copyFor(Astro.currentLocale);
 
@@ -22,22 +24,26 @@ const strings = JSON.stringify({ folded: t.folded, unfolded: t.unfolded });
 
 <figure class="hero-fold" data-hero-fold data-strings={strings} data-inspect="HeroFold">
   <div class="stage" data-stage>
-    <svg viewBox={foxViewBox} aria-hidden="true" focusable="false">
-      <path class="sheet" d={foxSheet}></path>
-      <path class="mountain" d={foxMountainFolds}></path>
-      <path class="valley" d={foxValleyFolds}></path>
-      <path class="note-line" d="M24 9.2v6.3"></path>
-      <text class="note" x="24" y="7.6" text-anchor="middle">
-        {t.mountain}
-      </text>
-      <path class="note-line" d="M9.5 38.8 16.6 32.4"></path>
-      <text class="note" x="5" y="41.6">
-        {t.valley}
-      </text>
-      <g>
-        {foxFacets.map((f) => (
-          <path class:list={['facet', f.part, `${f.part}-${f.side}`]} d={f.d} />
+    <svg class="origami" viewBox={VIEWBOX} aria-hidden="true" focusable="false">
+      <g class="flat">
+        {MODEL_IDS.map((id) => (
+          <use class={`o-model o-${id}`} href={`#origami-${id}-flat`} />
         ))}
+      </g>
+      <g class="folded">
+        {MODEL_IDS.map((id) => (
+          <use class={`o-model o-${id}`} href={`#origami-${id}`} />
+        ))}
+      </g>
+      <g class="legend">
+        <path class="mountain" d="M14 47.2h3.6"></path>
+        <text x="18.6" y="47.8">
+          {t.mountain}
+        </text>
+        <path class="valley" d="M27.6 47.2h3.6"></path>
+        <text x="32.2" y="47.8">
+          {t.valley}
+        </text>
       </g>
     </svg>
   </div>
@@ -74,7 +80,7 @@ const strings = JSON.stringify({ folded: t.folded, unfolded: t.unfolded });
     --t: var(--fold, 0);
     margin: 0;
   }
-  /* Inspecting unfolds every fox on the page, this one included. */
+  /* Inspecting unfolds every figure on the page, this one included. */
   :global(.inspecting) .hero-fold {
     --t: 1;
   }
@@ -84,7 +90,7 @@ const strings = JSON.stringify({ folded: t.folded, unfolded: t.unfolded });
     touch-action: pan-y;
     cursor: ew-resize;
   }
-  /* M4's 3D fox (src/components/inspector/scene3d.ts) takes over this square once its first frame
+  /* The 3D scene (src/components/inspector/scene3d.ts) takes over this square once its first frame
      is drawn; the SVG, its first frame, steps back and returns when the scene leaves. */
   .stage svg {
     transition: opacity 300ms ease-out;
@@ -99,82 +105,46 @@ const strings = JSON.stringify({ folded: t.folded, unfolded: t.unfolded });
     overflow: visible;
   }
 
-  .sheet,
-  .facet,
-  .mountain,
-  .valley,
-  .note,
-  .note-line,
+  .flat,
+  .folded,
+  .legend,
   .knob {
     transition:
       opacity var(--motion-stage) var(--motion-ease-in-out),
       transform var(--motion-stage) var(--motion-ease-in-out),
       left var(--motion-stage) var(--motion-ease-in-out);
   }
-  .scrubbing :is(.sheet, .facet, .mountain, .valley, .note, .note-line),
+  .scrubbing :is(.flat, .folded, .legend),
   .scrubbing ~ .scale .knob {
     transition: none;
   }
-
-  .sheet {
-    fill: var(--color-surface);
-    stroke: var(--color-rule);
-    stroke-width: 0.35;
-    opacity: var(--t);
-    transform-box: fill-box;
+  /* The figure steps back as its crease pattern comes forward on the same square. */
+  .flat,
+  .folded {
+    transform-box: view-box;
     transform-origin: center;
-    transform: scale(calc(0.94 + var(--t) * 0.06));
   }
-  .mountain,
-  .valley {
-    fill: none;
-    stroke: var(--color-accent-ui);
-    stroke-width: 0.55;
-    stroke-linejoin: round;
-    stroke-linecap: round;
-    opacity: calc(var(--t) * 1.25 - 0.2);
-  }
-  .valley {
-    stroke-dasharray: 1.4 1.2;
-  }
-  .note {
-    font: 2px var(--font-mono);
-    fill: var(--color-mute);
-    opacity: calc(var(--t) * 2 - 1);
-  }
-  .note-line {
-    stroke: var(--color-mute);
-    stroke-width: 0.2;
-    opacity: calc(var(--t) * 2 - 1);
-  }
-
-  /* Each facet folds along the edge it shares with the head (src/lib/fox.ts). */
-  .facet {
-    transform-box: fill-box;
-  }
-  .head {
-    transform: scaleX(calc(1 - var(--t)));
-    opacity: calc(1 - var(--t) * 0.9);
-  }
-  .head-left {
-    fill: var(--color-accent);
-    transform-origin: right center;
-  }
-  .head-right {
-    fill: var(--color-ink);
-    transform-origin: left center;
-  }
-  .ear,
-  .inner {
-    transform-origin: center bottom;
-    transform: scaleY(calc(1 - var(--t)));
+  .folded {
     opacity: calc(1 - var(--t));
+    transform: scale(calc(1 - var(--t) * 0.12));
   }
-  .ear {
-    fill: color-mix(in oklab, var(--color-accent-ui) 75%, var(--color-bg));
+  .flat {
+    opacity: var(--t);
+    transform: scale(calc(0.9 + var(--t) * 0.1));
   }
-  .inner {
-    fill: var(--color-ink);
+  .legend {
+    opacity: calc(var(--t) * 2 - 1);
+  }
+  .legend text {
+    font: 1.9px var(--font-mono);
+    fill: var(--color-mute);
+  }
+  .legend path {
+    stroke: var(--color-accent-ui);
+    stroke-width: 0.5;
+  }
+  .legend .valley {
+    stroke-dasharray: 1.2 0.8;
   }
 
   .scale {
@@ -226,23 +196,20 @@ const strings = JSON.stringify({ folded: t.folded, unfolded: t.unfolded });
     color: var(--color-mute);
   }
 
-  /* First visit: the flat sheet folds into the fox once. */
+  /* First visit: the flat sheet folds into the figure once. */
   :global(.intro) .hero-fold {
-    animation: sheet-to-fox calc(var(--motion-stage) * 2) var(--motion-ease-in-out) both;
+    animation: sheet-to-figure calc(var(--motion-stage) * 2) var(--motion-ease-in-out) both;
   }
-  @keyframes sheet-to-fox {
+  @keyframes sheet-to-figure {
     from {
       --t: 1;
     }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .sheet,
-    .facet,
-    .mountain,
-    .valley,
-    .note,
-    .note-line,
+    .flat,
+    .folded,
+    .legend,
     .knob {
       transition: none;
     }
@@ -297,7 +264,7 @@ const strings = JSON.stringify({ folded: t.folded, unfolded: t.unfolded });
         set(current() >= 0.5 ? 1 : 0);
       });
     }
-    // A mouse resting on the fox previews the unfold; leaving folds it back.
+    // A mouse resting on the figure previews the unfold; leaving folds it back.
     stage.addEventListener('pointerenter', (e) => {
       if (e.pointerType === 'mouse' && !e.buttons) set(1);
     });

@@ -1,0 +1,31 @@
+---
+/**
+ * Every origami figure, drawn once per page as SVG symbols (src/lib/origami/marks.ts): each folded
+ * in three-quarters, and each laid open as its crease pattern. The masthead, the footer, the hero
+ * and the 404 map place them with <use>, and src/styles/origami.css shows the one that belongs to
+ * the visitor's identity and theme, with no JavaScript and no inline styles.
+ */
+import { MODEL_IDS } from '../../lib/origami/models';
+import { flatMark, foldedMark, VIEWBOX } from '../../lib/origami/marks';
+
+const figures = MODEL_IDS.map((id) => ({ id, folded: foldedMark(id), flat: flatMark(id) }));
+---
+
+<svg class="origami-sprite" aria-hidden="true" focusable="false">
+  {figures.map(({ id, folded, flat }) => (
+    <>
+      <symbol id={`origami-${id}`} viewBox={VIEWBOX}>
+        {folded.facets.map((f) => (
+          <path class={`o-${f.role}`} d={f.d} />
+        ))}
+      </symbol>
+      <symbol id={`origami-${id}-flat`} viewBox={VIEWBOX}>
+        {flat.facets.map((d) => (
+          <path class="o-sheet" d={d} />
+        ))}
+        <path class="o-mountain" d={flat.mountain} />
+        <path class="o-valley" d={flat.valley} />
+      </symbol>
+    </>
+  ))}
+</svg>

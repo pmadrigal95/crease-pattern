@@ -13,14 +13,14 @@
       "inspect": "Ver cómo está hecha esta página",
       "releases": "Leer las notas de versión",
       "fold": {
-        "label": "Desdoblar el zorro en su patrón de pliegues",
+        "label": "Desdoblar la figura en su patrón de pliegues",
         "interface": "Interfaz",
         "architecture": "Arquitectura",
         "folded": "Doblado: la interfaz",
         "unfolded": "Desdoblado: el patrón de pliegues",
         "mountain": "monte",
         "valley": "valle",
-        "caption": "El zorro es lo que ves en pantalla: la interfaz. Al desdoblarlo aparecen los pliegues que le dan forma: la arquitectura. \"Ver cómo está hecha esta página\" abre cualquier página del sitio de la misma manera."
+        "caption": "La figura es lo que ves en pantalla: la interfaz. Al desdoblarla aparecen los pliegues que le dan forma: la arquitectura. Cada identidad dobla la suya: una grulla, una morfo azul de día y una rana de ojos rojos de noche, un zorro ártico. \"Ver cómo está hecha esta página\" abre cualquier página del sitio de la misma manera."
       },
       "who": "{name} · {role} · {location}"
     },

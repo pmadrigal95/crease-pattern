@@ -31,10 +31,10 @@ test('Contact is one line, the address and a copy button', async ({ page }) => {
   await expect(contact.getByRole('link', { name: /@/ })).toHaveAttribute('href', /^mailto:/);
 });
 
-test('the footer hangs on a crease with the fox, on every page', async ({ page }) => {
+test('the footer hangs on a crease with the figure, on every page', async ({ page }) => {
   for (const path of ['/', '/about', '/colophon']) {
     await page.goto(path);
-    await expect(page.locator('footer .crease .fox-mark')).toHaveCount(1);
+    await expect(page.locator('footer .crease .origami-mark')).toHaveCount(1);
     await expect(
       page.locator('footer').getByRole('list', { name: 'Elsewhere' }).getByRole('link'),
     ).toHaveCount(6);

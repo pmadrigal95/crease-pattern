@@ -1,62 +1,63 @@
 /**
- * M4's 3D fox and the identity scene behind it (21-m4-plan.md, decided in the demo derby). Loaded
- * with a dynamic import only when the Inspector opens on a page with the hero fox, on a device
- * that can run it (src/lib/scene3d-support.ts); its weight has its own budget (scene3d,
- * src/config/quality.ts).
+ * The hero's origami figure in 3D, and the identity scene behind it. Loaded with a dynamic import
+ * only when the Inspector opens on a page with the hero, on a device that can run it
+ * (src/lib/scene3d-support.ts); its weight has its own budget (scene3d, src/config/quality.ts).
  *
- * The SVG fox is the first frame (decision 25): the canvas takes over the same square once its
- * first frame is drawn, and hands it back when the Inspector closes. Inspecting runs one input q
- * per actor through Inspect's phases (inspectPhases, motion B): the fox's layers part, then the
- * active identity's scene rises behind it, then its details trace in. Changing identity while
- * inspecting exchanges the scenes: the old one sinks, the new one rises just behind it, and the
- * fox stays apart. Every pose comes from src/lib/fold3d.ts and src/lib/identity-scenes.ts.
+ * The SVG figure is the first frame (decision 25): the canvas takes over the same square once its
+ * first frame is drawn, and hands it back when the Inspector closes. The figure is the one of the
+ * visitor's identity and theme (src/lib/origami/marks.ts), folded for real: every facet turns on
+ * its hinge (src/lib/origami/hinge.ts), so changing identity or theme unfolds it to its crease
+ * pattern and folds the next figure from the sheet. Inspecting takes it apart, tips first (the
+ * teardown), while the identity's scene rises behind it (inspectPhases, motion B).
  *
  * It renders only while something moves, then stops: a still scene costs nothing.
  */
 import {
+  BufferGeometry,
   Color,
   DirectionalLight,
   DoubleSide,
-  EdgesGeometry,
+  Float32BufferAttribute,
   Group,
   HemisphereLight,
   LineBasicMaterial,
+  LineDashedMaterial,
   LineSegments,
   Mesh,
+  MeshPhysicalMaterial,
   MeshStandardMaterial,
   PerspectiveCamera,
   Scene,
-  Shape,
-  ShapeGeometry,
   SRGBColorSpace,
-  Vector2,
   Vector3,
   WebGLRenderer,
 } from 'three';
-import { foxBrowY, foxCentreX, foxFacets, type Facet } from '../../lib/fox';
-import { FOLD_ORDER, INSPECT_MS, LAYER_DEPTH, inspectPhases, pose, type Fold } from '../../lib/fold3d';
+import { INSPECT_MS, inspectPhases, stateToState } from '../../lib/fold3d';
+import { creases, foldMatrices, posed } from '../../lib/origami/hinge';
+import { models, type ModelId } from '../../lib/origami/models';
+import { EDGE_MIX, FROG_EYE, ROLE_MIX, facetRole, modelFor } from '../../lib/origami/marks';
 import { EXCHANGE_DELAY_MS } from '../../lib/identity-scenes';
 import { allVisualDirections, type VisualDirection } from '../../config/visual-direction';
 import { makeIdentityScene, type IdentityScene } from './identity-scenes3d';
 
-export interface FoxScene {
+export interface FigureScene {
   /** Runs Inspect's progress toward 1 (on) or back to 0 (off). */
   setInspecting(on: boolean): void;
   /** Brings everything back together, then hands the square back to the SVG and frees the GPU. */
   dispose(): void;
 }
 
-/** The camera looks slightly down on the fox, with the scene behind and below it. */
+/** The camera looks slightly down on the figure, with the scene behind and below it. */
 const CAMERA = { fov: 32, y: 0.25, z: 5.2, lookY: -0.25 };
 /** A 3/4 view: a V fold seen face-on flattens out (teardown rule 6). */
-const FOX = { scale: 0.62, y: 0.15, z: 0.6, yaw: -0.42, pitch: -0.1 };
-/** The inner ear sits this far in front of its ear: the paper's thickness, so the two never fight. */
-const INNER_LIFT = 0.004;
-const UNIT = 1 / 24; // sheet units (48 wide) → scene units (2 wide)
+const FIGURE = { scale: 0.55, y: 0.2, z: 0.6, yaw: -0.55, pitch: 0.12 };
+/** The figures' floor, in their own units (src/lib/origami/models.ts). */
+const FLOOR = -1.2;
+/** Unfolding to the sheet, and folding the next figure from it. */
+const REFOLD_MS = { unfold: 1500, fold: 1800 };
+/** How far each facet steps out when the figure is taken apart, in figure units. */
+const TEARDOWN = 0.3;
 const FADE_MS = 300;
-
-const toScene = ([x, y]: readonly [number, number]) =>
-  new Vector2((x - foxCentreX) * UNIT, (foxCentreX - y) * UNIT);
 
 /** One input in [0, 1] moving toward a target: entering takes INSPECT_MS.enter, leaving .exit. */
 class Progress {
@@ -88,7 +89,125 @@ const currentDirection = (): VisualDirection => {
   return (allVisualDirections as string[]).includes(id ?? '') ? (id as VisualDirection) : 'contour-lines';
 };
 
-export function mountFoxScene(stage: HTMLElement): FoxScene {
+/** Dark: chosen, or the system's when the visitor hasn't chosen (the same rule as origami.css). */
+const isDark = () => {
+  const theme = document.documentElement.getAttribute('data-theme');
+  return theme ? theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+};
+
+type Css = (name: string) => Color;
+
+/** One figure on stage: its paper, its crease lines, and how to draw it at a fold and a teardown. */
+function makeFigure(id: ModelId) {
+  const { fold, tags } = models[id];
+  const n = fold.faces.length;
+  const position = new Float32Array(n * 9);
+  const colour = new Float32Array(n * 9);
+  const geometry = new BufferGeometry();
+  geometry.setAttribute('position', new Float32BufferAttribute(position, 3));
+  geometry.setAttribute('color', new Float32BufferAttribute(colour, 3));
+  // The morpho's blue is structural: it shifts with the angle, like an iridescent film. The rest is paper.
+  tags.forEach((tag, i) => geometry.addGroup(i * 3, 3, tag === 'wing' ? 1 : 0));
+  const paper = new MeshStandardMaterial({
+    vertexColors: true,
+    flatShading: true,
+    roughness: 0.86,
+    side: DoubleSide,
+  });
+  const wing = new MeshPhysicalMaterial({
+    vertexColors: true,
+    flatShading: true,
+    roughness: 0.38,
+    metalness: 0.15,
+    iridescence: 1,
+    iridescenceIOR: 1.35,
+    iridescenceThicknessRange: [250, 520],
+    clearcoat: 0.3,
+    side: DoubleSide,
+  });
+  const mesh = new Mesh(geometry, [paper, wing]);
+  const mountain = new LineSegments(new BufferGeometry(), new LineBasicMaterial({ transparent: true }));
+  const valley = new LineSegments(
+    new BufferGeometry(),
+    new LineDashedMaterial({ transparent: true, dashSize: 0.07, gapSize: 0.05 }),
+  );
+  const group = new Group();
+  group.add(mesh, mountain, valley);
+  const centre = fold.points.reduce((sum, p) => sum.add(p), new Vector3()).divideScalar(fold.points.length);
+  const out = new Vector3();
+  const positionAttr = geometry.getAttribute('position');
+  const colourAttr = geometry.getAttribute('color');
+  return {
+    group,
+    paint(css: Css) {
+      // Paper is light in every theme, and shades toward ink by day, the background by night
+      // (the same rule as --origami-paper and --origami-dark in src/styles/origami.css).
+      const night = isDark();
+      const surface = night ? css('--color-surface').lerp(css('--color-ink'), 0.9) : css('--color-surface');
+      const dark = night ? css('--color-bg') : css('--color-ink');
+      const accent = css('--color-accent');
+      const mixes: Record<string, Color> = {
+        light: surface.clone().lerp(accent, ROLE_MIX.light),
+        mid: surface.clone().lerp(accent, ROLE_MIX.mid),
+        shade: surface.clone().lerp(accent, ROLE_MIX.shade),
+        deep: surface.clone().lerp(accent, ROLE_MIX.deep),
+        accent: id === 'frog' ? new Color(FROG_EYE) : accent,
+        wing: css('--color-accent-ui'),
+        edge: accent.clone().lerp(dark, EDGE_MIX),
+      };
+      for (let i = 0; i < n; i++) {
+        const c = mixes[facetRole(id, i)]!;
+        for (let k = 0; k < 3; k++) colourAttr.setXYZ(i * 3 + k, c.r, c.g, c.b);
+      }
+      colourAttr.needsUpdate = true;
+      const line = css('--color-accent-ui');
+      mountain.material.color.copy(line);
+      valley.material.color.copy(line);
+    },
+    /** u: 0 folded … 1 its crease pattern; apart: 0 whole … 1 taken apart. */
+    pose(u: number, apart: number) {
+      const M = foldMatrices(fold, u, FLOOR);
+      for (let i = 0; i < n; i++) {
+        // The teardown: tips first, every facet steps straight out from the body, a short even step.
+        const k = Math.min(
+          1,
+          Math.max(0, (apart * (fold.maxDepth + 2) - (fold.maxDepth - fold.depth[i]!)) / 2),
+        );
+        const corners = posed(fold, M, i);
+        const mid = corners[0].clone().add(corners[1]).add(corners[2]).divideScalar(3);
+        out
+          .copy(mid)
+          .sub(centre)
+          .normalize()
+          .multiplyScalar(TEARDOWN * stateToState(k));
+        corners.forEach((p, c) => positionAttr.setXYZ(i * 3 + c, p.x + out.x, p.y + out.y, p.z + out.z));
+      }
+      positionAttr.needsUpdate = true;
+      geometry.computeVertexNormals();
+      geometry.computeBoundingSphere();
+      const lines = { mountain: [] as number[], valley: [] as number[] };
+      for (const { kind, a, b } of creases(fold, M))
+        lines[kind].push(a.x, a.y + 0.003, a.z, b.x, b.y + 0.003, b.z);
+      mountain.geometry.setAttribute('position', new Float32BufferAttribute(lines.mountain, 3));
+      valley.geometry.setAttribute('position', new Float32BufferAttribute(lines.valley, 3));
+      valley.computeLineDistances();
+      // The crease pattern shows as the sheet lies open.
+      const shown = Math.max(0, (u - 0.55) / 0.45);
+      mountain.visible = valley.visible = shown > 0.01;
+      mountain.material.opacity = valley.material.opacity = shown;
+    },
+    dispose() {
+      geometry.dispose();
+      paper.dispose();
+      wing.dispose();
+      mountain.geometry.dispose();
+      valley.geometry.dispose();
+    },
+  };
+}
+type Figure = ReturnType<typeof makeFigure>;
+
+export function mountFigureScene(stage: HTMLElement): FigureScene {
   const figure = stage.closest<HTMLElement>('[data-hero-fold]');
   const canvas = document.createElement('canvas');
   canvas.setAttribute('aria-hidden', 'true');
@@ -119,50 +238,17 @@ export function mountFoxScene(stage: HTMLElement): FoxScene {
   sun.position.set(-3, 4, 3);
   scene.add(sun);
 
-  // ---------- The fox, from src/lib/fox.ts: the same facets as the SVG ----------
-  const browY = (foxCentreX - foxBrowY) * UNIT;
-  const fox = new Group();
-  fox.scale.setScalar(FOX.scale);
-  fox.position.set(0, FOX.y, FOX.z);
-  fox.rotation.set(FOX.pitch, FOX.yaw, 0);
-  scene.add(fox);
-  const facetMesh = (f: Facet) => {
-    const mesh = new Mesh(
-      new ShapeGeometry(new Shape(f.points.map(toScene))),
-      new MeshStandardMaterial({ side: DoubleSide, roughness: 0.92, metalness: 0, flatShading: true }),
-    );
-    mesh.add(
-      new LineSegments(
-        new EdgesGeometry(mesh.geometry),
-        new LineBasicMaterial({ transparent: true, opacity: 0.25 }),
-      ),
-    );
-    return mesh;
-  };
-  type Side = Facet['side'];
-  const meshes = {} as Record<`${Fold}-${Side}`, Mesh>;
-  const hinges: { side: Side }[] = [];
-  const folded = pose(1);
-  for (const side of ['left', 'right'] as const) {
-    const head = new Group();
-    const ear = new Group();
-    const inner = new Group();
-    ear.position.y = browY;
-    for (const f of foxFacets.filter((x) => x.side === side)) {
-      const mesh = (meshes[`${f.part}-${side}`] = facetMesh(f));
-      if (f.part !== 'head') mesh.position.y = -browY;
-      ({ head, ear, inner })[f.part].add(mesh);
-    }
-    ear.add(inner);
-    head.add(ear);
-    fox.add(head);
-    // The fox stays folded; only its layers move.
-    const sign = side === 'left' ? 1 : -1;
-    head.rotation.y = (sign * folded.folds.head.degrees * Math.PI) / 180;
-    ear.rotation.x = (-folded.folds.ear.degrees * Math.PI) / 180;
-    inner.rotation.x = (folded.folds.inner.degrees * Math.PI) / 180;
-    hinges.push({ side });
-  }
+  // ---------- The figure: the identity's, folded for real ----------
+  const holder = new Group();
+  holder.scale.setScalar(FIGURE.scale);
+  holder.position.set(0, FIGURE.y, FIGURE.z);
+  holder.rotation.set(FIGURE.pitch, FIGURE.yaw, 0);
+  scene.add(holder);
+  let shownId = modelFor(currentDirection(), isDark());
+  let shape: Figure = makeFigure(shownId);
+  holder.add(shape.group);
+  /** Unfolding to the sheet and folding the next figure: one value u, and where it's heading. */
+  const refold = { u: 0, from: 0, to: 0, start: 0, ms: 0, next: null as ModelId | null };
 
   // ---------- The identity scenes: built when first shown ----------
   const world = new Group();
@@ -187,40 +273,35 @@ export function mountFoxScene(stage: HTMLElement): FoxScene {
     return new Color(getComputedStyle(document.documentElement).getPropertyValue(name).trim() || '#888');
   }
   function paint() {
-    const surface = css('--color-surface');
-    const ink = css('--color-ink');
-    const set = (key: `${Fold}-${Side}`, c: Color) =>
-      (meshes[key].material as MeshStandardMaterial).color.copy(c);
-    set('head-left', css('--color-accent'));
-    set('head-right', ink);
-    const ear = css('--color-accent-ui').lerp(surface, 0.25);
-    set('ear-left', ear);
-    set('ear-right', ear);
-    set('inner-left', ink);
-    set('inner-right', ink);
-    for (const mesh of Object.values(meshes))
-      ((mesh.children[0] as LineSegments).material as LineBasicMaterial).color.copy(ink);
+    shape.paint(css);
     for (const a of actors.values()) a.scene.paint(css);
   }
 
   // ---------- Pose ----------
-  const foxQ = new Progress();
-  const base = new Vector3();
-  const BASE_Y: Record<Fold, number> = { head: 0, ear: -browY, inner: -browY };
+  const figureQ = new Progress();
+  /** Steps the refold to `now`; true while it moves. At the sheet, the next figure takes over. */
+  function stepRefold(now: number) {
+    if (!refold.ms) return false;
+    const k = Math.min(1, Math.max(0, (now - refold.start) / refold.ms));
+    refold.u = refold.from + (refold.to - refold.from) * k;
+    if (k < 1) return true;
+    refold.ms = 0;
+    if (refold.next) {
+      // Flat on the floor, every figure is the same kind of thing: a sheet. Swap, then fold.
+      holder.remove(shape.group);
+      shape.dispose();
+      shownId = refold.next;
+      shape = makeFigure(shownId);
+      shape.paint(css);
+      holder.add(shape.group);
+      refold.next = null;
+      Object.assign(refold, { from: 1, to: 0, start: now, ms: REFOLD_MS.fold });
+      return true;
+    }
+    return false;
+  }
   function frame() {
-    const layers = inspectPhases(foxQ.value).eased.layers;
-    fox.updateMatrixWorld(true);
-    for (const h of hinges)
-      for (const part of FOLD_ORDER) {
-        const mesh = meshes[`${part}-${h.side}`];
-        base.set(0, BASE_Y[part], part === 'inner' ? INNER_LIFT : 0);
-        mesh.parent!.localToWorld(base);
-        fox.worldToLocal(base);
-        base.z += LAYER_DEPTH[part] * layers;
-        fox.localToWorld(base);
-        mesh.parent!.worldToLocal(base);
-        mesh.position.copy(base);
-      }
+    shape.pose(refold.u, inspectPhases(figureQ.value).eased.layers);
     for (const a of actors.values()) {
       a.scene.group.visible = a.q.value > 0.001;
       if (a.scene.group.visible) a.scene.update(inspectPhases(a.q.value), 1);
@@ -234,7 +315,8 @@ export function mountFoxScene(stage: HTMLElement): FoxScene {
   function tick() {
     // The same clock the tweens started on (a frame's own timestamp can run on another time base).
     const now = performance.now();
-    let moving = foxQ.step(now);
+    let moving = figureQ.step(now);
+    moving = stepRefold(now) || moving;
     for (const a of actors.values()) moving = a.q.step(now) || moving;
     frame();
     if (!shown) {
@@ -264,14 +346,26 @@ export function mountFoxScene(stage: HTMLElement): FoxScene {
   function setInspecting(on: boolean) {
     inspecting = on;
     const now = performance.now();
-    foxQ.to(on ? 1 : 0, now);
+    figureQ.to(on ? 1 : 0, now);
     if (on) actor(direction).q.to(1, now);
     else for (const a of actors.values()) a.q.to(0, now);
     requestFrame();
   }
 
-  // An identity change repaints everything; while inspecting, the scenes exchange.
+  // An identity or theme change repaints everything and, when the figure changes, refolds it from
+  // the sheet; while inspecting, the identity scenes exchange.
   function onIdentity() {
+    const wanted = modelFor(currentDirection(), isDark());
+    if (refold.next) refold.next = wanted;
+    else if (wanted !== shownId) {
+      refold.next = wanted;
+      Object.assign(refold, {
+        from: refold.u,
+        to: 1,
+        start: performance.now(),
+        ms: REFOLD_MS.unfold * (1 - refold.u),
+      });
+    }
     const next = currentDirection();
     if (next !== direction) {
       const now = performance.now();
@@ -300,7 +394,8 @@ export function mountFoxScene(stage: HTMLElement): FoxScene {
     dispose() {
       setInspecting(false);
       const now = performance.now();
-      const settle = Math.max(foxQ.remaining(now), ...[...actors.values()].map((a) => a.q.remaining(now)));
+      refold.next = null;
+      const settle = Math.max(figureQ.remaining(now), ...[...actors.values()].map((a) => a.q.remaining(now)));
       // Once everything is back together, the SVG takes the square again and the GPU is freed.
       setTimeout(() => {
         figure?.classList.remove('scene-3d');
@@ -309,6 +404,7 @@ export function mountFoxScene(stage: HTMLElement): FoxScene {
         sizeWatch.disconnect();
         schemeQuery.removeEventListener('change', onIdentity);
         setTimeout(() => {
+          shape.dispose();
           renderer.dispose();
           renderer.forceContextLoss();
           canvas.remove();

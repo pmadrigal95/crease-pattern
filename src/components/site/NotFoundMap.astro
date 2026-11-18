@@ -2,12 +2,13 @@
 /**
  * The 404 page's map (design debt phase 4): "This page isn't on the map", drawn literally. The
  * Irazú's real contours (src/lib/irazu-map.ts, from the 3D scene's Copernicus grid), with the
- * visitor's pin just outside the map's edge and a dashed trail leading in to the fox on the
- * summit. Drawn at build time: plain SVG, no script.
+ * visitor's pin just outside the map's edge and a dashed trail leading in to the site's origami
+ * figure on the summit (the one of the visitor's identity, src/styles/origami.css). Drawn at build time: plain SVG, no script.
  */
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { foxFacets } from '../../lib/fox';
+import { MODEL_IDS } from '../../lib/origami/models';
+import { VIEWBOX } from '../../lib/origami/marks';
 import { copyFor, fill } from '../../i18n/dictionary';
 import { formatNumber } from '../../lib/format';
 import { IRAZU } from '../../lib/identity-scenes';
@@ -39,11 +40,19 @@ const trail = `M${here.x} ${here.y}C${here.x - 30} ${here.y - 14} ${size - 70} $
       ))}
     </g>
     <path class="trail" d={trail}></path>
-    <g transform={`translate(${summit.x - 12} ${summit.y - 12}) scale(0.5)`} aria-hidden="true">
-      {foxFacets.map((f) => (
-        <path class:list={['facet', `${f.part}-${f.side}`]} d={f.d} />
+    <svg
+      class="origami"
+      x={summit.x - 14}
+      y={summit.y - 22}
+      width="28"
+      height="28"
+      viewBox={VIEWBOX}
+      aria-hidden="true"
+    >
+      {MODEL_IDS.map((id) => (
+        <use class={`o-model o-${id}`} href={`#origami-${id}`} />
       ))}
-    </g>
+    </svg>
     <circle class="ring" cx={here.x} cy={here.y} r="11"></circle>
     <circle class="pin" cx={here.x} cy={here.y} r="4.5"></circle>
     <text class="here" x={here.x - 20} y={here.y + 4} text-anchor="end">
@@ -108,17 +117,5 @@ const trail = `M${here.x} ${here.y}C${here.x - 30} ${here.y - 14} ${size - 70} $
   .note {
     font: 9px var(--font-mono);
     fill: var(--color-mute);
-  }
-  .head-left {
-    fill: var(--color-accent);
-  }
-  .head-right,
-  .inner-left,
-  .inner-right {
-    fill: var(--color-ink);
-  }
-  .ear-left,
-  .ear-right {
-    fill: color-mix(in oklab, var(--color-accent-ui) 75%, var(--color-bg));
   }
 </style>
