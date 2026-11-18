@@ -38,7 +38,7 @@ export default [
 ];
 
 /** Forbids `files` from importing any of the `later` layers. */
-function layer(files, later) {
+function layer(files: string, later: string[]) {
   return [
     {
       files: [files],

@@ -17,7 +17,7 @@
     "build": "astro build && node scripts/sync-inline-style-hashes.ts && node scripts/build-search-index.ts && node scripts/build-command-index.ts && node scripts/stamp-site-metrics.ts",
     "preview": "astro preview",
     "check": "astro check",
-    "lint": "eslint .",
+    "lint": "eslint --flag unstable_native_nodejs_ts_config .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "check:sizes": "node scripts/check-file-sizes.ts",

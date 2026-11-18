@@ -40,7 +40,7 @@ src/layouts     page shells                                                   (i
 src/pages       routes: fetch, compose, nothing clever                        (imports everything above)
 ```
 
-ESLint enforces the direction (`eslint.config.js`, `no-restricted-imports`). Content (`src/content`)
+ESLint enforces the direction (`eslint.config.ts`, `no-restricted-imports`). Content (`src/content`)
 and tokens (`tokens/`) are data, read through `lib` and generated CSS.
 
 ## Naming

@@ -8,7 +8,7 @@ export interface SiteConfig {
   /**
    * Canonical origin: canonical links, the sitemap and absolute URLs. It points at the live
    * workers.dev host until pablomadrigal.dev is registered (configured last, before M8); then it
-   * moves back here, and the new host joins webAnalytics.hosts. astro.config.mjs reads it too.
+   * moves back here, and the new host joins webAnalytics.hosts. astro.config.ts reads it too.
    */
   url: string;
   /** Identity rendered by default; visitors can switch it from the inspector. */
