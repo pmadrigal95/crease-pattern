@@ -4,7 +4,15 @@
 import { readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { jsBudgetKb } from '../src/config/quality.ts';
-import { measureBundles, measureInspectorData, measurePosts, toKb } from './bundle-sizes.mjs';
+import {
+  measureBundles,
+  measureInspectorData,
+  measureInspectorStyles,
+  measureCommandData,
+  measurePosts,
+  measureSceneData,
+  toKb,
+} from './bundle-sizes.mjs';
 
 const root = join(import.meta.dirname, '..');
 const dist = join(root, 'dist');
@@ -15,6 +23,9 @@ const postPaths = readdirSync(join(root, 'src/content/precrease'))
 const rows = [
   ...Object.entries(measureBundles(dist)).map(([group, bytes]) => ({ label: group, group, bytes })),
   { label: 'inspectorData', group: 'inspectorData', bytes: measureInspectorData(dist) },
+  { label: 'inspectorStyles', group: 'inspectorStyles', bytes: measureInspectorStyles(dist) },
+  { label: 'commandData', group: 'commandData', bytes: measureCommandData(dist) },
+  { label: 'sceneData', group: 'sceneData', bytes: measureSceneData(dist) },
   ...measurePosts(dist, postPaths).map(({ path, bytes }) => ({
     label: `post ${path}`,
     group: 'post',

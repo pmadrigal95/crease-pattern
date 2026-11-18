@@ -1,4 +1,27 @@
-/* The Inspector panel and its highlight. Loaded with the panel, never before. */
+/* The Inspector panel and its highlight. Loaded with the panel, never before.
+
+   Design debt phase 5 (M4.6): the panel wears the active identity rather than DevTools grey. Its
+   header carries the identity's own surface (public/textures, the same tiles as the home hero),
+   sections part on dashed valley folds, identities are shown as paper samples, layers as a tree.
+   Washi & asagi, the paper identity, folds the panel over the page like a sheet; the other two
+   keep it a notebook. */
+
+.inspector-root {
+  display: contents;
+}
+
+#inspector {
+  --panel-tile: url('/textures/contours.svg');
+  --panel-tile-strength: 0.22;
+}
+:root[data-direction='basalt-glacier'] #inspector {
+  --panel-tile: url('/textures/basalt.svg');
+  --panel-tile-strength: 0.2;
+}
+:root[data-direction='washi-asagi'] #inspector {
+  --panel-tile: url('/textures/washi.svg');
+  --panel-tile-strength: 0.28;
+}
 
 #inspector {
   position: fixed;
@@ -29,9 +52,40 @@
 }
 
 .inspector-panel .top {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  margin: calc(-1 * var(--space-4)) calc(-1 * var(--space-6)) 0;
+  padding: var(--space-6) var(--space-6) var(--space-4);
+  border-bottom: 1px solid var(--color-rule);
+}
+
+/* Notebook: the identity's surface across the header, fading toward the title. */
+.inspector-panel .top::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: var(--color-accent-ui);
+  opacity: var(--panel-tile-strength);
+  pointer-events: none;
+  mask-image: var(--panel-tile), linear-gradient(to left, #000 10%, transparent 85%);
+  mask-size:
+    360px 360px,
+    100% 100%;
+  mask-composite: intersect;
+}
+
+.inspector-panel .top > * {
+  position: relative;
+}
+
+/* Sections part on a dashed valley fold, the site's crease. */
+.inspector-panel section + section {
+  margin-top: var(--space-6);
+  background: repeating-linear-gradient(90deg, var(--color-accent-ui) 0 6px, transparent 6px 11px) top / 100%
+    1px no-repeat;
 }
 
 .inspector-panel h2 {
@@ -41,10 +95,11 @@
 }
 
 .inspector-panel h3 {
-  margin: var(--space-6) 0 var(--space-2);
-  font: 600 var(--type-caption);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  margin: var(--space-6) 0 var(--space-3);
+  padding-top: var(--space-2);
+  font: 500 var(--size-xs) var(--font-mono);
+  letter-spacing: 0.01em;
+  text-transform: lowercase;
   color: var(--color-mute);
 }
 
@@ -86,17 +141,34 @@
   padding: 0;
 }
 
+/* Layers as a tree: each part indented by how many parts hold it, marked with a folded diamond. */
 .inspector-panel .layers button {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
   width: 100%;
   min-height: 36px;
-  padding: var(--space-1) var(--space-2);
+  padding: var(--space-1) var(--space-2) var(--space-1) calc(var(--space-2) + var(--d, 0) * 18px);
   border: 0;
-  border-radius: 6px;
+  border-radius: 4px;
   background: transparent;
   color: inherit;
-  font: 500 var(--type-caption);
+  font: 500 var(--size-xs) var(--font-mono);
   text-align: left;
   cursor: pointer;
+}
+
+.inspector-panel .layers button::before {
+  content: '';
+  flex: none;
+  width: 7px;
+  height: 7px;
+  border: 1.5px solid var(--color-accent-ui);
+  transform: rotate(45deg);
+}
+
+.inspector-panel .layers button[aria-pressed='true']::before {
+  background: var(--color-accent-ui);
 }
 
 .inspector-panel .layers button:hover,
@@ -105,15 +177,21 @@
   background: color-mix(in srgb, var(--color-accent-ui) 18%, transparent);
 }
 
+/* The selected part, as a specimen card. */
 .inspector-panel .facts {
   display: grid;
   gap: var(--space-1);
   margin: 0;
+  padding: var(--space-3) var(--space-4) var(--space-4);
+  border: 1px solid var(--color-rule);
+  border-radius: 6px;
+  background: var(--color-bg);
 }
 
 .inspector-panel .facts dt,
 .inspector-panel .metrics dt {
-  font: 500 var(--type-caption);
+  font: 500 var(--size-xs) var(--font-mono);
+  text-transform: lowercase;
   color: var(--color-mute);
   margin-top: var(--space-2);
 }
@@ -173,41 +251,33 @@
   font-weight: 600;
 }
 
-/* Identity and theme (M2c): native radios, styled as rows with the identity's own swatches. */
+/* Identity and theme (M2c): native radios. Identities are paper samples, each showing its own
+   surface and inks; the theme is a segmented control. The radio itself stays for keyboard and
+   assistive tech, drawn by its label. */
 .inspector-panel .choices {
   display: grid;
-  gap: var(--space-1);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-2);
   margin: 0;
   padding: 0;
   border: 0;
 }
 
-.inspector-panel .themes {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  margin-top: var(--space-3);
-}
-
-.inspector-panel .themes legend {
-  grid-column: 1 / -1;
-  margin-bottom: var(--space-1);
-  font: 500 var(--type-caption);
-  color: var(--color-mute);
-}
-
 .inspector-panel .choice {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  min-height: 40px;
-  padding: 0 var(--space-2);
-  border: 1px solid var(--color-rule);
-  border-radius: var(--radius-panel);
+  position: relative;
   cursor: pointer;
 }
 
-.inspector-panel .choice:has(input:checked) {
-  border-color: var(--color-accent-ui);
-  background: color-mix(in srgb, var(--color-accent-ui) 14%, transparent);
+/* The radio covers its whole sample, transparent: a click anywhere on it picks it. */
+.inspector-panel .choice input {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
 }
 
 .inspector-panel .choice:has(input:focus-visible) {
@@ -215,25 +285,111 @@
   outline-offset: 2px;
 }
 
-.inspector-panel .choice input {
-  margin: 0;
-  accent-color: var(--color-accent-ui);
+.inspector-panel .paper {
+  display: grid;
+  gap: var(--space-2);
+  padding-bottom: var(--space-2);
+  overflow: hidden;
+  border: 1px solid var(--color-rule);
+  border-radius: 6px;
+  background: var(--color-bg);
+}
+
+.inspector-panel .paper:has(input:checked) {
+  border-color: var(--color-ink);
+  box-shadow: inset 0 0 0 1px var(--color-ink);
+}
+
+.inspector-panel .sample {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  height: 52px;
+  padding: var(--space-2);
+}
+
+.inspector-panel .sample::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--color-mute);
+  opacity: 0.45;
+  mask: var(--sample-tile) 0 0 / 220px 220px;
+}
+
+.inspector-panel [data-id='contour-lines'] {
+  --sample-tile: url('/textures/contours.svg');
+}
+
+.inspector-panel [data-id='basalt-glacier'] {
+  --sample-tile: url('/textures/basalt.svg');
+}
+
+.inspector-panel [data-id='washi-asagi'] {
+  --sample-tile: url('/textures/washi.svg');
+}
+
+.inspector-panel .paper .name {
+  padding: 0 var(--space-2);
+  font-size: var(--size-xs);
+  line-height: 1.25;
 }
 
 .inspector-panel .swatches {
+  position: relative;
   display: inline-flex;
 }
 
 .inspector-panel .swatches span {
-  width: 14px;
-  height: 14px;
+  width: 12px;
+  height: 12px;
   border: 1px solid var(--color-rule);
   border-radius: 50%;
-  margin-left: -4px;
+  margin-left: -3px;
 }
 
 .inspector-panel .swatches span:first-child {
   margin-left: 0;
+}
+
+.inspector-panel .themes {
+  gap: 0;
+  margin-top: var(--space-3);
+}
+
+.inspector-panel .themes legend {
+  padding: 0;
+  margin-bottom: var(--space-2);
+  font: 500 var(--size-xs) var(--font-mono);
+  text-transform: lowercase;
+  color: var(--color-mute);
+}
+
+/* Three joined segments: one border, rounded at the ends. */
+.inspector-panel .themes .choice {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  border: 1px solid var(--color-rule);
+  margin-left: -1px;
+}
+
+.inspector-panel .themes .choice:first-of-type {
+  margin-left: 0;
+  border-radius: var(--radius-pill) 0 0 var(--radius-pill);
+}
+
+.inspector-panel .themes .choice:last-of-type {
+  border-radius: 0 var(--radius-pill) var(--radius-pill) 0;
+}
+
+.inspector-panel .themes .choice:has(input:checked) {
+  position: relative;
+  z-index: 1;
+  border-color: var(--color-ink);
+  background: var(--color-ink);
+  color: var(--color-bg);
 }
 
 /* The identity transition (decision 42): the new colors rise like terrain from the chosen
@@ -362,18 +518,87 @@ main [data-inspect] {
   cursor: crosshair;
 }
 
-/* Phones: a bottom sheet over the lower half of the screen. */
+/* The sheet's handle: phones only. */
+.inspector-panel .grab {
+  display: none;
+}
+
+/* Washi & asagi: the panel is a sheet folded over the page, with a dashed crease and the fold's
+   shadow on its edge and a dog-eared corner. */
+:root[data-direction='washi-asagi'] #inspector {
+  border-left: 1px dashed var(--color-accent-ui);
+  box-shadow:
+    inset 14px 0 14px -12px color-mix(in srgb, var(--color-ink) 22%, transparent),
+    -18px 0 36px rgb(0 0 0 / 0.12);
+}
+
+:root[data-direction='washi-asagi'] .inspector-panel .top::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 36px;
+  height: 36px;
+  background: linear-gradient(
+    225deg,
+    var(--color-bg) 0 50%,
+    color-mix(in srgb, var(--color-ink) 9%, var(--color-surface)) 50%
+  );
+  box-shadow: -2px 2px 4px rgb(0 0 0 / 0.08);
+}
+
+/* Phones: a bottom sheet with two heights. Half the screen keeps the page in view; the handle
+   lifts it to most of the screen. */
 @media (max-width: 720px) {
+  .inspector-panel {
+    padding-top: 0;
+  }
+  .inspector-panel .grab {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: calc(100% + 2 * var(--space-6));
+    min-height: 32px;
+    margin: 0 calc(-1 * var(--space-6));
+    border: 0;
+    background: var(--color-surface);
+    cursor: pointer;
+  }
+  .inspector-panel .grab::before {
+    content: '';
+    width: 40px;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--color-rule);
+  }
+  .inspector-panel .top {
+    margin-top: 0;
+  }
+  :root[data-direction='washi-asagi'] #inspector {
+    border-left: 0;
+    border-top: 1px dashed var(--color-accent-ui);
+    box-shadow: 0 -12px 32px rgb(0 0 0 / 0.16);
+  }
+  :root[data-direction='washi-asagi'] .inspector-panel .top::after {
+    display: none;
+  }
   #inspector {
     top: auto;
     left: 0;
     width: auto;
-    max-height: 60vh;
+    max-height: 50vh;
+    transition: max-height var(--motion-base) var(--motion-ease-out);
     border-left: 0;
     border-top: 1px solid var(--color-rule);
     border-radius: 16px 16px 0 0;
     box-shadow: 0 -12px 32px rgb(0 0 0 / 0.16);
     animation-name: inspector-up;
+  }
+  #inspector[data-tall] {
+    max-height: 88vh;
   }
   @keyframes inspector-up {
     from {

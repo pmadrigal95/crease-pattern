@@ -34,6 +34,35 @@ export const jsBudgetKb = {
    */
   inspectorData: 4,
   /**
+   * The Inspector's styles (src/components/inspector/inspector.css), fetched when the panel opens.
+   * Moved out of the on-demand JavaScript for the panel's identity redesign (M4.6), which left
+   * onDemand at 31.5 of 32 KB; 2.1 KB when it moved.
+   */
+  inspectorStyles: 6,
+  /**
+   * The command menu (src/components/site/command-menu.ts, M4.7), loaded on any page the first
+   * time a visitor opens it: matching, actions, the dialog and its styles.
+   */
+  commandMenu: 8,
+  /** Its index of pages, sections and posts (/commands.json), fetched when the menu opens. */
+  commandData: 6,
+  /**
+   * The Work section's Sonobe animator (src/components/site/work-model.ts), loaded on the home
+   * page as the section approaches: the star's geometry, its two inputs and the SVG renderer.
+   */
+  workModel: 8,
+  /**
+   * M4's 3D scenes, the hero's fox and the Work star, which share one three.js. They load only on
+   * the home page, on a device that can run them (src/lib/scene3d-support.ts). Set at 180 KB in
+   * the M4 plan; about 100 KB at M4.1.
+   */
+  scene3d: 180,
+  /**
+   * The 3D scenes' data, fetched with the scene: today the Irazú's height grid from Copernicus
+   * GLO-30 (src/assets/scenes/irazu-dem.bin), 28.5 KB. The M4 plan capped it at 150 KB.
+   */
+  sceneData: 150,
+  /**
    * Everything one Precrease post can run, Web Workers included, checked for every post in the
    * build (drafts only exist in preview builds). Set at 45 KB for Crease No. 002, the heaviest
    * (42 KB); widened from interactive essays to every post when No. 003 brought its own demos.

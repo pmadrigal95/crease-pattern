@@ -1,0 +1,117 @@
+/* ⌘K (command-menu.ts). Adopted when the menu first opens, never before. */
+
+.cmdk {
+  width: min(40rem, calc(100vw - 2 * var(--space-4)));
+  max-height: min(70vh, 34rem);
+  margin: 12vh auto auto;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--color-rule);
+  border-top: 4px solid var(--color-accent);
+  border-radius: 8px;
+  background: var(--color-surface);
+  color: var(--color-ink);
+  box-shadow: 0 24px 60px -24px color-mix(in oklab, var(--color-ink) 55%, transparent);
+}
+
+.cmdk[open] {
+  display: flex;
+  flex-direction: column;
+  animation: cmdk-in var(--motion-fast) var(--motion-ease-out) both;
+}
+
+@keyframes cmdk-in {
+  from {
+    transform: translateY(-6px) scale(0.98);
+    opacity: 0;
+  }
+}
+
+.cmdk::backdrop {
+  background: color-mix(in oklab, var(--color-ink) 28%, transparent);
+}
+
+.cmdk input {
+  width: 100%;
+  min-height: 3.25rem;
+  padding: 0 var(--space-4);
+  border: 0;
+  border-bottom: 1px dashed var(--color-accent-ui);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: var(--size-md);
+}
+
+.cmdk input:focus {
+  outline: none;
+}
+
+.cmdk input::placeholder {
+  color: var(--color-mute);
+}
+
+.cmdk-list {
+  flex: 1;
+  overflow: auto;
+  padding: var(--space-2);
+}
+
+.cmdk-group {
+  margin: var(--space-3) var(--space-2) var(--space-1);
+  font: 500 var(--size-xs) var(--font-mono);
+  text-transform: lowercase;
+  color: var(--color-mute);
+}
+
+.cmdk-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  min-height: 2.75rem;
+  padding: 0 var(--space-3);
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.cmdk-option[aria-selected='true'] {
+  background: color-mix(in oklab, var(--color-accent-ui) 18%, transparent);
+  box-shadow: inset 3px 0 0 var(--color-accent-ui);
+}
+
+.cmdk-aside {
+  flex: none;
+  font: 500 var(--size-xs) var(--font-mono);
+  color: var(--color-mute);
+}
+
+.cmdk-status {
+  margin: 0;
+  padding: var(--space-3) var(--space-4) 0;
+  font: var(--type-caption);
+  color: var(--color-mute);
+}
+
+.cmdk-hint {
+  margin: 0;
+  padding: var(--space-2) var(--space-4) var(--space-3);
+  font: 500 var(--size-xs) var(--font-mono);
+  color: var(--color-mute);
+}
+
+@media (max-width: 720px) {
+  .cmdk {
+    margin-top: max(var(--space-4), env(safe-area-inset-top));
+    max-height: calc(100dvh - 2 * var(--space-4));
+  }
+  .cmdk-hint {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cmdk[open] {
+    animation: none;
+  }
+}

@@ -73,6 +73,20 @@ const layerButtons = ref<HTMLButtonElement[]>([]);
 const scripts = scriptBytes(props.openedAt);
 
 const idOf = (el: Element | null) => el?.getAttribute('data-inspect') ?? '';
+/** How many inspectable parts hold this one: the layer list draws it as a tree. */
+const depthOf = (el: Element) => {
+  let depth = 0;
+  for (let p = el.parentElement?.closest('[data-inspect]'); p; p = p.parentElement?.closest('[data-inspect]'))
+    depth++;
+  return depth;
+};
+// Phones: a bottom sheet with two heights, half the screen or most of it.
+const phone = matchMedia('(max-width: 720px)');
+const tall = ref(false);
+function toggleSheet() {
+  tall.value = !tall.value;
+  document.getElementById('inspector')?.toggleAttribute('data-tall', tall.value);
+}
 const part = (el: Element | null) => {
   const id = idOf(el);
   const file = props.manifest.parts[id];
@@ -113,10 +127,14 @@ function pin(el: HTMLElement, focusList = false) {
   pinned.value = el;
   firstRun.value = false;
   announce.value = fill(t.selectedAnnouncement, { name: label(idOf(el)) });
-  el.scrollIntoView({
-    block: 'nearest',
-    behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
-  });
+  const behavior = matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
+  if (phone.matches) {
+    // The sheet covers the bottom of the screen: bring the part into the space above it.
+    const sheet = document.getElementById('inspector')?.getBoundingClientRect().height ?? 0;
+    const rect = el.getBoundingClientRect();
+    const free = innerHeight - sheet;
+    scrollBy({ top: rect.top - Math.max(16, (free - rect.height) / 2), behavior });
+  } else el.scrollIntoView({ block: 'nearest', behavior });
   if (focusList) layerButtons.value[elements.value.indexOf(el)]?.focus();
   requestAnimationFrame(place);
 }
@@ -194,157 +212,169 @@ const metrics = computed(() => [
 </script>
 
 <template>
-  <div class="inspector-panel">
-    <header class="top">
-      <h2 ref="heading" tabindex="-1">{{ t.title }}</h2>
-      <button type="button" class="close" :aria-label="t.close" @click="emit('close')">×</button>
-    </header>
-    <p v-if="firstRun" class="intro">{{ t.intro }}</p>
-    <p class="sr-only" role="status" aria-live="polite">{{ announce }}</p>
+  <aside id="inspector" :aria-label="t.title">
+    <div class="inspector-panel">
+      <button
+        type="button"
+        class="grab"
+        :aria-label="tall ? t.sheetShrink : t.sheetExpand"
+        :aria-expanded="tall"
+        @click="toggleSheet"
+      ></button>
+      <header class="top">
+        <h2 ref="heading" tabindex="-1">{{ t.title }}</h2>
+        <button type="button" class="close" :aria-label="t.close" @click="emit('close')">×</button>
+      </header>
+      <p v-if="firstRun" class="intro">{{ t.intro }}</p>
+      <p class="sr-only" role="status" aria-live="polite">{{ announce }}</p>
 
-    <section aria-labelledby="inspector-identity">
-      <h3 id="inspector-identity">{{ t.identity }}</h3>
-      <fieldset class="choices">
-        <legend class="sr-only">{{ t.identity }}</legend>
-        <label v-for="id in allVisualDirections" :key="id" class="choice">
-          <input
-            type="radio"
-            name="inspector-direction"
-            :value="id"
-            :checked="direction === id"
-            @change="chooseDirection(id, $event)"
-          />
-          <span class="swatches" aria-hidden="true">
-            <span
-              v-for="(color, i) in manifest.identities.swatches[id]?.[dark() ? 'dark' : 'light']"
-              :key="i"
-              :style="{ background: color }"
-            ></span>
-          </span>
-          {{ visualDirectionLabels[id].label }}
-        </label>
-      </fieldset>
-      <p class="muted">{{ fill(t.identityNote, { count: manifest.identities.tokenCount }) }}</p>
-      <fieldset class="choices themes">
-        <legend>{{ t.theme }}</legend>
-        <label v-for="value in themes" :key="value" class="choice">
-          <input
-            type="radio"
-            name="inspector-theme"
-            :value="value"
-            :checked="theme === value"
-            @change="chooseTheme(value, $event)"
-          />
-          {{ t.themes[value] }}
-        </label>
-      </fieldset>
-    </section>
+      <section aria-labelledby="inspector-identity">
+        <h3 id="inspector-identity">{{ t.identity }}</h3>
+        <fieldset class="choices">
+          <legend class="sr-only">{{ t.identity }}</legend>
+          <label v-for="id in allVisualDirections" :key="id" class="choice paper" :data-id="id">
+            <input
+              type="radio"
+              name="inspector-direction"
+              :value="id"
+              :checked="direction === id"
+              @change="chooseDirection(id, $event)"
+            />
+            <span class="sample" aria-hidden="true">
+              <span class="swatches">
+                <span
+                  v-for="(color, i) in manifest.identities.swatches[id]?.[dark() ? 'dark' : 'light']"
+                  :key="i"
+                  :style="{ background: color }"
+                ></span>
+              </span>
+            </span>
+            <span class="name">{{ visualDirectionLabels[id].label }}</span>
+          </label>
+        </fieldset>
+        <p class="muted">{{ fill(t.identityNote, { count: manifest.identities.tokenCount }) }}</p>
+        <fieldset class="choices themes">
+          <legend>{{ t.theme }}</legend>
+          <label v-for="value in themes" :key="value" class="choice">
+            <input
+              type="radio"
+              name="inspector-theme"
+              :value="value"
+              :checked="theme === value"
+              @change="chooseTheme(value, $event)"
+            />
+            {{ t.themes[value] }}
+          </label>
+        </fieldset>
+      </section>
 
-    <section aria-labelledby="inspector-layers">
-      <h3 id="inspector-layers">{{ t.layers }}</h3>
-      <ul class="layers">
-        <li v-for="(el, i) in elements" :key="idOf(el)">
-          <button
-            :ref="(b) => (layerButtons[i] = b as HTMLButtonElement)"
-            type="button"
-            :aria-pressed="pinned === el"
-            :tabindex="(pinned ? pinned === el : i === 0) ? 0 : -1"
-            @click="pin(el)"
-            @keydown="onListKey($event, i)"
-            @focus="
-              hovered = el;
-              place();
-            "
-            @blur="
-              hovered = null;
-              place();
-            "
-          >
-            {{ label(idOf(el)) }}
-          </button>
-        </li>
-      </ul>
-    </section>
+      <section aria-labelledby="inspector-layers">
+        <h3 id="inspector-layers">{{ t.layers }}</h3>
+        <ul class="layers">
+          <li v-for="(el, i) in elements" :key="idOf(el)" :style="{ '--d': depthOf(el) }">
+            <button
+              :ref="(b) => (layerButtons[i] = b as HTMLButtonElement)"
+              type="button"
+              :aria-pressed="pinned === el"
+              :tabindex="(pinned ? pinned === el : i === 0) ? 0 : -1"
+              @click="pin(el)"
+              @keydown="onListKey($event, i)"
+              @focus="
+                hovered = el;
+                place();
+              "
+              @blur="
+                hovered = null;
+                place();
+              "
+            >
+              {{ label(idOf(el)) }}
+            </button>
+          </li>
+        </ul>
+      </section>
 
-    <section aria-labelledby="inspector-selected">
-      <h3 id="inspector-selected">{{ t.selected }}</h3>
-      <p v-if="!details" class="muted">{{ t.nothingSelected }}</p>
-      <dl v-else class="facts">
-        <dt>{{ details.kind === 'component' ? t.component : t.section }}</dt>
-        <dd>
-          <strong>{{ label(details.id) }}</strong>
-          · <a :href="details.source" target="_blank" rel="noopener">{{ t.source }}</a>
-        </dd>
-        <template v-if="details.lastChange">
-          <dt>{{ t.lastChange }}</dt>
+      <section aria-labelledby="inspector-selected">
+        <h3 id="inspector-selected">{{ t.selected }}</h3>
+        <p v-if="!details" class="muted">{{ t.nothingSelected }}</p>
+        <dl v-else class="facts">
+          <dt>{{ details.kind === 'component' ? t.component : t.section }}</dt>
           <dd>
-            <time :datetime="details.lastChange.date">{{ details.lastChange.date }}</time> ·
-            {{ details.lastChange.subject }}
+            <strong>{{ label(details.id) }}</strong>
+            · <a :href="details.source" target="_blank" rel="noopener">{{ t.source }}</a>
           </dd>
-        </template>
-        <dt>{{ t.size }}</dt>
-        <dd>{{ details.size }}</dd>
-        <dt>{{ t.contrast }}</dt>
-        <dd>
-          <template v-if="details.contrast">
-            {{
-              fill(details.contrastPasses ? t.contrastPass : t.contrastFail, {
-                ratio: details.contrast.ratio.toFixed(1),
-              })
-            }}
+          <template v-if="details.lastChange">
+            <dt>{{ t.lastChange }}</dt>
+            <dd>
+              <time :datetime="details.lastChange.date">{{ details.lastChange.date }}</time> ·
+              {{ details.lastChange.subject }}
+            </dd>
           </template>
-          <template v-else>{{ t.noText }}</template>
-        </dd>
-        <dt>{{ t.tokens }}</dt>
-        <dd>
-          <ul class="tokens">
-            <li v-for="token in details.tokens" :key="token.name">
-              <span
-                v-if="token.color"
-                class="swatch"
-                :style="{ background: token.value }"
-                aria-hidden="true"
-              ></span>
-              <code>--{{ token.name }}</code>
-            </li>
-          </ul>
-        </dd>
-      </dl>
-    </section>
-
-    <section aria-labelledby="inspector-outline">
-      <h3 id="inspector-outline">{{ t.outline }}</h3>
-      <h4>{{ t.landmarks }}</h4>
-      <ul class="plain">
-        <li v-for="(item, i) in outline.landmarks" :key="i">{{ item.label }}</li>
-      </ul>
-      <h4>{{ t.headings }}</h4>
-      <ul class="plain">
-        <li v-for="(item, i) in outline.headings" :key="i" :class="`h${item.level}`">
-          <span class="level">h{{ item.level }}</span> {{ item.label }}
-        </li>
-      </ul>
-    </section>
-
-    <section aria-labelledby="inspector-metrics">
-      <h3 id="inspector-metrics">{{ t.metrics }}</h3>
-      <p class="muted">{{ t.metricsNote }}</p>
-      <dl class="metrics">
-        <div v-for="m in metrics" :key="m.name">
-          <dt>{{ m.name }}</dt>
+          <dt>{{ t.size }}</dt>
+          <dd>{{ details.size }}</dd>
+          <dt>{{ t.contrast }}</dt>
           <dd>
-            <template v-if="m.value">{{ m.value }} · {{ m.good ? t.pass : t.fail }}</template>
-            <template v-else>{{ t.waiting }}</template>
+            <template v-if="details.contrast">
+              {{
+                fill(details.contrastPasses ? t.contrastPass : t.contrastFail, {
+                  ratio: details.contrast.ratio.toFixed(1),
+                })
+              }}
+            </template>
+            <template v-else>{{ t.noText }}</template>
           </dd>
-        </div>
-        <div>
-          <dt>{{ t.scripts }}</dt>
-          <dd>{{ kb(scripts) }}</dd>
-        </div>
-      </dl>
-    </section>
-  </div>
+          <dt>{{ t.tokens }}</dt>
+          <dd>
+            <ul class="tokens">
+              <li v-for="token in details.tokens" :key="token.name">
+                <span
+                  v-if="token.color"
+                  class="swatch"
+                  :style="{ background: token.value }"
+                  aria-hidden="true"
+                ></span>
+                <code>--{{ token.name }}</code>
+              </li>
+            </ul>
+          </dd>
+        </dl>
+      </section>
 
+      <section aria-labelledby="inspector-outline">
+        <h3 id="inspector-outline">{{ t.outline }}</h3>
+        <h4>{{ t.landmarks }}</h4>
+        <ul class="plain">
+          <li v-for="(item, i) in outline.landmarks" :key="i">{{ item.label }}</li>
+        </ul>
+        <h4>{{ t.headings }}</h4>
+        <ul class="plain">
+          <li v-for="(item, i) in outline.headings" :key="i" :class="`h${item.level}`">
+            <span class="level">h{{ item.level }}</span> {{ item.label }}
+          </li>
+        </ul>
+      </section>
+
+      <section aria-labelledby="inspector-metrics">
+        <h3 id="inspector-metrics">{{ t.metrics }}</h3>
+        <p class="muted">{{ t.metricsNote }}</p>
+        <dl class="metrics">
+          <div v-for="m in metrics" :key="m.name">
+            <dt>{{ m.name }}</dt>
+            <dd>
+              <template v-if="m.value">{{ m.value }} · {{ m.good ? t.pass : t.fail }}</template>
+              <template v-else>{{ t.waiting }}</template>
+            </dd>
+          </div>
+          <div>
+            <dt>{{ t.scripts }}</dt>
+            <dd>{{ kb(scripts) }}</dd>
+          </div>
+        </dl>
+      </section>
+    </div>
+  </aside>
+
+  <!-- Beside the panel, not in it: inside, the outline would paint over the panel (phones). -->
   <div
     v-if="box"
     class="highlight"

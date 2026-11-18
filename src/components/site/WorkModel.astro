@@ -1,0 +1,166 @@
+---
+/**
+ * The Work section's model (M4.3, decision 24): a Sonobe star of 30 identical folded units, the
+ * site's idea in paper. It comes together as the section scrolls into view; opening the Inspector
+ * takes it apart and shows the count of this site's real components (src/generated/components.json).
+ *
+ * Drawn here at build time, assembled: the complete picture without JavaScript, with reduced
+ * motion, and the first frame for everything else. As the section approaches, a small script
+ * loads the animator (src/components/site/work-model.ts), which plays the assembly in SVG and, on a
+ * device that can run it, hands the square to a three.js scene (work3d.ts) that shares its code
+ * with the hero's 3D fox.
+ */
+import usage from '../../generated/components.json';
+import { copy } from '../../lib/copy';
+import { formatNumber } from '../../lib/format';
+import { drawStar, star } from '../../lib/sonobe/assemble';
+
+const t = copy.home.work.model;
+const { totals } = usage;
+const facets = drawStar(star(), 1, 0);
+const points = (pts: readonly (readonly [number, number])[]) =>
+  pts.map(([x, y]) => `${x.toFixed(3)},${y.toFixed(3)}`).join(' ');
+---
+
+<figure class="work-model" data-work-model data-inspect="WorkModel">
+  <div class="stage" data-stage>
+    <svg viewBox="-1.75 -1.75 3.5 3.5" role="img" aria-label={t.label} data-star>
+      {facets.map((f) => (
+        <polygon
+          class={`u${f.unit % 5}`}
+          points={points(f.points)}
+          fill-opacity={(0.6 + 0.4 * f.light).toFixed(2)}
+          data-facet={f.index}
+        />
+      ))}
+    </svg>
+  </div>
+  <figcaption>{t.caption}</figcaption>
+  <dl class="counts">
+    <div>
+      <dt>{t.counts.components}</dt>
+      <dd>{formatNumber(totals.components)}</dd>
+    </div>
+    <div>
+      <dt>{t.counts.uses}</dt>
+      <dd>{formatNumber(totals.uses)}</dd>
+    </div>
+    <div>
+      <dt>{t.counts.reused}</dt>
+      <dd>{formatNumber(totals.reused)}</dd>
+    </div>
+  </dl>
+</figure>
+
+<script>
+  // Loads the animator as the section approaches, half a screen early, so the star can take itself
+  // apart while still out of sight and come together in view. Heavy code waits for the visitor:
+  // nothing loads until the first scroll, even where the section starts just below the fold, unless
+  // the page opens already scrolled (a link to #work).
+  const figure = document.querySelector<HTMLElement>('[data-work-model]');
+  const watch = () => {
+    if (!figure) return;
+    new IntersectionObserver(
+      ([entry], observer) => {
+        if (!entry?.isIntersecting) return;
+        observer.disconnect();
+        void import('./work-model').then((m) => m.animateWorkModel(figure)).catch(() => undefined); // offline: the drawn star stays, a complete picture
+      },
+      { rootMargin: '0px 0px 50% 0px' },
+    ).observe(figure);
+  };
+  if (scrollY > 0) watch();
+  else addEventListener('scroll', watch, { once: true, passive: true });
+</script>
+
+<style>
+  .work-model {
+    margin: 0;
+  }
+  .stage {
+    position: relative;
+    aspect-ratio: 1;
+    max-width: 420px;
+    margin-inline: auto;
+  }
+  .stage svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    transition: opacity 300ms ease-out;
+  }
+  /* The 3D scene (work3d.ts) takes the square once its first frame is drawn. */
+  .work-model:global(.scene-3d) .stage svg {
+    opacity: 0;
+  }
+  polygon {
+    stroke: var(--color-ink);
+    stroke-opacity: 0.18;
+    stroke-width: 0.006;
+    stroke-linejoin: round;
+  }
+  /* The five papers of Crease No. 003 (ScaleDemo), from the active identity's tokens. */
+  .u0 {
+    fill: var(--color-accent-ui);
+  }
+  .u1 {
+    fill: color-mix(in oklab, var(--color-accent-ui) 55%, var(--color-ink));
+  }
+  .u2 {
+    fill: color-mix(in oklab, var(--color-accent-ui) 45%, var(--color-bg));
+  }
+  .u3 {
+    fill: var(--color-ink);
+  }
+  .u4 {
+    fill: color-mix(in oklab, var(--color-ink) 45%, var(--color-bg));
+  }
+  figcaption {
+    max-width: 44ch;
+    margin: var(--space-3) auto 0;
+    font: var(--type-caption);
+    color: var(--color-mute);
+    text-align: center;
+  }
+  /* The count appears while inspecting, as the star comes apart. */
+  .counts {
+    display: flex;
+    justify-content: center;
+    gap: var(--space-6);
+    margin: var(--space-4) 0 0;
+    visibility: hidden;
+    opacity: 0;
+    transform: translateY(6px);
+    transition:
+      opacity var(--motion-base) var(--motion-ease-out),
+      transform var(--motion-base) var(--motion-ease-out),
+      visibility 0s linear var(--motion-base);
+  }
+  :global(.inspecting) .counts {
+    visibility: visible;
+    opacity: 1;
+    transform: none;
+    transition-delay: 0s;
+  }
+  .counts > div {
+    display: flex;
+    flex-direction: column-reverse;
+    align-items: center;
+    gap: var(--space-1);
+  }
+  .counts dt {
+    font: var(--type-caption);
+    color: var(--color-mute);
+  }
+  .counts dd {
+    margin: 0;
+    font: 600 var(--size-xl) var(--font-mono);
+    font-variant-numeric: tabular-nums;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .stage svg,
+    .counts {
+      transition: none;
+    }
+  }
+</style>

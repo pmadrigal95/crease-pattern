@@ -4,13 +4,30 @@
 //  - page: every script an HTML page references directly.
 //  - onDemand: what those scripts can import later, found by following their imports. Files
 //    nothing references never reach a visitor and don't count.
+//  - workModel: the Work section's Sonobe animator (src/components/site/work-model.ts), loaded on
+//    the home page as the section approaches.
+//  - scene3d: M4's 3D scenes, the hero's fox (src/components/inspector/scene3d.ts) and the Work
+//    star (src/components/site/work3d.ts), and what only they import (three.js, shared). They load
+//    only on the home page, on capable devices.
+//  - commandMenu: the command menu (src/components/site/command-menu.ts), loaded on any page the
+//    first time a visitor opens it with Ctrl/Cmd+K or its button.
+//  These three have budgets of their own, and the other groups stop at them.
 import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { brotliCompressSync } from 'node:zlib';
 
 export const toKb = (bytes) => Math.round((bytes / 1024) * 10) / 10;
 
-/** @returns {{ page: number, onDemand: number }} bytes, Brotli */
+/** The 3D scenes' entry chunks, as Vite names them after their source files. */
+const isScene3d = (file) => /^(scene3d|work3d)\.[\w-]+\.js$/.test(file);
+/** The Work animator's entry chunk. */
+const isWorkModel = (file) => /^work-model\.[\w-]+\.js$/.test(file);
+/** The command menu's entry chunk. */
+const isCommandMenu = (file) => /^command-menu\.[\w-]+\.js$/.test(file);
+/** Where the page and on-demand groups stop: code with budgets of its own. */
+const isOwnBudget = (file) => isScene3d(file) || isWorkModel(file) || isCommandMenu(file);
+
+/** @returns {{ page: number, onDemand: number, workModel: number, scene3d: number, commandMenu: number }} bytes, Brotli */
 export function measureBundles(dist) {
   const assets = join(dist, '_astro');
   const read = (file) => readFileSync(join(assets, file), 'utf8');
@@ -25,18 +42,32 @@ export function measureBundles(dist) {
   const importsOf = (file) =>
     [...read(file).matchAll(/(?:from|import)\s*\(?\s*["'`]\.\/([^"'`]+\.js)["'`]/g)].map((m) => m[1]);
 
-  const page = scripts.filter((f) => html.includes(`/_astro/${f}`));
-  const onDemand = new Set();
-  const queue = page.flatMap(importsOf);
-  while (queue.length) {
-    const file = queue.pop();
-    if (page.includes(file) || onDemand.has(file) || !scripts.includes(file)) continue;
-    onDemand.add(file);
-    queue.push(...importsOf(file));
-  }
+  /** Every chunk reachable from `start`, minus `skip` and anything `stop` matches. */
+  const closure = (start, skip, stop = () => false) => {
+    const seen = new Set();
+    const queue = [...start];
+    while (queue.length) {
+      const file = queue.pop();
+      if (seen.has(file) || skip.has(file) || stop(file) || !scripts.includes(file)) continue;
+      seen.add(file);
+      queue.push(...importsOf(file));
+    }
+    return seen;
+  };
+  const sum = (files) => [...files].reduce((total, f) => total + size(f), 0);
+
+  const page = new Set(scripts.filter((f) => html.includes(`/_astro/${f}`)));
+  const onDemand = closure([...page].flatMap(importsOf), page, isOwnBudget);
+  // A chunk shared with an earlier group (Vite's helpers, the capability check) counts there once.
+  const workModel = closure(scripts.filter(isWorkModel), new Set([...page, ...onDemand]), isScene3d);
+  const scene3d = closure(scripts.filter(isScene3d), new Set([...page, ...onDemand, ...workModel]));
+  const commandMenu = closure(scripts.filter(isCommandMenu), new Set([...page, ...onDemand]), isScene3d);
   return {
-    page: page.reduce((sum, f) => sum + size(f), 0),
-    onDemand: [...onDemand].reduce((sum, f) => sum + size(f), 0),
+    page: sum(page),
+    onDemand: sum(onDemand),
+    workModel: sum(workModel),
+    scene3d: sum(scene3d),
+    commandMenu: sum(commandMenu),
   };
 }
 
@@ -74,6 +105,39 @@ export function measureInspectorData(dist) {
 }
 
 /**
+ * The Inspector's styles as Vite emits them (/_astro/inspector.<hash>.css), Brotli: fetched when
+ * the panel opens, like its manifest. Zero when the build has none.
+ * @returns {number} bytes
+ */
+export function measureInspectorStyles(dist) {
+  const assets = join(dist, '_astro');
+  return readdirSync(assets)
+    .filter((f) => /^inspector\.[\w-]+\.css$/.test(f))
+    .reduce((sum, f) => sum + brotliCompressSync(readFileSync(join(assets, f))).length, 0);
+}
+
+/**
+ * The command menu's index (/commands.json, scripts/build-command-index.ts), Brotli: fetched the
+ * first time the menu opens.
+ * @returns {number} bytes
+ */
+export function measureCommandData(dist) {
+  return brotliCompressSync(readFileSync(join(dist, 'commands.json'))).length;
+}
+
+/**
+ * The 3D scenes' data files as Vite emits them (/_astro/*.<hash>.bin, such as the Irazú's height
+ * grid), Brotli. They download with the scene, on the home page only.
+ * @returns {number} bytes
+ */
+export function measureSceneData(dist) {
+  const assets = join(dist, '_astro');
+  return readdirSync(assets)
+    .filter((f) => f.endsWith('.bin'))
+    .reduce((sum, f) => sum + brotliCompressSync(readFileSync(join(assets, f))).length, 0);
+}
+
+/**
  * Everything one Precrease post can run: the scripts its page references, what they import, and
  * the Web Workers they start, with the workers' own imports. Workers count because a reader who
  * presses Run downloads them. Pages missing from `dist` (drafts in a production build) are
@@ -101,7 +165,8 @@ export function measurePosts(dist, paths) {
     const queue = [...html.matchAll(/\/_astro\/([^"'\s]+\.js)/g)].map((m) => m[1]);
     while (queue.length) {
       const file = queue.pop();
-      if (seen.has(file) || !scripts.has(file)) continue;
+      // The 3D scenes and the Work animator load only on the home page, never on a post.
+      if (seen.has(file) || !scripts.has(file) || isOwnBudget(file)) continue;
       seen.add(file);
       queue.push(...linksOf(file));
     }

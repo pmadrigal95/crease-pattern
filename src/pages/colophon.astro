@@ -8,7 +8,7 @@ if (!page) throw new Error('src/content/pages/colophon.mdx is missing.');
 const { Content } = await render(page);
 ---
 
-<PageLayout title={page.data.title} description={page.data.description}>
+<PageLayout title={page.data.title} description={page.data.description} image="/og/colophon.png">
   <div class="wrap">
     <header class="page-head" data-inspect="colophon#header">
       <p class="eyebrow">{page.data.title}</p>

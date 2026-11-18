@@ -10,8 +10,24 @@ export interface Facet {
   /** Class names: the part (`head`, `ear`, `inner`) and its side. */
   part: 'head' | 'ear' | 'inner';
   side: 'left' | 'right';
+  /** The facet's corners on the 48×48 sheet (y down): the source the 2D path and the 3D mesh share. */
+  points: readonly (readonly [number, number])[];
+  /** The same facet as an SVG path, derived from `points`. */
   d: string;
 }
+
+/** The y of the brow, the mountain fold the ears hinge on; the centre line is x = 24. */
+export const foxBrowY = 16;
+export const foxCentreX = 24;
+/** The chin, where the centre valley fold ends. */
+export const foxChinY = 44;
+
+const facet = (part: Facet['part'], side: Facet['side'], points: Facet['points']): Facet => ({
+  part,
+  side,
+  points,
+  d: `M${points.map(([x, y]) => `${x} ${y}`).join('L')}z`,
+});
 
 export const foxViewBox = '0 0 48 48';
 export const foxSheet = 'M3 2h42v44H3z';
@@ -22,10 +38,34 @@ export const foxValleyFolds = 'M24 16v28M6 16l18 28M42 16 24 44';
 
 /** Back to front: ears, their inner folds, then the head halves on top. */
 export const foxFacets: readonly Facet[] = [
-  { part: 'ear', side: 'left', d: 'M6 16 11 3l8 13z' },
-  { part: 'ear', side: 'right', d: 'm29 16 8-13 5 13z' },
-  { part: 'inner', side: 'left', d: 'm9.5 16 2-8 4.5 8z' },
-  { part: 'inner', side: 'right', d: 'm32 16 4.5-8 2 8z' },
-  { part: 'head', side: 'left', d: 'M6 16h18v28z' },
-  { part: 'head', side: 'right', d: 'M24 16h18L24 44z' },
+  facet('ear', 'left', [
+    [6, 16],
+    [11, 3],
+    [19, 16],
+  ]),
+  facet('ear', 'right', [
+    [29, 16],
+    [37, 3],
+    [42, 16],
+  ]),
+  facet('inner', 'left', [
+    [9.5, 16],
+    [11.5, 8],
+    [16, 16],
+  ]),
+  facet('inner', 'right', [
+    [32, 16],
+    [36.5, 8],
+    [38.5, 16],
+  ]),
+  facet('head', 'left', [
+    [6, 16],
+    [24, 16],
+    [24, 44],
+  ]),
+  facet('head', 'right', [
+    [24, 16],
+    [42, 16],
+    [24, 44],
+  ]),
 ];
