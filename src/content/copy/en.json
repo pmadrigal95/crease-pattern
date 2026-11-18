@@ -83,6 +83,7 @@
     "notes": {
       "heading": "Precrease",
       "intro": "Notes on how software gets designed and built, from architecture to working with AI. I write them in public and include what went wrong.",
+      "kicker": "{number} · {kind} · {date}",
       "latest": "Latest posts",
       "empty": "The first crease is being folded. It introduces who I am and what this blog will cover.",
       "all": "Read Precrease"
@@ -104,7 +105,12 @@
     "title": "This page isn't on the map.",
     "body": "The link may be outdated or mistyped.",
     "aside": "I've taken a few wrong trails myself. This one leads back home.",
-    "action": "Back to the home page"
+    "action": "Back to the home page",
+    "map": {
+      "label": "A contour map of the Irazú volcano, drawn from real elevation data. You are here, just outside its edge, and a dashed trail leads in to the summit.",
+      "here": "You are here",
+      "note": "Irazú, {summit} m · contours every {interval} m"
+    }
   },
   "changelogPage": {
     "title": "Changelog",

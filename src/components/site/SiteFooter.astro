@@ -1,90 +1,142 @@
 ---
+/**
+ * The footer, on every page (design debt phase 4, option A): it hangs from a valley fold, a dashed
+ * crease across the page with the fox folded on it, the site's thesis one last time. Below it,
+ * who this is and where else to find them, then the licences.
+ */
 import site from '../../../site.config';
+import FoxMark from './FoxMark.astro';
 import { copy } from '../../lib/copy';
 
 interface Props {
   name: string;
+  role: string;
+  location: string;
   contact: { email: string; linkedin: string; github: string };
 }
-const { name, contact } = Astro.props;
+const { name, role, location, contact } = Astro.props;
 const year = new Date().getFullYear();
 ---
 
 <footer class="foot" data-inspect="SiteFooter">
   <div class="wrap">
-    <p>
-      © {year} {name}
+    <div class="crease" aria-hidden="true">
+      <span class="mark">
+        <FoxMark size={40} />
+      </span>
+    </div>
+    <div class="grid">
+      <p class="who">
+        <strong>{name}</strong>
+        <span>
+          {role} · {location}
+        </span>
+      </p>
+      <ul class="links" aria-label={copy.labels.elsewhere}>
+        <li>
+          <a href={`mailto:${contact.email}`}>Email</a>
+        </li>
+        <li>
+          <a href={contact.linkedin}>LinkedIn</a>
+        </li>
+        <li>
+          <a href={contact.github}>GitHub</a>
+        </li>
+        <li>
+          <a href="/colophon">{copy.footer.colophon}</a>
+        </li>
+        <li>
+          <a href="/privacy">{copy.footer.privacy}</a>
+        </li>
+        <li>
+          <a href={site.repository}>{copy.footer.source}</a>
+        </li>
+      </ul>
+    </div>
+    <p class="legal">
+      <span>
+        © {year} {name}
+      </span>
+      <span aria-hidden="true"> · </span>
+      <a href={`${site.repository}/blob/main/LICENSE.md`}>{copy.footer.license}</a>
     </p>
-    <ul class="links" aria-label={copy.labels.elsewhere}>
-      <li>
-        <a href={`mailto:${contact.email}`}>Email</a>
-      </li>
-      <li>
-        <a href={contact.linkedin}>LinkedIn</a>
-      </li>
-      <li>
-        <a href={contact.github}>GitHub</a>
-      </li>
-      <li>
-        <a href="/colophon">{copy.footer.colophon}</a>
-      </li>
-      <li>
-        <a href="/privacy">{copy.footer.privacy}</a>
-      </li>
-      <li>
-        <a href={site.repository}>{copy.footer.source}</a>
-      </li>
-    </ul>
-    <a class="license" href={`${site.repository}/blob/main/LICENSE.md`}>
-      {copy.footer.license}
-    </a>
   </div>
 </footer>
 
 <style>
-  .foot {
-    border-top: 1px solid var(--color-rule);
-  }
   .wrap {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-3) var(--space-6);
-    align-items: center;
-    padding-block: var(--space-6) var(--space-12);
+    padding-block: var(--space-12) var(--space-12);
     font-size: var(--size-sm);
     color: var(--color-mute);
   }
-  p {
+  /* The valley fold: dashed, in the fold colour, with the fox sitting on it. */
+  .crease {
+    position: relative;
+    height: 1px;
+    margin-bottom: var(--space-12);
+    background: repeating-linear-gradient(90deg, var(--color-accent-ui) 0 7px, transparent 7px 13px);
+  }
+  .mark {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    display: flex;
+    padding-inline: var(--space-2);
+    background: var(--color-bg);
+    transform: translate(-50%, -50%);
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: var(--space-6) var(--space-12);
+    align-items: start;
+  }
+  .who {
+    display: grid;
+    gap: var(--space-1);
     margin: 0;
+  }
+  .who strong {
+    color: var(--color-ink);
+    font-weight: 600;
+    font-size: var(--size-md);
   }
   .links {
     list-style: none;
     margin: 0;
     padding: 0;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0 var(--space-4);
+    display: grid;
+    grid-template-columns: repeat(3, auto);
+    gap: 0 var(--space-8);
   }
   .links a {
     min-height: 44px;
     display: inline-flex;
     align-items: center;
+    text-decoration: none;
   }
   .links a:hover,
-  .license:hover {
+  .legal a:hover {
     color: var(--color-ink);
+    text-decoration: underline;
+    text-underline-offset: 4px;
   }
-  .license {
-    margin-left: auto;
-    min-height: 44px;
+  .legal {
+    margin: var(--space-8) 0 0;
+    font: var(--size-xs) var(--font-mono);
+  }
+  .legal a {
     display: inline-flex;
+    min-height: 44px;
     align-items: center;
-    font-family: var(--font-mono);
-    font-size: var(--size-xs);
   }
   @media (max-width: 720px) {
-    .license {
-      margin-left: 0;
+    .grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .links {
+      grid-template-columns: repeat(2, auto);
+      justify-content: start;
     }
   }
 </style>

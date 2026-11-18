@@ -1,0 +1,121 @@
+---
+/**
+ * The 404 page's map (design debt phase 4): "This page isn't on the map", drawn literally. The
+ * Irazú's real contours (src/lib/irazu-map.ts, from the 3D scene's Copernicus grid), with the
+ * visitor's pin just outside the map's edge and a dashed trail leading in to the fox on the
+ * summit. Drawn at build time: plain SVG, no script.
+ */
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { foxFacets } from '../../lib/fox';
+import { copy, fill } from '../../lib/copy';
+import { formatNumber } from '../../lib/format';
+import { IRAZU } from '../../lib/identity-scenes';
+import { irazuMap } from '../../lib/irazu-map';
+
+const t = copy.notFound.map;
+const file = readFileSync(join(process.cwd(), 'src/assets/scenes/irazu-dem.bin'));
+const { size, lines, summit } = irazuMap(new Uint16Array(file.buffer, file.byteOffset, file.byteLength / 2));
+
+// The visitor: below the map's bottom-right corner, outside it. The trail curves in to the summit.
+const here = { x: size - 18, y: size + 46 };
+const trail = `M${here.x} ${here.y}C${here.x - 30} ${here.y - 14} ${size - 70} ${size - 20} ${(summit.x + size) / 2} ${(summit.y + size) / 2}S${summit.x + 18} ${summit.y + 34} ${summit.x} ${summit.y + 10}`;
+---
+
+<figure class="nf-map" data-inspect="NotFoundMap">
+  <svg viewBox={`-12 -12 ${size + 24} ${size + 92}`} role="img" aria-label={t.label}>
+    <defs>
+      <clipPath id="nf-map-frame">
+        <rect width={size} height={size}></rect>
+      </clipPath>
+    </defs>
+    <rect class="frame" width={size} height={size}></rect>
+    <g clip-path="url(#nf-map-frame)">
+      {lines.map((l) => (
+        <path class:list={['contour', { major: l.major }]} d={l.d} />
+      ))}
+    </g>
+    <path class="trail" d={trail}></path>
+    <g transform={`translate(${summit.x - 12} ${summit.y - 12}) scale(0.5)`} aria-hidden="true">
+      {foxFacets.map((f) => (
+        <path class:list={['facet', `${f.part}-${f.side}`]} d={f.d} />
+      ))}
+    </g>
+    <circle class="ring" cx={here.x} cy={here.y} r="11"></circle>
+    <circle class="pin" cx={here.x} cy={here.y} r="4.5"></circle>
+    <text class="here" x={here.x - 20} y={here.y + 4} text-anchor="end">
+      {t.here}
+    </text>
+    <text class="note" x="0" y={size + 18}>
+      {fill(t.note, { summit: formatNumber(IRAZU.summit), interval: IRAZU.interval })}
+    </text>
+  </svg>
+</figure>
+
+<style>
+  .nf-map {
+    margin: 0;
+    width: 100%;
+    max-width: 520px;
+    justify-self: center;
+  }
+  svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+  .frame {
+    fill: var(--color-surface);
+    stroke: var(--color-rule);
+    stroke-width: 1;
+  }
+  .contour {
+    fill: none;
+    stroke: var(--color-mute);
+    stroke-width: 0.7;
+    stroke-linejoin: round;
+    opacity: 0.55;
+  }
+  .contour.major {
+    stroke: var(--color-ink);
+    stroke-width: 1.2;
+    opacity: 0.8;
+  }
+  .trail {
+    fill: none;
+    stroke: var(--color-accent-ui);
+    stroke-width: 2;
+    stroke-dasharray: 6 5;
+    stroke-linecap: round;
+  }
+  .pin {
+    fill: var(--color-accent);
+  }
+  .ring {
+    fill: none;
+    stroke: var(--color-accent);
+    stroke-width: 1.5;
+    opacity: 0.4;
+  }
+  .here {
+    font: 500 11px var(--font-mono);
+    fill: var(--color-ink);
+  }
+  .note {
+    font: 9px var(--font-mono);
+    fill: var(--color-mute);
+  }
+  .head-left {
+    fill: var(--color-accent);
+  }
+  .head-right,
+  .inner-left,
+  .inner-right {
+    fill: var(--color-ink);
+  }
+  .ear-left,
+  .ear-right {
+    fill: color-mix(in oklab, var(--color-accent-ui) 75%, var(--color-bg));
+  }
+</style>

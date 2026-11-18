@@ -1,0 +1,222 @@
+---
+/**
+ * Precrease on the home page in the zine's own voice (design debt phase 4, option A): the
+ * wordmark over a rule, the latest Crease large with its generated thumbnail, and the earlier
+ * ones as a list. Replaces a heading, a grey paragraph and three links, the same rhythm every
+ * other section had.
+ *
+ * Newsreader, the zine's serif, is heavy as Precrease loads it (a variable font, 280 KB). Here
+ * three static weights of the same family (about 70 KB) load only as the section approaches;
+ * until then, and without JavaScript, a system serif stands in.
+ */
+import newsreader400 from '@fontsource/newsreader/files/newsreader-latin-400-normal.woff2?url';
+import newsreader600 from '@fontsource/newsreader/files/newsreader-latin-600-normal.woff2?url';
+import newsreader300Italic from '@fontsource/newsreader/files/newsreader-latin-300-italic.woff2?url';
+import PostThumb from '../precrease/PostThumb.astro';
+import { copy, fill } from '../../lib/copy';
+import { formatDate } from '../../lib/format';
+import { creaseNumber, getPosts, postHref, postKind } from '../../lib/precrease';
+
+const t = copy.home.notes;
+const [latest, ...older] = (await getPosts()).slice(0, 3);
+const fonts = JSON.stringify([
+  { url: newsreader400, weight: '400', style: 'normal' },
+  { url: newsreader600, weight: '600', style: 'normal' },
+  { url: newsreader300Italic, weight: '300', style: 'italic' },
+]);
+---
+
+<section
+  class="sec home-precrease"
+  id="precrease"
+  aria-labelledby="precrease-title"
+  data-inspect="HomePrecrease"
+  data-home-precrease
+  data-fonts={fonts}
+>
+  <div class="wrap">
+    <div class="head">
+      <h2 id="precrease-title" class="word">
+        <span class="pre">Pre</span>
+        <span class="crease">crease</span>
+      </h2>
+      <p class="intro">{latest ? t.intro : t.empty}</p>
+    </div>
+    {latest && (
+      <article class="latest">
+        <a class="thumb" href={postHref(latest.id)} aria-hidden="true" tabindex="-1">
+          <PostThumb slug={latest.id} format={latest.entry.data.format} />
+        </a>
+        <div>
+          <p class="kicker">
+            {fill(t.kicker, {
+              number: creaseNumber(latest.number),
+              kind: postKind(latest.entry),
+              date: formatDate(latest.entry.data.date),
+            })}
+          </p>
+          <h3>
+            <a href={postHref(latest.id)}>{latest.entry.data.title}</a>
+          </h3>
+          <p class="dek">{latest.entry.data.description}</p>
+        </div>
+      </article>
+    )}
+    {older.length > 0 && (
+      <ul class="older">
+        {older.map((p) => (
+          <li>
+            <span class="kicker">{creaseNumber(p.number)}</span>
+            <a href={postHref(p.id)}>{p.entry.data.title}</a>
+            <span class="date">{formatDate(p.entry.data.date)}</span>
+          </li>
+        ))}
+      </ul>
+    )}
+    <p class="more">
+      <a href="/precrease">{t.all}</a>
+    </p>
+  </div>
+</section>
+
+<script>
+  // Self-contained (ENGINEERING.md, "Browser scripts"): loads the section's serif half a screen
+  // before it comes into view, so the first load pays nothing for it.
+  const section = document.querySelector<HTMLElement>('[data-home-precrease]');
+  if (section && 'FontFace' in window)
+    new IntersectionObserver(
+      ([entry], observer) => {
+        if (!entry?.isIntersecting) return;
+        observer.disconnect();
+        const fonts = JSON.parse(section.dataset.fonts ?? '[]') as {
+          url: string;
+          weight: string;
+          style: string;
+        }[];
+        for (const f of fonts)
+          new FontFace('Newsreader Home', `url(${f.url}) format('woff2')`, {
+            weight: f.weight,
+            style: f.style,
+            display: 'swap',
+          })
+            .load()
+            .then((face) => document.fonts.add(face))
+            .catch(() => undefined); // the system serif stays
+      },
+      { rootMargin: '0px 0px 50% 0px' },
+    ).observe(section);
+</script>
+
+<style>
+  .home-precrease {
+    --serif: 'Newsreader Home', 'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
+    border-top: 1px solid var(--color-rule);
+  }
+  .home-precrease > .wrap {
+    padding-block: var(--space-16);
+  }
+  .head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--space-4) var(--space-12);
+    padding-bottom: var(--space-3);
+    border-bottom: 2px solid var(--color-ink);
+  }
+  .word {
+    margin: 0;
+    font: 600 clamp(2.75rem, 5.6vw, 4.25rem) / 1 var(--serif);
+    letter-spacing: -0.02em;
+  }
+  .pre {
+    font-style: italic;
+    font-weight: 300;
+  }
+  .crease {
+    color: var(--color-accent);
+  }
+  .intro {
+    max-width: 44ch;
+    margin: 0;
+    font-size: var(--size-sm);
+    color: var(--color-mute);
+  }
+  .latest {
+    display: grid;
+    grid-template-columns: 220px minmax(0, 1fr);
+    gap: var(--space-12);
+    align-items: center;
+    padding-block: var(--space-12);
+    border-bottom: 1px solid var(--color-rule);
+  }
+  .thumb {
+    display: block;
+  }
+  .kicker,
+  .date {
+    margin: 0;
+    font: 500 var(--size-xs) var(--font-mono);
+    color: var(--color-mute);
+  }
+  h3 {
+    margin: var(--space-2) 0 var(--space-3);
+    font: 600 clamp(2rem, 3.6vw, 2.875rem) / 1.05 var(--serif);
+    letter-spacing: -0.015em;
+    text-wrap: balance;
+  }
+  h3 a,
+  .older a {
+    text-decoration: none;
+  }
+  h3 a:hover,
+  .older a:hover {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.18em;
+  }
+  .dek {
+    max-width: 56ch;
+    margin: 0;
+    color: var(--color-mute);
+  }
+  .older {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .older li {
+    display: grid;
+    grid-template-columns: 7.5rem minmax(0, 1fr) auto;
+    gap: var(--space-6);
+    align-items: baseline;
+    padding-block: var(--space-4);
+    border-bottom: 1px solid var(--color-rule);
+  }
+  .older a {
+    font: 400 var(--size-lg) / 1.2 var(--serif);
+  }
+  .more {
+    margin: var(--space-6) 0 0;
+  }
+  .more a {
+    font-weight: 600;
+    color: var(--color-accent);
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+  @media (max-width: 860px) {
+    .latest {
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--space-4);
+    }
+    .thumb {
+      max-width: 180px;
+    }
+    .older li {
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--space-1);
+    }
+  }
+</style>
