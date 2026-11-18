@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest';
-import { plainText } from '../../scripts/plain-text.mjs';
+import { plainText } from '../../scripts/plain-text.ts';
 
 test('tags go, entities read as text, spaces collapse', () => {
   expect(plainText('<span class="x">Quality</span>\n  gates')).toBe('Quality gates');

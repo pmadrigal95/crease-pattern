@@ -6,7 +6,7 @@
 // of the posts stays in Precrease's own box, and ⌘K hands a query over to it.
 import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { plainText } from './plain-text.mjs';
+import { plainText } from './plain-text.ts';
 
 const dist = join(import.meta.dirname, '..', 'dist');
 
@@ -22,30 +22,31 @@ const PAGES = [
   '/precrease/subscribe',
 ];
 
-const html = (path) => {
+const html = (path: string): string | null => {
   const file = join(dist, path === '/' ? 'index.html' : `${path.slice(1)}.html`);
   return existsSync(file) ? readFileSync(file, 'utf8') : null;
 };
 const decode = plainText;
 /** "About · Pablo Madrigal" → "About"; "Topic map · Precrease · Pablo Madrigal" → "Topic map". */
-const titleOf = (page, owner) => {
+const titleOf = (page: string, owner: string): string => {
   const title = decode(page.match(/<title>([^<]*)<\/title>/)?.[1] ?? '');
   const parts = title.split(' · ').filter((p) => p !== owner && p !== 'Precrease');
   // Precrease's own front page has nothing left once the names go: it is Precrease.
-  return parts[0] ?? title.split(' · ')[0];
+  return parts[0] ?? title.split(' · ')[0] ?? title;
 };
-const description = (page) => decode(page.match(/<meta name="description" content="([^"]*)"/)?.[1] ?? '');
+const description = (page: string): string =>
+  decode(page.match(/<meta name="description" content="([^"]*)"/)?.[1] ?? '');
 /** The page's second-level headings that carry an anchor, inside its main content. */
-const sections = (page) => {
+const sections = (page: string): { title: string; anchor: string }[] => {
   const main = page.match(/<main[\s\S]*?<\/main>/)?.[0] ?? '';
   return [...main.matchAll(/<h2\b[^>]*\bid="([^"]+)"[^>]*>([\s\S]*?)<\/h2>/g)]
-    .map(([, id, inner]) => ({ title: decode(inner), anchor: id }))
+    .map(([, id = '', inner = '']) => ({ title: decode(inner), anchor: id }))
     .filter((s) => s.title);
 };
 
 const home = html('/');
 if (!home) throw new Error('dist/index.html is missing: run astro build first.');
-const owner = decode(home.match(/<title>([^<]*)<\/title>/)?.[1] ?? '').split(' · ')[0];
+const owner = decode(home.match(/<title>([^<]*)<\/title>/)?.[1] ?? '').split(' · ')[0] ?? '';
 
 const pages = PAGES.flatMap((path) => {
   const page = html(path);
