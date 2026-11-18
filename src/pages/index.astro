@@ -4,6 +4,7 @@ import PageLayout from '../layouts/PageLayout.astro';
 import AltitudeProfile from '../components/site/AltitudeProfile.astro';
 import CopyText from '../components/site/CopyText.astro';
 import HeroFold from '../components/site/HeroFold.astro';
+import WorkModel from '../components/site/WorkModel.astro';
 import { getProfile } from '../lib/profile';
 import { copy, fill } from '../lib/copy';
 import { creaseNumber, getPosts, postHref } from '../lib/precrease';
@@ -72,8 +73,9 @@ const commit = manifest.commit.slice(0, 7);
         <div>
           <p class="eyebrow">{work.eyebrow}</p>
           <h2 id="work-title">{work.heading}</h2>
+          <p class="lead">{work.intro}</p>
         </div>
-        <p class="lead">{work.intro}</p>
+        <WorkModel />
       </div>
       <dl class="readout">
         {metrics.map((metric) => (
@@ -310,11 +312,14 @@ const commit = manifest.commit.slice(0, 7);
     display: grid;
     grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
     gap: var(--space-4) var(--space-12);
-    align-items: end;
+    align-items: center;
   }
-  .work-head .lead,
   .work-head h2 {
     margin: 0;
+  }
+  .work-head .lead {
+    max-width: 46ch;
+    margin: var(--space-6) 0 0;
   }
   .eyebrow {
     margin: 0 0 var(--space-3);

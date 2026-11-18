@@ -13,7 +13,9 @@ const sceneReady = { timeout: 15_000 };
 // capability check accept it (it turns software rendering away on purpose, for real visitors).
 // One worker for this file: several software-rendered scenes at once can starve SwiftShader, and
 // then the capability check rightly falls back to the SVG.
-test.describe.configure({ mode: 'default' });
+// Software WebGL is slow, more so with the hero's scene and the Work star on one page: a longer
+// limit for these tests only.
+test.describe.configure({ mode: 'default', timeout: 90_000 });
 test.use({ launchOptions: { args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader'] } });
 const allowSoftwareGl = (page: Page) =>
   page.addInitScript(() => {
