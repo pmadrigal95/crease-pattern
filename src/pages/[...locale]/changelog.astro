@@ -2,13 +2,13 @@
 import PageLayout from '../../layouts/PageLayout.astro';
 import ExpeditionMap from '../../components/site/ExpeditionMap.astro';
 import ReleaseNotes from '../../components/site/ReleaseNotes.astro';
-import { copyFor } from '../../lib/copy';
-import { localeStaticPaths } from '../../lib/i18n';
+import { copyFor } from '../../i18n/dictionary';
+import { localeStaticPaths } from '../../i18n/routing';
 const copy = copyFor(Astro.currentLocale);
 
 const page = copy.changelogPage;
 
-/** This page in every language: "/" and "/es" (src/lib/i18n.ts). */
+/** This page in every language (src/i18n/routing.ts). */
 export const getStaticPaths = localeStaticPaths;
 ---
 

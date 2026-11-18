@@ -1,15 +1,15 @@
 ---
-import { getEntry, render } from 'astro:content';
+import { render } from 'astro:content';
+import { getPage } from '../../lib/pages';
 import PageLayout from '../../layouts/PageLayout.astro';
-import { copyFor } from '../../lib/copy';
-import { localeStaticPaths } from '../../lib/i18n';
+import { copyFor } from '../../i18n/dictionary';
+import { localeStaticPaths } from '../../i18n/routing';
 const copy = copyFor(Astro.currentLocale);
 
-const page = await getEntry('pages', 'privacy');
-if (!page) throw new Error('src/content/pages/privacy.mdx is missing.');
+const page = await getPage('privacy', Astro.currentLocale);
 const { Content } = await render(page);
 
-/** This page in every language: "/" and "/es" (src/lib/i18n.ts). */
+/** This page in every language (src/i18n/routing.ts). */
 export const getStaticPaths = localeStaticPaths;
 ---
 

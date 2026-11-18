@@ -11,10 +11,10 @@
  * with the hero's 3D fox.
  */
 import usage from '../../generated/components.json';
-import { copyFor } from '../../lib/copy';
+import { copyFor } from '../../i18n/dictionary';
 import { formatNumber } from '../../lib/format';
 import { drawStar, star } from '../../lib/sonobe/assemble';
-import { langOf } from '../../lib/i18n';
+import { langOf } from '../../i18n/routing';
 const lang = langOf(Astro.currentLocale);
 const copy = copyFor(Astro.currentLocale);
 

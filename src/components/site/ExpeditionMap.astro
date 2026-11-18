@@ -9,17 +9,18 @@
  * labels with a halo so they stay legible over the contours. Two drawings (wide and phone), one
  * shown by CSS. Static SVG, no JavaScript, no inline styles.
  */
-import { climbs, places } from '../../lib/career';
+import { careerFor, climbs, places } from '../../lib/career';
 import { expeditionMap, type MapFrame } from '../../lib/terrain';
-import { copyFor, fill } from '../../lib/copy';
+import { copyFor, fill } from '../../i18n/dictionary';
 import { formatNumber } from '../../lib/format';
-import { langOf } from '../../lib/i18n';
+import { langOf } from '../../i18n/routing';
 const lang = langOf(Astro.currentLocale);
 const copy = copyFor(Astro.currentLocale);
 
 const t = copy.changelogPage.map;
 const elevation = (m: number) => fill(copy.home.changelog.elevation, { elevation: formatNumber(m, lang) });
-const spans = new Map(climbs().map((c, i, all) => [c.major, { c, current: i === all.length - 1 }]));
+const career = careerFor(lang);
+const spans = new Map(climbs(career).map((c, i, all) => [c.major, { c, current: i === all.length - 1 }]));
 const frames = {
   wide: {
     width: 1000,
@@ -39,7 +40,7 @@ const frames = {
     compact: true,
   },
 } satisfies Record<string, MapFrame>;
-const data = places();
+const data = places(career);
 const byMajor = new Map(data.map((p) => [p.major, p]));
 const drawings = (['wide', 'narrow'] as const).map((name) => ({
   name,

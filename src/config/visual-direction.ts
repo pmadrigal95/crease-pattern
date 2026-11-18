@@ -12,10 +12,5 @@ export const VisualDirection = {
 
 export type VisualDirection = (typeof VisualDirection)[keyof typeof VisualDirection];
 
-export const visualDirectionLabels: Record<VisualDirection, { label: string; note: string }> = {
-  [VisualDirection.BasaltGlacier]: { label: 'Basalt & glacier', note: 'Iceland: basalt, glacier ice, moss' },
-  [VisualDirection.WashiAsagi]: { label: 'Washi & asagi', note: 'Japanese paper, sumi ink, walnut' },
-  [VisualDirection.ContourLines]: { label: 'Contour lines', note: 'Trail maps, cloud forest, lakes' },
-};
-
+// Their names, per language, are in the interface copy (src/i18n/locales/<lang>/ui.json, `identities`).
 export const allVisualDirections = Object.values(VisualDirection);

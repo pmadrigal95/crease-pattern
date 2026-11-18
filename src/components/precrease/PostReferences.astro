@@ -4,7 +4,7 @@
  * learning"), from the post's `references` front matter. A group with no entries doesn't show, and
  * nothing renders when a post has none. Plain links, no JavaScript.
  */
-import { copyFor } from '../../lib/copy';
+import { copyFor } from '../../i18n/dictionary';
 const copy = copyFor(Astro.currentLocale);
 
 type Reference = {

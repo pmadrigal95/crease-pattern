@@ -7,13 +7,10 @@
  * never to sort or compare.
  *
  * Each formatter takes the page's language (English when left out). Depends on nothing but `Intl`,
- * ./template and ./i18n, so browser scripts can use it too.
+ * ./template and src/i18n/config, so browser scripts can use it too.
  */
 import { fill } from './template';
-import { DEFAULT_LANG, type Lang } from './i18n';
-
-/** BCP 47 locale per site language: Spanish as written in Costa Rica. */
-const LOCALES: Record<Lang, string> = { en: 'en', es: 'es-CR' };
+import { DEFAULT_LANG, LOCALES, type Lang } from '../i18n/config';
 
 /**
  * Each formatter is built the first time a language uses it. Building one loads locale data, which
@@ -24,7 +21,7 @@ const lazy = <T>(make: (locale: string) => T): ((lang: Lang) => T) => {
   const made = new Map<Lang, T>();
   return (lang) => {
     let value = made.get(lang);
-    if (value === undefined) made.set(lang, (value = make(LOCALES[lang])));
+    if (value === undefined) made.set(lang, (value = make(LOCALES[lang].intl)));
     return value;
   };
 };

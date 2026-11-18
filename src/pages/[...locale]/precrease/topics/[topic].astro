@@ -2,17 +2,23 @@
 import PrecreaseLayout from '../../../../layouts/PrecreaseLayout.astro';
 import PostCard from '../../../../components/precrease/PostCard.astro';
 import TopicChips from '../../../../components/precrease/TopicChips.astro';
-import { MIN_POSTS_TO_INDEX, topics, type Topic } from '../../../../config/precrease';
-import { copyFor, fill } from '../../../../lib/copy';
+import { MIN_POSTS_TO_INDEX } from '../../../../config/precrease';
+import { topicsFor, type Topic } from '../../../../lib/taxonomy';
+import { copyFor, fill } from '../../../../i18n/dictionary';
 import { getPosts, topicHref, type PostSummary } from '../../../../lib/precrease';
 import { childrenOf, pathTo, postsUnder } from '../../../../lib/precrease-tree';
-import { localeStaticPaths } from '../../../../lib/i18n';
-const copy = copyFor(Astro.currentLocale);
+import { langOf, localeStaticPaths, localize } from '../../../../i18n/routing';
+const lang = langOf(Astro.currentLocale);
+const copy = copyFor(lang);
+const topics = topicsFor(lang);
 
 export async function getStaticPaths() {
   const posts = await getPosts();
   return localeStaticPaths().flatMap(({ params }) =>
-    topics.map((topic) => ({ params: { ...params, topic: topic.id }, props: { topic, posts } })),
+    topicsFor(langOf(params.locale)).map((topic) => ({
+      params: { ...params, topic: topic.id },
+      props: { topic, posts },
+    })),
   );
 }
 
@@ -45,11 +51,11 @@ const feedHref = `/precrease/topics/${topic.id}/rss.xml`;
       <nav aria-label={t.breadcrumb}>
         <ol class="crumbs">
           <li>
-            <a href="/precrease/map">{t.map.title}</a>
+            <a href={localize('/precrease/map', lang)}>{t.map.title}</a>
           </li>
           {path.slice(0, -1).map((p) => (
             <li>
-              <a href={topicHref(p.id)}>{p.label}</a>
+              <a href={topicHref(p.id, lang)}>{p.label}</a>
             </li>
           ))}
         </ol>
@@ -67,7 +73,7 @@ const feedHref = `/precrease/topics/${topic.id}/rss.xml`;
         <ul>
           {children.map((c) => (
             <li>
-              <a href={topicHref(c.id)}>{c.label}</a>
+              <a href={topicHref(c.id, lang)}>{c.label}</a>
               <span class="count">{c.count}</span>
             </li>
           ))}

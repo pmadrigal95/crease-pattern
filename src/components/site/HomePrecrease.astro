@@ -13,10 +13,10 @@ import newsreader400 from '@fontsource/newsreader/files/newsreader-latin-400-nor
 import newsreader600 from '@fontsource/newsreader/files/newsreader-latin-600-normal.woff2?url';
 import newsreader300Italic from '@fontsource/newsreader/files/newsreader-latin-300-italic.woff2?url';
 import PostThumb from '../precrease/PostThumb.astro';
-import { copyFor, fill } from '../../lib/copy';
+import { copyFor, fill } from '../../i18n/dictionary';
 import { formatDate } from '../../lib/format';
 import { creaseNumber, getPosts, postHref, postKind } from '../../lib/precrease';
-import { langOf } from '../../lib/i18n';
+import { langOf, localize } from '../../i18n/routing';
 const lang = langOf(Astro.currentLocale);
 const copy = copyFor(Astro.currentLocale);
 
@@ -54,7 +54,7 @@ const fonts = JSON.stringify([
           <p class="kicker">
             {fill(t.kicker, {
               number: creaseNumber(latest.number, lang),
-              kind: postKind(latest.entry),
+              kind: postKind(latest.entry, lang),
               date: formatDate(latest.entry.data.date, lang),
             })}
           </p>
@@ -77,7 +77,7 @@ const fonts = JSON.stringify([
       </ul>
     )}
     <p class="more">
-      <a href="/precrease">{t.all}</a>
+      <a href={localize('/precrease', lang)}>{t.all}</a>
     </p>
   </div>
 </section>

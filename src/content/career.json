@@ -3,154 +3,107 @@
   "releases": [
     {
       "major": 0,
-      "codename": "Base camp",
-      "place": "Cartago",
       "elevationM": 1435,
-      "theme": "Foundations. Every climb starts here.",
-      "location": { "lat": 9.864, "lon": -83.919 }
+      "location": {
+        "lat": 9.864,
+        "lon": -83.919
+      }
     },
     {
       "major": 1,
-      "codename": "Poás",
-      "place": "Poás Volcano",
       "elevationM": 2708,
-      "theme": "Developer",
-      "location": { "lat": 10.198, "lon": -84.233 }
+      "location": {
+        "lat": 10.198,
+        "lon": -84.233
+      }
     },
     {
       "major": 2,
-      "codename": "Turrialba",
-      "place": "Turrialba Volcano",
       "elevationM": 3340,
-      "theme": "Product engineering",
-      "location": { "lat": 10.025, "lon": -83.767 }
+      "location": {
+        "lat": 10.025,
+        "lon": -83.767
+      }
     },
     {
       "major": 3,
-      "codename": "Irazú",
-      "place": "Irazú Volcano",
       "elevationM": 3432,
-      "theme": "Architecture and leadership",
-      "location": { "lat": 9.979, "lon": -83.852 }
+      "location": {
+        "lat": 9.979,
+        "lon": -83.852
+      }
     }
-  ],
-  "unreleased": [
-    "The Inspector: tilt this page into its layers and read its real metrics.",
-    "Parallel code in the browser: an interactive essay on threads.",
-    "One unit, thirty shapes: reusable components explained through modular origami."
   ],
   "entries": [
     {
       "version": "0.0.1",
       "kind": "education",
       "start": "2015",
-      "end": "2017",
-      "title": "Diploma in Information Technology",
-      "org": "Colegio Universitario de Cartago"
+      "end": "2017"
     },
     {
       "version": "0.1.0",
       "kind": "role",
       "start": "2017-05",
       "end": "2017-07",
-      "title": "Software Developer, internship",
-      "org": "MDG Developers Group",
-      "stack": ["Node.js", "Express", "Pug", "OAuth 2.0"],
-      "added": [
-        "Worked on an inherited web system as an intern, in Node.js, Express and Pug.",
-        "Integrated Azure and Google sign-in over OAuth 2.0."
-      ]
+      "stack": ["Node.js", "Express", "Pug", "OAuth 2.0"]
     },
     {
       "version": "0.2.0",
       "kind": "role",
       "start": "2018-06",
-      "end": "2018-11",
-      "title": "IT Engineer",
-      "org": "Jardines del Recuerdo"
+      "end": "2018-11"
     },
     {
       "version": "0.3.0",
       "kind": "education",
       "start": "2017",
-      "end": "2019",
-      "title": "Bachelor's degree in Systems Engineering",
-      "org": "Universidad Fidélitas"
+      "end": "2019"
     },
     {
       "version": "1.0.0",
       "kind": "role",
       "start": "2019-09",
       "end": "2022-07",
-      "title": "Software Development Engineer",
-      "org": "MDG Developers Group",
-      "stack": ["Vue", ".NET Core", "REST"],
-      "added": [
-        "Defined the Vue frontend foundation that every company project started from.",
-        "Shipped full-stack features: Vue clients on top of .NET Core REST APIs."
-      ]
+      "stack": ["Vue", ".NET Core", "REST"]
     },
     {
       "version": "1.1.0",
       "kind": "assignment",
       "start": "2021-01",
       "end": "2022-07",
-      "title": "Software Engineer, on assignment to NICE Actimize",
-      "org": "MDG Developers Group",
-      "stack": ["Java", "JavaScript"],
-      "added": [
-        "Diagnosed and resolved issues in Java and JavaScript applications for NICE Actimize, a financial crime and compliance software company."
-      ]
+      "stack": ["Java", "JavaScript"]
     },
     {
       "version": "2.0.0",
       "kind": "contract",
       "start": "2021-12",
-      "end": "2022-07",
-      "title": "Frontend Consultant",
-      "org": "Buo",
-      "added": ["Joined Buo, an AI people analytics platform, as its only frontend developer."]
+      "end": "2022-07"
     },
     {
       "version": "2.1.0",
       "kind": "role",
       "start": "2022-07",
-      "end": "2024-07",
-      "title": "Frontend Developer",
-      "org": "Buo",
-      "changed": ["Moved from consultant to full time, still the only frontend developer on the product."]
+      "end": "2024-07"
     },
     {
       "version": "3.0.0",
       "kind": "role",
       "start": "2024-07",
-      "end": "2026-01",
-      "title": "Frontend Lead",
-      "org": "Buo",
-      "changed": ["Started leading the frontend team as it grew around the product."]
+      "end": "2026-01"
     },
     {
       "version": "3.1.0",
       "kind": "role",
       "start": "2026-01",
-      "end": null,
-      "title": "Lead Frontend Architect",
-      "org": "Buo",
-      "changed": ["Took ownership of the frontend architecture and its technical direction."]
+      "end": null
     },
     {
       "version": "3.2.0",
       "kind": "project",
       "start": "2026-10",
       "end": null,
-      "title": "crease-pattern",
-      "org": "Independent",
-      "stack": ["Astro", "TypeScript", "Vitest", "Playwright", "Cloudflare Workers"],
-      "added": [
-        "Launched this site, built in public: one design system with three visual identities.",
-        "Enforced WCAG 2.2 AA contrast with unit tests across every identity and theme.",
-        "Every change passes accessibility and performance budgets in CI before it deploys on its own."
-      ]
+      "stack": ["Astro", "TypeScript", "Vitest", "Playwright", "Cloudflare Workers"]
     }
   ]
 }

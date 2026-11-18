@@ -99,7 +99,8 @@
     "license": "Código MIT · Textos CC BY-NC-ND 4.0",
     "colophon": "Colofón",
     "privacy": "Privacidad",
-    "source": "Código en GitHub"
+    "source": "Código en GitHub",
+    "email": "Correo"
   },
   "notFound": {
     "title": "Esta página no está en el mapa.",
@@ -130,7 +131,8 @@
   "labels": {
     "stack": "Tecnologías",
     "elsewhere": "En otros sitios",
-    "main": "Principal"
+    "main": "Principal",
+    "home": "{name}, inicio"
   },
   "about": {
     "title": "Ingeniero de sistemas. Arquitecto frontend.",
@@ -444,8 +446,7 @@
       "system": "Seguir el tema del sistema",
       "identity": "Usar la identidad {name}",
       "copyEmail": "Copiar el correo",
-      "searchPosts": "Buscar “{query}” en las entradas",
-      "language": "Leer en español"
+      "searchPosts": "Buscar “{query}” en las entradas"
     },
     "copied": "Correo copiado",
     "empty": "Nada coincide. Prueba con menos letras o con otra palabra.",
@@ -454,12 +455,15 @@
     "many": "{count} resultados"
   },
   "lang": {
-    "name": "Español",
-    "code": "ES",
     "label": "Idioma",
     "switch": "Leer en español",
     "suggest": "Esta página también está en español.",
     "suggestAction": "Leer en español",
     "dismiss": "No, gracias"
+  },
+  "identities": {
+    "basalt-glacier": "Basalto y glaciar",
+    "washi-asagi": "Washi y asagi",
+    "contour-lines": "Curvas de nivel"
   }
 }

@@ -2,6 +2,7 @@ import { defineCollection } from 'astro:content';
 import { file, glob } from 'astro/loaders';
 import { z } from 'astro/zod';
 import { formatIds, topicIds } from './config/precrease';
+import { DEFAULT_LANG, LANGS } from './i18n/config';
 
 /**
  * Precrease (the blog, decisions 46–49). One MDX file per post in src/content/precrease.
@@ -58,7 +59,7 @@ const precrease = defineCollection({
           close: z.string().max(120),
         })
         .optional(),
-      lang: z.enum(['en', 'es']).default('en'),
+      lang: z.enum(LANGS).default(DEFAULT_LANG),
       translationOf: z.string().optional(),
       draft: z.boolean().default(false),
       /**
@@ -77,18 +78,14 @@ const precrease = defineCollection({
 
 /**
  * The site owner's public profile: the only place personal data lives, so code stays
- * free of it. The schema is strict on purpose: an unexpected field (a phone number,
+ * free of it. What is said about the owner (role, summary…) is per language, in
+ * src/i18n/locales/<lang>/profile.json; src/lib/profile.ts joins the two. The schema is strict on purpose: an unexpected field (a phone number,
  * an address) fails the build instead of being published.
  */
 const profile = defineCollection({
   loader: file('./src/content/profile.json'),
   schema: z.strictObject({
     name: z.string().min(1),
-    role: z.string().min(1),
-    location: z.string().min(1),
-    training: z.string().min(1),
-    languages: z.array(z.string().min(1)).min(1),
-    summary: z.string().max(160),
     contact: z.strictObject({
       email: z.email(),
       linkedin: z.url().startsWith('https://www.linkedin.com/in/'),
@@ -97,9 +94,12 @@ const profile = defineCollection({
   }),
 });
 
-/** Standalone pages written in MDX (About, Colophon). */
+/**
+ * Standalone pages written in MDX (About, Colophon, Privacy): one folder per language, the same
+ * file names in each (en/about.mdx, es/about.mdx). Read through src/lib/pages.ts.
+ */
 const pages = defineCollection({
-  loader: glob({ pattern: '*.mdx', base: './src/content/pages' }),
+  loader: glob({ pattern: '**/*.mdx', base: './src/content/pages' }),
   schema: z.strictObject({
     title: z.string().min(1),
     description: z.string().max(160),

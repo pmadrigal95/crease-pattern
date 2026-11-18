@@ -1,13 +1,17 @@
 import { describe, expect, test } from 'vitest';
 import {
   langOf,
+  languageLinks,
   localize,
   preferredLang,
   switchTarget,
   translationsOf,
   unlocalize,
-} from '../../src/lib/i18n';
-import { assertSameShape } from '../../src/lib/copy';
+} from '../../src/i18n/routing';
+import { assertSameShape, assertWellFormed } from '../../src/i18n/dictionary';
+import { DEFAULT_LANG, LANGS } from '../../src/i18n/config';
+import { joinCareer } from '../../src/lib/career';
+import { readFileSync } from 'node:fs';
 
 describe('paths', () => {
   test.each([
@@ -61,16 +65,67 @@ describe('preferredLang', () => {
   ] as const)('%j prefers %s', (languages, expected) => expect(preferredLang(languages)).toBe(expected));
 });
 
-describe('copy files', () => {
+describe('dictionaries', () => {
   test('a missing key fails', () => {
-    expect(() => assertSameShape({ a: 'x', b: 'y' }, { a: 'x' }, 'es')).toThrow(/keys differ/);
+    expect(() => assertSameShape({ a: 'x', b: 'y' }, { a: 'x' }, 'es/ui.json')).toThrow(/keys differ/);
   });
   test('a different placeholder fails', () => {
-    expect(() => assertSameShape({ a: 'Hi {name}' }, { a: 'Hola {nombre}' }, 'es')).toThrow(/placeholders/);
+    expect(() => assertSameShape({ a: 'Hi {name}' }, { a: 'Hola {nombre}' }, 'es/ui.json')).toThrow(
+      /placeholders/,
+    );
   });
-  test('a translation with the same keys and placeholders passes', () => {
+  test('a list of another length fails', () => {
+    expect(() => assertSameShape({ a: ['x', 'y'] }, { a: ['x'] }, 'es/career.json')).toThrow(/list of 2/);
+  });
+  test('a translation with the same keys, lists and placeholders passes', () => {
     expect(() =>
-      assertSameShape({ g: { a: 'Hi {name}' } }, { g: { a: 'Hola, {name}' } }, 'es'),
+      assertSameShape(
+        { g: { a: 'Hi {name}', l: ['x'] } },
+        { g: { a: 'Hola, {name}', l: ['y'] } },
+        'es/ui.json',
+      ),
     ).not.toThrow();
+  });
+  test('empty strings and broken placeholders fail', () => {
+    expect(() => assertWellFormed({ a: ' ' }, 'es/ui.json')).toThrow(/empty/);
+    expect(() => assertWellFormed({ a: ['ok', 'Hola {name'] }, 'es/ui.json')).toThrow(/a\[1\]: placeholders/);
+  });
+});
+
+describe('career words', () => {
+  const facts = {
+    vueSince: '2019-09',
+    releases: [{ major: 1, elevationM: 2708, location: { lat: 10, lon: -84 } }],
+    entries: [{ version: '1.0.0', kind: 'role' as const, start: '2019-09' }],
+  };
+  const words = {
+    releases: { '1': { codename: 'Poás', place: 'Poás', theme: 'Developer' } },
+    unreleased: [],
+    entries: { '1.0.0': { title: 'Engineer', org: 'MDG' } },
+  };
+  test('join each release and entry with its words', () => {
+    expect(joinCareer(facts, words, 'en').entries[0]).toMatchObject({ version: '1.0.0', title: 'Engineer' });
+  });
+  test('an entry without words fails, and so do words for an entry that does not exist', () => {
+    expect(() => joinCareer(facts, { ...words, entries: {} }, 'es')).toThrow(/entry 1\.0\.0 has no words/);
+    expect(() =>
+      joinCareer(facts, { ...words, entries: { ...words.entries, '9.0.0': { title: 'x', org: 'y' } } }, 'es'),
+    ).toThrow(/9\.0\.0 not in career\.json/);
+  });
+});
+
+describe('languages', () => {
+  test('the switch lists every language, the current one marked', () => {
+    expect(languageLinks('/es/about', { en: '/about', es: '/es/about' }, 'es')).toEqual([
+      { lang: 'en', href: '/about', current: false },
+      { lang: 'es', href: '/es/about', current: true },
+    ]);
+  });
+  test('the home redirect knows every language but the default', () => {
+    const script = readFileSync('src/scripts/restore-identity.ts', 'utf8');
+    const listed = /\[((?:"[a-z]+",?)+)\]\.indexOf\(l\)/.exec(script)?.[1];
+    expect(listed?.split(',').map((l) => l.replaceAll('"', ''))).toEqual(
+      LANGS.filter((l) => l !== DEFAULT_LANG),
+    );
   });
 });

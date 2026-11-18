@@ -4,23 +4,26 @@
  * (src/layouts/BaseLayout.astro). Precrease posts have theirs at /precrease/og/<slug>.png.
  */
 import type { APIRoute } from 'astro';
-import { getEntry } from 'astro:content';
-import { copy } from '../../lib/copy';
+import { copyFor } from '../../i18n/dictionary';
+import { DEFAULT_LANG } from '../../i18n/routing';
 import { getProfile } from '../../lib/profile';
+import { getPage } from '../../lib/pages';
 import { ogPageImage } from '../../lib/og-image';
 
 export async function getStaticPaths() {
   const profile = await getProfile();
   const page = async (id: 'about' | 'colophon') => {
-    const entry = await getEntry('pages', id);
-    if (!entry) throw new Error(`src/content/pages/${id}.mdx is missing.`);
+    const entry = await getPage(id, DEFAULT_LANG);
     return { kicker: entry.data.title, title: entry.data.description };
   };
   const cards = {
     // The home page's own headline; the name is already the signature.
-    home: { kicker: profile.role, title: copy.home.hero.title },
+    home: { kicker: profile.role, title: copyFor(DEFAULT_LANG).home.hero.title },
     about: await page('about'),
-    changelog: { kicker: copy.changelogPage.title, title: copy.changelogPage.description },
+    changelog: {
+      kicker: copyFor(DEFAULT_LANG).changelogPage.title,
+      title: copyFor(DEFAULT_LANG).changelogPage.description,
+    },
     colophon: await page('colophon'),
   };
   return Object.entries(cards).map(([id, card]) => ({

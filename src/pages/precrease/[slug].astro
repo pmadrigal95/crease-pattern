@@ -9,13 +9,13 @@ import PostToc from '../../components/precrease/PostToc.astro';
 import PostReaders from '../../components/precrease/PostReaders.astro';
 import PostReferences from '../../components/precrease/PostReferences.astro';
 import site from '../../../site.config';
-import { formats, topics } from '../../config/precrease';
-import { copyFor, fill } from '../../lib/copy';
+import { formatsFor, topicsFor } from '../../lib/taxonomy';
+import { copyFor, fill } from '../../i18n/dictionary';
 import { formatDate, padNumber } from '../../lib/format';
 import { creaseNumber, getPosts, postHref, postKind, topicHref, type PostSummary } from '../../lib/precrease';
 import { pathTo, related } from '../../lib/precrease-tree';
 import { readingMinutes } from '../../lib/reading';
-import { langOf } from '../../lib/i18n';
+import { langOf } from '../../i18n/routing';
 const lang = langOf(Astro.currentLocale);
 const copy = copyFor(Astro.currentLocale);
 
@@ -35,6 +35,7 @@ const { Content, headings } = await render(post.entry);
 const historyHref = `${site.repository}/commits/main/src/content/precrease/${post.id}.mdx`;
 const t = copy.precrease;
 const number = padNumber(data.number);
+const topics = topicsFor(lang);
 const paths = data.topics.map((id) => pathTo(topics, id));
 const others = related(topics, posts, post);
 // Search filters: a post counts under each of its topics and every ancestor of them.
@@ -62,8 +63,8 @@ const topicFilters = [...new Set(paths.flat().map((topic) => topic.id))];
     <header class="wrap head">
       <div class="text">
         <p class="kicker" data-pagefind-ignore>
-          {creaseNumber(data.number, lang)} · {postKind(post.entry)}
-          <span class="format-note">{formats[data.format].description}</span>
+          {creaseNumber(data.number, lang)} · {postKind(post.entry, lang)}
+          <span class="format-note">{formatsFor(lang)[data.format].description}</span>
         </p>
         <FoldTitle text={data.title} unfold="load" />
         <p class="lede">{data.description}</p>

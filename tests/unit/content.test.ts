@@ -1,9 +1,12 @@
 import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, test } from 'vitest';
-import { career, releasesNewestFirst, yearsSince } from '../../src/lib/career';
+import { careerFor, releasesNewestFirst, yearsSince } from '../../src/lib/career';
 import { formatRange } from '../../src/lib/format';
-import { copy, fill } from '../../src/lib/copy';
+import { copyFor, fill } from '../../src/i18n/dictionary';
+
+const career = careerFor('en');
+const copy = copyFor('en');
 
 describe('career changelog', () => {
   test('every entry belongs to a release', () => {
@@ -22,7 +25,7 @@ describe('career changelog', () => {
   });
 
   test('releases and entries are listed newest first', () => {
-    const releases = releasesNewestFirst();
+    const releases = releasesNewestFirst(career);
     expect(releases.map((r) => r.major)).toEqual([...releases.map((r) => r.major)].sort((a, b) => b - a));
     expect(releases[0]?.entries[0]?.version).toBe('3.2.0');
   });

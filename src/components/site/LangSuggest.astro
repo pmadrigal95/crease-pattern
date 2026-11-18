@@ -1,33 +1,34 @@
 ---
 /**
- * The suggestion to read a page in the other language (M5, decision 2), written in that language.
- * Rendered hidden on pages that have a pair; src/scripts/lang.ts shows it when the browser's
- * languages prefer the other one and the visitor hasn't chosen a language or dismissed it yet.
+ * The suggestion to read a page in another language (M5, decision 2), written in that language:
+ * one per language the page has a pair in, rendered hidden. src/scripts/lang.ts shows the one in
+ * the browser's preferred language when the visitor hasn't chosen a language or dismissed it.
  * Fixed at the bottom of the window, so showing it never moves the page.
  */
-import { copyFor } from '../../lib/copy';
-import { langOf, otherLang, type Translations } from '../../lib/i18n';
+import { copyFor } from '../../i18n/dictionary';
+import { LANGS, LOCALES, langOf, type Translations } from '../../i18n/routing';
 
 interface Props {
   translations: Translations;
 }
-const other = otherLang(langOf(Astro.currentLocale));
-const href = Astro.props.translations[other];
-const t = copyFor(other).lang;
+const current = langOf(Astro.currentLocale);
+const suggestions = LANGS.filter((lang) => lang !== current).flatMap((lang) => {
+  const href = Astro.props.translations[lang];
+  return href ? [{ lang, href, t: copyFor(lang).lang }] : [];
+});
 ---
 
-{href && (
-  <aside class="suggest" lang={other} aria-label={t.name} data-lang-suggest={other} hidden>
+{suggestions.map(({ lang, href, t }) => (
+  <aside class="suggest" lang={lang} aria-label={LOCALES[lang].name} data-lang-suggest={lang} hidden>
     <p>{t.suggest}</p>
-    <a href={href} hreflang={other} data-lang-switch={other}>
+    <a href={href} hreflang={lang} data-lang-switch={lang}>
       {t.suggestAction}
     </a>
     <button type="button" data-lang-dismiss>
       {t.dismiss}
     </button>
   </aside>
-)}
-
+))}
 <style>
   .suggest {
     position: fixed;

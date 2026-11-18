@@ -109,3 +109,28 @@ for (const path of ['/es', '/es/about', '/es/precrease']) {
     expect(results.violations).toEqual([]);
   });
 }
+
+test('the Spanish pages read in Spanish, the Inspector included', async ({ page }) => {
+  await page.goto('/es/about');
+  await expect(page.locator('main h1')).toHaveText('Ingeniero de sistemas. Arquitecto frontend.');
+  await expect(page.getByRole('link', { name: 'colofón', exact: true })).toHaveAttribute(
+    'href',
+    '/es/colophon',
+  );
+  await page.getByRole('button', { name: 'Inspeccionar' }).click();
+  await expect(page.locator('#inspector')).toHaveAttribute('aria-label', 'Inspector');
+  await expect(page.locator('#inspector')).toContainText('Capas');
+  await expect(page.locator('#inspector')).toContainText('Curvas de nivel');
+});
+
+test('the Spanish changelog and topic map use Spanish data', async ({ page }) => {
+  await page.goto('/es/changelog');
+  await expect(page.locator('main')).toContainText('Campamento base');
+  await expect(page.locator('main')).toContainText('Arquitecto frontend líder');
+  await page.goto('/es/precrease/map');
+  await expect(page.locator('main')).toContainText('Arquitectura y diseño');
+  await expect(page.getByRole('link', { name: 'Arquitectura y diseño' })).toHaveAttribute(
+    'href',
+    '/es/precrease/topics/architecture',
+  );
+});

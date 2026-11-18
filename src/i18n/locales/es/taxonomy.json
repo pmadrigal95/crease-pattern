@@ -1,0 +1,66 @@
+{
+  "topics": {
+    "architecture": {
+      "label": "Arquitectura y diseño",
+      "intro": "Cómo se le da forma al software para que pueda seguir cambiando: límites, módulos, interfaces."
+    },
+    "frontend": {
+      "label": "Frontend",
+      "intro": "Interfaces que aguantan en el navegador, para cada persona que las usa."
+    },
+    "performance": {
+      "label": "Rendimiento",
+      "intro": "Velocidad medida: qué hace esperar a la gente y cómo quitarlo."
+    },
+    "accessibility": {
+      "label": "Accesibilidad",
+      "intro": "Teclado, lectores de pantalla, contraste y todo lo demás que decide quién puede usarlo."
+    },
+    "motion": {
+      "label": "Interacción y movimiento",
+      "intro": "Movimiento que explica algo, y la mesura a su alrededor."
+    },
+    "backend": {
+      "label": "Backend y datos",
+      "intro": "APIs, almacenamiento y los datos que sobreviven a cualquier interfaz."
+    },
+    "systems": {
+      "label": "Sistemas",
+      "intro": "Concurrencia, trabajo distribuido y el costo de coordinar."
+    },
+    "concurrency": {
+      "label": "Concurrencia",
+      "intro": "Hilos, workers y por qué tener más no siempre es más rápido."
+    },
+    "delivery": {
+      "label": "Entrega",
+      "intro": "Pruebas, CI/CD, DevOps y seguridad: sacar cambios de forma segura."
+    },
+    "ai": {
+      "label": "IA e ingeniería",
+      "intro": "Construir software con IA en el ciclo, y lo que todavía necesita a una persona."
+    },
+    "craft": {
+      "label": "Oficio y carrera",
+      "intro": "Leer, escribir, liderar y aprender en público."
+    }
+  },
+  "formats": {
+    "essay": {
+      "label": "Ensayo",
+      "description": "Una lectura larga, a menudo con algo para probar."
+    },
+    "note": {
+      "label": "Nota",
+      "description": "Una nota corta sobre una idea."
+    },
+    "dog-ear": {
+      "label": "Esquina doblada",
+      "description": "Notas sobre un libro, capítulo por capítulo."
+    },
+    "basic-folds": {
+      "label": "Pliegues básicos",
+      "description": "Fundamentos de ingeniería para quienes construyen con IA."
+    }
+  }
+}

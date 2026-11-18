@@ -11,9 +11,13 @@
  * Shortcut: "/" focuses it (Ctrl/Cmd+K opens the site's command menu, which can hand a query
  * over as ?q=); Escape closes the results.
  */
-import { formats, topics } from '../../config/precrease';
-import { copyFor } from '../../lib/copy';
-const copy = copyFor(Astro.currentLocale);
+import { formatsFor, topicsFor } from '../../lib/taxonomy';
+import { copyFor } from '../../i18n/dictionary';
+import { langOf } from '../../i18n/routing';
+const lang = langOf(Astro.currentLocale);
+const copy = copyFor(lang);
+const formats = formatsFor(lang);
+const topics = topicsFor(lang);
 
 // Pagefind compiles WebAssembly. 'wasm-unsafe-eval' allows that and nothing else (eval() stays
 // blocked), and only on pages that carry the search box, not site-wide.

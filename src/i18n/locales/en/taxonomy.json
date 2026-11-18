@@ -1,0 +1,66 @@
+{
+  "topics": {
+    "architecture": {
+      "label": "Architecture & Design",
+      "intro": "How software is shaped so it can keep changing: boundaries, modules, interfaces."
+    },
+    "frontend": {
+      "label": "Frontend",
+      "intro": "Interfaces that hold up in the browser, for every person using them."
+    },
+    "performance": {
+      "label": "Performance",
+      "intro": "Measured speed: what users wait for and how to remove it."
+    },
+    "accessibility": {
+      "label": "Accessibility",
+      "intro": "Keyboard, screen readers, contrast and everything else that decides who can use it."
+    },
+    "motion": {
+      "label": "Interaction & Motion",
+      "intro": "Movement that explains something, and the restraint around it."
+    },
+    "backend": {
+      "label": "Backend & Data",
+      "intro": "APIs, storage and the data that outlives every interface."
+    },
+    "systems": {
+      "label": "Systems",
+      "intro": "Concurrency, distributed work and the cost of coordination."
+    },
+    "concurrency": {
+      "label": "Concurrency",
+      "intro": "Threads, workers and why more of them is not always faster."
+    },
+    "delivery": {
+      "label": "Delivery",
+      "intro": "Testing, CI/CD, DevOps and security: getting changes out safely."
+    },
+    "ai": {
+      "label": "AI & Engineering",
+      "intro": "Building software with AI in the loop, and what still needs a person."
+    },
+    "craft": {
+      "label": "Craft & Career",
+      "intro": "Reading, writing, leading, and learning in public."
+    }
+  },
+  "formats": {
+    "essay": {
+      "label": "Essay",
+      "description": "A long read, often with something to try."
+    },
+    "note": {
+      "label": "Note",
+      "description": "A short note on one idea."
+    },
+    "dog-ear": {
+      "label": "Dog-ear",
+      "description": "Notes on a book, chapter by chapter."
+    },
+    "basic-folds": {
+      "label": "Basic Folds",
+      "description": "Engineering fundamentals for people who build with AI."
+    }
+  }
+}
