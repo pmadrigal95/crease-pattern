@@ -99,7 +99,8 @@
     "license": "Code MIT · Writing CC BY-NC-ND 4.0",
     "colophon": "Colophon",
     "privacy": "Privacy",
-    "source": "Source on GitHub"
+    "source": "Source on GitHub",
+    "email": "Email"
   },
   "notFound": {
     "title": "This page isn't on the map.",
@@ -130,7 +131,8 @@
   "labels": {
     "stack": "Stack",
     "elsewhere": "Elsewhere",
-    "main": "Main"
+    "main": "Main",
+    "home": "{name}, home"
   },
   "about": {
     "title": "Systems engineer. Frontend architect.",
@@ -444,8 +446,7 @@
       "system": "Follow the system theme",
       "identity": "Use the {name} identity",
       "copyEmail": "Copy email address",
-      "searchPosts": "Search posts for “{query}”",
-      "language": "Read in English"
+      "searchPosts": "Search posts for “{query}”"
     },
     "copied": "Email address copied",
     "empty": "Nothing matches. Try fewer letters or another word.",
@@ -454,12 +455,15 @@
     "many": "{count} results"
   },
   "lang": {
-    "name": "English",
-    "code": "EN",
     "label": "Language",
     "switch": "Read in English",
     "suggest": "This page is also in English.",
     "suggestAction": "Read in English",
     "dismiss": "No, thanks"
+  },
+  "identities": {
+    "basalt-glacier": "Basalt & glacier",
+    "washi-asagi": "Washi & asagi",
+    "contour-lines": "Contour lines"
   }
 }

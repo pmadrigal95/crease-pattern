@@ -12,9 +12,10 @@
 import styles from './command-menu.css?inline';
 import { rank, type Searchable } from '../../lib/command-match';
 import { setDirection, setTheme, type Theme } from '../inspector/identity';
-import { allVisualDirections, visualDirectionLabels } from '../../config/visual-direction';
+import { allVisualDirections, type VisualDirection } from '../../config/visual-direction';
 import { fill } from '../../lib/template';
 import { padNumber } from '../../lib/format';
+import { langOfPath, localize } from '../../i18n/routing';
 
 export interface CommandStrings {
   label: string;
@@ -28,8 +29,6 @@ export interface CommandStrings {
     identity: string;
     copyEmail: string;
     searchPosts: string;
-    /** Read this page in the other language, in that language. */
-    language: string;
   };
   copied: string;
   empty: string;
@@ -38,6 +37,10 @@ export interface CommandStrings {
   many: string;
   number: string;
   email: string;
+  /** Read this page in each other language, worded in that language. */
+  languages: { lang: string; label: string }[];
+  /** Each identity's name, in the page's language. */
+  identities: Record<VisualDirection, string>;
 }
 
 interface Index {
@@ -122,17 +125,17 @@ function build(t: CommandStrings) {
     })),
     ...allVisualDirections.map((id) => ({
       group: 'actions' as const,
-      label: fill(t.actions.identity, { name: visualDirectionLabels[id].label }),
+      label: fill(t.actions.identity, { name: t.identities[id] }),
       context: 'identity',
       run: () => setDirection(id, center()),
     })),
-    {
-      group: 'actions',
-      label: t.actions.language,
-      context: 'language idioma english español',
+    ...t.languages.map(({ lang, label }) => ({
+      group: 'actions' as const,
+      label,
+      context: `language idioma ${lang}`,
       // The masthead's switch: it knows this page's pair and remembers the choice.
-      run: () => document.querySelector<HTMLAnchorElement>('.mast [data-lang-switch]')?.click(),
-    },
+      run: () => document.querySelector<HTMLAnchorElement>(`.mast [data-lang-switch="${lang}"]`)?.click(),
+    })),
     {
       group: 'actions',
       label: t.actions.copyEmail,
@@ -181,7 +184,9 @@ function build(t: CommandStrings) {
           {
             group: 'posts',
             label: fill(t.actions.searchPosts, { query }),
-            run: go(`/precrease?q=${encodeURIComponent(query)}`),
+            run: go(
+              `${localize('/precrease', langOfPath(location.pathname))}?q=${encodeURIComponent(query)}`,
+            ),
           },
         ]
       : [];

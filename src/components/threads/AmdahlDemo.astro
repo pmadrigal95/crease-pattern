@@ -5,10 +5,10 @@
  * joining it, waiting on a lock). The cost model is in essay.ts (`costCurve`). Drawn at build time
  * with the default cost, so it reads without JavaScript; the slider redraws it.
  */
-import { copyFor, fill } from '../../lib/copy';
+import { copyFor, fill } from '../../i18n/dictionary';
 import { bestPoint, costCurve, speedupPath, type ChartFrame } from '../../lib/threads/essay';
 import { formatDecimal } from '../../lib/format';
-import { langOf } from '../../lib/i18n';
+import { langOf } from '../../i18n/routing';
 const lang = langOf(Astro.currentLocale);
 const copy = copyFor(Astro.currentLocale);
 

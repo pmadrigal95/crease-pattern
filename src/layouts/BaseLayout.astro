@@ -6,8 +6,8 @@ import '../styles/base.css';
 import site from '../../site.config';
 import { getProfile } from '../lib/profile';
 import { publicPath } from '../lib/url';
-import { copyFor } from '../lib/copy';
-import { DEFAULT_LANG, htmlLang, langOf, type Lang, type Translations } from '../lib/i18n';
+import { copyFor } from '../i18n/dictionary';
+import { DEFAULT_LANG, LOCALES, langOf, type Lang, type Translations } from '../i18n/routing';
 import WebAnalytics from '../components/site/WebAnalytics.astro';
 // Written in TypeScript, inlined as the JavaScript type stripping leaves (scripts/inline-script.ts):
 // the same output scripts/csp-hashes.ts hashes for the CSP.
@@ -24,7 +24,7 @@ const pageRevealScript = toInlineScript(pageRevealSource);
 interface Props {
   title: string;
   description: string;
-  /** Where this page lives in each language it exists in (PageLayout, src/lib/i18n.ts). */
+  /** Where this page lives in each language it exists in (PageLayout, src/i18n/routing.ts). */
   translations: Translations;
   /**
    * Absolute or root-relative URL of the social preview image (1200 × 630 PNG). Pages without one
@@ -40,12 +40,11 @@ const lang = langOf(Astro.currentLocale);
 const canonical = new URL(publicPath(Astro.url.pathname), site.url);
 // hreflang only for pages that exist in more than one language; x-default is the English one.
 const alternates = Object.entries(translations) as [Lang, string][];
-const ogLocale: Record<Lang, string> = { en: 'en_US', es: 'es_CR' };
-const profile = await getProfile();
+const profile = await getProfile(Astro.currentLocale);
 ---
 
 <!doctype html>
-<html lang={htmlLang[lang]} data-direction={site.visualDirection}>
+<html lang={LOCALES[lang].htmlLang} data-direction={site.visualDirection}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -54,7 +53,7 @@ const profile = await getProfile();
     <link rel="canonical" href={canonical} />
     {alternates.length > 1 &&
       alternates.map(([l, href]) => (
-        <link rel="alternate" hreflang={htmlLang[l]} href={new URL(href, site.url)} />
+        <link rel="alternate" hreflang={LOCALES[l].htmlLang} href={new URL(href, site.url)} />
       ))}
     {alternates.length > 1 && translations[DEFAULT_LANG] && (
       <link rel="alternate" hreflang="x-default" href={new URL(translations[DEFAULT_LANG], site.url)} />
@@ -67,7 +66,7 @@ const profile = await getProfile();
     <meta property="og:description" content={description} />
     <meta property="og:type" content={type} />
     <meta property="og:url" content={canonical} />
-    <meta property="og:locale" content={ogLocale[lang]} />
+    <meta property="og:locale" content={LOCALES[lang].ogLocale} />
     <meta property="og:image" content={new URL(image, site.url)} />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />

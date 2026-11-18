@@ -6,9 +6,9 @@
  */
 import site from '../../../site.config';
 import FoxMark from './FoxMark.astro';
-import { copyFor } from '../../lib/copy';
+import { copyFor } from '../../i18n/dictionary';
 import { publicPath } from '../../lib/url';
-import { LANGS, langOf, localize, switchTarget, type Translations } from '../../lib/i18n';
+import { LOCALES, languageLinks, langOf, localize, type Translations } from '../../i18n/routing';
 const lang = langOf(Astro.currentLocale);
 const copy = copyFor(lang);
 
@@ -17,18 +17,13 @@ interface Props {
   role: string;
   location: string;
   contact: { email: string; linkedin: string; github: string };
-  /** Where this page lives in each language (src/lib/i18n.ts), for the language switch. */
+  /** Where this page lives in each language (src/i18n/routing.ts), for the language switch. */
   translations: Translations;
 }
 const { name, role, location, contact, translations } = Astro.props;
 const path = publicPath(Astro.url.pathname);
 // Each language by its own name, the current one marked (M5).
-const languages = LANGS.map((l) => ({
-  lang: l,
-  name: copyFor(l).lang.name,
-  href: l === lang ? path : switchTarget(path, translations, l),
-  current: l === lang,
-}));
+const languages = languageLinks(path, translations, lang).map((l) => ({ ...l, name: LOCALES[l.lang].name }));
 const year = new Date().getFullYear();
 ---
 
@@ -48,7 +43,7 @@ const year = new Date().getFullYear();
       </p>
       <ul class="links" aria-label={copy.labels.elsewhere}>
         <li>
-          <a href={`mailto:${contact.email}`}>Email</a>
+          <a href={`mailto:${contact.email}`}>{copy.footer.email}</a>
         </li>
         <li>
           <a href={contact.linkedin}>LinkedIn</a>

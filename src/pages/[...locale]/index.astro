@@ -7,14 +7,15 @@ import HeroFold from '../../components/site/HeroFold.astro';
 import HomePrecrease from '../../components/site/HomePrecrease.astro';
 import WorkModel from '../../components/site/WorkModel.astro';
 import { getProfile } from '../../lib/profile';
-import { copyFor, fill } from '../../lib/copy';
+import { copyFor, fill } from '../../i18n/dictionary';
 import { auditedPages, jsBudgetKb, themes } from '../../config/quality';
 import { allVisualDirections } from '../../config/visual-direction';
 import manifest from '../../generated/inspector.json';
-import { localeStaticPaths } from '../../lib/i18n';
-const copy = copyFor(Astro.currentLocale);
+import { langOf, localeStaticPaths, localize } from '../../i18n/routing';
+const lang = langOf(Astro.currentLocale);
+const copy = copyFor(lang);
 
-const profile = await getProfile();
+const profile = await getProfile(Astro.currentLocale);
 const home = copy.home;
 const work = home.work;
 // "This site, measured" (decision 50). The first-load JavaScript is only known after the build:
@@ -42,7 +43,7 @@ const metrics: Metric[] = [
 ];
 const commit = manifest.commit.slice(0, 7);
 
-/** This page in every language: "/" and "/es" (src/lib/i18n.ts). */
+/** This page in every language (src/i18n/routing.ts). */
 export const getStaticPaths = localeStaticPaths;
 ---
 
@@ -65,7 +66,7 @@ export const getStaticPaths = localeStaticPaths;
             {home.hero.inspect}
             <kbd aria-hidden="true">{copy.inspector.shortcut}</kbd>
           </button>
-          <a href="/changelog">{home.hero.releases}</a>
+          <a href={localize('/changelog', lang)}>{home.hero.releases}</a>
         </p>
       </div>
       <HeroFold />
@@ -99,7 +100,7 @@ export const getStaticPaths = localeStaticPaths;
       <div class="source">
         <p>{fill(work.source, { commit })}</p>
         <p class="actions">
-          <a href="/colophon">{work.links.colophon}</a>
+          <a href={localize('/colophon', lang)}>{work.links.colophon}</a>
           <a href={site.repository}>{work.links.repo}</a>
         </p>
       </div>
@@ -112,7 +113,7 @@ export const getStaticPaths = localeStaticPaths;
       <p class="lead">{home.changelog.intro}</p>
       <AltitudeProfile />
       <p class="actions">
-        <a href="/changelog">{home.changelog.full}</a>
+        <a href={localize('/changelog', lang)}>{home.changelog.full}</a>
       </p>
     </div>
   </section>

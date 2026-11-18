@@ -13,17 +13,18 @@
  * Static SVG, no JavaScript: the pointer readout is CSS (:hover and :has). Positions are SVG
  * attributes, never inline styles, so the CSP stays strict.
  */
-import { climbs, currentVersion } from '../../lib/career';
+import { careerFor, climbs, currentVersion } from '../../lib/career';
 import { profile, type Frame } from '../../lib/altitude';
-import { copyFor, fill } from '../../lib/copy';
+import { copyFor, fill } from '../../i18n/dictionary';
 import { formatList, formatNumber } from '../../lib/format';
-import { langOf } from '../../lib/i18n';
+import { langOf } from '../../i18n/routing';
 const lang = langOf(Astro.currentLocale);
 const copy = copyFor(Astro.currentLocale);
 
 const t = copy.home.changelog;
-const data = climbs();
-const version = currentVersion();
+const career = careerFor(lang);
+const data = climbs(career);
+const version = currentVersion(career);
 const frames = {
   wide: {
     width: 1000,

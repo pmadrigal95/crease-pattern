@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
-import { formats } from '../../../config/precrease';
+import { formatsFor } from '../../../lib/taxonomy';
+import { DEFAULT_LANG } from '../../../i18n/routing';
 import { getPosts } from '../../../lib/precrease';
 import { creaseNumber } from '../../../lib/precrease';
 import { ogImage } from '../../../lib/og-image';
@@ -14,8 +15,8 @@ export const GET: APIRoute = async ({ props }) => {
   const { data } = post.entry;
   const png = await ogImage({
     slug: post.id,
-    family: formats[data.format].family,
-    kicker: `${creaseNumber(data.number)} · ${formats[data.format].label}`,
+    family: formatsFor(DEFAULT_LANG)[data.format].family,
+    kicker: `${creaseNumber(data.number)} · ${formatsFor(DEFAULT_LANG)[data.format].label}`,
     title: data.title,
   });
   return new Response(new Uint8Array(png), { headers: { 'Content-Type': 'image/png' } });

@@ -6,9 +6,9 @@
  */
 import usage from '../../generated/components.json';
 import site from '../../../site.config';
-import { copyFor, fill } from '../../lib/copy';
+import { copyFor, fill } from '../../i18n/dictionary';
 import { formatNumber } from '../../lib/format';
-import { langOf } from '../../lib/i18n';
+import { langOf } from '../../i18n/routing';
 const lang = langOf(Astro.currentLocale);
 const copy = copyFor(Astro.currentLocale);
 

@@ -5,6 +5,7 @@ import sitemap from '@astrojs/sitemap';
 import siteConfig from './site.config.ts';
 import { pageRevealScript, restoreIdentityScript, sha256 } from './scripts/csp-hashes.ts';
 import { devIsolation } from './scripts/dev-isolation.ts';
+import { DEFAULT_LANG, LANGS } from './src/i18n/config.ts';
 
 export default defineConfig({
   site: siteConfig.url,
@@ -34,8 +35,9 @@ export default defineConfig({
     },
   },
   i18n: {
-    defaultLocale: 'en',
-    locales: ['en', 'es'],
+    // The languages come from src/i18n/config.ts, like everything else that depends on them.
+    defaultLocale: DEFAULT_LANG,
+    locales: [...LANGS],
     routing: { prefixDefaultLocale: false },
   },
   // One URL per page, without a trailing slash: pages build to changelog.html, which

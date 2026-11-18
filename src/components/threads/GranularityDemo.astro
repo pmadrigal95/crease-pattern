@@ -4,7 +4,7 @@
  * work by board column, ten units dealt round-robin. With more threads than columns, some threads
  * get nothing. Drawn at build time for 16 threads (2022's largest run); the slider redraws it.
  */
-import { copyFor, fill } from '../../lib/copy';
+import { copyFor, fill } from '../../i18n/dictionary';
 import { cyclicColumns } from '../../lib/threads/essay';
 const copy = copyFor(Astro.currentLocale);
 

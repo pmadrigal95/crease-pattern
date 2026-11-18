@@ -1,8 +1,8 @@
 ---
 import FoxMark from './FoxMark.astro';
-import { copyFor } from '../../lib/copy';
+import { copyFor, fill } from '../../i18n/dictionary';
 import { publicPath } from '../../lib/url';
-import { langOf, localize, otherLang, switchTarget, unlocalize, type Translations } from '../../lib/i18n';
+import { LOCALES, languageLinks, langOf, localize, unlocalize, type Translations } from '../../i18n/routing';
 const lang = langOf(Astro.currentLocale);
 const copy = copyFor(lang);
 
@@ -10,22 +10,24 @@ interface Props {
   name: string;
   /** For the command menu's "Copy email address". */
   email: string;
-  /** Where this page lives in each language (src/lib/i18n.ts), for the language switch. */
+  /** Where this page lives in each language (src/i18n/routing.ts), for the language switch. */
   translations: Translations;
 }
 const { name, email, translations } = Astro.props;
-// The command menu's strings, read by command-menu.ts when the menu first opens.
 const path = publicPath(Astro.url.pathname);
-// The other language: its code, its name, and this page in it (or the closest page that is).
-const other = otherLang(lang);
-const otherCopy = copyFor(other).lang;
-const otherHref = switchTarget(path, translations, other);
+// Every other language: this page in it (or the closest page that is), its code and its name.
+const otherLanguages = languageLinks(path, translations, lang).filter((l) => !l.current);
+// The command menu's strings, read by command-menu.ts when the menu first opens. Each language's
+// action is worded in that language.
 const commandStrings = JSON.stringify({
   ...copy.commands,
-  actions: { ...copy.commands.actions, language: otherCopy.switch },
+  languages: otherLanguages.map((l) => ({ lang: l.lang, label: copyFor(l.lang).lang.switch })),
   number: copy.precrease.number,
   email,
+  identities: copy.identities,
 });
+// The Inspector's strings, in the page's language, read by the panel when it first opens.
+const inspectorStrings = JSON.stringify({ ...copy.inspector, identities: copy.identities });
 
 const home = localize('/', lang);
 const links = [
@@ -39,7 +41,7 @@ const here = unlocalize(path);
 
 <header class="mast" data-inspect="Masthead">
   <div class="wrap">
-    <a class="me" href={home} aria-label={`${name}, home`}>
+    <a class="me" href={home} aria-label={fill(copy.labels.home, { name })}>
       <FoxMark />
       <span>{name}</span>
     </a>
@@ -53,18 +55,21 @@ const here = unlocalize(path);
         </a>
       ))}
     </nav>
-    <!-- The language switch (M5): the other language's code; its name, in that language, for screen
-         readers. Choosing it is remembered (src/scripts/lang.ts). -->
-    <a class="lang" href={otherHref} hreflang={other} lang={other} data-lang-switch={other}>
-      {otherCopy.code}
-      <span class="sr-only"> · {otherCopy.name}</span>
-    </a>
+    <!-- The language switch (M5): each other language's code; its name, in that language, for
+         screen readers. Choosing one is remembered (src/scripts/lang.ts). -->
+    {otherLanguages.map((l) => (
+      <a class="lang" href={l.href} hreflang={l.lang} lang={l.lang} data-lang-switch={l.lang}>
+        {LOCALES[l.lang].code}
+        <span class="sr-only"> · {LOCALES[l.lang].name}</span>
+      </a>
+    ))}
     <button
       type="button"
       class="inspect"
       aria-expanded="false"
       aria-keyshortcuts="Shift+I"
       data-inspector-toggle
+      data-strings={inspectorStrings}
     >
       <svg class="icon" viewBox="0 0 20 20" aria-hidden="true" focusable="false">
         <path d="M3 7h10v10H3z" />

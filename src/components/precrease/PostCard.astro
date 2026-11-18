@@ -1,11 +1,11 @@
 ---
 /** One post in a Precrease list: its number, thumbnail, title and what kind of post it is. */
 import PostThumb from './PostThumb.astro';
-import { copyFor, fill } from '../../lib/copy';
+import { copyFor, fill } from '../../i18n/dictionary';
 import { formatDate, padNumber } from '../../lib/format';
 import { postHref, postKind, type PostSummary } from '../../lib/precrease';
 import { readingMinutes } from '../../lib/reading';
-import { langOf } from '../../lib/i18n';
+import { langOf } from '../../i18n/routing';
 const lang = langOf(Astro.currentLocale);
 const copy = copyFor(Astro.currentLocale);
 
@@ -25,7 +25,7 @@ const t = copy.precrease;
     <Heading class="title">{data.title}</Heading>
   </a>
   <p class="meta">
-    <span>{postKind(post.entry)}</span>
+    <span>{postKind(post.entry, lang)}</span>
     <span>{fill(t.minutes, { minutes: readingMinutes(post.entry.body ?? '') })}</span>
     {data.draft && <span class="draft">{t.draft}</span>}
     {!data.draft && !post.live && (

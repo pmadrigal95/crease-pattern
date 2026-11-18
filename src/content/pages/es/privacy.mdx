@@ -1,0 +1,104 @@
+---
+title: Privacidad
+description: Qué recoge este sitio, qué no recoge y cómo comprobarlo tú mismo.
+---
+
+_Última actualización: 18 de noviembre de 2026. Cada cambio a esta página está en [su historial en GitHub](https://github.com/pmadrigal95/crease-pattern/commits/main/src/content/pages/es/privacy.mdx)._
+
+Este es el sitio personal de Pablo Madrigal, una persona que vive en Costa Rica. No vende nada, no tiene
+cuentas ni formularios. Si tienes una pregunta sobre esta página, escribe al correo que está en el pie de
+página.
+
+## En resumen
+
+- **Sin cookies.** Este sitio no guarda ninguna, y nada de lo que carga tampoco.
+- **Sin perfiles.** Las visitas se cuentan en conjunto. Nada aquí puede saber si dos visitas vienen de la misma
+  persona.
+- **Los contadores de las entradas son totales.** Cada entrada de Precrease muestra cuántas veces se abrió, se
+  leyó hasta el final y se marcó como útil. Solo se guardan esos tres números.
+- **Sin anuncios, sin rastreadores de terceros, sin datos vendidos ni compartidos** con fines de marketing.
+- **Se respetan las señales de privacidad de tu navegador.** Con Global Privacy Control o Do Not Track
+  activados, el script de analítica nunca se carga y las entradas no reportan tu visita ni tu lectura.
+
+## Qué pasa cuando visitas el sitio
+
+**Hosting.** El sitio lo sirve [Cloudflare](https://www.cloudflare.com/). Como cualquier servidor web,
+Cloudflare recibe los datos técnicos que lleva cada solicitud, como tu dirección IP, tu navegador y la página
+que pediste, y los procesa para entregar y proteger el sitio según la
+[Política de privacidad de Cloudflare](https://www.cloudflare.com/privacypolicy/). Este sitio no guarda
+registros propios de las solicitudes.
+
+**Analítica.** Para saber qué páginas se leen y si el sitio carga rápido, uso
+[Cloudflare Web Analytics](https://www.cloudflare.com/web-analytics/). Cuando la página termina de cargar, un
+pequeño script de `static.cloudflareinsights.com` envía un reporte a `cloudflareinsights.com` con:
+
+- la página que viste y la página que te trajo;
+- tu país, navegador, sistema operativo y tipo de dispositivo;
+- qué tan rápido cargó la página y qué tan estable se mantuvo mientras cargaba.
+
+Cloudflare dice que Web Analytics no usa cookies ni almacenamiento local y que no crea huellas digitales de los
+visitantes. Yo solo veo totales, como visitas por página o por país, y no los copio a ningún otro lado.
+Cloudflare es una empresa de Estados Unidos y puede procesar estos datos fuera de tu país, como explica su
+política de privacidad.
+
+**Contadores de las entradas.** En una entrada de Precrease, la página le avisa al servidor de este sitio
+(`/api/stats`) tres cosas, cada una como un evento suelto sin ningún identificador:
+
+- que se abrió la entrada;
+- que llegaste al final después de pasar un rato en ella;
+- que pulsaste "Me sirvió", si lo haces.
+
+El servidor le suma uno al total de esa entrada y no guarda nada más: ni dirección IP, ni la hora del evento,
+ni datos del navegador. Para evitar que una sola persona infle los números, el limitador de solicitudes de
+Cloudflare mira tu dirección IP en memoria durante cerca de un minuto y la descarta; nunca se escribe en ningún
+lado. Los totales son públicos, debajo de cada entrada. Con Global Privacy Control o Do Not Track activados, los
+dos primeros eventos no se envían.
+
+**Compartir.** Los botones de LinkedIn, X y Bluesky debajo de una entrada son enlaces simples. Nada de esos
+servicios se carga hasta que haces clic en uno, y desde ese momento estás en su sitio, bajo su política de
+privacidad.
+
+**Comentarios.** Las entradas tienen un botón "Comentarios". Hasta que lo pulsas, no se carga nada relacionado
+con los comentarios. Cuando lo haces, la página carga [giscus](https://giscus.app/), que muestra el hilo de la
+entrada desde GitHub Discussions de este sitio: tu navegador se conecta entonces con `giscus.app` y GitHub,
+según la
+[Declaración de privacidad de GitHub](https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement).
+Para leer no hace falta una cuenta. Para comentar inicias sesión con GitHub, y giscus mantiene esa sesión dentro
+de su propio marco de comentarios, no en este sitio. Tu comentario es público, en GitHub, con tu nombre de
+GitHub. Algunas entradas interactivas que ejecutan código en varios hilos no pueden incrustar ese marco; ahí,
+"Comentarios" es un enlace simple al hilo en GitHub.
+
+**Preferencias.** El sitio lee cinco valores del almacenamiento local de tu navegador: `pm.direction` y
+`pm.theme`, para mostrar la identidad visual y el tema que elegiste; `pm.lang`, el idioma que elegiste con el
+selector de idioma, para que el inicio se abra en ese idioma; `pm.langHint`, para que la sugerencia de leer una
+página en el idioma de tu navegador no vuelva a aparecer después de cerrarla; y `pm.helped`, las entradas en las
+que pulsaste "Me sirvió", para que el botón no te cuente dos veces. Solo se escriben cuando haces esas cosas,
+nunca salen de tu dispositivo y se borran cuando borras los datos del sitio. Para hacer esa sugerencia, la
+página compara su idioma con la configuración de idioma de tu navegador en tu dispositivo; nada de eso se envía
+a ningún lado.
+
+**Las fuentes y todo lo demás** se sirven desde este mismo sitio. No se contacta a ningún otro tercero a menos
+que abras los comentarios o sigas un enlace para compartir.
+
+## Por qué, y tus derechos
+
+Contar las visitas en conjunto y mantener el sitio rápido y seguro son intereses legítimos de tener un sitio
+público (artículo 6(1)(f) del RGPD; Ley 8968 de Protección de la Persona frente al Tratamiento de sus Datos
+Personales de Costa Rica). Según esas leyes, puedes pedir acceso a tus datos personales, corregirlos o
+borrarlos, y oponerte a su tratamiento. Como la analítica es agregada, normalmente no hay nada que se pueda
+vincular contigo, pero escríbeme y te respondo. También puedes presentar una queja ante la autoridad de
+protección de datos: en Costa Rica, la [PRODHAB](https://www.prodhab.go.cr/); en la Unión Europea, la autoridad
+de tu país.
+
+## Compruébalo tú mismo
+
+Abre las herramientas de desarrollo de tu navegador en cualquier página:
+
+- **Application → Cookies:** vacío.
+- **Application → Local storage:** vacío, o solo `pm.direction`, `pm.theme`, `pm.lang`, `pm.langHint` y
+  `pm.helped` si los usaste.
+- **Network:** solicitudes a este sitio, incluida `/api/stats` en las entradas, más
+  `static.cloudflareinsights.com` y `cloudflareinsights.com` salvo que tu navegador envíe una señal de
+  privacidad.
+
+Si algo de lo que ves no coincide con esta página, es un error. Por favor, avísame.

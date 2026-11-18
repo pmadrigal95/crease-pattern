@@ -1,0 +1,95 @@
+{
+  "releases": {
+    "0": {
+      "codename": "Base camp",
+      "place": "Cartago",
+      "theme": "Foundations. Every climb starts here."
+    },
+    "1": {
+      "codename": "Poás",
+      "place": "Poás Volcano",
+      "theme": "Developer"
+    },
+    "2": {
+      "codename": "Turrialba",
+      "place": "Turrialba Volcano",
+      "theme": "Product engineering"
+    },
+    "3": {
+      "codename": "Irazú",
+      "place": "Irazú Volcano",
+      "theme": "Architecture and leadership"
+    }
+  },
+  "unreleased": [
+    "The Inspector: tilt this page into its layers and read its real metrics.",
+    "Parallel code in the browser: an interactive essay on threads.",
+    "One unit, thirty shapes: reusable components explained through modular origami."
+  ],
+  "entries": {
+    "0.0.1": {
+      "title": "Diploma in Information Technology",
+      "org": "Colegio Universitario de Cartago"
+    },
+    "0.1.0": {
+      "title": "Software Developer, internship",
+      "org": "MDG Developers Group",
+      "added": [
+        "Worked on an inherited web system as an intern, in Node.js, Express and Pug.",
+        "Integrated Azure and Google sign-in over OAuth 2.0."
+      ]
+    },
+    "0.2.0": {
+      "title": "IT Engineer",
+      "org": "Jardines del Recuerdo"
+    },
+    "0.3.0": {
+      "title": "Bachelor's degree in Systems Engineering",
+      "org": "Universidad Fidélitas"
+    },
+    "1.0.0": {
+      "title": "Software Development Engineer",
+      "org": "MDG Developers Group",
+      "added": [
+        "Defined the Vue frontend foundation that every company project started from.",
+        "Shipped full-stack features: Vue clients on top of .NET Core REST APIs."
+      ]
+    },
+    "1.1.0": {
+      "title": "Software Engineer, on assignment to NICE Actimize",
+      "org": "MDG Developers Group",
+      "added": [
+        "Diagnosed and resolved issues in Java and JavaScript applications for NICE Actimize, a financial crime and compliance software company."
+      ]
+    },
+    "2.0.0": {
+      "title": "Frontend Consultant",
+      "org": "Buo",
+      "added": ["Joined Buo, an AI people analytics platform, as its only frontend developer."]
+    },
+    "2.1.0": {
+      "title": "Frontend Developer",
+      "org": "Buo",
+      "changed": ["Moved from consultant to full time, still the only frontend developer on the product."]
+    },
+    "3.0.0": {
+      "title": "Frontend Lead",
+      "org": "Buo",
+      "changed": ["Started leading the frontend team as it grew around the product."]
+    },
+    "3.1.0": {
+      "title": "Lead Frontend Architect",
+      "org": "Buo",
+      "changed": ["Took ownership of the frontend architecture and its technical direction."]
+    },
+    "3.2.0": {
+      "title": "crease-pattern",
+      "org": "Independent",
+      "added": [
+        "Launched this site, built in public: one design system with three visual identities.",
+        "Enforced WCAG 2.2 AA contrast with unit tests across every identity and theme.",
+        "Every change passes accessibility and performance budgets in CI before it deploys on its own."
+      ]
+    }
+  }
+}

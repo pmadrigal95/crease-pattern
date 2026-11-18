@@ -4,13 +4,14 @@
  * without JavaScript and with the keyboard. Counts include every post below a branch.
  */
 import PrecreaseLayout from '../../../layouts/PrecreaseLayout.astro';
-import { topics, type Topic } from '../../../config/precrease';
+import { topicsFor, type Topic } from '../../../lib/taxonomy';
 import TopicBranch, { type Branch } from '../../../components/precrease/TopicBranch.astro';
-import { copyFor } from '../../../lib/copy';
+import { copyFor } from '../../../i18n/dictionary';
 import { getPosts } from '../../../lib/precrease';
 import { childrenOf, postsUnder } from '../../../lib/precrease-tree';
-import { localeStaticPaths } from '../../../lib/i18n';
+import { langOf, localeStaticPaths } from '../../../i18n/routing';
 const copy = copyFor(Astro.currentLocale);
+const topics = topicsFor(langOf(Astro.currentLocale));
 
 const t = copy.precrease;
 const posts = await getPosts();
@@ -23,7 +24,7 @@ const grow = (parent: string | undefined): (Branch & Topic)[] =>
   }));
 const tree = grow(undefined);
 
-/** This page in every language: "/" and "/es" (src/lib/i18n.ts). */
+/** This page in every language (src/i18n/routing.ts). */
 export const getStaticPaths = localeStaticPaths;
 ---
 

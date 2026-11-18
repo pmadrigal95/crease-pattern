@@ -3,12 +3,12 @@
  * Drafts show in `astro dev` so they can be previewed, and never in a build.
  */
 import { getCollection, type CollectionEntry } from 'astro:content';
-import { formats, topics } from '../config/precrease';
-import { copyFor } from './copy';
-import { DEFAULT_LANG, type Lang } from './i18n';
+import { copyFor } from '../i18n/dictionary';
+import { DEFAULT_LANG, localize, type Lang } from '../i18n/routing';
+import { formatsFor } from './taxonomy';
 import { padNumber } from './format';
 import { fill } from './template';
-import { checkNumbers, isLive, validateTree } from './precrease-tree';
+import { checkNumbers, isLive } from './precrease-tree';
 
 export type Post = CollectionEntry<'precrease'>;
 
@@ -22,8 +22,6 @@ export interface PostSummary {
   live: boolean;
   entry: Post;
 }
-
-validateTree(topics);
 
 /**
  * Preview builds (`pnpm preview:upload`) include drafts and scheduled posts, so they can be read on
@@ -57,11 +55,11 @@ export const creaseNumber = (value: number, lang: Lang = DEFAULT_LANG): string =
   fill(copyFor(lang).precrease.number, { number: padNumber(value) });
 
 /** What kind of post it is: "Essay", or "Basic Folds 03" inside a series. */
-export function postKind(post: Post): string {
+export function postKind(post: Post, lang: Lang = DEFAULT_LANG): string {
   const { format, series } = post.data;
-  const label = formats[format].label;
+  const label = formatsFor(lang)[format].label;
   return series ? `${label} ${padNumber(series.part, 2)}` : label;
 }
 
 export const postHref = (id: string) => `/precrease/${id}`;
-export const topicHref = (id: string) => `/precrease/topics/${id}`;
+export const topicHref = (id: string, lang: Lang = DEFAULT_LANG) => localize(`/precrease/topics/${id}`, lang);

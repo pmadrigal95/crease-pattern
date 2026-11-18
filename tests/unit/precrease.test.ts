@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { formats, topics, type Topic } from '../../src/config/precrease';
+import { formats, topicTree as topics, type TopicNode as Topic } from '../../src/config/precrease';
 import {
   checkNumbers,
   isLive,
@@ -26,28 +26,17 @@ describe('Precrease topic tree', () => {
   });
 
   test('rejects unknown parents, duplicates and cycles', () => {
-    expect(() => validateTree([{ id: 'a', label: 'A', intro: '', parent: 'missing' }])).toThrow(
-      /unknown parent/,
-    );
-    expect(() =>
-      validateTree([
-        { id: 'a', label: 'A', intro: '' },
-        { id: 'a', label: 'A', intro: '' },
-      ]),
-    ).toThrow(/twice/);
+    expect(() => validateTree([{ id: 'a', parent: 'missing' }])).toThrow(/unknown parent/);
+    expect(() => validateTree([{ id: 'a' }, { id: 'a' }])).toThrow(/twice/);
     const cycle: Topic[] = [
-      { id: 'a', label: 'A', intro: '', parent: 'b' },
-      { id: 'b', label: 'B', intro: '', parent: 'a' },
+      { id: 'a', parent: 'b' },
+      { id: 'b', parent: 'a' },
     ];
     expect(() => validateTree(cycle)).toThrow(/cycle/);
   });
 
   test('paths run root first and subtrees go to any depth', () => {
-    const deep: Topic[] = [
-      { id: 'root', label: 'Root', intro: '' },
-      { id: 'mid', label: 'Mid', intro: '', parent: 'root' },
-      { id: 'leaf', label: 'Leaf', intro: '', parent: 'mid' },
-    ];
+    const deep: Topic[] = [{ id: 'root' }, { id: 'mid', parent: 'root' }, { id: 'leaf', parent: 'mid' }];
     expect(pathTo(deep, 'leaf').map((t) => t.id)).toEqual(['root', 'mid', 'leaf']);
     expect([...subtree(deep, 'root')]).toEqual(['root', 'mid', 'leaf']);
   });

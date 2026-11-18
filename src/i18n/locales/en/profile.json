@@ -1,0 +1,7 @@
+{
+  "role": "Lead Frontend Architect",
+  "location": "Costa Rica",
+  "training": "Systems engineering",
+  "languages": ["Spanish", "English"],
+  "summary": "I build the shared pieces behind web products (components, tests and release pipelines), so teams ship new features fast without breaking what works."
+}

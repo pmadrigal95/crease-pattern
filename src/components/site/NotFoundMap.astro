@@ -8,11 +8,11 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { foxFacets } from '../../lib/fox';
-import { copyFor, fill } from '../../lib/copy';
+import { copyFor, fill } from '../../i18n/dictionary';
 import { formatNumber } from '../../lib/format';
 import { IRAZU } from '../../lib/identity-scenes';
 import { irazuMap } from '../../lib/irazu-map';
-import { langOf } from '../../lib/i18n';
+import { langOf } from '../../i18n/routing';
 const lang = langOf(Astro.currentLocale);
 const copy = copyFor(Astro.currentLocale);
 

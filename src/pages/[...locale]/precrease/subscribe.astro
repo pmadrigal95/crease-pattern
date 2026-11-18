@@ -6,15 +6,15 @@
  */
 import PrecreaseLayout from '../../../layouts/PrecreaseLayout.astro';
 import CopyText from '../../../components/site/CopyText.astro';
-import { copyFor, fill } from '../../../lib/copy';
-import { localeStaticPaths } from '../../../lib/i18n';
+import { copyFor, fill } from '../../../i18n/dictionary';
+import { langOf, localeStaticPaths, localize } from '../../../i18n/routing';
 const copy = copyFor(Astro.currentLocale);
 
 const t = copy.precrease.subscribe;
 const feed = new URL('/precrease/rss.xml', Astro.site).href;
 const [before, after] = fill(t.topics, { map: '\u0000' }).split('\u0000');
 
-/** This page in every language: "/" and "/es" (src/lib/i18n.ts). */
+/** This page in every language (src/i18n/routing.ts). */
 export const getStaticPaths = localeStaticPaths;
 ---
 
@@ -37,7 +37,7 @@ export const getStaticPaths = localeStaticPaths;
       <h2>{t.topicsTitle}</h2>
       <p>
         {before}
-        <a href="/precrease/map">{t.mapLink}</a>
+        <a href={localize('/precrease/map', langOf(Astro.currentLocale))}>{t.mapLink}</a>
         {after}
       </p>
 
