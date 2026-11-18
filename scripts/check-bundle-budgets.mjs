@@ -7,6 +7,7 @@ import { jsBudgetKb } from '../src/config/quality.ts';
 import {
   measureBundles,
   measureInspectorData,
+  measureInspectorStyles,
   measurePosts,
   measureSceneData,
   toKb,
@@ -21,6 +22,7 @@ const postPaths = readdirSync(join(root, 'src/content/precrease'))
 const rows = [
   ...Object.entries(measureBundles(dist)).map(([group, bytes]) => ({ label: group, group, bytes })),
   { label: 'inspectorData', group: 'inspectorData', bytes: measureInspectorData(dist) },
+  { label: 'inspectorStyles', group: 'inspectorStyles', bytes: measureInspectorStyles(dist) },
   { label: 'sceneData', group: 'sceneData', bytes: measureSceneData(dist) },
   ...measurePosts(dist, postPaths).map(({ path, bytes }) => ({
     label: `post ${path}`,

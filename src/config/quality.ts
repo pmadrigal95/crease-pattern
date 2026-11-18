@@ -34,6 +34,12 @@ export const jsBudgetKb = {
    */
   inspectorData: 4,
   /**
+   * The Inspector's styles (src/components/inspector/inspector.css), fetched when the panel opens.
+   * Moved out of the on-demand JavaScript for the panel's identity redesign (M4.6), which left
+   * onDemand at 31.5 of 32 KB; 2.1 KB when it moved.
+   */
+  inspectorStyles: 6,
+  /**
    * The Work section's Sonobe animator (src/components/site/work-model.ts), loaded on the home
    * page as the section approaches: the star's geometry, its two inputs and the SVG renderer.
    */

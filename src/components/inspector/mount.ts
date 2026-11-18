@@ -8,10 +8,12 @@ import InspectorPanel, { type Manifest } from './InspectorPanel.vue';
 // loads, not bundled into it: it grows with every inspectable part, and the panel's code
 // shouldn't. Its size has its own budget (src/config/quality.ts, inspectorData).
 import manifestUrl from '../../generated/inspector.json?url';
-import { inspector as t } from '../../content/copy/en.json';
-// Imported as text, not as a stylesheet: a CSS import here would make Astro add it to every
-// page's <head> as render-blocking CSS. It is adopted only when the Inspector opens.
-import inspectorStyles from './inspector.css?inline';
+// The panel's styles are a file of their own (Vite emits it hashed under /_astro/), fetched when
+// the Inspector loads and adopted as a constructed stylesheet: a CSS import here would make Astro
+// add it to every page's <head> as render-blocking CSS, and inlining it in this module would make
+// every visual change to the panel weigh on the on-demand JavaScript. Its size has its own budget
+// (src/config/quality.ts, inspectorStyles).
+import inspectorStylesUrl from './inspector.css?url';
 import { canRun3D, detectDevice } from '../../lib/scene3d-support';
 import type { FoxScene } from './scene3d';
 
@@ -21,11 +23,24 @@ export interface InspectorHandle {
 
 let styles: CSSStyleSheet | null = null;
 
+let stylesRequest: Promise<string> | null = null;
+
+/** Starts (or reuses) the styles' download; a failed one is forgotten, so the next open retries. */
+function loadStyles(): Promise<string> {
+  stylesRequest ??= fetch(inspectorStylesUrl)
+    .then((r) => (r.ok ? r.text() : Promise.reject(new Error(`inspector styles: ${r.status}`))))
+    .catch((error: unknown) => {
+      stylesRequest = null;
+      throw error;
+    });
+  return stylesRequest;
+}
+
 /** Adopts the Inspector's styles once; kept after closing so the layers can settle back. */
-function adoptStyles() {
+function adoptStyles(css: string) {
   if (styles) return;
   styles = new CSSStyleSheet();
-  styles.replaceSync(inspectorStyles);
+  styles.replaceSync(css);
   document.adoptedStyleSheets = [...document.adoptedStyleSheets, styles];
 }
 
@@ -46,6 +61,7 @@ function loadManifest(): Promise<Manifest> {
 // This module loads when a visitor first reaches for the Inspector (hovering its button counts), so
 // start the manifest now, alongside Vue, instead of after it.
 void loadManifest().catch(() => undefined);
+void loadStyles().catch(() => undefined);
 
 // M4's 3D fox: only on a page with the hero fox, and only on a device that can run it
 // (decision 50). Its module is a chunk of its own with its own budget (scene3d), so the panel's
@@ -66,11 +82,12 @@ export async function openInspector(
   trigger: HTMLElement | null,
   onClosed: () => void,
 ): Promise<InspectorHandle> {
-  const manifest = await loadManifest();
-  adoptStyles();
-  const host = document.createElement('aside');
-  host.id = 'inspector';
-  host.setAttribute('aria-label', t.title);
+  const [manifest, css] = await Promise.all([loadManifest(), loadStyles()]);
+  adoptStyles(css);
+  // A box-less wrapper: the panel (aside#inspector) and the part's outline render side by side in
+  // it, so the outline never sits inside the panel's stacking context and paints over it.
+  const host = document.createElement('div');
+  host.className = 'inspector-root';
   document.body.append(host);
   document.documentElement.classList.add('inspecting');
 

@@ -94,6 +94,18 @@ export function measureInspectorData(dist) {
 }
 
 /**
+ * The Inspector's styles as Vite emits them (/_astro/inspector.<hash>.css), Brotli: fetched when
+ * the panel opens, like its manifest. Zero when the build has none.
+ * @returns {number} bytes
+ */
+export function measureInspectorStyles(dist) {
+  const assets = join(dist, '_astro');
+  return readdirSync(assets)
+    .filter((f) => /^inspector\.[\w-]+\.css$/.test(f))
+    .reduce((sum, f) => sum + brotliCompressSync(readFileSync(join(assets, f))).length, 0);
+}
+
+/**
  * The 3D scenes' data files as Vite emits them (/_astro/*.<hash>.bin, such as the Irazú's height
  * grid), Brotli. They download with the scene, on the home page only.
  * @returns {number} bytes
