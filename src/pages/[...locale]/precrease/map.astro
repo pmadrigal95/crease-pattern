@@ -3,12 +3,14 @@
  * The whole topic tree, folded: each branch is a <details> element, so it opens and closes
  * without JavaScript and with the keyboard. Counts include every post below a branch.
  */
-import PrecreaseLayout from '../../layouts/PrecreaseLayout.astro';
-import { topics, type Topic } from '../../config/precrease';
-import TopicBranch, { type Branch } from '../../components/precrease/TopicBranch.astro';
-import { copy } from '../../lib/copy';
-import { getPosts } from '../../lib/precrease';
-import { childrenOf, postsUnder } from '../../lib/precrease-tree';
+import PrecreaseLayout from '../../../layouts/PrecreaseLayout.astro';
+import { topics, type Topic } from '../../../config/precrease';
+import TopicBranch, { type Branch } from '../../../components/precrease/TopicBranch.astro';
+import { copyFor } from '../../../lib/copy';
+import { getPosts } from '../../../lib/precrease';
+import { childrenOf, postsUnder } from '../../../lib/precrease-tree';
+import { localeStaticPaths } from '../../../lib/i18n';
+const copy = copyFor(Astro.currentLocale);
 
 const t = copy.precrease;
 const posts = await getPosts();
@@ -20,6 +22,9 @@ const grow = (parent: string | undefined): (Branch & Topic)[] =>
     children: grow(topic.id),
   }));
 const tree = grow(undefined);
+
+/** This page in every language: "/" and "/es" (src/lib/i18n.ts). */
+export const getStaticPaths = localeStaticPaths;
 ---
 
 <PrecreaseLayout title={`${t.map.title} · ${t.name}`} description={t.map.description}>

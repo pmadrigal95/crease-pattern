@@ -5,8 +5,9 @@
  * starts as a faint bar. Drawn from the spans the workers record (protocol.ts, `Span`) on one
  * shared clock, so what you see is what happened.
  */
-import { copy } from '../../lib/copy';
+import { copyFor } from '../../lib/copy';
 import { MODELS } from '../../lib/threads/protocol';
+const copy = copyFor(Astro.currentLocale);
 
 const t = copy.precrease.threads;
 ---

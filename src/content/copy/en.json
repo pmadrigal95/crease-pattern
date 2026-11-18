@@ -444,12 +444,22 @@
       "system": "Follow the system theme",
       "identity": "Use the {name} identity",
       "copyEmail": "Copy email address",
-      "searchPosts": "Search posts for “{query}”"
+      "searchPosts": "Search posts for “{query}”",
+      "language": "Read in English"
     },
     "copied": "Email address copied",
     "empty": "Nothing matches. Try fewer letters or another word.",
     "hint": "↑ ↓ to move · Enter to open · Esc to close",
     "one": "1 result",
     "many": "{count} results"
+  },
+  "lang": {
+    "name": "English",
+    "code": "EN",
+    "label": "Language",
+    "switch": "Read in English",
+    "suggest": "This page is also in English.",
+    "suggestAction": "Read in English",
+    "dismiss": "No, thanks"
   }
 }

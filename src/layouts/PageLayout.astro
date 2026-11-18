@@ -2,7 +2,10 @@
 import BaseLayout from './BaseLayout.astro';
 import Masthead from '../components/site/Masthead.astro';
 import SiteFooter from '../components/site/SiteFooter.astro';
+import LangSuggest from '../components/site/LangSuggest.astro';
 import { getProfile } from '../lib/profile';
+import { publicPath } from '../lib/url';
+import { translationsOf, type Translations } from '../lib/i18n';
 
 interface Props {
   /** Page title; the owner's name is appended unless `standalone` is set. */
@@ -11,17 +14,28 @@ interface Props {
   standalone?: boolean;
   image?: string | undefined;
   type?: 'website' | 'article' | undefined;
+  /** A page outside src/pages/[...locale]/ that has a pair in the other language (a post). */
+  translations?: Translations | undefined;
 }
 const { title, description, standalone = false, image, type } = Astro.props;
+const path = publicPath(Astro.url.pathname);
+const translations = translationsOf(path, Astro.routePattern, Astro.props.translations);
 const profile = await getProfile();
 const fullTitle = standalone ? title : `${title} · ${profile.name}`;
 ---
 
-<BaseLayout title={fullTitle} description={description} image={image} type={type}>
+<BaseLayout title={fullTitle} description={description} image={image} type={type} translations={translations}>
   <slot name="head" slot="head" />
-  <Masthead name={profile.name} email={profile.contact.email} />
+  <Masthead name={profile.name} email={profile.contact.email} translations={translations} />
   <main id="main">
     <slot />
   </main>
-  <SiteFooter name={profile.name} role={profile.role} location={profile.location} contact={profile.contact} />
+  <SiteFooter
+    name={profile.name}
+    role={profile.role}
+    location={profile.location}
+    contact={profile.contact}
+    translations={translations}
+  />
+  <LangSuggest translations={translations} />
 </BaseLayout>

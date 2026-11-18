@@ -5,9 +5,12 @@
  * JavaScript. The link never goes inside <summary>: a link nested in the disclosure control is
  * announced badly and fails axe's nested-interactive rule.
  */
-import { copy } from '../../lib/copy';
+import { copyFor } from '../../lib/copy';
 import { formatCount } from '../../lib/format';
 import { topicHref } from '../../lib/precrease';
+import { langOf } from '../../lib/i18n';
+const lang = langOf(Astro.currentLocale);
+const copy = copyFor(Astro.currentLocale);
 
 export interface Branch {
   id: string;
@@ -21,8 +24,8 @@ interface Props {
 }
 const { branch, depth = 0 } = Astro.props;
 const t = copy.precrease.map;
-const count = formatCount(branch.count, { zero: t.countZero, one: t.countOne, many: t.count });
-const subtopics = formatCount(branch.children.length, { one: t.subtopicsOne, many: t.subtopics });
+const count = formatCount(branch.count, { zero: t.countZero, one: t.countOne, many: t.count }, lang);
+const subtopics = formatCount(branch.children.length, { one: t.subtopicsOne, many: t.subtopics }, lang);
 ---
 
 <li class:list={['branch', { root: depth === 0 }]} data-inspect="TopicBranch">

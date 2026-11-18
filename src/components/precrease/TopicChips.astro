@@ -7,9 +7,10 @@
  * its top-level branch when the reader is deeper in the tree.
  */
 import { topics } from '../../config/precrease';
-import { copy, fill } from '../../lib/copy';
+import { copyFor, fill } from '../../lib/copy';
 import { topicHref, type PostSummary } from '../../lib/precrease';
 import { pathTo, postsUnder } from '../../lib/precrease-tree';
+const copy = copyFor(Astro.currentLocale);
 
 interface Props {
   posts: PostSummary[];

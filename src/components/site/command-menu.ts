@@ -28,6 +28,8 @@ export interface CommandStrings {
     identity: string;
     copyEmail: string;
     searchPosts: string;
+    /** Read this page in the other language, in that language. */
+    language: string;
   };
   copied: string;
   empty: string;
@@ -124,6 +126,13 @@ function build(t: CommandStrings) {
       context: 'identity',
       run: () => setDirection(id, center()),
     })),
+    {
+      group: 'actions',
+      label: t.actions.language,
+      context: 'language idioma english español',
+      // The masthead's switch: it knows this page's pair and remembers the choice.
+      run: () => document.querySelector<HTMLAnchorElement>('.mast [data-lang-switch]')?.click(),
+    },
     {
       group: 'actions',
       label: t.actions.copyEmail,
