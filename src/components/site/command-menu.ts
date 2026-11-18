@@ -2,7 +2,7 @@
  * ⌘K (M4.7): one menu, one shortcut, every page. Loaded with a dynamic import the first time a
  * visitor presses Ctrl/Cmd+K or the commands button (src/components/site/Masthead.astro); its
  * weight has its own budget (commandMenu, src/config/quality.ts). It finds pages, their sections
- * and Precrease posts from /commands.json (scripts/build-command-index.mjs), and runs a few
+ * and Precrease posts from /commands.json (scripts/build-command-index.ts), and runs a few
  * actions: inspect the page, switch theme or identity, copy the email address, or hand a query to
  * Precrease's full-text search.
  *

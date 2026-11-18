@@ -117,7 +117,7 @@ export function measureInspectorStyles(dist) {
 }
 
 /**
- * The command menu's index (/commands.json, scripts/build-command-index.mjs), Brotli: fetched the
+ * The command menu's index (/commands.json, scripts/build-command-index.ts), Brotli: fetched the
  * first time the menu opens.
  * @returns {number} bytes
  */
