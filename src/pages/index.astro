@@ -4,10 +4,10 @@ import PageLayout from '../layouts/PageLayout.astro';
 import AltitudeProfile from '../components/site/AltitudeProfile.astro';
 import CopyText from '../components/site/CopyText.astro';
 import HeroFold from '../components/site/HeroFold.astro';
+import HomePrecrease from '../components/site/HomePrecrease.astro';
 import WorkModel from '../components/site/WorkModel.astro';
 import { getProfile } from '../lib/profile';
 import { copy, fill } from '../lib/copy';
-import { creaseNumber, getPosts, postHref } from '../lib/precrease';
 import { auditedPages, jsBudgetKb, themes } from '../config/quality';
 import { allVisualDirections } from '../config/visual-direction';
 import manifest from '../generated/inspector.json';
@@ -15,7 +15,6 @@ import manifest from '../generated/inspector.json';
 const profile = await getProfile();
 const home = copy.home;
 const work = home.work;
-const latest = (await getPosts()).slice(0, 3);
 // "This site, measured" (decision 50). The first-load JavaScript is only known after the build:
 // the page renders a placeholder and scripts/stamp-site-metrics.mjs fills it in dist.
 interface Metric {
@@ -113,32 +112,12 @@ const commit = manifest.commit.slice(0, 7);
     </div>
   </section>
 
-  <section class="sec" id="precrease" aria-labelledby="precrease-title" data-inspect="index#precrease">
-    <div class="wrap">
-      <h2 id="precrease-title">{home.notes.heading}</h2>
-      <p class="lead">{latest.length > 0 ? home.notes.intro : home.notes.empty}</p>
-      {latest.length > 0 && (
-        <ul class="creases">
-          {latest.map((p) => (
-            <li>
-              <a href={postHref(p.id)}>
-                <span class="crease-no">{creaseNumber(p.number)}</span>
-                {p.entry.data.title}
-              </a>
-            </li>
-          ))}
-        </ul>
-      )}
-      <p class="actions">
-        <a href="/precrease">{home.notes.all}</a>
-      </p>
-    </div>
-  </section>
+  <HomePrecrease />
 
   <section class="sec close" id="contact" aria-labelledby="contact-title" data-inspect="index#contact">
     <div class="wrap">
       <h2 id="contact-title">{home.contact.heading}</h2>
-      <p class="lead">{home.contact.intro}</p>
+      <p class="line">{home.contact.intro}</p>
       <CopyText
         value={profile.contact.email}
         href={`mailto:${profile.contact.email}`}
@@ -386,18 +365,23 @@ const commit = manifest.commit.slice(0, 7);
     margin: 0;
   }
 
-  .creases {
-    display: grid;
-    gap: var(--space-3);
-    margin: var(--space-6) 0 0;
-    padding: 0;
-    list-style: none;
-    font-size: var(--size-lg);
-  }
-  .crease-no {
-    display: block;
-    font: var(--type-caption);
+  /* Contact: one line and the address, not a closing headline (design debt phase 4). The serif
+     is the one HomePrecrease loads; a system serif stands in until it arrives. */
+  .close h2 {
+    margin: 0 0 var(--space-2);
+    font: 500 var(--size-xs) var(--font-mono);
+    letter-spacing: 0.02em;
     color: var(--color-mute);
+  }
+  .close .line {
+    max-width: 30ch;
+    margin: 0 0 var(--space-6);
+    font:
+      400 clamp(1.625rem, 3vw, 2.25rem) / 1.25 'Newsreader Home',
+      'Iowan Old Style',
+      'Palatino Linotype',
+      Georgia,
+      serif;
   }
 
   @media (max-width: 860px) {

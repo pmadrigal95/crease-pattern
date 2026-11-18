@@ -23,5 +23,5 @@ const fullTitle = standalone ? title : `${title} · ${profile.name}`;
   <main id="main">
     <slot />
   </main>
-  <SiteFooter name={profile.name} contact={profile.contact} />
+  <SiteFooter name={profile.name} role={profile.role} location={profile.location} contact={profile.contact} />
 </BaseLayout>

@@ -124,7 +124,7 @@ function projection(places: readonly Place[], frame: MapFrame) {
 }
 
 /** Marching squares: the segments where the field crosses `level`. */
-function march(field: number[][], level: number, cell: number): [number, number, number, number][] {
+export function march(field: number[][], level: number, cell: number): [number, number, number, number][] {
   const out: [number, number, number, number][] = [];
   for (let r = 0; r < field.length - 1; r++) {
     for (let c = 0; c < field[0]!.length - 1; c++) {
@@ -149,7 +149,7 @@ function march(field: number[][], level: number, cell: number): [number, number,
 }
 
 /** Joins segments that share an end into polylines and writes them as one path. */
-function polylines(segments: [number, number, number, number][]): string {
+export function polylines(segments: [number, number, number, number][]): string {
   const key = (x: number, y: number) => `${Math.round(x * 10)},${Math.round(y * 10)}`;
   const ends = new Map<string, number[]>();
   segments.forEach(([x1, y1, x2, y2], i) => {
