@@ -40,6 +40,13 @@ export const jsBudgetKb = {
    */
   inspectorStyles: 6,
   /**
+   * The command menu (src/components/site/command-menu.ts, M4.7), loaded on any page the first
+   * time a visitor opens it: matching, actions, the dialog and its styles.
+   */
+  commandMenu: 8,
+  /** Its index of pages, sections and posts (/commands.json), fetched when the menu opens. */
+  commandData: 6,
+  /**
    * The Work section's Sonobe animator (src/components/site/work-model.ts), loaded on the home
    * page as the section approaches: the star's geometry, its two inputs and the SVG renderer.
    */

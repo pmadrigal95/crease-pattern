@@ -19,7 +19,7 @@ const fullTitle = standalone ? title : `${title} · ${profile.name}`;
 
 <BaseLayout title={fullTitle} description={description} image={image} type={type}>
   <slot name="head" slot="head" />
-  <Masthead name={profile.name} />
+  <Masthead name={profile.name} email={profile.contact.email} />
   <main id="main">
     <slot />
   </main>
