@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import { decimalYear, profile, textWidth, type Climb, type Frame } from '../../src/lib/altitude';
-import { climbs, currentVersion } from '../../src/lib/career';
+import { careerFor, climbs, currentVersion } from '../../src/lib/career';
 
 // The career drawn as a climb (design debt phase 2). The chart has to stay right as releases
 // are added, so these tests run on the real data and on a made-up v4.
@@ -25,7 +25,7 @@ const narrow: Frame = {
   ceilingM: 3600,
   axisFont: 11,
 };
-const real = climbs(now);
+const real = climbs(careerFor('en'), now);
 const withV4: Climb[] = [
   ...real.map((c, i, all) => (i === all.length - 1 ? { ...c, end: 2028.5 } : c)),
   {
@@ -48,7 +48,7 @@ describe('career as climbs', () => {
   });
 
   test('the current version is the newest entry', () => {
-    expect(currentVersion()).toBe('3.2');
+    expect(currentVersion(careerFor('en'))).toBe('3.2');
   });
 });
 

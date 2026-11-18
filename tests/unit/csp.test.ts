@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { pageRevealScript, restoreIdentityScript } from '../../scripts/csp-hashes.mjs';
+import { pageRevealScript, restoreIdentityScript } from '../../scripts/csp-hashes.ts';
 import { allVisualDirections } from '../../src/config/visual-direction';
 
 describe('restore-identity inline script', () => {

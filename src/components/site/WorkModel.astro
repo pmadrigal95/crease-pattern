@@ -11,9 +11,12 @@
  * with the hero's 3D fox.
  */
 import usage from '../../generated/components.json';
-import { copy } from '../../lib/copy';
+import { copyFor } from '../../i18n/dictionary';
 import { formatNumber } from '../../lib/format';
 import { drawStar, star } from '../../lib/sonobe/assemble';
+import { langOf } from '../../i18n/routing';
+const lang = langOf(Astro.currentLocale);
+const copy = copyFor(Astro.currentLocale);
 
 const t = copy.home.work.model;
 const { totals } = usage;
@@ -39,15 +42,15 @@ const points = (pts: readonly (readonly [number, number])[]) =>
   <dl class="counts">
     <div>
       <dt>{t.counts.components}</dt>
-      <dd>{formatNumber(totals.components)}</dd>
+      <dd>{formatNumber(totals.components, lang)}</dd>
     </div>
     <div>
       <dt>{t.counts.uses}</dt>
-      <dd>{formatNumber(totals.uses)}</dd>
+      <dd>{formatNumber(totals.uses, lang)}</dd>
     </div>
     <div>
       <dt>{t.counts.reused}</dt>
-      <dd>{formatNumber(totals.reused)}</dd>
+      <dd>{formatNumber(totals.reused, lang)}</dd>
     </div>
   </dl>
 </figure>

@@ -13,9 +13,12 @@ import newsreader400 from '@fontsource/newsreader/files/newsreader-latin-400-nor
 import newsreader600 from '@fontsource/newsreader/files/newsreader-latin-600-normal.woff2?url';
 import newsreader300Italic from '@fontsource/newsreader/files/newsreader-latin-300-italic.woff2?url';
 import PostThumb from '../precrease/PostThumb.astro';
-import { copy, fill } from '../../lib/copy';
+import { copyFor, fill } from '../../i18n/dictionary';
 import { formatDate } from '../../lib/format';
 import { creaseNumber, getPosts, postHref, postKind } from '../../lib/precrease';
+import { langOf, localize } from '../../i18n/routing';
+const lang = langOf(Astro.currentLocale);
+const copy = copyFor(Astro.currentLocale);
 
 const t = copy.home.notes;
 const [latest, ...older] = (await getPosts()).slice(0, 3);
@@ -50,9 +53,9 @@ const fonts = JSON.stringify([
         <div>
           <p class="kicker">
             {fill(t.kicker, {
-              number: creaseNumber(latest.number),
-              kind: postKind(latest.entry),
-              date: formatDate(latest.entry.data.date),
+              number: creaseNumber(latest.number, lang),
+              kind: postKind(latest.entry, lang),
+              date: formatDate(latest.entry.data.date, lang),
             })}
           </p>
           <h3>
@@ -66,15 +69,15 @@ const fonts = JSON.stringify([
       <ul class="older">
         {older.map((p) => (
           <li>
-            <span class="kicker">{creaseNumber(p.number)}</span>
+            <span class="kicker">{creaseNumber(p.number, lang)}</span>
             <a href={postHref(p.id)}>{p.entry.data.title}</a>
-            <span class="date">{formatDate(p.entry.data.date)}</span>
+            <span class="date">{formatDate(p.entry.data.date, lang)}</span>
           </li>
         ))}
       </ul>
     )}
     <p class="more">
-      <a href="/precrease">{t.all}</a>
+      <a href={localize('/precrease', lang)}>{t.all}</a>
     </p>
   </div>
 </section>

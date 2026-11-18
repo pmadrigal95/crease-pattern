@@ -1,29 +1,47 @@
 ---
 import FoxMark from './FoxMark.astro';
-import { copy } from '../../lib/copy';
+import { copyFor, fill } from '../../i18n/dictionary';
 import { publicPath } from '../../lib/url';
+import { LOCALES, languageLinks, langOf, localize, unlocalize, type Translations } from '../../i18n/routing';
+const lang = langOf(Astro.currentLocale);
+const copy = copyFor(lang);
 
 interface Props {
   name: string;
   /** For the command menu's "Copy email address". */
   email: string;
+  /** Where this page lives in each language (src/i18n/routing.ts), for the language switch. */
+  translations: Translations;
 }
-const { name, email } = Astro.props;
-// The command menu's strings, read by command-menu.ts when the menu first opens.
-const commandStrings = JSON.stringify({ ...copy.commands, number: copy.precrease.number, email });
-
-const links = [
-  { href: '/#work', label: copy.nav.work, match: null },
-  { href: '/changelog', label: copy.nav.changelog, match: '/changelog' },
-  { href: '/precrease', label: copy.nav.precrease, match: '/precrease' },
-  { href: '/about', label: copy.nav.about, match: '/about' },
-];
+const { name, email, translations } = Astro.props;
 const path = publicPath(Astro.url.pathname);
+// Every other language: this page in it (or the closest page that is), its code and its name.
+const otherLanguages = languageLinks(path, translations, lang).filter((l) => !l.current);
+// The command menu's strings, read by command-menu.ts when the menu first opens. Each language's
+// action is worded in that language.
+const commandStrings = JSON.stringify({
+  ...copy.commands,
+  languages: otherLanguages.map((l) => ({ lang: l.lang, label: copyFor(l.lang).lang.switch })),
+  number: copy.precrease.number,
+  email,
+  identities: copy.identities,
+});
+// The Inspector's strings, in the page's language, read by the panel when it first opens.
+const inspectorStrings = JSON.stringify({ ...copy.inspector, identities: copy.identities });
+
+const home = localize('/', lang);
+const links = [
+  { href: `${home}#work`, label: copy.nav.work, match: null },
+  { href: localize('/changelog', lang), label: copy.nav.changelog, match: '/changelog' },
+  { href: localize('/precrease', lang), label: copy.nav.precrease, match: '/precrease' },
+  { href: localize('/about', lang), label: copy.nav.about, match: '/about' },
+];
+const here = unlocalize(path);
 ---
 
 <header class="mast" data-inspect="Masthead">
   <div class="wrap">
-    <a class="me" href="/" aria-label={`${name}, home`}>
+    <a class="me" href={home} aria-label={fill(copy.labels.home, { name })}>
       <FoxMark />
       <span>{name}</span>
     </a>
@@ -31,18 +49,27 @@ const path = publicPath(Astro.url.pathname);
       {links.map((l) => (
         <a
           href={l.href}
-          aria-current={l.match && (path === l.match || path.startsWith(`${l.match}/`)) ? 'page' : undefined}
+          aria-current={l.match && (here === l.match || here.startsWith(`${l.match}/`)) ? 'page' : undefined}
         >
           {l.label}
         </a>
       ))}
     </nav>
+    <!-- The language switch (M5): each other language's code; its name, in that language, for
+         screen readers. Choosing one is remembered (src/scripts/lang.ts). -->
+    {otherLanguages.map((l) => (
+      <a class="lang" href={l.href} hreflang={l.lang} lang={l.lang} data-lang-switch={l.lang}>
+        {LOCALES[l.lang].code}
+        <span class="sr-only"> · {LOCALES[l.lang].name}</span>
+      </a>
+    ))}
     <button
       type="button"
       class="inspect"
       aria-expanded="false"
       aria-keyshortcuts="Shift+I"
       data-inspector-toggle
+      data-strings={inspectorStrings}
     >
       <svg class="icon" viewBox="0 0 20 20" aria-hidden="true" focusable="false">
         <path d="M3 7h10v10H3z" />
@@ -72,6 +99,10 @@ const path = publicPath(Astro.url.pathname);
 </header>
 
 <script>
+  // The language switch, here and in the footer, and the suggestion to read in the other
+  // language (M5). Imported only here, so it joins this script instead of adding a request.
+  import { initLanguage } from '../../scripts/lang';
+  initLanguage();
   // Opens the Inspector (decision 44): the button, any [data-inspector-open], Shift+I or ?inspect. Vue and the
   // panel download only now, on first use; hovering the button starts that download early.
   type Handle = { close(): void };
@@ -204,6 +235,22 @@ const path = publicPath(Astro.url.pathname);
     text-decoration-color: var(--color-accent-ui);
     text-decoration-thickness: 2px;
     text-underline-offset: 6px;
+  }
+  .lang {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 36px;
+    min-height: 44px;
+    font: 500 var(--type-caption);
+    letter-spacing: 0.04em;
+    color: var(--color-mute);
+    text-decoration: none;
+    transition: color var(--motion-fast) var(--motion-ease-out);
+  }
+  .lang:hover {
+    color: var(--color-ink);
   }
   .inspect {
     display: inline-flex;

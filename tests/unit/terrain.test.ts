@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { places } from '../../src/lib/career';
+import { careerFor, places } from '../../src/lib/career';
 import { crosses, expeditionMap, overlaps, type MapFrame, type Place } from '../../src/lib/terrain';
 
 // The volcanoes at their real coordinates (design debt phase 2). The map is generated at build
@@ -22,7 +22,7 @@ const narrow: MapFrame = {
   intervalM: 250,
   compact: true,
 };
-const real = places();
+const real = places(careerFor('en'));
 const withChirripo: Place[] = [
   ...real,
   { major: 4, codename: 'Chirripó', elevationM: 3820, lat: 9.484, lon: -83.489 },

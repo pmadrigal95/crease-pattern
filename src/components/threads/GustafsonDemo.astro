@@ -5,11 +5,14 @@
  * searched at each depth are counted at build time; the times are measured live, serial against
  * the best parallel model this browser can run.
  */
-import { copy, fill } from '../../lib/copy';
+import { copyFor, fill } from '../../i18n/dictionary';
 import { formatNumber } from '../../lib/format';
 import { boardFromText } from '../../lib/threads/board';
 import { ESSAY_BOARD, ESSAY_PIECES } from '../../lib/threads/essay';
 import { search } from '../../lib/threads/search';
+import { langOf } from '../../i18n/routing';
+const lang = langOf(Astro.currentLocale);
+const copy = copyFor(Astro.currentLocale);
 
 const t = copy.precrease.threads;
 const board = boardFromText(ESSAY_BOARD, 20);
@@ -23,7 +26,7 @@ const depths = [1, 2, 3, 4].map((depth) => ({ depth, nodes: search(board, ESSAY_
       <li data-depth={d.depth}>
         <span class="name">
           {fill(t.depthRow, { depth: d.depth })}
-          <small>{fill(t.placements, { count: formatNumber(d.nodes) })}</small>
+          <small>{fill(t.placements, { count: formatNumber(d.nodes, lang) })}</small>
         </span>
         <span class="bar" aria-hidden="true">
           <span class="fill" data-fill></span>
@@ -131,7 +134,7 @@ const depths = [1, 2, 3, 4].map((depth) => ({ depth, nodes: search(board, ESSAY_
   import { formatDecimal } from '../../lib/format';
   import { fill } from '../../lib/template';
   // Type only: erased from the bundle, so the copy file still never reaches the browser.
-  type ThreadsCopy = (typeof import('../../content/copy/en.json'))['precrease']['threads'];
+  type ThreadsCopy = import('../../i18n/dictionary').Copy['precrease']['threads'];
   import { canRun, nextFrame, poolSize, time } from '../../lib/threads/client';
   import { essayProblem, speedup } from '../../lib/threads/essay';
 

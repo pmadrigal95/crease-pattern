@@ -2,10 +2,10 @@
  * Pure helpers for Precrease's topic tree and post list: no Astro imports, so unit tests can
  * run them directly. src/lib/precrease.ts feeds them the real content.
  */
-import type { Topic } from '../config/precrease';
+import type { TopicNode } from '../config/precrease';
 
 /** Throws when a parent is unknown, a topic id repeats, or the parents form a cycle. */
-export function validateTree(topics: readonly Topic[]): void {
+export function validateTree(topics: readonly TopicNode[]): void {
   const ids = new Set<string>();
   for (const t of topics) {
     if (ids.has(t.id)) throw new Error(`Precrease topic "${t.id}" is defined twice`);
@@ -22,19 +22,19 @@ export function validateTree(topics: readonly Topic[]): void {
 }
 
 /** Root first: the breadcrumb from the top of the tree down to `id`, inclusive. */
-export function pathTo(topics: readonly Topic[], id: string): Topic[] {
-  const path: Topic[] = [];
+export function pathTo<T extends TopicNode>(topics: readonly T[], id: string): T[] {
+  const path: T[] = [];
   for (let t = topics.find((x) => x.id === id); t; t = topics.find((x) => x.id === t?.parent)) {
     path.unshift(t);
   }
   return path;
 }
 
-export const childrenOf = (topics: readonly Topic[], id: string | undefined) =>
+export const childrenOf = <T extends TopicNode>(topics: readonly T[], id: string | undefined) =>
   topics.filter((t) => t.parent === id);
 
 /** `id` and every topic below it, at any depth. */
-export function subtree(topics: readonly Topic[], id: string): Set<string> {
+export function subtree(topics: readonly TopicNode[], id: string): Set<string> {
   const out = new Set([id]);
   for (const child of childrenOf(topics, id)) subtree(topics, child.id).forEach((x) => out.add(x));
   return out;
@@ -49,7 +49,7 @@ export interface PostLike {
 
 /** Posts on `id` or anywhere below it, newest first. */
 export function postsUnder<P extends PostLike>(
-  topics: readonly Topic[],
+  topics: readonly TopicNode[],
   posts: readonly P[],
   id: string,
 ): P[] {
@@ -62,7 +62,7 @@ export function postsUnder<P extends PostLike>(
  * weight, so a post on Accessibility still finds one on Performance (both under Frontend).
  */
 export function related<P extends PostLike>(
-  topics: readonly Topic[],
+  topics: readonly TopicNode[],
   posts: readonly P[],
   post: P,
   count = 3,

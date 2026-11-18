@@ -206,7 +206,7 @@
  * - on a first visit, the fold mark folds and the hero's supporting lines rise in (never the headline: LCP);
  * - the changelog's altitude bars climb with the reader's scroll (ReleaseNotes.astro).
  * Native CSS only: cross-document View Transitions and scroll-driven animations, no library.
- * Browsers without them simply navigate and scroll. src/scripts/page-reveal.js picks fold or entrance.
+ * Browsers without them simply navigate and scroll. src/scripts/page-reveal.ts picks fold or entrance.
  */
 @view-transition {
   navigation: auto;

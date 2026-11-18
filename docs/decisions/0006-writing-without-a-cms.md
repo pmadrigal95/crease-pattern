@@ -20,7 +20,7 @@ Posts also needed a way to go out on a set day without someone merging at that m
 - A post is published when it is not a draft and its `date` has arrived (`isLive` in
   `src/lib/precrease-tree.ts`). Every page reads posts through `getPosts()`, so a scheduled post stays out of the
   index, the feeds, the sitemap and search until then. `astro dev` shows it with a "Scheduled for" label.
-- `deploy.yml` also runs every day at 12:00 UTC (6:00 a.m. in Costa Rica). `scripts/due-today.mjs` checks
+- `deploy.yml` also runs every day at 12:00 UTC (6:00 a.m. in Costa Rica). `scripts/due-today.ts` checks
   whether a post's date falls in the last three days; if none does, the run stops before building. The
   three-day window means one failed run doesn't leave a post unpublished.
 

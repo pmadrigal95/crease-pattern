@@ -9,9 +9,10 @@
  * With it, CSS under html[data-js] shows one from the first paint and the script repaints it.
  */
 import tokens from '../../generated/tokens.json';
-import { copy, fill } from '../../lib/copy';
-import { allVisualDirections, visualDirectionLabels } from '../../config/visual-direction';
+import { copyFor, fill } from '../../i18n/dictionary';
+import { allVisualDirections } from '../../config/visual-direction';
 import { assembly, project } from '../../lib/sonobe/geometry';
+const copy = copyFor(Astro.currentLocale);
 
 const t = copy.precrease.sonobe.token;
 /** Which palette color each unit takes (unit number mod 5): neighbouring units read apart. */
@@ -38,7 +39,7 @@ const facets = project(assembly(30), 0.5, 0.42).map((f) => ({
   <div class="picker" role="group" aria-label={t.label}>
     {allVisualDirections.map((id, i) => (
       <button type="button" data-pick={id} aria-pressed={i === 0 ? 'true' : 'false'}>
-        {visualDirectionLabels[id].label}
+        {copy.identities[id]}
       </button>
     ))}
   </div>
@@ -46,7 +47,7 @@ const facets = project(assembly(30), 0.5, 0.42).map((f) => ({
   <div class="cards">
     {allVisualDirections.map((id, i) => (
       <figure class={i === 0 ? 'card current' : 'card'} data-card={id}>
-        <svg viewBox="-1.8 -1.8 3.6 3.6" role="img" aria-label={visualDirectionLabels[id].label}>
+        <svg viewBox="-1.8 -1.8 3.6 3.6" role="img" aria-label={copy.identities[id]}>
           <rect class="sheet" x="-1.8" y="-1.8" width="3.6" height="3.6" rx="0.12" fill={palettes[id]!.bg} />
           {facets.map((f) => (
             <polygon
@@ -58,7 +59,7 @@ const facets = project(assembly(30), 0.5, 0.42).map((f) => ({
             />
           ))}
         </svg>
-        <figcaption>{visualDirectionLabels[id].label}</figcaption>
+        <figcaption>{copy.identities[id]}</figcaption>
       </figure>
     ))}
   </div>

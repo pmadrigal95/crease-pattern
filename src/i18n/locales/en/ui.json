@@ -1,0 +1,469 @@
+{
+  "nav": {
+    "work": "Work",
+    "changelog": "Changelog",
+    "about": "About",
+    "colophon": "Colophon",
+    "skip": "Skip to content",
+    "precrease": "Precrease"
+  },
+  "home": {
+    "hero": {
+      "title": "Interfaces built to last.",
+      "inspect": "See how this page is built",
+      "releases": "Read the release notes",
+      "fold": {
+        "label": "Unfold the fox into its crease pattern",
+        "interface": "Interface",
+        "architecture": "Architecture",
+        "folded": "Folded: the interface",
+        "unfolded": "Unfolded: the crease pattern",
+        "mountain": "mountain",
+        "valley": "valley",
+        "caption": "The fox is what you see on screen: the interface. Unfold it and you get the folds that shape it, the architecture. \"See how this page is built\" opens any page here the same way."
+      },
+      "who": "{name} · {role} · {location}"
+    },
+    "work": {
+      "heading": "This site, measured.",
+      "eyebrow": "Work",
+      "intro": "These numbers are measured each time the site is published, and all of its code is public, so you can check every claim on this page.",
+      "model": {
+        "label": "A Sonobe star: 30 copies of one folded paper unit",
+        "caption": "One folded unit, repeated 30 times, locks into this star. Open the Inspector to take it apart and count the pieces this site is built from.",
+        "counts": {
+          "components": "components",
+          "uses": "uses across the site",
+          "reused": "used in more than one file"
+        }
+      },
+      "metrics": {
+        "js": {
+          "unit": "KB",
+          "label": "of JavaScript your browser runs for this page",
+          "note": "the limit is {budget} KB: less code loads faster, even on slow phones"
+        },
+        "axe": {
+          "label": "accessibility errors found by automated checks, across {pages} pages, {identities} visual styles, light and dark",
+          "note": "run with axe on every change"
+        },
+        "parts": {
+          "label": "parts of this site you can open and inspect",
+          "note": "each shows its code, design values and last change"
+        },
+        "identities": {
+          "label": "visual styles, one design system",
+          "note": "switch them in the Inspector; only the colors change"
+        }
+      },
+      "source": "Measured on version {commit} of this site, the one you're reading.",
+      "links": {
+        "colophon": "How it's built",
+        "repo": "Source on GitHub"
+      }
+    },
+    "changelog": {
+      "heading": "Changelog",
+      "intro": "My career, written like a software changelog. Each major version is a step up in responsibility and takes the name of a Costa Rican volcano, a higher one each time.",
+      "years": "{years} years shipping Vue in production",
+      "unreleased": "Unreleased",
+      "elevation": "{elevation} m",
+      "present": "Present",
+      "sections": {
+        "added": "Added",
+        "changed": "Changed"
+      },
+      "full": "Read the full release notes",
+      "profile": {
+        "summary": "My career as an elevation profile, from {from} to today: {releases}. I'm on version {version} now.",
+        "release": "v{major} {codename}, {elevation}, {theme}",
+        "now": "v{version} · {codename} · NOW"
+      }
+    },
+    "notes": {
+      "heading": "Precrease",
+      "intro": "Notes on how software gets designed and built, from architecture to working with AI. I write them in public and include what went wrong.",
+      "kicker": "{number} · {kind} · {date}",
+      "latest": "Latest posts",
+      "empty": "The first crease is being folded. It introduces who I am and what this blog will cover.",
+      "all": "Read Precrease"
+    },
+    "contact": {
+      "heading": "Contact",
+      "intro": "Email reaches me fastest.",
+      "copy": "Copy email address",
+      "copied": "Email address copied"
+    }
+  },
+  "footer": {
+    "license": "Code MIT · Writing CC BY-NC-ND 4.0",
+    "colophon": "Colophon",
+    "privacy": "Privacy",
+    "source": "Source on GitHub",
+    "email": "Email"
+  },
+  "notFound": {
+    "title": "This page isn't on the map.",
+    "body": "The link may be outdated or mistyped.",
+    "aside": "I've taken a few wrong trails myself. This one leads back home.",
+    "action": "Back to the home page",
+    "map": {
+      "label": "A contour map of the Irazú volcano, drawn from real elevation data. You are here, just outside its edge, and a dashed trail leads in to the summit.",
+      "here": "You are here",
+      "note": "Irazú, {summit} m · contours every {interval} m"
+    }
+  },
+  "changelogPage": {
+    "title": "Changelog",
+    "description": "Pablo Madrigal's career as release notes, from base camp to Irazú.",
+    "intro": "My career as release notes, newest first. Each major version takes the name of a Costa Rican volcano, a higher one each time. Choose a summit on the map to go to its release.",
+    "map": {
+      "label": "Map of the volcanoes behind each release",
+      "pin": "v{major} {codename}, {elevation}, {years}. Go to its release notes.",
+      "caption": "Costa Rica's Central Volcanic Range at real coordinates. Contour lines every 250 m; the route follows the releases in order."
+    },
+    "rail": {
+      "next": "Next",
+      "now": "You are here"
+    },
+    "built": "Built with {stack}"
+  },
+  "labels": {
+    "stack": "Stack",
+    "elsewhere": "Elsewhere",
+    "main": "Main",
+    "home": "{name}, home"
+  },
+  "about": {
+    "title": "Systems engineer. Frontend architect.",
+    "factsLabel": "Facts",
+    "facts": {
+      "location": "Based in",
+      "role": "Role",
+      "training": "Training",
+      "vue": "Vue in production",
+      "languages": "Languages"
+    },
+    "vueYears": "{years} years",
+    "portrait": {
+      "alt": "Pablo Madrigal, head and shoulders, in glasses and a striped shirt. A diagonal fold turns part of the photo into the same face drawn as contour lines.",
+      "caption": "Interface · architecture",
+      "handle": "Fold the portrait",
+      "value": "{photo}% photo, {contours}% contour lines"
+    }
+  },
+  "colophonPage": {
+    "title": "How this site is built."
+  },
+  "privacyPage": {
+    "title": "What this site knows about you."
+  },
+  "inspector": {
+    "open": "Inspect",
+    "shortcut": "Shift I",
+    "title": "Inspector",
+    "close": "Close the inspector",
+    "intro": "Hover a block · Click to pin · Esc to leave",
+    "layers": "Layers",
+    "selected": "Selected",
+    "nothingSelected": "Hover or pick a layer to see where it comes from.",
+    "component": "Component",
+    "section": "Page section",
+    "source": "View source",
+    "lastChange": "Last change",
+    "size": "Size",
+    "tokens": "Tokens it uses",
+    "contrast": "Text contrast",
+    "contrastPass": "{ratio}:1 · passes AA",
+    "contrastFail": "{ratio}:1 · below AA",
+    "noText": "No text inside",
+    "outline": "Accessibility outline",
+    "landmarks": "Landmarks",
+    "headings": "Headings",
+    "metrics": "This visit, measured",
+    "metricsNote": "Measured in your browser as you use the page. Thresholds are Google's \"good\" limits.",
+    "pass": "good",
+    "fail": "needs work",
+    "waiting": "interact to measure",
+    "scripts": "JavaScript before the Inspector",
+    "selectedAnnouncement": "Selected {name}",
+    "identity": "Identity",
+    "identityNote": "The same {count} color tokens in every identity. Only their values change.",
+    "theme": "Theme",
+    "themes": {
+      "system": "System",
+      "light": "Light",
+      "dark": "Dark"
+    },
+    "sheetExpand": "Show more of the panel",
+    "sheetShrink": "Show more of the page"
+  },
+  "precrease": {
+    "name": "Precrease",
+    "tagline": "The work before the shape.",
+    "description": "Pablo Madrigal's notes on how software is designed and built, from architecture to AI, written for engineers and for anyone curious about how it works.",
+    "nav": {
+      "latest": "Latest",
+      "map": "Topic map",
+      "rss": "Subscribe"
+    },
+    "number": "Crease No. {number}",
+    "minutes": "{minutes} min read",
+    "published": "Published {date}",
+    "updated": "Updated {date}",
+    "topicsLabel": "Topics",
+    "breadcrumb": "Topic path",
+    "related": "Related posts",
+    "latestHeading": "Latest posts",
+    "empty": "The first post is on its way. Subscribe to hear when it's out.",
+    "map": {
+      "title": "Topic map",
+      "description": "Every Precrease topic as a tree, with how many posts sit in each branch.",
+      "intro": "Topics are organized like a tree. Open one to see the smaller topics inside it; each topic's page collects every post below it.",
+      "count": "{count} posts",
+      "countOne": "1 post",
+      "countZero": "No posts yet",
+      "subtopics": "{count} subtopics",
+      "subtopicsOne": "1 subtopic"
+    },
+    "topic": {
+      "title": "{topic} · Precrease",
+      "heading": "{topic}",
+      "subtopics": "Inside this topic",
+      "empty": "Nothing in this branch yet.",
+      "feed": "RSS feed for this topic"
+    },
+    "book": "On {title} by {author} ({year})",
+    "chapter": "Chapter: {chapter}",
+    "draft": "Draft: only visible in development",
+    "scheduled": "Scheduled for {date}: only visible in development",
+    "search": {
+      "label": "Search Precrease",
+      "placeholder": "Search posts",
+      "filters": "Filter results",
+      "format": "Format",
+      "topic": "Topic",
+      "clear": "Clear filters",
+      "loading": "Searching…",
+      "one": "1 post",
+      "many": "{count} posts",
+      "none": "No posts match. Try fewer words or clear a filter.",
+      "failed": "Search didn't load. Check your connection and reload the page."
+    },
+    "subscribe": {
+      "title": "Subscribe",
+      "description": "Get new Precrease posts as they come out, with RSS.",
+      "heading": "Get new posts as they come out",
+      "intro": "You don't need an account to follow Precrease. The simplest way is RSS: a feed that a reader app checks for you, so new posts show up there on their own.",
+      "howTitle": "How to subscribe",
+      "steps": {
+        "reader": "Open a feed reader. Feedly and Inoreader work in any browser; NetNewsWire is free on Mac and iPhone.",
+        "add": "Add this address as a new feed:",
+        "done": "New posts appear in your reader as soon as they're published."
+      },
+      "copy": "Copy feed address",
+      "copied": "Feed address copied",
+      "topicsTitle": "Only some topics?",
+      "topics": "Every topic has its own feed. Open a topic from the {map} and use its RSS feed link.",
+      "mapLink": "topic map",
+      "email": "Prefer email? A newsletter is coming once the site moves to its own domain."
+    },
+    "chips": {
+      "label": "Filter posts by topic",
+      "all": "All posts"
+    },
+    "marginNote": {
+      "toggle": "Show margin note",
+      "start": "Margin note: "
+    },
+    "readers": {
+      "heading": "Readers",
+      "kicker": "End of {number}",
+      "title": "Thanks for reading to the end.",
+      "metrics": {
+        "views": "views",
+        "reads": "read to the end",
+        "helped": "found it helpful"
+      },
+      "helped": "This helped",
+      "helpedDone": "Thanks",
+      "thanks": "Thanks. That tells me what to write more of.",
+      "share": "Share",
+      "shareTitle": "Share “{title}”",
+      "copy": "Copy link",
+      "copyShort": "Copy",
+      "copied": "Link copied",
+      "more": "More…",
+      "comments": "Comments",
+      "commentsNote": "From GitHub Discussions · loads when you open it",
+      "commentsElsewhere": "On GitHub Discussions, for this post"
+    },
+    "threads": {
+      "models": {
+        "serial": "One worker",
+        "messages": "Message passing",
+        "fork-join": "Fork-join",
+        "shared": "Shared memory, with a queue"
+      },
+      "modelNotes": {
+        "serial": "The baseline",
+        "messages": "Like MPI",
+        "fork-join": "Like OpenMP",
+        "shared": "Like pthreads"
+      },
+      "run": "Run on this device",
+      "running": "Running…",
+      "runAgain": "Run again",
+      "next": "Next pieces",
+      "time": "Time",
+      "speedup": "Speedup",
+      "faster": "{times}× faster",
+      "result": "Fastest on this device: {model}, {times}× faster than one worker.",
+      "cores": "This device reports {cores} cores; the demos use {workers} workers.",
+      "noShared": "This browser doesn't allow shared memory here, so the two models that need it are skipped. Chrome, Edge and Firefox run all four.",
+      "unavailable": "Not available in this browser",
+      "needsJs": "The demos on this page run in your browser and need JavaScript.",
+      "bestMove": "The move the solver chose",
+      "measuredResult": "On my desktop: {model}, {times}× faster than one worker.",
+      "batteryNote": "A run keeps your processor's cores busy for about a second, so it uses a little battery.",
+      "measuredNote": "Measured on {device} in {browser}, with {workers} workers, four pieces ahead. Press Run to time your own device.",
+      "modelLabel": "Model",
+      "summary": "{model}: {ms} ms · {tasks} tasks per worker",
+      "legendWork": "Searching a task",
+      "legendCopy": "Copying the board",
+      "legendStart": "Waiting to start",
+      "worker": "Worker {n}",
+      "idle": "{idle} of {threads} threads have nothing to do",
+      "allBusy": "Every thread has work",
+      "threadsLabel": "Threads",
+      "costLabel": "Cost per thread",
+      "best": "Best: {times}× with {threads} threads",
+      "depthLabel": "Pieces ahead",
+      "placements": "{count} placements searched",
+      "amdahlCaption": "Threads from 1 to 16, with 36 ms of work, as in 2022",
+      "depthRow": "{depth} ahead",
+      "runDepths": "Run all four",
+      "depthReadout": "{depth} pieces ahead: {times}× faster with {workers} workers"
+    },
+    "toc": "On this page",
+    "history": "Change history on GitHub",
+    "references": {
+      "title": "References",
+      "sources": "Sources",
+      "sourcesNote": "What this post draws on.",
+      "further": "To keep learning",
+      "furtherNote": "For going deeper into the same ideas."
+    },
+    "sonobe": {
+      "unit": {
+        "label": "Folding one Sonobe unit",
+        "stage": "Stage {n} of {total}",
+        "previous": "Previous stage",
+        "next": "Next stage",
+        "stages": {
+          "s1": "A square of paper.",
+          "s2": "Folded in half and opened: one crease across the middle.",
+          "s3": "Both edges folded to that crease: a strip, half as tall.",
+          "s4": "Two opposite corners folded in.",
+          "s5": "The unit: a square face between two tabs. The edges of the face are its pockets."
+        },
+        "decisions": {
+          "s1": "Start from one need: show a post in a list.",
+          "s2": "Decide what it takes: one post.",
+          "s3": "Leave the rest to the page: where the card sits and how wide it is.",
+          "s4": "Decide what may change: the heading level.",
+          "s5": "What it accepts, and nothing else."
+        },
+        "code": "PostCard's props, read from its file when this page is built.",
+        "file": "PostCard.astro on GitHub"
+      },
+      "contract": {
+        "label": "Two units, a tab and a pocket",
+        "join": "Join them",
+        "apart": "Take them apart",
+        "props": "The tab's props",
+        "asIs": "As it is",
+        "optional": "One optional prop",
+        "required": "One required prop",
+        "apartStatus": "Two units, side by side.",
+        "fits": "The tab goes into the pocket and the units lock.",
+        "fitsOptional": "The units still lock. The contract grew: one more case to test.",
+        "noFit": "A required prop changes the tab. It no longer fits, and every place that uses it has to change.",
+        "fitsFigure": "As it is: the tab goes into the pocket.",
+        "optionalFigure": "One optional prop: it still fits, with one more case to test.",
+        "noFitFigure": "One required prop: the tab stops at the pocket."
+      },
+      "exception": {
+        "label": "The 12-unit model, one unit made special",
+        "toggle": "Make one unit special",
+        "closed": "Every unit is the same, and the model closes.",
+        "open": "One unit is different now, and the model no longer closes.",
+        "variants": "Kinds of unit",
+        "checks": "Shapes to check",
+        "closedFigure": "Every unit the same: the model closes.",
+        "openFigure": "One special unit: the model doesn't close.",
+        "code": "FoldTitle's prop, and the two places that use it, read from the code when this page is built.",
+        "file": "FoldTitle.astro on GitHub"
+      },
+      "token": {
+        "label": "Paper",
+        "names": "The color names every identity defines",
+        "caption": "All three identities define the same {count} color names. Components ask for a name, never a value, so changing the paper changes no component."
+      },
+      "site": {
+        "summary": "{components} components, {uses} uses, {reused} used in two or more files.",
+        "source": "Counted from the code when this page is built.",
+        "component": "Component",
+        "group": "Group",
+        "uses": "Uses",
+        "files": "Files"
+      },
+      "scale": {
+        "label": "Model",
+        "model": "{count} units",
+        "turn": "Turn the model",
+        "designed": "Units designed",
+        "folded": "Units folded",
+        "caption": "The same unit every time. What changes is how many, and where they meet."
+      }
+    }
+  },
+  "commands": {
+    "open": "Search and commands",
+    "label": "Search and commands",
+    "placeholder": "Search pages, sections and posts, or type a command",
+    "shortcut": "Ctrl K",
+    "groups": {
+      "actions": "Actions",
+      "pages": "Pages",
+      "sections": "Sections",
+      "posts": "Precrease"
+    },
+    "actions": {
+      "inspect": "Inspect this page",
+      "light": "Use the light theme",
+      "dark": "Use the dark theme",
+      "system": "Follow the system theme",
+      "identity": "Use the {name} identity",
+      "copyEmail": "Copy email address",
+      "searchPosts": "Search posts for “{query}”"
+    },
+    "copied": "Email address copied",
+    "empty": "Nothing matches. Try fewer letters or another word.",
+    "hint": "↑ ↓ to move · Enter to open · Esc to close",
+    "one": "1 result",
+    "many": "{count} results"
+  },
+  "lang": {
+    "label": "Language",
+    "switch": "Read in English",
+    "suggest": "This page is also in English.",
+    "suggestAction": "Read in English",
+    "dismiss": "No, thanks"
+  },
+  "identities": {
+    "basalt-glacier": "Basalt & glacier",
+    "washi-asagi": "Washi & asagi",
+    "contour-lines": "Contour lines"
+  }
+}

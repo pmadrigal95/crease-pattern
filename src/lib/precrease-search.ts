@@ -32,7 +32,7 @@ import { formatCount } from './format';
 import { isTypingTarget } from './keyboard';
 import { fill } from './template';
 
-/** Where scripts/build-search-index.mjs writes the bundle. A constant: no input reaches import(). */
+/** Where scripts/build-search-index.ts writes the bundle. A constant: no input reaches import(). */
 const BUNDLE = '/pagefind/pagefind.js';
 const MAX_RESULTS = 8;
 

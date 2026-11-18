@@ -1,7 +1,8 @@
 /** Precrease's RSS feeds: the whole blog and one per topic (subtree included). */
 import rss from '@astrojs/rss';
 import site from '../../site.config';
-import { copy } from './copy';
+import { copyFor } from '../i18n/dictionary';
+import { DEFAULT_LANG } from '../i18n/routing';
 import { creaseNumber, postHref, type PostSummary } from './precrease';
 
 export function feed(posts: PostSummary[], title: string, description: string) {
@@ -20,4 +21,4 @@ export function feed(posts: PostSummary[], title: string, description: string) {
   });
 }
 
-export const blogTitle = copy.precrease.name;
+export const blogTitle = copyFor(DEFAULT_LANG).precrease.name;

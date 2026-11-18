@@ -6,21 +6,26 @@ import '../styles/base.css';
 import site from '../../site.config';
 import { getProfile } from '../lib/profile';
 import { publicPath } from '../lib/url';
+import { copyFor } from '../i18n/dictionary';
+import { DEFAULT_LANG, LOCALES, langOf, type Lang, type Translations } from '../i18n/routing';
 import WebAnalytics from '../components/site/WebAnalytics.astro';
-// Same file scripts/csp-hashes.mjs hashes for the CSP; ?raw inlines it at build time.
-import restoreIdentitySource from '../scripts/restore-identity.js?raw';
-import pageRevealSource from '../scripts/page-reveal.js?raw';
+// Written in TypeScript, inlined as the JavaScript type stripping leaves (scripts/inline-script.ts):
+// the same output scripts/csp-hashes.ts hashes for the CSP.
+import restoreIdentitySource from '../scripts/restore-identity.ts?raw';
+import pageRevealSource from '../scripts/page-reveal.ts?raw';
+import { toInlineScript } from '../../scripts/inline-script.ts';
 // Preloaded so text renders in its final font on first paint (no layout shift on swap).
 import sansLatin from '@fontsource-variable/schibsted-grotesk/files/schibsted-grotesk-latin-wght-normal.woff2?url';
 import monoLatin from '@fontsource-variable/jetbrains-mono/files/jetbrains-mono-latin-wght-normal.woff2?url';
 
-const restoreIdentityScript = restoreIdentitySource.trim();
-const pageRevealScript = pageRevealSource.trim();
+const restoreIdentityScript = toInlineScript(restoreIdentitySource);
+const pageRevealScript = toInlineScript(pageRevealSource);
 
 interface Props {
   title: string;
   description: string;
-  lang?: 'en' | 'es';
+  /** Where this page lives in each language it exists in (PageLayout, src/i18n/routing.ts). */
+  translations: Translations;
   /**
    * Absolute or root-relative URL of the social preview image (1200 × 630 PNG). Pages without one
    * of their own share the home page's card (src/pages/og/[page].png.ts), so every link shows one.
@@ -30,19 +35,29 @@ interface Props {
   type?: 'website' | 'article' | undefined;
 }
 
-const { title, description, lang = 'en', image = '/og/home.png', type = 'website' } = Astro.props;
+const { title, description, translations, image = '/og/home.png', type = 'website' } = Astro.props;
+const lang = langOf(Astro.currentLocale);
 const canonical = new URL(publicPath(Astro.url.pathname), site.url);
-const profile = await getProfile();
+// hreflang only for pages that exist in more than one language; x-default is the English one.
+const alternates = Object.entries(translations) as [Lang, string][];
+const profile = await getProfile(Astro.currentLocale);
 ---
 
 <!doctype html>
-<html lang={lang} data-direction={site.visualDirection}>
+<html lang={LOCALES[lang].htmlLang} data-direction={site.visualDirection}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
+    {alternates.length > 1 &&
+      alternates.map(([l, href]) => (
+        <link rel="alternate" hreflang={LOCALES[l].htmlLang} href={new URL(href, site.url)} />
+      ))}
+    {alternates.length > 1 && translations[DEFAULT_LANG] && (
+      <link rel="alternate" hreflang="x-default" href={new URL(translations[DEFAULT_LANG], site.url)} />
+    )}
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="preload" href={sansLatin} as="font" type="font/woff2" crossorigin />
     <link rel="preload" href={monoLatin} as="font" type="font/woff2" crossorigin />
@@ -51,6 +66,7 @@ const profile = await getProfile();
     <meta property="og:description" content={description} />
     <meta property="og:type" content={type} />
     <meta property="og:url" content={canonical} />
+    <meta property="og:locale" content={LOCALES[lang].ogLocale} />
     <meta property="og:image" content={new URL(image, site.url)} />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
@@ -64,12 +80,12 @@ const profile = await getProfile();
       <head>, and a script placed before it would run unprotected. It still runs before
       any content is parsed, so there is no flash of the default identity.
     -->
-    <!-- Restores the visitor's identity and theme. Its CSP hash comes from scripts/csp-hashes.mjs. -->
+    <!-- Restores the visitor's identity and theme. Its CSP hash comes from scripts/csp-hashes.ts. -->
     <script is:inline set:html={restoreIdentityScript} />
     <!-- Runs before first render: the page-to-page fold or the first-load entrance (decision 42). -->
     <script is:inline set:html={pageRevealScript} />
     <a class="skip-link" href="#main">
-      Skip to content
+      {copyFor(lang).nav.skip}
     </a>
     <slot />
     <div class="vt-crease" aria-hidden="true"></div>

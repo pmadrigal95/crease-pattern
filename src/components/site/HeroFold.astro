@@ -13,7 +13,8 @@
  * the first frame of M4's 3D scene, which takes over this same square when it loads.
  */
 import { foxFacets, foxMountainFolds, foxSheet, foxValleyFolds, foxViewBox } from '../../lib/fox';
-import { copy } from '../../lib/copy';
+import { copyFor } from '../../i18n/dictionary';
+const copy = copyFor(Astro.currentLocale);
 
 const t = copy.home.hero.fold;
 const strings = JSON.stringify({ folded: t.folded, unfolded: t.unfolded });

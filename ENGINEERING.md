@@ -40,7 +40,7 @@ src/layouts     page shells                                                   (i
 src/pages       routes: fetch, compose, nothing clever                        (imports everything above)
 ```
 
-ESLint enforces the direction (`eslint.config.js`, `no-restricted-imports`). Content (`src/content`)
+ESLint enforces the direction (`eslint.config.ts`, `no-restricted-imports`). Content (`src/content`)
 and tokens (`tokens/`) are data, read through `lib` and generated CSS.
 
 ## Naming
@@ -59,12 +59,24 @@ and tokens (`tokens/`) are data, read through `lib` and generated CSS.
   `undefined` says so (`image?: string | undefined`).
 - ES modules, `const` by default, no classes unless something has a lifecycle (the Inspector).
 - `satisfies` to check a literal against a type without widening it.
-- Validate at the edges (content schemas with Zod, the copy file on import), then trust the types.
+- Validate at the edges (content schemas with Zod, the dictionaries on import), then trust the types.
 
 ## Text, copy and formatting
 
-- Every interface string lives in `src/content/copy/en.json`. Sentences are never concatenated:
-  dynamic values go through `fill()` (`src/lib/template.ts`).
+- Languages are declared once, in `src/i18n/config.ts`. Routes, `<html lang>`, hreflang, date and
+  number formats, the language switch and the dictionaries' checks all derive from it.
+- Every word the site shows lives in `src/i18n/locales/<lang>/`: `ui.json` (interface copy),
+  `career.json`, `profile.json` and `taxonomy.json`. Facts that don't change with the language
+  (dates, map positions, stacks, the topic tree) live once, in `src/content` and `src/config`.
+  `src/i18n/dictionary.ts` loads them and fails the build if a language misses a key, a list item
+  or a placeholder, or has an empty string.
+- Prose pages are MDX, one folder per language: `src/content/pages/<lang>/<id>.mdx`.
+- Pages are never copied per language: one `.astro` file under `src/pages/[...locale]/` builds
+  every language. Browser scripts get their strings from the page (data attributes), never from
+  the dictionaries.
+- Sentences are never concatenated: dynamic values go through `fill()` (`src/lib/template.ts`).
+- Adding a language: an entry in `src/i18n/config.ts`, a `locales/<lang>/` folder, its MDX pages,
+  and the code in `src/scripts/restore-identity.ts`; the tests list anything missing.
 - Values become text only in `src/lib/format.ts`: `formatDate`, `formatMonth`, `formatRange`,
   `formatNumber`, `formatList`, `formatCount`, `padNumber`. `creaseNumber` (in `lib/precrease.ts`)
   builds on it. A guard test fails if any other file calls `Intl` or pads a number.
@@ -135,7 +147,7 @@ skills before it ships; AGENTS.md says the same to coding agents.
 | Guards  | `tests/unit/guards.test.ts` | Rules that break one file at a time: formatting outside `format.ts`, debug code                       |
 | E2E     | `tests/e2e`                 | axe in every identity and theme, privacy, the Inspector, no overflow on phones                        |
 | Visual  | `tests/visual` (local)      | A refactor changes nothing visible: `npm run test:visual -- --update-snapshots` before, compare after |
-| Budgets | `scripts/check-*.mjs`       | JavaScript and file sizes                                                                             |
+| Budgets | `scripts/check-*.ts`        | JavaScript and file sizes                                                                             |
 
 A guard's header comment says what went wrong without it. A new exception names its reason.
 

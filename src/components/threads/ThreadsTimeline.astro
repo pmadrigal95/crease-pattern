@@ -5,8 +5,9 @@
  * starts as a faint bar. Drawn from the spans the workers record (protocol.ts, `Span`) on one
  * shared clock, so what you see is what happened.
  */
-import { copy } from '../../lib/copy';
+import { copyFor } from '../../i18n/dictionary';
 import { MODELS } from '../../lib/threads/protocol';
+const copy = copyFor(Astro.currentLocale);
 
 const t = copy.precrease.threads;
 ---
@@ -178,7 +179,7 @@ const t = copy.precrease.threads;
   import { formatDecimal } from '../../lib/format';
   import { fill } from '../../lib/template';
   // Type only: erased from the bundle, so the copy file still never reaches the browser.
-  type ThreadsCopy = (typeof import('../../content/copy/en.json'))['precrease']['threads'];
+  type ThreadsCopy = import('../../i18n/dictionary').Copy['precrease']['threads'];
   import { canRun, essayDepth, exclusive, getPool } from '../../lib/threads/client';
   import { essayProblem } from '../../lib/threads/essay';
   import type { Model } from '../../lib/threads/protocol';

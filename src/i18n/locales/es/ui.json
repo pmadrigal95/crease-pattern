@@ -1,0 +1,469 @@
+{
+  "nav": {
+    "work": "Trabajo",
+    "changelog": "Versiones",
+    "about": "Sobre mí",
+    "colophon": "Colofón",
+    "skip": "Ir al contenido",
+    "precrease": "Precrease"
+  },
+  "home": {
+    "hero": {
+      "title": "Interfaces hechas para durar.",
+      "inspect": "Ver cómo está hecha esta página",
+      "releases": "Leer las notas de versión",
+      "fold": {
+        "label": "Desdoblar el zorro en su patrón de pliegues",
+        "interface": "Interfaz",
+        "architecture": "Arquitectura",
+        "folded": "Doblado: la interfaz",
+        "unfolded": "Desdoblado: el patrón de pliegues",
+        "mountain": "monte",
+        "valley": "valle",
+        "caption": "El zorro es lo que ves en pantalla: la interfaz. Al desdoblarlo aparecen los pliegues que le dan forma: la arquitectura. \"Ver cómo está hecha esta página\" abre cualquier página del sitio de la misma manera."
+      },
+      "who": "{name} · {role} · {location}"
+    },
+    "work": {
+      "heading": "Este sitio, medido.",
+      "eyebrow": "Trabajo",
+      "intro": "Estas cifras se miden cada vez que se publica el sitio, y todo su código es público, así que puedes comprobar cada dato de esta página.",
+      "model": {
+        "label": "Una estrella Sonobe: 30 copias de una misma unidad de papel doblado",
+        "caption": "Una unidad doblada, repetida 30 veces, se traba en esta estrella. Abre el Inspector para desarmarla y contar las piezas con las que está hecho este sitio.",
+        "counts": {
+          "components": "componentes",
+          "uses": "usos en todo el sitio",
+          "reused": "usados en más de un archivo"
+        }
+      },
+      "metrics": {
+        "js": {
+          "unit": "KB",
+          "label": "de JavaScript que tu navegador ejecuta en esta página",
+          "note": "el límite es {budget} KB: menos código carga más rápido, incluso en teléfonos lentos"
+        },
+        "axe": {
+          "label": "errores de accesibilidad encontrados por revisiones automáticas, en {pages} páginas, {identities} estilos visuales, claro y oscuro",
+          "note": "se revisa con axe en cada cambio"
+        },
+        "parts": {
+          "label": "partes de este sitio que puedes abrir e inspeccionar",
+          "note": "cada una muestra su código, sus valores de diseño y su último cambio"
+        },
+        "identities": {
+          "label": "estilos visuales, un solo sistema de diseño",
+          "note": "cámbialos en el Inspector; solo cambian los colores"
+        }
+      },
+      "source": "Medido en la versión {commit} de este sitio, la que estás leyendo.",
+      "links": {
+        "colophon": "Cómo está hecho",
+        "repo": "Código en GitHub"
+      }
+    },
+    "changelog": {
+      "heading": "Versiones",
+      "intro": "Mi carrera, escrita como el registro de cambios de un software. Cada versión mayor es un paso más en responsabilidad y lleva el nombre de un volcán de Costa Rica, cada vez uno más alto.",
+      "years": "{years} años usando Vue en producción",
+      "unreleased": "Sin publicar",
+      "elevation": "{elevation} m",
+      "present": "Hoy",
+      "sections": {
+        "added": "Nuevo",
+        "changed": "Cambios"
+      },
+      "full": "Leer todas las notas de versión",
+      "profile": {
+        "summary": "Mi carrera como perfil de altitud, de {from} a hoy: {releases}. Ahora voy en la versión {version}.",
+        "release": "v{major} {codename}, {elevation}, {theme}",
+        "now": "v{version} · {codename} · HOY"
+      }
+    },
+    "notes": {
+      "heading": "Precrease",
+      "intro": "Notas sobre cómo se diseña y se construye software, desde la arquitectura hasta el trabajo con IA. Las escribo en público e incluyo lo que salió mal.",
+      "kicker": "{number} · {kind} · {date}",
+      "latest": "Últimas entradas",
+      "empty": "El primer pliegue está en proceso. Cuenta quién soy y de qué va a tratar este blog.",
+      "all": "Leer Precrease"
+    },
+    "contact": {
+      "heading": "Contacto",
+      "intro": "Por correo me encuentras más rápido.",
+      "copy": "Copiar el correo",
+      "copied": "Correo copiado"
+    }
+  },
+  "footer": {
+    "license": "Código MIT · Textos CC BY-NC-ND 4.0",
+    "colophon": "Colofón",
+    "privacy": "Privacidad",
+    "source": "Código en GitHub",
+    "email": "Correo"
+  },
+  "notFound": {
+    "title": "Esta página no está en el mapa.",
+    "body": "Puede que el enlace sea viejo o tenga un error.",
+    "aside": "Yo también he tomado algún sendero equivocado. Este te lleva de vuelta al inicio.",
+    "action": "Volver al inicio",
+    "map": {
+      "label": "Un mapa de curvas de nivel del volcán Irazú, dibujado con datos reales de elevación. Estás aquí, justo fuera del borde, y un sendero punteado sube hasta la cima.",
+      "here": "Estás aquí",
+      "note": "Irazú, {summit} m · curvas cada {interval} m"
+    }
+  },
+  "changelogPage": {
+    "title": "Versiones",
+    "description": "La carrera de Pablo Madrigal como notas de versión, del campamento base al Irazú.",
+    "intro": "Mi carrera como notas de versión, de la más reciente a la más antigua. Cada versión mayor lleva el nombre de un volcán de Costa Rica, cada vez uno más alto. Elige una cima en el mapa para ir a su versión.",
+    "map": {
+      "label": "Mapa de los volcanes detrás de cada versión",
+      "pin": "v{major} {codename}, {elevation}, {years}. Ir a sus notas de versión.",
+      "caption": "La Cordillera Volcánica Central de Costa Rica en coordenadas reales. Curvas de nivel cada 250 m; la ruta sigue las versiones en orden."
+    },
+    "rail": {
+      "next": "Siguiente",
+      "now": "Estás aquí"
+    },
+    "built": "Hecho con {stack}"
+  },
+  "labels": {
+    "stack": "Tecnologías",
+    "elsewhere": "En otros sitios",
+    "main": "Principal",
+    "home": "{name}, inicio"
+  },
+  "about": {
+    "title": "Ingeniero de sistemas. Arquitecto frontend.",
+    "factsLabel": "Datos",
+    "facts": {
+      "location": "Vive en",
+      "role": "Rol",
+      "training": "Formación",
+      "vue": "Vue en producción",
+      "languages": "Idiomas"
+    },
+    "vueYears": "{years} años",
+    "portrait": {
+      "alt": "Pablo Madrigal, de los hombros para arriba, con anteojos y camisa a rayas. Un pliegue en diagonal convierte parte de la foto en la misma cara dibujada con curvas de nivel.",
+      "caption": "Interfaz · arquitectura",
+      "handle": "Doblar el retrato",
+      "value": "{photo}% foto, {contours}% curvas de nivel"
+    }
+  },
+  "colophonPage": {
+    "title": "Cómo está hecho este sitio."
+  },
+  "privacyPage": {
+    "title": "Lo que este sitio sabe de ti."
+  },
+  "inspector": {
+    "open": "Inspeccionar",
+    "shortcut": "Mayús I",
+    "title": "Inspector",
+    "close": "Cerrar el inspector",
+    "intro": "Pasa el cursor por un bloque · Haz clic para fijarlo · Esc para salir",
+    "layers": "Capas",
+    "selected": "Seleccionado",
+    "nothingSelected": "Pasa el cursor o elige una capa para ver de dónde viene.",
+    "component": "Componente",
+    "section": "Sección de la página",
+    "source": "Ver el código",
+    "lastChange": "Último cambio",
+    "size": "Tamaño",
+    "tokens": "Tokens que usa",
+    "contrast": "Contraste del texto",
+    "contrastPass": "{ratio}:1 · cumple AA",
+    "contrastFail": "{ratio}:1 · no llega a AA",
+    "noText": "Sin texto dentro",
+    "outline": "Esquema de accesibilidad",
+    "landmarks": "Regiones",
+    "headings": "Encabezados",
+    "metrics": "Esta visita, medida",
+    "metricsNote": "Medido en tu navegador mientras usas la página. Los umbrales son los límites de \"bueno\" de Google.",
+    "pass": "bueno",
+    "fail": "por mejorar",
+    "waiting": "interactúa para medir",
+    "scripts": "JavaScript antes del Inspector",
+    "selectedAnnouncement": "{name} seleccionado",
+    "identity": "Identidad",
+    "identityNote": "Los mismos {count} tokens de color en cada identidad. Solo cambian sus valores.",
+    "theme": "Tema",
+    "themes": {
+      "system": "Sistema",
+      "light": "Claro",
+      "dark": "Oscuro"
+    },
+    "sheetExpand": "Ver más del panel",
+    "sheetShrink": "Ver más de la página"
+  },
+  "precrease": {
+    "name": "Precrease",
+    "tagline": "El trabajo antes de la forma.",
+    "description": "Las notas de Pablo Madrigal sobre cómo se diseña y se construye software, desde la arquitectura hasta la IA, para ingenieros y para cualquiera con curiosidad por cómo funciona.",
+    "nav": {
+      "latest": "Recientes",
+      "map": "Mapa de temas",
+      "rss": "Suscribirse"
+    },
+    "number": "Pliegue n.º {number}",
+    "minutes": "{minutes} min de lectura",
+    "published": "Publicada el {date}",
+    "updated": "Actualizada el {date}",
+    "topicsLabel": "Temas",
+    "breadcrumb": "Ruta del tema",
+    "related": "Entradas relacionadas",
+    "latestHeading": "Últimas entradas",
+    "empty": "La primera entrada viene en camino. Suscríbete para enterarte cuando salga.",
+    "map": {
+      "title": "Mapa de temas",
+      "description": "Todos los temas de Precrease como un árbol, con cuántas entradas hay en cada rama.",
+      "intro": "Los temas se organizan como un árbol. Abre uno para ver los temas más pequeños que contiene; la página de cada tema reúne todas las entradas que tiene debajo.",
+      "count": "{count} entradas",
+      "countOne": "1 entrada",
+      "countZero": "Todavía no hay entradas",
+      "subtopics": "{count} subtemas",
+      "subtopicsOne": "1 subtema"
+    },
+    "topic": {
+      "title": "{topic} · Precrease",
+      "heading": "{topic}",
+      "subtopics": "Dentro de este tema",
+      "empty": "Todavía no hay nada en esta rama.",
+      "feed": "Feed RSS de este tema"
+    },
+    "book": "Sobre {title}, de {author} ({year})",
+    "chapter": "Capítulo: {chapter}",
+    "draft": "Borrador: solo visible en desarrollo",
+    "scheduled": "Programada para el {date}: solo visible en desarrollo",
+    "search": {
+      "label": "Buscar en Precrease",
+      "placeholder": "Buscar entradas",
+      "filters": "Filtrar resultados",
+      "format": "Formato",
+      "topic": "Tema",
+      "clear": "Quitar filtros",
+      "loading": "Buscando…",
+      "one": "1 entrada",
+      "many": "{count} entradas",
+      "none": "Ninguna entrada coincide. Prueba con menos palabras o quita un filtro.",
+      "failed": "La búsqueda no cargó. Revisa tu conexión y recarga la página."
+    },
+    "subscribe": {
+      "title": "Suscribirse",
+      "description": "Recibe las entradas nuevas de Precrease en cuanto salen, por RSS.",
+      "heading": "Recibe las entradas nuevas en cuanto salen",
+      "intro": "No necesitas una cuenta para seguir Precrease. Lo más simple es RSS: un feed que una app lectora revisa por ti, así las entradas nuevas aparecen ahí solas.",
+      "howTitle": "Cómo suscribirte",
+      "steps": {
+        "reader": "Abre un lector de feeds. Feedly e Inoreader funcionan en cualquier navegador; NetNewsWire es gratis en Mac y iPhone.",
+        "add": "Agrega esta dirección como un feed nuevo:",
+        "done": "Las entradas nuevas aparecen en tu lector apenas se publican."
+      },
+      "copy": "Copiar la dirección del feed",
+      "copied": "Dirección del feed copiada",
+      "topicsTitle": "¿Solo algunos temas?",
+      "topics": "Cada tema tiene su propio feed. Abre un tema desde el {map} y usa su enlace al feed RSS.",
+      "mapLink": "mapa de temas",
+      "email": "¿Prefieres el correo? Habrá un boletín cuando el sitio tenga su propio dominio."
+    },
+    "chips": {
+      "label": "Filtrar entradas por tema",
+      "all": "Todas las entradas"
+    },
+    "marginNote": {
+      "toggle": "Mostrar nota al margen",
+      "start": "Nota al margen: "
+    },
+    "readers": {
+      "heading": "Lectores",
+      "kicker": "Fin del {number}",
+      "title": "Gracias por leer hasta el final.",
+      "metrics": {
+        "views": "visitas",
+        "reads": "la leyeron hasta el final",
+        "helped": "la encontraron útil"
+      },
+      "helped": "Me sirvió",
+      "helpedDone": "Gracias",
+      "thanks": "Gracias. Así sé sobre qué escribir más.",
+      "share": "Compartir",
+      "shareTitle": "Compartir “{title}”",
+      "copy": "Copiar el enlace",
+      "copyShort": "Copiar",
+      "copied": "Enlace copiado",
+      "more": "Más…",
+      "comments": "Comentarios",
+      "commentsNote": "Desde GitHub Discussions · carga cuando lo abres",
+      "commentsElsewhere": "En GitHub Discussions, para esta entrada"
+    },
+    "threads": {
+      "models": {
+        "serial": "Un solo worker",
+        "messages": "Paso de mensajes",
+        "fork-join": "Fork-join",
+        "shared": "Memoria compartida, con una cola"
+      },
+      "modelNotes": {
+        "serial": "La referencia",
+        "messages": "Como MPI",
+        "fork-join": "Como OpenMP",
+        "shared": "Como pthreads"
+      },
+      "run": "Ejecutar en este dispositivo",
+      "running": "Ejecutando…",
+      "runAgain": "Ejecutar otra vez",
+      "next": "Piezas siguientes",
+      "time": "Tiempo",
+      "speedup": "Aceleración",
+      "faster": "{times}× más rápido",
+      "result": "Lo más rápido en este dispositivo: {model}, {times}× más rápido que un solo worker.",
+      "cores": "Este dispositivo reporta {cores} núcleos; las demos usan {workers} workers.",
+      "noShared": "Este navegador no permite memoria compartida aquí, así que se omiten los dos modelos que la necesitan. Chrome, Edge y Firefox ejecutan los cuatro.",
+      "unavailable": "No disponible en este navegador",
+      "needsJs": "Las demos de esta página se ejecutan en tu navegador y necesitan JavaScript.",
+      "bestMove": "La jugada que eligió el solucionador",
+      "measuredResult": "En mi computadora de escritorio: {model}, {times}× más rápido que un solo worker.",
+      "batteryNote": "Una ejecución mantiene ocupados los núcleos del procesador por cerca de un segundo, así que gasta un poco de batería.",
+      "measuredNote": "Medido en {device} con {browser}, con {workers} workers y cuatro piezas por delante. Pulsa Ejecutar para medir tu propio dispositivo.",
+      "modelLabel": "Modelo",
+      "summary": "{model}: {ms} ms · {tasks} tareas por worker",
+      "legendWork": "Buscando en una tarea",
+      "legendCopy": "Copiando el tablero",
+      "legendStart": "Esperando para empezar",
+      "worker": "Worker {n}",
+      "idle": "{idle} de {threads} hilos no tienen nada que hacer",
+      "allBusy": "Todos los hilos tienen trabajo",
+      "threadsLabel": "Hilos",
+      "costLabel": "Costo por hilo",
+      "best": "Lo mejor: {times}× con {threads} hilos",
+      "depthLabel": "Piezas por delante",
+      "placements": "{count} posiciones revisadas",
+      "amdahlCaption": "De 1 a 16 hilos, con 36 ms de trabajo, como en 2022",
+      "depthRow": "{depth} por delante",
+      "runDepths": "Ejecutar las cuatro",
+      "depthReadout": "{depth} piezas por delante: {times}× más rápido con {workers} workers"
+    },
+    "toc": "En esta página",
+    "history": "Historial de cambios en GitHub",
+    "references": {
+      "title": "Referencias",
+      "sources": "Fuentes",
+      "sourcesNote": "En qué se basa esta entrada.",
+      "further": "Para seguir aprendiendo",
+      "furtherNote": "Para profundizar en las mismas ideas."
+    },
+    "sonobe": {
+      "unit": {
+        "label": "Cómo se dobla una unidad Sonobe",
+        "stage": "Paso {n} de {total}",
+        "previous": "Paso anterior",
+        "next": "Paso siguiente",
+        "stages": {
+          "s1": "Un cuadrado de papel.",
+          "s2": "Doblado por la mitad y abierto: un pliegue de lado a lado.",
+          "s3": "Los dos bordes doblados hasta ese pliegue: una tira de la mitad de alto.",
+          "s4": "Dos esquinas opuestas dobladas hacia adentro.",
+          "s5": "La unidad: una cara cuadrada entre dos pestañas. Los bordes de la cara son sus bolsillos."
+        },
+        "decisions": {
+          "s1": "Partir de una necesidad: mostrar una entrada en una lista.",
+          "s2": "Decidir qué necesita: una entrada.",
+          "s3": "Dejar el resto a la página: dónde va la tarjeta y cuánto mide de ancho.",
+          "s4": "Decidir qué puede cambiar: el nivel del encabezado.",
+          "s5": "Lo que acepta, y nada más."
+        },
+        "code": "Las props de PostCard, leídas de su archivo al generar esta página.",
+        "file": "PostCard.astro en GitHub"
+      },
+      "contract": {
+        "label": "Dos unidades, una pestaña y un bolsillo",
+        "join": "Unirlas",
+        "apart": "Separarlas",
+        "props": "Las props de la pestaña",
+        "asIs": "Tal como está",
+        "optional": "Una prop opcional",
+        "required": "Una prop obligatoria",
+        "apartStatus": "Dos unidades, una al lado de la otra.",
+        "fits": "La pestaña entra en el bolsillo y las unidades se traban.",
+        "fitsOptional": "Las unidades se siguen trabando. El contrato creció: un caso más que probar.",
+        "noFit": "Una prop obligatoria cambia la pestaña. Ya no encaja, y cada lugar que la usa tiene que cambiar.",
+        "fitsFigure": "Tal como está: la pestaña entra en el bolsillo.",
+        "optionalFigure": "Una prop opcional: todavía encaja, con un caso más que probar.",
+        "noFitFigure": "Una prop obligatoria: la pestaña se queda en la entrada del bolsillo."
+      },
+      "exception": {
+        "label": "El modelo de 12 unidades, con una unidad especial",
+        "toggle": "Hacer especial una unidad",
+        "closed": "Todas las unidades son iguales, y el modelo cierra.",
+        "open": "Ahora una unidad es distinta, y el modelo ya no cierra.",
+        "variants": "Tipos de unidad",
+        "checks": "Formas que revisar",
+        "closedFigure": "Todas las unidades iguales: el modelo cierra.",
+        "openFigure": "Una unidad especial: el modelo no cierra.",
+        "code": "La prop de FoldTitle, y los dos lugares que la usan, leídos del código al generar esta página.",
+        "file": "FoldTitle.astro en GitHub"
+      },
+      "token": {
+        "label": "Papel",
+        "names": "Los nombres de color que define cada identidad",
+        "caption": "Las tres identidades definen los mismos {count} nombres de color. Los componentes piden un nombre, nunca un valor, así que cambiar el papel no cambia ningún componente."
+      },
+      "site": {
+        "summary": "{components} componentes, {uses} usos, {reused} usados en dos o más archivos.",
+        "source": "Contados desde el código al generar esta página.",
+        "component": "Componente",
+        "group": "Grupo",
+        "uses": "Usos",
+        "files": "Archivos"
+      },
+      "scale": {
+        "label": "Modelo",
+        "model": "{count} unidades",
+        "turn": "Girar el modelo",
+        "designed": "Unidades diseñadas",
+        "folded": "Unidades dobladas",
+        "caption": "Siempre la misma unidad. Lo que cambia es cuántas hay y dónde se juntan."
+      }
+    }
+  },
+  "commands": {
+    "open": "Buscar y comandos",
+    "label": "Buscar y comandos",
+    "placeholder": "Busca páginas, secciones y entradas, o escribe un comando",
+    "shortcut": "Ctrl K",
+    "groups": {
+      "actions": "Acciones",
+      "pages": "Páginas",
+      "sections": "Secciones",
+      "posts": "Precrease"
+    },
+    "actions": {
+      "inspect": "Inspeccionar esta página",
+      "light": "Usar el tema claro",
+      "dark": "Usar el tema oscuro",
+      "system": "Seguir el tema del sistema",
+      "identity": "Usar la identidad {name}",
+      "copyEmail": "Copiar el correo",
+      "searchPosts": "Buscar “{query}” en las entradas"
+    },
+    "copied": "Correo copiado",
+    "empty": "Nada coincide. Prueba con menos letras o con otra palabra.",
+    "hint": "↑ ↓ para moverte · Enter para abrir · Esc para cerrar",
+    "one": "1 resultado",
+    "many": "{count} resultados"
+  },
+  "lang": {
+    "label": "Idioma",
+    "switch": "Leer en español",
+    "suggest": "Esta página también está en español.",
+    "suggestAction": "Leer en español",
+    "dismiss": "No, gracias"
+  },
+  "identities": {
+    "basalt-glacier": "Basalto y glaciar",
+    "washi-asagi": "Washi y asagi",
+    "contour-lines": "Curvas de nivel"
+  }
+}

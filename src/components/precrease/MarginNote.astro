@@ -12,7 +12,8 @@
  * paragraph without breaking the HTML. Keep the note itself to plain text, links and emphasis:
  * no lists or code blocks. Numbers come from a CSS counter the post body resets.
  */
-import { copy } from '../../lib/copy';
+import { copyFor } from '../../i18n/dictionary';
+const copy = copyFor(Astro.currentLocale);
 
 const t = copy.precrease.marginNote;
 const html = await Astro.slots.render('default');

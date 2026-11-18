@@ -3,7 +3,7 @@
  * so reading the site never downloads Vue. Returns a handle the launcher uses to close it.
  */
 import { createApp, type App } from 'vue';
-import InspectorPanel, { type Manifest } from './InspectorPanel.vue';
+import InspectorPanel, { type InspectorStrings, type Manifest } from './InspectorPanel.vue';
 // The manifest is a file of its own (Vite emits it hashed under /_astro/), fetched when the panel
 // loads, not bundled into it: it grows with every inspectable part, and the panel's code
 // shouldn't. Its size has its own budget (src/config/quality.ts, inspectorData).
@@ -91,8 +91,11 @@ export async function openInspector(
   document.body.append(host);
   document.documentElement.classList.add('inspecting');
 
+  const strings = document.querySelector<HTMLElement>('[data-inspector-toggle]')?.dataset.strings;
+  if (!strings) throw new Error('Inspector strings are missing from the Inspect button');
   let app: App | null = createApp(InspectorPanel, {
     manifest,
+    strings: JSON.parse(strings) as InspectorStrings,
     openedAt: performance.now(),
     onClose: () => handle.close(),
   });

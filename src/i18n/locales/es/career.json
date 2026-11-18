@@ -1,0 +1,99 @@
+{
+  "releases": {
+    "0": {
+      "codename": "Campamento base",
+      "place": "Cartago",
+      "theme": "Fundamentos. Todo ascenso empieza aquí."
+    },
+    "1": {
+      "codename": "Poás",
+      "place": "Volcán Poás",
+      "theme": "Desarrollador"
+    },
+    "2": {
+      "codename": "Turrialba",
+      "place": "Volcán Turrialba",
+      "theme": "Ingeniería de producto"
+    },
+    "3": {
+      "codename": "Irazú",
+      "place": "Volcán Irazú",
+      "theme": "Arquitectura y liderazgo"
+    }
+  },
+  "unreleased": [
+    "El Inspector: inclina esta página en sus capas y lee sus métricas reales.",
+    "Código paralelo en el navegador: un ensayo interactivo sobre hilos.",
+    "Una unidad, treinta formas: componentes reutilizables explicados con origami modular."
+  ],
+  "entries": {
+    "0.0.1": {
+      "title": "Diplomado en Tecnologías de Información",
+      "org": "Colegio Universitario de Cartago"
+    },
+    "0.1.0": {
+      "title": "Desarrollador de software, pasantía",
+      "org": "MDG Developers Group",
+      "added": [
+        "Trabajé como pasante en un sistema web heredado, en Node.js, Express y Pug.",
+        "Integré el inicio de sesión con Azure y Google mediante OAuth 2.0."
+      ]
+    },
+    "0.2.0": {
+      "title": "Ingeniero de TI",
+      "org": "Jardines del Recuerdo"
+    },
+    "0.3.0": {
+      "title": "Bachillerato en Ingeniería de Sistemas",
+      "org": "Universidad Fidélitas"
+    },
+    "1.0.0": {
+      "title": "Ingeniero de desarrollo de software",
+      "org": "MDG Developers Group",
+      "added": [
+        "Definí la base de frontend en Vue de la que partía cada proyecto de la empresa.",
+        "Entregué funcionalidades full-stack: clientes en Vue sobre APIs REST en .NET Core."
+      ]
+    },
+    "1.1.0": {
+      "title": "Ingeniero de software, asignado a NICE Actimize",
+      "org": "MDG Developers Group",
+      "added": [
+        "Diagnostiqué y resolví problemas en aplicaciones Java y JavaScript para NICE Actimize, una empresa de software contra delitos financieros y de cumplimiento normativo."
+      ]
+    },
+    "2.0.0": {
+      "title": "Consultor frontend",
+      "org": "Buo",
+      "added": [
+        "Entré a Buo, una plataforma de analítica de personas con IA, como su único desarrollador frontend."
+      ]
+    },
+    "2.1.0": {
+      "title": "Desarrollador frontend",
+      "org": "Buo",
+      "changed": [
+        "Pasé de consultor a tiempo completo, todavía como el único desarrollador frontend del producto."
+      ]
+    },
+    "3.0.0": {
+      "title": "Líder de frontend",
+      "org": "Buo",
+      "changed": ["Empecé a liderar el equipo de frontend a medida que crecía alrededor del producto."]
+    },
+    "3.1.0": {
+      "title": "Arquitecto frontend líder",
+      "org": "Buo",
+      "changed": ["Asumí la arquitectura de frontend y su dirección técnica."]
+    },
+    "3.2.0": {
+      "title": "crease-pattern",
+      "org": "Independiente",
+      "added": [
+        "Lancé este sitio, construido en público: un sistema de diseño con tres identidades visuales.",
+        "Aseguré el contraste WCAG 2.2 AA con pruebas unitarias en cada identidad y tema.",
+        "Cada cambio pasa presupuestos de accesibilidad y rendimiento en CI antes de publicarse solo."
+      ]
+    }
+  }
+}

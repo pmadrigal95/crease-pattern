@@ -9,11 +9,14 @@
  * so they can be drawn at build time without inline styles the CSP would block. Models that need
  * shared memory are skipped, with a note, where the browser doesn't allow it.
  */
-import { copy, fill } from '../../lib/copy';
+import { copyFor, fill } from '../../i18n/dictionary';
 import { formatDecimal } from '../../lib/format';
 import { boardFromText } from '../../lib/threads/board';
 import { ESSAY_BOARD, ESSAY_PIECES, MEASURED, speedup } from '../../lib/threads/essay';
 import { MODELS } from '../../lib/threads/protocol';
+import { langOf } from '../../i18n/routing';
+const lang = langOf(Astro.currentLocale);
+const copy = copyFor(Astro.currentLocale);
 
 const t = copy.precrease.threads;
 const board = boardFromText(ESSAY_BOARD, 20);
@@ -61,7 +64,7 @@ const cells = Array.from({ length: ROWS }, (_, row) => {
     <p class="readout" data-readout aria-live="polite">
       {fill(t.measuredResult, {
         model: t.models.shared.toLowerCase(),
-        times: formatDecimal(measuredSpeed('shared')),
+        times: formatDecimal(measuredSpeed('shared'), lang),
       })}
     </p>
     <ol class="results">
@@ -82,10 +85,10 @@ const cells = Array.from({ length: ROWS }, (_, row) => {
             />
           </svg>
           <span class="time" data-time>
-            {formatDecimal(MEASURED.ms[model])} ms
+            {formatDecimal(MEASURED.ms[model], lang)} ms
           </span>
           <span class="speed" data-speed>
-            {formatDecimal(measuredSpeed(model))}×
+            {formatDecimal(measuredSpeed(model), lang)}×
           </span>
         </li>
       ))}
@@ -263,7 +266,7 @@ const cells = Array.from({ length: ROWS }, (_, row) => {
   import { formatDecimal } from '../../lib/format';
   import { fill } from '../../lib/template';
   // Type only: erased from the bundle, so the copy file still never reaches the browser.
-  type ThreadsCopy = (typeof import('../../content/copy/en.json'))['precrease']['threads'];
+  type ThreadsCopy = import('../../i18n/dictionary').Copy['precrease']['threads'];
   import { canRun, essayDepth, nextFrame, poolSize, time } from '../../lib/threads/client';
   import { essayProblem, speedup } from '../../lib/threads/essay';
   import { ROTATIONS } from '../../lib/threads/pieces';

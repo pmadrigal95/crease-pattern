@@ -6,15 +6,24 @@
  */
 import site from '../../../site.config';
 import FoxMark from './FoxMark.astro';
-import { copy } from '../../lib/copy';
+import { copyFor } from '../../i18n/dictionary';
+import { publicPath } from '../../lib/url';
+import { LOCALES, languageLinks, langOf, localize, type Translations } from '../../i18n/routing';
+const lang = langOf(Astro.currentLocale);
+const copy = copyFor(lang);
 
 interface Props {
   name: string;
   role: string;
   location: string;
   contact: { email: string; linkedin: string; github: string };
+  /** Where this page lives in each language (src/i18n/routing.ts), for the language switch. */
+  translations: Translations;
 }
-const { name, role, location, contact } = Astro.props;
+const { name, role, location, contact, translations } = Astro.props;
+const path = publicPath(Astro.url.pathname);
+// Each language by its own name, the current one marked (M5).
+const languages = languageLinks(path, translations, lang).map((l) => ({ ...l, name: LOCALES[l.lang].name }));
 const year = new Date().getFullYear();
 ---
 
@@ -34,7 +43,7 @@ const year = new Date().getFullYear();
       </p>
       <ul class="links" aria-label={copy.labels.elsewhere}>
         <li>
-          <a href={`mailto:${contact.email}`}>Email</a>
+          <a href={`mailto:${contact.email}`}>{copy.footer.email}</a>
         </li>
         <li>
           <a href={contact.linkedin}>LinkedIn</a>
@@ -43,16 +52,31 @@ const year = new Date().getFullYear();
           <a href={contact.github}>GitHub</a>
         </li>
         <li>
-          <a href="/colophon">{copy.footer.colophon}</a>
+          <a href={localize('/colophon', lang)}>{copy.footer.colophon}</a>
         </li>
         <li>
-          <a href="/privacy">{copy.footer.privacy}</a>
+          <a href={localize('/privacy', lang)}>{copy.footer.privacy}</a>
         </li>
         <li>
           <a href={site.repository}>{copy.footer.source}</a>
         </li>
       </ul>
     </div>
+    <ul class="langs" aria-label={copy.lang.label}>
+      {languages.map((l) => (
+        <li>
+          {l.current ? (
+            <a href={l.href} lang={l.lang} aria-current="true">
+              {l.name}
+            </a>
+          ) : (
+            <a href={l.href} lang={l.lang} hreflang={l.lang} data-lang-switch={l.lang}>
+              {l.name}
+            </a>
+          )}
+        </li>
+      ))}
+    </ul>
     <p class="legal">
       <span>
         © {year} {name}
@@ -121,8 +145,31 @@ const year = new Date().getFullYear();
     text-decoration: underline;
     text-underline-offset: 4px;
   }
+  .langs {
+    list-style: none;
+    margin: var(--space-6) 0 0;
+    padding: 0;
+    display: flex;
+    gap: var(--space-6);
+  }
+  .langs a {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+  }
+  .langs a:hover {
+    color: var(--color-ink);
+  }
+  .langs a[aria-current] {
+    color: var(--color-ink);
+    text-decoration: underline;
+    text-decoration-color: var(--color-accent-ui);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 6px;
+  }
   .legal {
-    margin: var(--space-8) 0 0;
+    margin: var(--space-2) 0 0;
     font: var(--size-xs) var(--font-mono);
   }
   .legal a {

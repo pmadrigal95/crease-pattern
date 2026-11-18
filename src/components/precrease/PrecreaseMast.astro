@@ -6,8 +6,11 @@
  */
 import PrecreaseMark from './PrecreaseMark.astro';
 import PrecreaseSearch from './PrecreaseSearch.astro';
-import { copy } from '../../lib/copy';
+import { copyFor } from '../../i18n/dictionary';
 import { publicPath } from '../../lib/url';
+import { langOf, localize } from '../../i18n/routing';
+const lang = langOf(Astro.currentLocale);
+const copy = copyFor(lang);
 
 interface Props {
   /** The Precrease index, where the wordmark is the h1. */
@@ -17,9 +20,9 @@ const { home = false } = Astro.props;
 const t = copy.precrease;
 const path = publicPath(Astro.url.pathname);
 const links = [
-  { href: '/precrease', label: t.nav.latest },
-  { href: '/precrease/map', label: t.nav.map },
-  { href: '/precrease/subscribe', label: t.nav.rss },
+  { href: localize('/precrease', lang), label: t.nav.latest },
+  { href: localize('/precrease/map', lang), label: t.nav.map },
+  { href: localize('/precrease/subscribe', lang), label: t.nav.rss },
 ];
 const Word = home ? 'h1' : 'p';
 ---
@@ -38,7 +41,7 @@ const Word = home ? 'h1' : 'p';
             <span class="crease">crease</span>
           </>
         ) : (
-          <a href="/precrease">
+          <a href={localize('/precrease', lang)}>
             <span class="pre">Pre</span>
             <span class="crease">crease</span>
           </a>

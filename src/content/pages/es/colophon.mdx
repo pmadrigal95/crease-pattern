@@ -1,0 +1,75 @@
+---
+title: Colofón
+description: Cómo se construye, se prueba y se publica este sitio.
+---
+
+Cada dato de esta página se puede comprobar en [el repositorio](https://github.com/pmadrigal95/crease-pattern).
+
+## Arquitectura
+
+- **[Astro](https://astro.build/)** genera cada página como HTML estático al compilar. Una página no carga
+  JavaScript de ningún framework a menos que uno de sus componentes lo necesite.
+- **TypeScript** en su configuración más estricta, desde los esquemas de contenido hasta los componentes.
+
+## Sistema de diseño
+
+- **Un sistema, tres identidades.** Curvas de nivel, Basalto y glaciar y Washi y asagi comparten los mismos
+  tokens semánticos. Solo cambian los colores primitivos.
+- Los tokens se escriben en el [formato DTCG](https://www.designtokens.org/) y se compilan a CSS al generar el
+  sitio.
+- **El contraste se prueba.** Una prueba unitaria revisa cada color de texto y de interfaz contra WCAG 2.2 AA,
+  en las tres identidades, en claro y en oscuro.
+- La tipografía es **Schibsted Grotesk** y **JetBrains Mono**, con **Newsreader** para los titulares de
+  Precrease, todas servidas desde el propio sitio.
+- Detrás del inicio, cada identidad tiene su propia superficie: curvas de nivel, juntas de basalto o fibras de
+  washi. Un script dibuja cada una como un mosaico SVG continuo de pocos kilobytes, y usa una imagen hecha con IA
+  solo como referencia.
+
+## La escena 3D
+
+Abre el Inspector en el inicio y, en un dispositivo que pueda ejecutarla, el zorro se convierte en un modelo 3D
+hecho con las mismas seis facetas del dibujo. Detrás, cada identidad tiene su propia escena. Para Curvas de
+nivel es el volcán Irazú con datos reales de elevación, con una curva cada 100 m.
+
+- La dibuja [three.js](https://threejs.org/). Solo se carga cuando se abre el Inspector, y solo en dispositivos
+  con gráficos por hardware, WebGL 2, memoria suficiente y sin pedir movimiento reducido. En todos los demás se
+  queda el dibujo.
+- El Irazú viene del modelo de elevación Copernicus GLO-30, recortado a unos 13 km alrededor de la cima y
+  promediado en una cuadrícula de 161 × 161 puntos. Las alturas se dibujan al doble de su escala real. Produced
+  using Copernicus WorldDEM-30 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under
+  COPERNICUS by the European Union and ESA; all rights reserved.
+
+## El retrato
+
+El retrato de [Sobre mí](/es/about) es una sola foto real, sin tocar con IA generativa, mostrada de dos formas.
+
+- **La interfaz** es la foto misma. El duotono es CSS puro: una imagen en escala de grises mezclada con los
+  colores de la identidad activa y recortada con una máscara de silueta, así sigue cada identidad y tema sin
+  archivos extra.
+- **La arquitectura** es la misma cara en curvas de nivel. Un mapa de profundidad de la foto sale de
+  [Depth Anything V2 Small](https://github.com/DepthAnything/Depth-Anything-V2) (Apache 2.0), ejecutado una vez
+  en mi computadora, y un script de marching squares lo traza en un SVG de 11 KB.
+- Arrastra el control, o enfócalo y usa las flechas del teclado, para mover el pliegue.
+
+## Controles de calidad
+
+Un cambio no se puede fusionar hasta pasar formato, linting, revisión de tipos, pruebas unitarias, un escaneo
+de accesibilidad con axe en cada identidad y tema, y los presupuestos de Lighthouse:
+
+| Presupuesto              | Umbral         |
+| ------------------------ | -------------- |
+| Rendimiento              | 95 o más       |
+| Accesibilidad            | 100            |
+| Buenas prácticas         | 100            |
+| SEO                      | 100            |
+| Largest Contentful Paint | menos de 1.8 s |
+| Cumulative Layout Shift  | menos de 0.05  |
+
+## Hosting
+
+Archivos estáticos en **Cloudflare Workers**, publicados automáticamente desde la rama `main`.
+
+## Licencias
+
+El código es MIT. Los textos son CC BY-NC-ND 4.0. La identidad visual y los medios tienen todos los derechos
+reservados.

@@ -8,10 +8,13 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { foxFacets } from '../../lib/fox';
-import { copy, fill } from '../../lib/copy';
+import { copyFor, fill } from '../../i18n/dictionary';
 import { formatNumber } from '../../lib/format';
 import { IRAZU } from '../../lib/identity-scenes';
 import { irazuMap } from '../../lib/irazu-map';
+import { langOf } from '../../i18n/routing';
+const lang = langOf(Astro.currentLocale);
+const copy = copyFor(Astro.currentLocale);
 
 const t = copy.notFound.map;
 const file = readFileSync(join(process.cwd(), 'src/assets/scenes/irazu-dem.bin'));
@@ -47,7 +50,7 @@ const trail = `M${here.x} ${here.y}C${here.x - 30} ${here.y - 14} ${size - 70} $
       {t.here}
     </text>
     <text class="note" x="0" y={size + 18}>
-      {fill(t.note, { summit: formatNumber(IRAZU.summit), interval: IRAZU.interval })}
+      {fill(t.note, { summit: formatNumber(IRAZU.summit, lang), interval: IRAZU.interval })}
     </text>
   </svg>
 </figure>

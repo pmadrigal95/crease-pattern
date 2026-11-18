@@ -1,0 +1,32 @@
+---
+import { render } from 'astro:content';
+import { getPage } from '../../lib/pages';
+import PageLayout from '../../layouts/PageLayout.astro';
+import { copyFor } from '../../i18n/dictionary';
+import { localeStaticPaths } from '../../i18n/routing';
+const copy = copyFor(Astro.currentLocale);
+
+const page = await getPage('colophon', Astro.currentLocale);
+const { Content } = await render(page);
+
+/** This page in every language (src/i18n/routing.ts). */
+export const getStaticPaths = localeStaticPaths;
+---
+
+<PageLayout title={page.data.title} description={page.data.description} image="/og/colophon.png">
+  <div class="wrap">
+    <header class="page-head" data-inspect="colophon#header">
+      <p class="eyebrow">{page.data.title}</p>
+      <h1>{copy.colophonPage.title}</h1>
+    </header>
+    <div class="prose body" data-inspect="colophon#body">
+      <Content />
+    </div>
+  </div>
+</PageLayout>
+
+<style>
+  .body {
+    padding-bottom: var(--space-24);
+  }
+</style>

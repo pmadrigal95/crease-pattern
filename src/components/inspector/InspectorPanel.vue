@@ -5,7 +5,6 @@
  * page's accessibility outline and this visit's Web Vitals. Non-modal: the page stays readable.
  */
 import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
-import { inspector as t } from '../../content/copy/en.json';
 import {
   GOOD,
   accessibilityOutline,
@@ -16,13 +15,13 @@ import {
 } from './measure';
 import { explode, layersEnabled, markCurrent } from './layers';
 import { currentDirection, currentTheme, setDirection, setTheme, type Theme } from './identity';
-import {
-  allVisualDirections,
-  visualDirectionLabels,
-  type VisualDirection,
-} from '../../config/visual-direction';
+import { allVisualDirections, type VisualDirection } from '../../config/visual-direction';
+import type { Copy } from '../../i18n/dictionary';
 
-/** Built by scripts/build-inspector-manifest.mjs: facts per file, and each part's file. */
+/** The panel's strings in the page's language, from the Inspect button (Masthead.astro). */
+export type InspectorStrings = Copy['inspector'] & { identities: Copy['identities'] };
+
+/** Built by scripts/build-inspector-manifest.ts: facts per file, and each part's file. */
 export interface Manifest {
   repository: string;
   commit: string;
@@ -34,7 +33,8 @@ export interface Manifest {
   identities: { tokenCount: number; swatches: Record<string, { light: string[]; dark: string[] }> };
 }
 
-const props = defineProps<{ manifest: Manifest; openedAt: number }>();
+const props = defineProps<{ manifest: Manifest; openedAt: number; strings: InspectorStrings }>();
+const t = props.strings;
 const emit = defineEmits<{ close: [] }>();
 
 const fill = (s: string, v: Record<string, string | number>) =>
@@ -249,7 +249,7 @@ const metrics = computed(() => [
                 ></span>
               </span>
             </span>
-            <span class="name">{{ visualDirectionLabels[id].label }}</span>
+            <span class="name">{{ t.identities[id] }}</span>
           </label>
         </fieldset>
         <p class="muted">{{ fill(t.identityNote, { count: manifest.identities.tokenCount }) }}</p>

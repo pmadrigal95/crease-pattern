@@ -21,7 +21,8 @@
  *   isolated post they are a link to GitHub instead, since isolation blocks the giscus frame.
  */
 import site from '../../../site.config';
-import { copy, fill } from '../../lib/copy';
+import { copyFor, fill } from '../../i18n/dictionary';
+const copy = copyFor(Astro.currentLocale);
 
 interface Props {
   slug: string;

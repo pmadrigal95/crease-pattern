@@ -17,7 +17,7 @@ received the token ran third-party actions from movable tags next to dependency 
 - Every action in every workflow is pinned to a full commit SHA, with the version in a comment. Dependabot keeps
   the pins current, and the repository setting requires SHA pinning.
 - Checkouts do not persist the GitHub token. Node is pinned to an exact release.
-- `scripts/check-workflows.mjs` runs in CI and fails if any of these rules regresses.
+- `scripts/check-workflows.ts` runs in CI and fails if any of these rules regresses.
 
 ## Consequences
 

@@ -1,0 +1,38 @@
+---
+import PageLayout from '../../layouts/PageLayout.astro';
+import ExpeditionMap from '../../components/site/ExpeditionMap.astro';
+import ReleaseNotes from '../../components/site/ReleaseNotes.astro';
+import { copyFor } from '../../i18n/dictionary';
+import { localeStaticPaths } from '../../i18n/routing';
+const copy = copyFor(Astro.currentLocale);
+
+const page = copy.changelogPage;
+
+/** This page in every language (src/i18n/routing.ts). */
+export const getStaticPaths = localeStaticPaths;
+---
+
+<PageLayout title={page.title} description={page.description} image="/og/changelog.png">
+  <div class="wrap">
+    <header class="page-head" data-inspect="changelog#header">
+      <h1>{page.title}</h1>
+      <p>{page.intro}</p>
+    </header>
+    <div class="map">
+      <ExpeditionMap />
+    </div>
+    <div class="body">
+      <ReleaseNotes />
+    </div>
+  </div>
+</PageLayout>
+
+<style>
+  .map {
+    margin-bottom: var(--space-16);
+  }
+  .body {
+    padding-bottom: var(--space-24);
+    max-width: 960px;
+  }
+</style>

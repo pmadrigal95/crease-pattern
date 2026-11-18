@@ -1,13 +1,16 @@
 ---
 /**
  * Act 6 of Crease No. 003: every component of this site, how often it is used and where, from
- * src/generated/components.json (scripts/component-usage.mjs), counted from the code on every build.
+ * src/generated/components.json (scripts/component-usage.ts), counted from the code on every build.
  * Each name links to its file on GitHub. A plain table: it needs no JavaScript.
  */
 import usage from '../../generated/components.json';
 import site from '../../../site.config';
-import { copy, fill } from '../../lib/copy';
+import { copyFor, fill } from '../../i18n/dictionary';
 import { formatNumber } from '../../lib/format';
+import { langOf } from '../../i18n/routing';
+const lang = langOf(Astro.currentLocale);
+const copy = copyFor(Astro.currentLocale);
 
 const t = copy.precrease.sonobe.site;
 const { components, totals } = usage;
@@ -17,9 +20,9 @@ const fileHref = (path: string) => `${site.repository}/blob/main/${path}`;
 <figure class="site-components" data-inspect="SiteComponents">
   <p class="summary">
     {fill(t.summary, {
-      components: formatNumber(totals.components),
-      uses: formatNumber(totals.uses),
-      reused: formatNumber(totals.reused),
+      components: formatNumber(totals.components, lang),
+      uses: formatNumber(totals.uses, lang),
+      reused: formatNumber(totals.reused, lang),
     })}
   </p>
   <table>
@@ -44,8 +47,8 @@ const fileHref = (path: string) => `${site.repository}/blob/main/${path}`;
             <a href={fileHref(c.path)}>{c.name}</a>
           </th>
           <td class="group">{c.group}</td>
-          <td class="num">{formatNumber(c.uses)}</td>
-          <td class="num">{formatNumber(c.usedIn.length)}</td>
+          <td class="num">{formatNumber(c.uses, lang)}</td>
+          <td class="num">{formatNumber(c.usedIn.length, lang)}</td>
         </tr>
       ))}
     </tbody>

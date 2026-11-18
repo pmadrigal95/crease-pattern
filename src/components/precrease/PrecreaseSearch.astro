@@ -6,13 +6,18 @@
  *
  * Nothing loads until the visitor uses the box: Pagefind's script, its WebAssembly and the index
  * fragments download on first focus. Without JavaScript the box stays hidden, since it can't work:
- * it shows only under `html[data-js]`, which restore-identity.js sets before the first paint, so
+ * it shows only under `html[data-js]`, which restore-identity.ts sets before the first paint, so
  * the box never appears late and pushes the page down on phones, where it wraps to its own line.
  * Shortcut: "/" focuses it (Ctrl/Cmd+K opens the site's command menu, which can hand a query
  * over as ?q=); Escape closes the results.
  */
-import { formats, topics } from '../../config/precrease';
-import { copy } from '../../lib/copy';
+import { formatsFor, topicsFor } from '../../lib/taxonomy';
+import { copyFor } from '../../i18n/dictionary';
+import { langOf } from '../../i18n/routing';
+const lang = langOf(Astro.currentLocale);
+const copy = copyFor(lang);
+const formats = formatsFor(lang);
+const topics = topicsFor(lang);
 
 // Pagefind compiles WebAssembly. 'wasm-unsafe-eval' allows that and nothing else (eval() stays
 // blocked), and only on pages that carry the search box, not site-wide.
