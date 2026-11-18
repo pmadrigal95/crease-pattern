@@ -3,7 +3,7 @@ import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import site from '../../site.config';
 import { allVisualDirections } from '../../src/config/visual-direction';
-import { FALLBACK_DIRECTION } from '../../scripts/tokens-config.mjs';
+import { FALLBACK_DIRECTION } from '../../scripts/tokens-config.ts';
 
 type Palette = Record<string, { $value: string }>;
 const dir = join(process.cwd(), 'tokens/directions');

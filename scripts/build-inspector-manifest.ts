@@ -13,14 +13,25 @@ import { fileURLToPath } from 'node:url';
 const REPOSITORY = 'https://github.com/pmadrigal95/crease-pattern';
 const SOURCES = ['src/components', 'src/pages'];
 
-const listAstro = (root, dir) =>
+/** src/generated/tokens.json, as scripts/build-tokens.ts writes it. */
+interface TokenManifest {
+  base: Record<string, string>;
+  directions: Record<string, { light: Record<string, string>; dark: Record<string, string> }>;
+}
+const readTokens = (root: string): TokenManifest =>
+  JSON.parse(readFileSync(join(root, 'src/generated/tokens.json'), 'utf8')) as TokenManifest;
+/** The first identity's colors: every identity defines the same names (build-tokens checks). */
+const firstColors = (manifest: TokenManifest): Record<string, string> =>
+  Object.values(manifest.directions)[0]?.light ?? {};
+
+const listAstro = (root: string, dir: string): string[] =>
   readdirSync(join(root, dir), { withFileTypes: true }).flatMap((entry) => {
     const path = join(dir, entry.name);
     if (entry.isDirectory()) return listAstro(root, path);
     return entry.name.endsWith('.astro') ? [path] : [];
   });
 
-const git = (root, args) => {
+const git = (root: string, args: string[]): string => {
   try {
     return execFileSync('git', args, { cwd: root, encoding: 'utf8' }).trim();
   } catch {
@@ -29,9 +40,9 @@ const git = (root, args) => {
 };
 
 /** Token names the site defines (src/generated/tokens.json, built just before this script). */
-function knownTokens(root) {
-  const manifest = JSON.parse(readFileSync(join(root, 'src/generated/tokens.json'), 'utf8'));
-  const colors = Object.keys(Object.values(manifest.directions)[0].light).map((k) => `color-${k}`);
+function knownTokens(root: string): Set<string> {
+  const manifest = readTokens(root);
+  const colors = Object.keys(firstColors(manifest)).map((k) => `color-${k}`);
   return new Set([...Object.keys(manifest.base), ...colors]);
 }
 
@@ -39,34 +50,36 @@ function knownTokens(root) {
  * Five colors per identity and theme for the Identity switcher's swatches, plus how many color
  * tokens every identity shares (the point of the switcher: same system, different values).
  */
-function identities(root) {
-  const { directions } = JSON.parse(readFileSync(join(root, 'src/generated/tokens.json'), 'utf8'));
+function identities(root: string) {
+  const manifest = readTokens(root);
+  const { directions } = manifest;
   const SWATCH = ['bg', 'ink', 'accent', 'accent-ui', 'second'];
-  const pick = (palette) => SWATCH.map((k) => palette[k]);
+  const pick = (palette: Record<string, string>) => SWATCH.map((k) => palette[k] ?? '');
   return {
-    tokenCount: Object.keys(Object.values(directions)[0].light).length,
+    tokenCount: Object.keys(firstColors(manifest)).length,
     swatches: Object.fromEntries(
       Object.entries(directions).map(([id, d]) => [id, { light: pick(d.light), dark: pick(d.dark) }]),
     ),
   };
 }
 
-export function buildManifest(root) {
+export function buildManifest(root: string) {
   const tokens = knownTokens(root);
-  /** @type {Record<string, { tokens: string[], lastChange: { commit: string, date: string, subject: string } | null }>} */
-  const files = {};
-  /** @type {Record<string, string>} */
-  const parts = {};
+  const files: Record<
+    string,
+    { tokens: string[]; lastChange: { commit: string; date: string; subject: string } | null }
+  > = {};
+  const parts: Record<string, string> = {};
 
   for (const file of SOURCES.flatMap((dir) => listAstro(root, dir))) {
     const source = readFileSync(join(root, file), 'utf8');
-    const ids = [...source.matchAll(/data-inspect="([^"]+)"/g)].map((m) => m[1]);
+    const ids = [...source.matchAll(/data-inspect="([^"]+)"/g)].map((m) => m[1] ?? '');
     if (ids.length === 0) continue;
 
     const path = relative(root, join(root, file)).replaceAll('\\', '/');
     const name = basename(file, '.astro');
     const isPage = path.startsWith('src/pages/');
-    const used = [...new Set([...source.matchAll(/var\(--([a-z0-9-]+)/g)].map((m) => m[1]))]
+    const used = [...new Set([...source.matchAll(/var\(--([a-z0-9-]+)/g)].map((m) => m[1] ?? ''))]
       .filter((t) => tokens.has(t))
       .sort();
     const [commit = '', date = '', ...subject] = git(root, [

@@ -7,7 +7,7 @@ import site from '../../site.config';
 import { getProfile } from '../lib/profile';
 import { publicPath } from '../lib/url';
 import WebAnalytics from '../components/site/WebAnalytics.astro';
-// Same file scripts/csp-hashes.mjs hashes for the CSP; ?raw inlines it at build time.
+// Same file scripts/csp-hashes.ts hashes for the CSP; ?raw inlines it at build time.
 import restoreIdentitySource from '../scripts/restore-identity.js?raw';
 import pageRevealSource from '../scripts/page-reveal.js?raw';
 // Preloaded so text renders in its final font on first paint (no layout shift on swap).
@@ -64,7 +64,7 @@ const profile = await getProfile();
       <head>, and a script placed before it would run unprotected. It still runs before
       any content is parsed, so there is no flash of the default identity.
     -->
-    <!-- Restores the visitor's identity and theme. Its CSP hash comes from scripts/csp-hashes.mjs. -->
+    <!-- Restores the visitor's identity and theme. Its CSP hash comes from scripts/csp-hashes.ts. -->
     <script is:inline set:html={restoreIdentityScript} />
     <!-- Runs before first render: the page-to-page fold or the first-load entrance (decision 42). -->
     <script is:inline set:html={pageRevealScript} />

@@ -4,7 +4,7 @@
 // How: a height field made of sines with whole-number frequencies repeats exactly every TILE
 // units, so the lines meet themselves at the edges. Marching squares traces each contour level
 // on a grid that wraps around, then the segments are joined into polylines to keep the file small.
-import { pathFrom, random, tileSvg } from './shared.mjs';
+import { pathFrom, random, tileSvg, type Point } from './shared.ts';
 
 const TILE = 600; // SVG units; the CSS draws one tile per 600 CSS pixels
 const GRID = 150; // samples per side
@@ -24,11 +24,11 @@ export function contourTile() {
     }
     return { i, j, amp: 1 / (1 + Math.hypot(i, j)) ** 1.1, phase: rand() * Math.PI * 2 };
   });
-  const height = (u, v) =>
+  const height = (u: number, v: number): number =>
     waves.reduce((sum, w) => sum + w.amp * Math.sin(2 * Math.PI * (w.i * u + w.j * v) + w.phase), 0);
 
   // Sample the field on a wrapping grid.
-  const field = [];
+  const field: number[] = [];
   let min = Infinity;
   let max = -Infinity;
   for (let y = 0; y < GRID; y++) {
@@ -39,59 +39,59 @@ export function contourTile() {
       max = Math.max(max, h);
     }
   }
-  const at = (x, y) => field[((y + GRID) % GRID) * GRID + ((x + GRID) % GRID)];
+  const at = (x: number, y: number): number => field[((y + GRID) % GRID) * GRID + ((x + GRID) % GRID)]!;
   const step = TILE / GRID;
-  const r = (n) => Math.round(n * 10) / 10;
+  const r = (n: number): number => Math.round(n * 10) / 10;
 
   // Marching squares: for each level, collect segments as pairs of points.
-  const segments = [];
+  const segments: Point[][] = [];
   for (let l = 1; l <= LEVELS; l++) {
     const level = min + ((max - min) * l) / (LEVELS + 1);
     for (let y = 0; y < GRID; y++) {
       for (let x = 0; x < GRID; x++) {
         const c = [at(x, y), at(x + 1, y), at(x + 1, y + 1), at(x, y + 1)];
-        const corners = [
+        const corners: Point[] = [
           [x, y],
           [x + 1, y],
           [x + 1, y + 1],
           [x, y + 1],
         ];
-        const cross = [];
+        const cross: Point[] = [];
         for (let e = 0; e < 4; e++) {
-          const a = c[e];
-          const b = c[(e + 1) % 4];
+          const a = c[e]!;
+          const b = c[(e + 1) % 4]!;
           if (a < level !== b < level) {
             const t = (level - a) / (b - a);
-            const [ax, ay] = corners[e];
-            const [bx, by] = corners[(e + 1) % 4];
+            const [ax, ay] = corners[e]!;
+            const [bx, by] = corners[(e + 1) % 4]!;
             cross.push([r((ax + (bx - ax) * t) * step), r((ay + (by - ay) * t) * step)]);
           }
         }
         if (cross.length === 2) segments.push(cross);
-        if (cross.length === 4) segments.push([cross[0], cross[1]], [cross[2], cross[3]]);
+        if (cross.length === 4) segments.push([cross[0]!, cross[1]!], [cross[2]!, cross[3]!]);
       }
     }
   }
 
   // Join segments that share an end into polylines.
-  const key = ([x, y]) => `${x},${y}`;
-  const byEnd = new Map();
+  const key = ([x, y]: Point) => `${x},${y}`;
+  const byEnd = new Map<string, number[]>();
   segments.forEach((s, n) => {
     for (const p of s) byEnd.set(key(p), [...(byEnd.get(key(p)) ?? []), n]);
   });
-  const used = new Set();
-  const lines = [];
+  const used = new Set<number>();
+  const lines: Point[][] = [];
   segments.forEach((seg, n) => {
     if (used.has(n)) return;
     used.add(n);
     const line = [...seg];
     for (const atEnd of [true, false]) {
       for (;;) {
-        const tip = atEnd ? line[line.length - 1] : line[0];
+        const tip = (atEnd ? line.at(-1) : line[0])!;
         const next = (byEnd.get(key(tip)) ?? []).find((m) => !used.has(m));
         if (next === undefined) break;
         used.add(next);
-        const [a, b] = segments[next];
+        const [a, b] = segments[next] as [Point, Point];
         const other = key(tip) === key(a) ? b : a;
         if (atEnd) line.push(other);
         else line.unshift(other);

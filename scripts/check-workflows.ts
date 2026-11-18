@@ -8,18 +8,18 @@ import { join } from 'node:path';
 
 const DIR = '.github/workflows';
 const SECRET = /secrets\.CLOUDFLARE_/;
-const problems = [];
+const problems: string[] = [];
 
 for (const name of readdirSync(DIR).filter((f) => /\.ya?ml$/.test(f))) {
   const file = join(DIR, name);
   const lines = readFileSync(file, 'utf8').split('\n');
 
   lines.forEach((line, i) => {
-    const uses = line.match(/^\s*(?:-\s*)?uses:\s*([^\s#]+)/);
-    if (uses && !/^[\w.-]+\/[\w./-]+@[0-9a-f]{40}$/.test(uses[1])) {
-      problems.push(`${file}:${i + 1} ${uses[1]} is not pinned to a full commit SHA`);
+    const used = line.match(/^\s*(?:-\s*)?uses:\s*([^\s#]+)/)?.[1];
+    if (used && !/^[\w.-]+\/[\w./-]+@[0-9a-f]{40}$/.test(used)) {
+      problems.push(`${file}:${i + 1} ${used} is not pinned to a full commit SHA`);
     }
-    if (uses && uses[1].startsWith('actions/checkout@')) {
+    if (used?.startsWith('actions/checkout@')) {
       const block = lines.slice(i + 1, i + 4).join('\n');
       if (!/persist-credentials:\s*false/.test(block)) {
         problems.push(`${file}:${i + 1} actions/checkout must set persist-credentials: false`);
@@ -34,11 +34,12 @@ for (const name of readdirSync(DIR).filter((f) => /\.ya?ml$/.test(f))) {
   }
   // Split deploy.yml into jobs by their two-space indented keys under `jobs:`.
   const jobsStart = lines.findIndex((l) => /^jobs:\s*$/.test(l));
-  const jobs = [];
+  const jobs: { name: string; body: string[] }[] = [];
   for (let i = jobsStart + 1; i < lines.length; i++) {
-    const key = lines[i].match(/^ {2}([\w-]+):\s*$/);
-    if (key) jobs.push({ name: key[1], body: [] });
-    else if (jobs.length) jobs[jobs.length - 1].body.push(lines[i]);
+    const line = lines[i] ?? '';
+    const key = line.match(/^ {2}([\w-]+):\s*$/)?.[1];
+    if (key) jobs.push({ name: key, body: [] });
+    else jobs.at(-1)?.body.push(line);
   }
   for (const job of jobs) {
     const body = job.body.join('\n');

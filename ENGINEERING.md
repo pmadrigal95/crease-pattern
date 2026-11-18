@@ -135,7 +135,7 @@ skills before it ships; AGENTS.md says the same to coding agents.
 | Guards  | `tests/unit/guards.test.ts` | Rules that break one file at a time: formatting outside `format.ts`, debug code                       |
 | E2E     | `tests/e2e`                 | axe in every identity and theme, privacy, the Inspector, no overflow on phones                        |
 | Visual  | `tests/visual` (local)      | A refactor changes nothing visible: `npm run test:visual -- --update-snapshots` before, compare after |
-| Budgets | `scripts/check-*.mjs`       | JavaScript and file sizes                                                                             |
+| Budgets | `scripts/check-*.ts`        | JavaScript and file sizes                                                                             |
 
 A guard's header comment says what went wrong without it. A new exception names its reason.
 

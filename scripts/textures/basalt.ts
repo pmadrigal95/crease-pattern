@@ -5,21 +5,21 @@
 // so every cell near an edge meets its neighbour from the next tile exactly. A few rounds of Lloyd
 // relaxation (moving each seed to its cell's centroid) even out the cell sizes the way cooling lava
 // does. Each shared edge is drawn once.
-import { pathFrom, random, tileSvg } from './shared.mjs';
+import { pathFrom, random, tileSvg, type Point } from './shared.ts';
 
 const TILE = 600;
 const SEEDS = 58;
 const RELAX = 3;
 const SEED = 0xba5a17;
-const OFFSETS = [-1, 0, 1].flatMap((i) => [-1, 0, 1].map((j) => [i * TILE, j * TILE]));
+const OFFSETS = [-1, 0, 1].flatMap((i) => [-1, 0, 1].map((j): Point => [i * TILE, j * TILE]));
 
 /** Sutherland–Hodgman: keeps the part of `poly` where (p - m) · n <= 0. */
-function clip(poly, m, n) {
-  const side = ([x, y]) => (x - m[0]) * n[0] + (y - m[1]) * n[1];
-  const out = [];
+function clip(poly: Point[], m: Point, n: Point): Point[] {
+  const side = ([x, y]: Point) => (x - m[0]) * n[0] + (y - m[1]) * n[1];
+  const out: Point[] = [];
   for (let i = 0; i < poly.length; i++) {
-    const a = poly[i];
-    const b = poly[(i + 1) % poly.length];
+    const a = poly[i]!;
+    const b = poly[(i + 1) % poly.length]!;
     const sa = side(a);
     const sb = side(b);
     if (sa <= 0) out.push(a);
@@ -32,9 +32,9 @@ function clip(poly, m, n) {
 }
 
 /** The Voronoi cell of `p` among `others` (all seed copies). */
-function cell(p, others) {
+function cell(p: Point, others: Point[]): Point[] {
   const reach = TILE / 2;
-  let poly = [
+  let poly: Point[] = [
     [p[0] - reach, p[1] - reach],
     [p[0] + reach, p[1] - reach],
     [p[0] + reach, p[1] + reach],
@@ -49,13 +49,13 @@ function cell(p, others) {
   return poly;
 }
 
-function centroid(poly) {
+function centroid(poly: Point[]): Point {
   let a = 0;
   let cx = 0;
   let cy = 0;
   for (let i = 0; i < poly.length; i++) {
-    const [x0, y0] = poly[i];
-    const [x1, y1] = poly[(i + 1) % poly.length];
+    const [x0, y0] = poly[i]!;
+    const [x1, y1] = poly[(i + 1) % poly.length]!;
     const f = x0 * y1 - x1 * y0;
     a += f;
     cx += (x0 + x1) * f;
@@ -64,15 +64,16 @@ function centroid(poly) {
   return [cx / (3 * a), cy / (3 * a)];
 }
 
-const copies = (seeds) => seeds.flatMap(([x, y]) => OFFSETS.map(([ox, oy]) => [x + ox, y + oy]));
-const wrap = (v) => ((v % TILE) + TILE) % TILE;
+const copies = (seeds: Point[]): Point[] =>
+  seeds.flatMap(([x, y]) => OFFSETS.map(([ox, oy]): Point => [x + ox, y + oy]));
+const wrap = (v: number): number => ((v % TILE) + TILE) % TILE;
 
 export function basaltTile() {
   const rand = random(SEED);
-  let seeds = Array.from({ length: SEEDS }, () => [rand() * TILE, rand() * TILE]);
+  let seeds = Array.from({ length: SEEDS }, (): Point => [rand() * TILE, rand() * TILE]);
   for (let round = 0; round < RELAX; round++) {
     const all = copies(seeds);
-    seeds = seeds.map((p) => {
+    seeds = seeds.map((p): Point => {
       const [x, y] = centroid(cell(p, all));
       return [wrap(x), wrap(y)];
     });
@@ -80,9 +81,9 @@ export function basaltTile() {
 
   // Every edge of every cell that touches the tile, each drawn once.
   const all = copies(seeds);
-  const seen = new Set();
-  const edges = [];
-  const key = ([x, y]) => `${Math.round(x * 2)},${Math.round(y * 2)}`;
+  const seen = new Set<string>();
+  const edges: Point[][] = [];
+  const key = ([x, y]: Point) => `${Math.round(x * 2)},${Math.round(y * 2)}`;
   for (const p of all) {
     const poly = cell(p, all);
     const xs = poly.map(([x]) => x);
@@ -90,8 +91,8 @@ export function basaltTile() {
     if (Math.max(...xs) < 0 || Math.min(...xs) > TILE || Math.max(...ys) < 0 || Math.min(...ys) > TILE)
       continue;
     for (let i = 0; i < poly.length; i++) {
-      const a = poly[i];
-      const b = poly[(i + 1) % poly.length];
+      const a = poly[i]!;
+      const b = poly[(i + 1) % poly.length]!;
       const id = [key(a), key(b)].sort().join('|');
       if (seen.has(id)) continue;
       seen.add(id);

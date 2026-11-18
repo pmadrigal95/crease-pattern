@@ -12,14 +12,14 @@ The same components render in three visual identities (`basalt-glacier`, `washi-
 
 ## Stack
 
-| Piece         | Choice                                                         | Why                                                             |
-| ------------- | -------------------------------------------------------------- | --------------------------------------------------------------- |
-| Site          | [Astro](https://astro.build), static output                    | Content ships as HTML with zero framework JavaScript by default |
-| Islands       | Vue 3 + TypeScript (strict)                                    | Only the interactive parts (inspector, essays) hydrate          |
-| 3D            | Three.js, loaded on demand                                     | The WebGL scene loads only when you inspect the page            |
-| Threads essay | C → WebAssembly (Emscripten, pthreads)                         | Real threads running in the browser                             |
-| Tokens        | DTCG JSON → `scripts/build-tokens.mjs` → CSS custom properties | One source of truth, shown live in the inspector                |
-| Hosting       | Cloudflare Workers (static assets)                             | Per-route headers, global CDN, room for small APIs              |
+| Piece         | Choice                                                        | Why                                                             |
+| ------------- | ------------------------------------------------------------- | --------------------------------------------------------------- |
+| Site          | [Astro](https://astro.build), static output                   | Content ships as HTML with zero framework JavaScript by default |
+| Islands       | Vue 3 + TypeScript (strict)                                   | Only the interactive parts (inspector, essays) hydrate          |
+| 3D            | Three.js, loaded on demand                                    | The WebGL scene loads only when you inspect the page            |
+| Threads essay | C → WebAssembly (Emscripten, pthreads)                        | Real threads running in the browser                             |
+| Tokens        | DTCG JSON → `scripts/build-tokens.ts` → CSS custom properties | One source of truth, shown live in the inspector                |
+| Hosting       | Cloudflare Workers (static assets)                            | Per-route headers, global CDN, room for small APIs              |
 
 ## Getting started
 
