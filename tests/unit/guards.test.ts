@@ -7,13 +7,16 @@
  *   of them showed every date a day early (local time instead of UTC). Everything that turns a
  *   value into text for people now goes through src/lib/format.ts.
  * - Debug leftovers: a stray console.log or debugger ships to every visitor.
+ * - TypeScript only: the repository is 100% TypeScript, scripts and configs included. A .js file
+ *   slipped back in twice before this guard existed.
  */
+import { execFileSync } from 'node:child_process';
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, relative, sep } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
 const SRC = join(import.meta.dirname, '..', '..', 'src');
-const SOURCE = /\.(ts|astro|vue|mjs|js)$/;
+const SOURCE = /\.(ts|astro|vue)$/;
 
 function* files(dir: string): Generator<string> {
   for (const name of readdirSync(dir)) {
@@ -88,4 +91,9 @@ describe('cross-origin isolation', () => {
   test('built assets carry an embedder policy, so workers started by isolated pages are allowed', () => {
     expect(blockFor('/_astro/*')).toMatch(/Cross-Origin-Embedder-Policy: credentialless/);
   });
+});
+
+test('the repository has no JavaScript sources: write .ts (Node runs it directly)', () => {
+  const tracked = execFileSync('git', ['ls-files'], { encoding: 'utf8' }).split('\n');
+  expect(tracked.filter((file) => /\.(js|mjs|cjs|jsx)$/.test(file))).toEqual([]);
 });
