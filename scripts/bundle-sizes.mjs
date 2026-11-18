@@ -9,7 +9,9 @@
 //  - scene3d: M4's 3D scenes, the hero's fox (src/components/inspector/scene3d.ts) and the Work
 //    star (src/components/site/work3d.ts), and what only they import (three.js, shared). They load
 //    only on the home page, on capable devices.
-//  The last two have budgets of their own, and the other groups stop at them.
+//  - commandMenu: the command menu (src/components/site/command-menu.ts), loaded on any page the
+//    first time a visitor opens it with Ctrl/Cmd+K or its button.
+//  These three have budgets of their own, and the other groups stop at them.
 import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { brotliCompressSync } from 'node:zlib';
@@ -20,10 +22,12 @@ export const toKb = (bytes) => Math.round((bytes / 1024) * 10) / 10;
 const isScene3d = (file) => /^(scene3d|work3d)\.[\w-]+\.js$/.test(file);
 /** The Work animator's entry chunk. */
 const isWorkModel = (file) => /^work-model\.[\w-]+\.js$/.test(file);
-/** Where the page and on-demand groups stop: home-only code with budgets of its own. */
-const isHomeOnly = (file) => isScene3d(file) || isWorkModel(file);
+/** The command menu's entry chunk. */
+const isCommandMenu = (file) => /^command-menu\.[\w-]+\.js$/.test(file);
+/** Where the page and on-demand groups stop: code with budgets of its own. */
+const isOwnBudget = (file) => isScene3d(file) || isWorkModel(file) || isCommandMenu(file);
 
-/** @returns {{ page: number, onDemand: number, workModel: number, scene3d: number }} bytes, Brotli */
+/** @returns {{ page: number, onDemand: number, workModel: number, scene3d: number, commandMenu: number }} bytes, Brotli */
 export function measureBundles(dist) {
   const assets = join(dist, '_astro');
   const read = (file) => readFileSync(join(assets, file), 'utf8');
@@ -53,11 +57,18 @@ export function measureBundles(dist) {
   const sum = (files) => [...files].reduce((total, f) => total + size(f), 0);
 
   const page = new Set(scripts.filter((f) => html.includes(`/_astro/${f}`)));
-  const onDemand = closure([...page].flatMap(importsOf), page, isHomeOnly);
+  const onDemand = closure([...page].flatMap(importsOf), page, isOwnBudget);
   // A chunk shared with an earlier group (Vite's helpers, the capability check) counts there once.
   const workModel = closure(scripts.filter(isWorkModel), new Set([...page, ...onDemand]), isScene3d);
   const scene3d = closure(scripts.filter(isScene3d), new Set([...page, ...onDemand, ...workModel]));
-  return { page: sum(page), onDemand: sum(onDemand), workModel: sum(workModel), scene3d: sum(scene3d) };
+  const commandMenu = closure(scripts.filter(isCommandMenu), new Set([...page, ...onDemand]), isScene3d);
+  return {
+    page: sum(page),
+    onDemand: sum(onDemand),
+    workModel: sum(workModel),
+    scene3d: sum(scene3d),
+    commandMenu: sum(commandMenu),
+  };
 }
 
 /**
@@ -106,6 +117,15 @@ export function measureInspectorStyles(dist) {
 }
 
 /**
+ * The command menu's index (/commands.json, scripts/build-command-index.mjs), Brotli: fetched the
+ * first time the menu opens.
+ * @returns {number} bytes
+ */
+export function measureCommandData(dist) {
+  return brotliCompressSync(readFileSync(join(dist, 'commands.json'))).length;
+}
+
+/**
  * The 3D scenes' data files as Vite emits them (/_astro/*.<hash>.bin, such as the Irazú's height
  * grid), Brotli. They download with the scene, on the home page only.
  * @returns {number} bytes
@@ -146,7 +166,7 @@ export function measurePosts(dist, paths) {
     while (queue.length) {
       const file = queue.pop();
       // The 3D scenes and the Work animator load only on the home page, never on a post.
-      if (seen.has(file) || !scripts.has(file) || isHomeOnly(file)) continue;
+      if (seen.has(file) || !scripts.has(file) || isOwnBudget(file)) continue;
       seen.add(file);
       queue.push(...linksOf(file));
     }

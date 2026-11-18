@@ -244,12 +244,19 @@ export function initPrecreaseSearch(): void {
   document.addEventListener('pointerdown', (e) => {
     if (e.target instanceof Node && !root.contains(e.target)) close();
   });
+  // "/" focuses the box. Ctrl/Cmd+K belongs to the site's command menu (M4.7), which hands its
+  // query over as ?q= when the visitor asks it to search the posts.
   addEventListener('keydown', (e) => {
-    const slash = e.key === '/' && !e.ctrlKey && !e.metaKey && !e.altKey;
-    const commandK = e.key.toLowerCase() === 'k' && (e.ctrlKey || e.metaKey) && !e.altKey;
-    if ((!slash && !commandK) || (slash && isTypingTarget(e.target))) return;
+    if (e.key !== '/' || e.ctrlKey || e.metaKey || e.altKey || isTypingTarget(e.target)) return;
     e.preventDefault();
     input.focus();
     input.select();
   });
+  const handed = new URLSearchParams(location.search).get('q')?.slice(0, 120);
+  if (handed) {
+    input.value = handed;
+    input.focus();
+    open();
+    void update();
+  }
 }

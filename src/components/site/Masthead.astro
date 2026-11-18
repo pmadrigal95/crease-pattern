@@ -5,8 +5,12 @@ import { publicPath } from '../../lib/url';
 
 interface Props {
   name: string;
+  /** For the command menu's "Copy email address". */
+  email: string;
 }
-const { name } = Astro.props;
+const { name, email } = Astro.props;
+// The command menu's strings, read by command-menu.ts when the menu first opens.
+const commandStrings = JSON.stringify({ ...copy.commands, number: copy.precrease.number, email });
 
 const links = [
   { href: '/#work', label: copy.nav.work, match: null },
@@ -46,6 +50,23 @@ const path = publicPath(Astro.url.pathname);
       </svg>
       <span class="label">{copy.inspector.open}</span>
       <kbd aria-hidden="true">{copy.inspector.shortcut}</kbd>
+    </button>
+    <!-- The command menu (M4.7). Phones: the same button, floating in the bottom corner. -->
+    <button
+      type="button"
+      class="commands"
+      aria-label={copy.commands.open}
+      aria-keyshortcuts="Control+K Meta+K"
+      data-command-open
+      data-strings={commandStrings}
+    >
+      <svg class="glass" viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+        <circle cx="8.5" cy="8.5" r="5.5"></circle>
+        <path d="m13 13 4.5 4.5"></path>
+      </svg>
+      <kbd aria-hidden="true" data-shortcut>
+        {copy.commands.shortcut}
+      </kbd>
     </button>
   </div>
 </header>
@@ -95,6 +116,27 @@ const path = publicPath(Astro.url.pathname);
   document
     .querySelector('[data-hero-fold] [data-stage]')
     ?.addEventListener('pointerenter', () => void load(), { once: true });
+  // The command menu (M4.7): one menu for every page, loaded on first use; hovering its button
+  // starts the download early. Ctrl+K everywhere, Cmd+K on Apple devices.
+  const commandButton = document.querySelector<HTMLButtonElement>('[data-command-open]');
+  const commandMenu = () => import('./command-menu');
+  const openCommands = (from: HTMLElement | null) => {
+    const strings = commandButton?.dataset.strings;
+    if (!strings) return;
+    void commandMenu()
+      .then((m) => m.openCommandMenu(JSON.parse(strings) as Parameters<typeof m.openCommandMenu>[0], from))
+      .catch((error: unknown) => console.warn('Commands could not open', error));
+  };
+  commandButton?.addEventListener('click', () => openCommands(commandButton));
+  commandButton?.addEventListener('pointerenter', () => void commandMenu(), { once: true });
+  const shortcut = commandButton?.querySelector('[data-shortcut]');
+  if (shortcut && /Mac|iPhone|iPad/.test(navigator.platform)) shortcut.textContent = '⌘ K';
+  addEventListener('keydown', (e) => {
+    if (e.key.toLowerCase() !== 'k' || !(e.ctrlKey || e.metaKey) || e.altKey || e.shiftKey) return;
+    e.preventDefault();
+    const active = document.activeElement;
+    openCommands(active instanceof HTMLElement && active !== document.body ? active : commandButton);
+  });
   addEventListener('keydown', (e) => {
     if (
       !e.shiftKey ||
@@ -197,6 +239,61 @@ const path = publicPath(Astro.url.pathname);
   }
   @media (pointer: coarse) {
     .inspect kbd {
+      display: none;
+    }
+  }
+  .commands {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: 36px;
+    padding: 0 var(--space-3);
+    border: 1px solid var(--color-rule);
+    border-radius: var(--radius-pill);
+    background: transparent;
+    color: var(--color-ink);
+    font: inherit;
+    font-size: var(--size-sm);
+    cursor: pointer;
+    transition: border-color var(--motion-fast) var(--motion-ease-out);
+  }
+  .commands:hover {
+    border-color: var(--color-accent-ui);
+  }
+  .commands .glass {
+    width: 16px;
+    height: 16px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.75;
+    stroke-linecap: round;
+  }
+  .commands kbd {
+    font: 500 var(--type-caption);
+    color: var(--color-mute);
+  }
+  /* Phones: a round button in the bottom corner, clear of the home indicator and the notch. */
+  @media (max-width: 720px) {
+    .commands {
+      position: fixed;
+      right: max(var(--space-4), env(safe-area-inset-right));
+      bottom: max(var(--space-4), env(safe-area-inset-bottom));
+      z-index: 30;
+      width: 52px;
+      height: 52px;
+      justify-content: center;
+      padding: 0;
+      background: var(--color-surface);
+      box-shadow: 0 8px 24px -8px color-mix(in oklab, var(--color-ink) 45%, transparent);
+    }
+    .commands .glass {
+      width: 20px;
+      height: 20px;
+    }
+    .commands kbd {
+      display: none;
+    }
+    :global(.inspecting) .commands {
       display: none;
     }
   }

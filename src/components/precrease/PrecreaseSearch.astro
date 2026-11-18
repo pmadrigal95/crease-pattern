@@ -8,7 +8,8 @@
  * fragments download on first focus. Without JavaScript the box stays hidden, since it can't work:
  * it shows only under `html[data-js]`, which restore-identity.js sets before the first paint, so
  * the box never appears late and pushes the page down on phones, where it wraps to its own line.
- * Shortcuts: "/" or Ctrl/Cmd+K focus it; Escape closes the results.
+ * Shortcut: "/" focuses it (Ctrl/Cmd+K opens the site's command menu, which can hand a query
+ * over as ?q=); Escape closes the results.
  */
 import { formats, topics } from '../../config/precrease';
 import { copy } from '../../lib/copy';
@@ -50,7 +51,7 @@ const strings = JSON.stringify({
       maxlength="120"
       spellcheck="false"
       aria-controls="precrease-results"
-      aria-keyshortcuts="/ Control+K Meta+K"
+      aria-keyshortcuts="/"
     />
     <kbd aria-hidden="true">/</kbd>
   </form>

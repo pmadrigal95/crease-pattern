@@ -425,5 +425,31 @@
         "caption": "The same unit every time. What changes is how many, and where they meet."
       }
     }
+  },
+  "commands": {
+    "open": "Search and commands",
+    "label": "Search and commands",
+    "placeholder": "Search pages, sections and posts, or type a command",
+    "shortcut": "Ctrl K",
+    "groups": {
+      "actions": "Actions",
+      "pages": "Pages",
+      "sections": "Sections",
+      "posts": "Precrease"
+    },
+    "actions": {
+      "inspect": "Inspect this page",
+      "light": "Use the light theme",
+      "dark": "Use the dark theme",
+      "system": "Follow the system theme",
+      "identity": "Use the {name} identity",
+      "copyEmail": "Copy email address",
+      "searchPosts": "Search posts for “{query}”"
+    },
+    "copied": "Email address copied",
+    "empty": "Nothing matches. Try fewer letters or another word.",
+    "hint": "↑ ↓ to move · Enter to open · Esc to close",
+    "one": "1 result",
+    "many": "{count} results"
   }
 }
