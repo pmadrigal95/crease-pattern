@@ -6,7 +6,7 @@
  *
  * Nothing loads until the visitor uses the box: Pagefind's script, its WebAssembly and the index
  * fragments download on first focus. Without JavaScript the box stays hidden, since it can't work:
- * it shows only under `html[data-js]`, which restore-identity.js sets before the first paint, so
+ * it shows only under `html[data-js]`, which restore-identity.ts sets before the first paint, so
  * the box never appears late and pushes the page down on phones, where it wraps to its own line.
  * Shortcut: "/" focuses it (Ctrl/Cmd+K opens the site's command menu, which can hand a query
  * over as ?q=); Escape closes the results.

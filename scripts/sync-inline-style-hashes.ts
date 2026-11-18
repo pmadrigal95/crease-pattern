@@ -3,7 +3,7 @@
 //
 // Astro hashes the inline styles it renders, but it misses the styles of components used inside
 // MDX content (a post's own components, such as the Threads essay's demos or MarginNote). Our
-// Vite setting inlines a page's CSS when it's small (astro.config.mjs, assetsInlineLimit), so
+// Vite setting inlines a page's CSS when it's small (astro.config.ts, assetsInlineLimit), so
 // those styles land in the HTML without a hash and the browser blocks them, as the CSP says.
 //
 // This adds the exact SHA-256 of each such block to `style-src`, nothing else: never

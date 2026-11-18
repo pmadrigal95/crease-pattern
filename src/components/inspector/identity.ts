@@ -1,7 +1,7 @@
 /**
  * Switching identity and theme (decision 44, M2c). The choice is applied to <html> and remembered
  * in localStorage (pm.direction, pm.theme), only because the visitor made it; /privacy says so and
- * src/scripts/restore-identity.js reads it back before the next page paints.
+ * src/scripts/restore-identity.ts reads it back before the next page paints.
  *
  * The identity change is the contour-lines transition of decision 42: the new paper rises like
  * terrain from the swatch the visitor picked (styles in inspector.css).

@@ -134,7 +134,7 @@ test('the Identity switcher applies a direction and a theme, and remembers them'
     await page.evaluate(() => [localStorage.getItem('pm.direction'), localStorage.getItem('pm.theme')]),
   ).toEqual(['washi-asagi', 'dark']);
 
-  // restore-identity.js brings the choice back before the next page paints.
+  // restore-identity.ts brings the choice back before the next page paints.
   await page.goto('/about');
   await expect(page.locator('html')).toHaveAttribute('data-direction', 'washi-asagi');
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');

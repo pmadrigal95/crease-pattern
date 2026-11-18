@@ -6,6 +6,6 @@ src/generated
 .changeset/*.md
 CHANGELOG.md
 docs/concept/prototype-v2.html
-# Inlined verbatim and hashed for the CSP (scripts/csp-hashes.ts): reformatting would change the hash.
-src/scripts/restore-identity.js
-src/scripts/page-reveal.js
+# Inlined before first paint (scripts/inline-script.ts): kept compact, since every byte ships on every page.
+src/scripts/restore-identity.ts
+src/scripts/page-reveal.ts
