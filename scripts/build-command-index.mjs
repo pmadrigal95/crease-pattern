@@ -6,6 +6,7 @@
 // of the posts stays in Precrease's own box, and ⌘K hands a query over to it.
 import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { plainText } from './plain-text.mjs';
 
 const dist = join(import.meta.dirname, '..', 'dist');
 
@@ -25,16 +26,7 @@ const html = (path) => {
   const file = join(dist, path === '/' ? 'index.html' : `${path.slice(1)}.html`);
   return existsSync(file) ? readFileSync(file, 'utf8') : null;
 };
-const decode = (text) =>
-  text
-    .replace(/<[^>]+>/g, '')
-    .replace(/&#39;|&#x27;/g, "'")
-    .replace(/&quot;/g, '"')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&amp;/g, '&')
-    .replace(/\s+/g, ' ')
-    .trim();
+const decode = plainText;
 /** "About · Pablo Madrigal" → "About"; "Topic map · Precrease · Pablo Madrigal" → "Topic map". */
 const titleOf = (page, owner) => {
   const title = decode(page.match(/<title>([^<]*)<\/title>/)?.[1] ?? '');
