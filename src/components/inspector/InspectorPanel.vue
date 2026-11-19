@@ -16,6 +16,8 @@ import {
 import { explode, layersEnabled, markCurrent } from './layers';
 import { currentDirection, currentTheme, setDirection, setTheme, type Theme } from './identity';
 import { allVisualDirections, type VisualDirection } from '../../config/visual-direction';
+import { useViews } from './use-views';
+import InspectorViews from './InspectorViews.vue';
 import { fill } from '../../lib/template';
 import type { Copy } from '../../i18n/dictionary';
 
@@ -28,7 +30,11 @@ export interface Manifest {
   commit: string;
   files: Record<
     string,
-    { tokens: string[]; lastChange: { commit: string; date: string; subject: string } | null }
+    {
+      tokens: string[];
+      lines?: number;
+      lastChange: { commit: string; date: string; subject: string } | null;
+    }
   >;
   parts: Record<string, string>;
   identities: { tokenCount: number; swatches: Record<string, { light: string[]; dark: string[] }> };
@@ -121,18 +127,22 @@ const place = () => {
   else box.value = current.value ? current.value.getBoundingClientRect() : null;
 };
 
+/** Scrolls a part into view; on phones, into the space above the sheet that covers the bottom. */
+const bringIntoView = (el: HTMLElement) => {
+  const behavior = matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
+  if (!phone.matches) return el.scrollIntoView({ block: 'nearest', behavior });
+  const sheet = document.getElementById('inspector')?.getBoundingClientRect().height ?? 0;
+  const rect = el.getBoundingClientRect();
+  const free = innerHeight - sheet;
+  scrollBy({ top: rect.top - Math.max(16, (free - rect.height) / 2), behavior });
+};
+
 const pin = (el: HTMLElement, focusList = false) => {
   pinned.value = el;
   firstRun.value = false;
   announce.value = fill(t.selectedAnnouncement, { name: label(idOf(el)) });
-  const behavior = matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
-  if (phone.matches) {
-    // The sheet covers the bottom of the screen: bring the part into the space above it.
-    const sheet = document.getElementById('inspector')?.getBoundingClientRect().height ?? 0;
-    const rect = el.getBoundingClientRect();
-    const free = innerHeight - sheet;
-    scrollBy({ top: rect.top - Math.max(16, (free - rect.height) / 2), behavior });
-  } else el.scrollIntoView({ block: 'nearest', behavior });
+  // Folded, the page doesn't scroll: the camera brings the part's section to the front instead.
+  if (!bringForward(el)) bringIntoView(el);
   if (focusList) layerButtons.value[elements.value.indexOf(el)]?.focus();
   requestAnimationFrame(place);
 };
@@ -168,6 +178,32 @@ const onKey = (e: KeyboardEvent) => {
   if (e.key === 'Escape') emit('close');
 };
 
+// ---------- Views: the layers, the folded page, its crease pattern; and the tour ----------
+const { view, touring, chooseView, tour, downloadPattern, bringForward, close } = useViews({
+  layers: {
+    on: () => (settle = explode(elements.value)),
+    off: () => {
+      settle();
+      settle = () => {};
+    },
+  },
+  hooks: {
+    name: (el) => label(idOf(el)),
+    facts: (el) => {
+      const p = part(el);
+      return { lines: p?.lines, tokens: p?.tokens.length ?? 0, date: p?.lastChange?.date };
+    },
+    onHover: (el) => {
+      hovered.value = el;
+      place();
+    },
+    onPick: (el) => pin(el),
+  },
+  t,
+  pin: (el) => pin(el),
+  title: () => `${document.title} · ${t.views.pattern}`,
+});
+
 let stopVitals = () => {};
 let settle = () => {};
 onMounted(async () => {
@@ -183,6 +219,7 @@ onMounted(async () => {
   heading.value?.focus();
 });
 onBeforeUnmount(() => {
+  close();
   stopVitals();
   settle();
   document.removeEventListener('pointerover', onPointerOver);
@@ -265,6 +302,16 @@ const metrics = computed(() => [
           </label>
         </fieldset>
       </section>
+
+      <InspectorViews
+        v-if="threeD"
+        :t="t"
+        :view="view"
+        :touring="touring"
+        @choose="chooseView"
+        @tour="tour"
+        @download="downloadPattern"
+      />
 
       <section aria-labelledby="inspector-layers">
         <h3 id="inspector-layers">{{ t.layers }}</h3>

@@ -67,7 +67,7 @@ export const buildManifest = (root: string) => {
   const tokens = knownTokens(root);
   const files: Record<
     string,
-    { tokens: string[]; lastChange: { commit: string; date: string; subject: string } | null }
+    { tokens: string[]; lines: number; lastChange: { commit: string; date: string; subject: string } | null }
   > = {};
   const parts: Record<string, string> = {};
 
@@ -92,6 +92,8 @@ export const buildManifest = (root: string) => {
 
     files[path] = {
       tokens: used,
+      // Its size in lines, blank ones included: the pattern view shades each component by it.
+      lines: source.split('\n').length,
       lastChange: commit ? { commit, date, subject: subject.join('\x1f') } : null,
     };
     for (const id of ids) {
