@@ -14,5 +14,8 @@ export const pageRevealScript = toInlineScript(
   readFileSync(new URL('../src/scripts/page-reveal.ts', import.meta.url), 'utf8'),
 );
 
+/** The speculation rules every page carries (src/scripts/speculation-rules.ts). */
+export { speculationRules } from '../src/scripts/speculation-rules.ts';
+
 export const sha256 = (source: string): `sha256-${string}` =>
   `sha256-${createHash('sha256').update(source).digest('base64')}`;
