@@ -37,7 +37,8 @@ const CAMERA = { fov: 30, y: 0.8, z: 6.6, lookY: -0.15 };
 const FLOOR_Y = -1.6;
 const FADE_MS = 300;
 
-export function mountWorkScene(stage: HTMLElement, figure: HTMLElement, redraw: () => void): StarRenderer {
+/** The canvas over the star's square, its renderer with soft shadows, the camera, lights and floor. */
+function createWorkStage(stage: HTMLElement) {
   const canvas = document.createElement('canvas');
   canvas.setAttribute('aria-hidden', 'true');
   // CSSOM, which the Content Security Policy allows; no inline style attribute.
@@ -75,7 +76,11 @@ export function mountWorkScene(stage: HTMLElement, figure: HTMLElement, redraw: 
   floor.receiveShadow = true;
   scene.add(floor);
 
-  // The star: one group per unit, so a unit moves as one piece along its direction.
+  return { canvas, renderer, scene, camera };
+}
+
+/** The star: one group per unit, so a unit moves as one piece along its direction. */
+function buildStar(scene: Scene) {
   const { model, directions, rank } = star();
   const holder = new Group();
   // Turned like the SVG (around y, then tipped), less the tilt the camera's height already gives.
@@ -104,6 +109,15 @@ export function mountWorkScene(stage: HTMLElement, figure: HTMLElement, redraw: 
     holder.add(group);
     return { group, material };
   });
+
+  return { units, directions, rank, edgeMaterial };
+}
+
+export function mountWorkScene(stage: HTMLElement, figure: HTMLElement, redraw: () => void): StarRenderer {
+  const { canvas, renderer, scene, camera } = createWorkStage(stage);
+
+  // The star: one group per unit, so a unit moves as one piece along its direction.
+  const { units, directions, rank, edgeMaterial } = buildStar(scene);
 
   // Colours: the five papers of Crease No. 003, from the active identity's tokens.
   const css = (name: string) =>

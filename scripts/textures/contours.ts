@@ -43,34 +43,38 @@ export function contourTile() {
   const step = TILE / GRID;
   const r = (n: number): number => Math.round(n * 10) / 10;
 
-  // Marching squares: for each level, collect segments as pairs of points.
+  /** Where `level` crosses the edges of cell (x, y): marching squares, one cell at a time. */
+  const crossings = (x: number, y: number, level: number): Point[] => {
+    const c = [at(x, y), at(x + 1, y), at(x + 1, y + 1), at(x, y + 1)];
+    const corners: Point[] = [
+      [x, y],
+      [x + 1, y],
+      [x + 1, y + 1],
+      [x, y + 1],
+    ];
+    const cross: Point[] = [];
+    for (let e = 0; e < 4; e++) {
+      const a = c[e]!;
+      const b = c[(e + 1) % 4]!;
+      if (a < level === b < level) continue;
+      const t = (level - a) / (b - a);
+      const [ax, ay] = corners[e]!;
+      const [bx, by] = corners[(e + 1) % 4]!;
+      cross.push([r((ax + (bx - ax) * t) * step), r((ay + (by - ay) * t) * step)]);
+    }
+    return cross;
+  };
+
+  // For each level, collect segments as pairs of points.
   const segments: Point[][] = [];
   for (let l = 1; l <= LEVELS; l++) {
     const level = min + ((max - min) * l) / (LEVELS + 1);
-    for (let y = 0; y < GRID; y++) {
+    for (let y = 0; y < GRID; y++)
       for (let x = 0; x < GRID; x++) {
-        const c = [at(x, y), at(x + 1, y), at(x + 1, y + 1), at(x, y + 1)];
-        const corners: Point[] = [
-          [x, y],
-          [x + 1, y],
-          [x + 1, y + 1],
-          [x, y + 1],
-        ];
-        const cross: Point[] = [];
-        for (let e = 0; e < 4; e++) {
-          const a = c[e]!;
-          const b = c[(e + 1) % 4]!;
-          if (a < level !== b < level) {
-            const t = (level - a) / (b - a);
-            const [ax, ay] = corners[e]!;
-            const [bx, by] = corners[(e + 1) % 4]!;
-            cross.push([r((ax + (bx - ax) * t) * step), r((ay + (by - ay) * t) * step)]);
-          }
-        }
+        const cross = crossings(x, y, level);
         if (cross.length === 2) segments.push(cross);
         if (cross.length === 4) segments.push([cross[0]!, cross[1]!], [cross[2]!, cross[3]!]);
       }
-    }
   }
 
   // Join segments that share an end into polylines.

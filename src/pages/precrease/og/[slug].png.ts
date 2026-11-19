@@ -1,8 +1,7 @@
 import type { APIRoute } from 'astro';
 import { formatsFor } from '../../../lib/taxonomy';
 import { DEFAULT_LANG } from '../../../i18n/routing';
-import { getPosts } from '../../../lib/precrease';
-import { creaseNumber } from '../../../lib/precrease';
+import { creaseNumber, getPosts } from '../../../lib/precrease';
 import { ogImage } from '../../../lib/og-image';
 
 export async function getStaticPaths() {

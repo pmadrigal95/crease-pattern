@@ -75,42 +75,46 @@ export function openCommandMenu(strings: CommandStrings, from: HTMLElement | nul
   menu.open(from);
 }
 
-function build(t: CommandStrings) {
+/** The dialog and its parts, appended to the page once. */
+function createDialog(t: CommandStrings) {
   const sheet = new CSSStyleSheet();
   sheet.replaceSync(styles);
   document.adoptedStyleSheets = [...document.adoptedStyleSheets, sheet];
-
-  const dialog = document.createElement('dialog');
-  dialog.className = 'cmdk';
-  dialog.setAttribute('aria-label', t.label);
-  const input = document.createElement('input');
-  input.type = 'text';
-  input.placeholder = t.placeholder;
-  input.autocomplete = 'off';
-  input.spellcheck = false;
-  input.setAttribute('role', 'combobox');
-  input.setAttribute('aria-label', t.label);
-  input.setAttribute('aria-expanded', 'true');
-  input.setAttribute('aria-controls', 'cmdk-list');
-  input.setAttribute('aria-autocomplete', 'list');
-  const list = document.createElement('div');
-  list.id = 'cmdk-list';
-  list.className = 'cmdk-list';
-  list.setAttribute('role', 'listbox');
-  list.setAttribute('aria-label', t.label);
-  const status = document.createElement('p');
-  status.className = 'cmdk-status';
-  status.setAttribute('role', 'status');
-  const hint = document.createElement('p');
-  hint.className = 'cmdk-hint';
+  const element = <K extends keyof HTMLElementTagNameMap>(tag: K, attrs: Record<string, string>) => {
+    const el = document.createElement(tag);
+    for (const [name, value] of Object.entries(attrs)) el.setAttribute(name, value);
+    return el;
+  };
+  const dialog = element('dialog', { class: 'cmdk', 'aria-label': t.label });
+  const input = element('input', {
+    type: 'text',
+    placeholder: t.placeholder,
+    autocomplete: 'off',
+    spellcheck: 'false',
+    role: 'combobox',
+    'aria-label': t.label,
+    'aria-expanded': 'true',
+    'aria-controls': 'cmdk-list',
+    'aria-autocomplete': 'list',
+  });
+  const list = element('div', {
+    id: 'cmdk-list',
+    class: 'cmdk-list',
+    role: 'listbox',
+    'aria-label': t.label,
+  });
+  const status = element('p', { class: 'cmdk-status', role: 'status' });
+  const hint = element('p', { class: 'cmdk-hint', 'aria-hidden': 'true' });
   hint.textContent = t.hint;
-  hint.setAttribute('aria-hidden', 'true');
   dialog.append(input, list, status, hint);
   document.body.append(dialog);
+  return { dialog, input, list, status };
+}
 
-  // ---------- The commands: actions first, then places ----------
+/** What the menu can do on any page: inspect, theme, identity, language, copy the email address. */
+function actionCommands(t: CommandStrings, status: HTMLElement): Command[] {
   const center = () => ({ x: innerWidth / 2, y: innerHeight / 2 });
-  const actions: Command[] = [
+  return [
     {
       group: 'actions',
       label: t.actions.inspect,
@@ -145,91 +149,105 @@ function build(t: CommandStrings) {
       },
     },
   ];
+}
+
+const go = (href: string) => () => location.assign(href);
+
+/** Where the menu can go: pages, their sections and posts, from /commands.json. */
+function placeCommands({ pages, posts }: Index, t: CommandStrings): Command[] {
+  const number = (n: number) => fill(t.number, { number: padNumber(n) });
+  return [
+    ...pages.map((p) => ({ group: 'pages' as const, label: p.title, aside: p.href, run: go(p.href) })),
+    ...pages.flatMap((p) =>
+      p.sections.map((s) => ({
+        group: 'sections' as const,
+        label: s.title,
+        context: p.title,
+        aside: p.title,
+        run: go(s.href),
+      })),
+    ),
+    ...posts.map((p) => ({
+      group: 'posts' as const,
+      label: p.title,
+      context: `${number(p.number)} ${p.description}`,
+      aside: number(p.number),
+      run: go(p.href),
+    })),
+  ];
+}
+
+/** With a query, the last option hands it to Precrease's full-text search. */
+const searchCommand = (query: string, t: CommandStrings): Command => ({
+  group: 'posts',
+  label: fill(t.actions.searchPosts, { query }),
+  run: go(`${localize('/precrease', langOfPath(location.pathname))}?q=${encodeURIComponent(query)}`),
+});
+
+const optionId = (i: number) => `cmdk-option-${i}`;
+
+/** The listbox's options, grouped under their headings; `on` hears a pointer moving over or clicking one. */
+function renderOptions(
+  list: HTMLElement,
+  shown: readonly Command[],
+  t: CommandStrings,
+  on: (i: number, how: 'move' | 'click') => void,
+) {
+  const groups = new Map<string, HTMLElement>();
+  list.replaceChildren();
+  shown.forEach((command, i) => {
+    let group = groups.get(command.group);
+    if (!group) {
+      group = document.createElement('div');
+      group.setAttribute('role', 'group');
+      const heading = document.createElement('p');
+      heading.className = 'cmdk-group';
+      heading.id = `cmdk-group-${command.group}`;
+      heading.textContent = t.groups[command.group];
+      group.setAttribute('aria-labelledby', heading.id);
+      group.append(heading);
+      groups.set(command.group, group);
+      list.append(group);
+    }
+    const option = document.createElement('div');
+    option.id = optionId(i);
+    option.className = 'cmdk-option';
+    option.setAttribute('role', 'option');
+    const label = document.createElement('span');
+    label.textContent = command.label;
+    option.append(label);
+    if (command.aside) {
+      const aside = document.createElement('span');
+      aside.className = 'cmdk-aside';
+      aside.textContent = command.aside;
+      option.append(aside);
+    }
+    option.addEventListener('pointermove', () => on(i, 'move'));
+    option.addEventListener('click', () => on(i, 'click'));
+    group.append(option);
+  });
+}
+
+/** The menu: what's shown for the query, which option is active, and the keys that move it. */
+function build(t: CommandStrings) {
+  const { dialog, input, list, status } = createDialog(t);
+  const actions = actionCommands(t, status);
   let places: Command[] = [];
-  const go = (href: string) => () => location.assign(href);
   const indexReady = loadIndex()
-    .then(({ pages, posts }) => {
-      places = [
-        ...pages.map((p) => ({ group: 'pages' as const, label: p.title, aside: p.href, run: go(p.href) })),
-        ...pages.flatMap((p) =>
-          p.sections.map((s) => ({
-            group: 'sections' as const,
-            label: s.title,
-            context: p.title,
-            aside: p.title,
-            run: go(s.href),
-          })),
-        ),
-        ...posts.map((p) => ({
-          group: 'posts' as const,
-          label: p.title,
-          context: `${fill(t.number, { number: padNumber(p.number) })} ${p.description}`,
-          aside: fill(t.number, { number: padNumber(p.number) }),
-          run: go(p.href),
-        })),
-      ];
-    })
+    .then((index) => void (places = placeCommands(index, t)))
     .catch(() => undefined); // offline: the actions still work
 
-  // ---------- Rendering ----------
   let shown: Command[] = [];
   let active = 0;
-  const optionId = (i: number) => `cmdk-option-${i}`;
   function render() {
     const query = input.value.trim();
     const matched = rank([...actions, ...places], query);
-    // With a query, the last option hands it to Precrease's full-text search.
-    const search: Command[] = query
-      ? [
-          {
-            group: 'posts',
-            label: fill(t.actions.searchPosts, { query }),
-            run: go(
-              `${localize('/precrease', langOfPath(location.pathname))}?q=${encodeURIComponent(query)}`,
-            ),
-          },
-        ]
-      : [];
     // Without a query, sections and posts wait: actions and pages are the starting points.
-    shown = [
-      ...(query ? matched : matched.filter((c) => c.group === 'actions' || c.group === 'pages')),
-      ...search,
-    ];
+    shown = query
+      ? [...matched, searchCommand(query, t)]
+      : matched.filter((c) => c.group === 'actions' || c.group === 'pages');
     active = Math.min(active, Math.max(0, shown.length - 1));
-    const groups = new Map<string, HTMLElement>();
-    list.replaceChildren();
-    shown.forEach((command, i) => {
-      let group = groups.get(command.group);
-      if (!group) {
-        group = document.createElement('div');
-        group.setAttribute('role', 'group');
-        const heading = document.createElement('p');
-        heading.className = 'cmdk-group';
-        heading.id = `cmdk-group-${command.group}`;
-        heading.textContent = t.groups[command.group];
-        group.setAttribute('aria-labelledby', heading.id);
-        group.append(heading);
-        groups.set(command.group, group);
-        list.append(group);
-      }
-      const option = document.createElement('div');
-      option.id = optionId(i);
-      option.className = 'cmdk-option';
-      option.setAttribute('role', 'option');
-      option.setAttribute('aria-selected', String(i === active));
-      const label = document.createElement('span');
-      label.textContent = command.label;
-      option.append(label);
-      if (command.aside) {
-        const aside = document.createElement('span');
-        aside.className = 'cmdk-aside';
-        aside.textContent = command.aside;
-        option.append(aside);
-      }
-      option.addEventListener('pointermove', () => select(i));
-      option.addEventListener('click', () => runAt(i));
-      group.append(option);
-    });
+    renderOptions(list, shown, t, (i, how) => (how === 'move' ? select(i) : runAt(i)));
     const count = shown.length;
     status.textContent = count === 0 ? t.empty : fill(count === 1 ? t.one : t.many, { count });
     select(active);
@@ -248,8 +266,7 @@ function build(t: CommandStrings) {
   function runAt(i: number) {
     const command = shown[i];
     if (!command) return;
-    const keepOpen = command.label === t.actions.copyEmail;
-    if (!keepOpen) dialog.close();
+    if (command.label !== t.actions.copyEmail) dialog.close();
     command.run();
   }
 
