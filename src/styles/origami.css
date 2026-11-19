@@ -1,0 +1,46 @@
+/*
+ * The origami figures in SVG (OrigamiMark.astro, HeroFold.astro, NotFoundMap.astro): which one
+ * shows, and the paper colours their file (/origami.svg, src/lib/origami/sprite.ts) reads.
+ */
+/* Which figure: Washi & asagi the crane, Basalt & glacier the arctic fox, Contour lines the blue
+   morpho by day and the red-eyed tree frog by night (src/lib/origami/marks.ts, modelFor). */
+.origami .o-model {
+  display: none;
+}
+:root[data-direction='washi-asagi'] .origami .o-crane,
+:root[data-direction='basalt-glacier'] .origami .o-fox,
+:root[data-direction='contour-lines'] .origami .o-morpho {
+  display: inline;
+}
+:root[data-direction='contour-lines'][data-theme='dark'] .origami .o-morpho {
+  display: none;
+}
+:root[data-direction='contour-lines'][data-theme='dark'] .origami .o-frog {
+  display: inline;
+}
+@media (prefers-color-scheme: dark) {
+  :root[data-direction='contour-lines']:not([data-theme='light']) .origami .o-morpho {
+    display: none;
+  }
+  :root[data-direction='contour-lines']:not([data-theme='light']) .origami .o-frog {
+    display: inline;
+  }
+}
+
+/* Paper is light in every theme: an arctic fox is white at night too. And the dark it shades to
+   is ink by day and the background by night. The figures' file and the 3D scene read these
+   (src/lib/origami/sprite.ts, src/components/inspector/scene3d.ts). */
+:root {
+  --origami-paper: var(--color-surface);
+  --origami-dark: var(--color-ink);
+}
+:root[data-theme='dark'] {
+  --origami-paper: color-mix(in oklab, var(--color-ink) 90%, var(--color-surface));
+  --origami-dark: var(--color-bg);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --origami-paper: color-mix(in oklab, var(--color-ink) 90%, var(--color-surface));
+    --origami-dark: var(--color-bg);
+  }
+}

@@ -10,7 +10,7 @@ import { join } from 'node:path';
 import satori from 'satori';
 import { Resvg } from '@resvg/resvg-js';
 import { thumbnail, type Family } from './thumbnail';
-import { foxFacets, foxMountainFolds, foxSheet, foxValleyFolds, foxViewBox } from './fox';
+import { EDGE_MIX, ROLE_MIX, flatMark, foldedMark, modelFor, VIEWBOX, type Role } from './origami/marks';
 
 const COLORS = {
   bg: '#EFF1EC',
@@ -138,11 +138,29 @@ export async function ogImage({ slug, family, kicker, title }: OgPost): Promise<
   });
 }
 
+/** Mixes two #rrggbb colours: `t` of `b` over `a`. */
+const mix = (a: string, b: string, t: number) => {
+  const ch = (hex: string, i: number) => parseInt(hex.slice(1 + i * 2, 3 + i * 2), 16);
+  // 256 + n, minus its leading 1: two hex digits for any channel, no padding by hand.
+  const hex = (n: number) => (256 + Math.round(n)).toString(16).slice(1);
+  return `#${[0, 1, 2].map((i) => hex(ch(a, i) + (ch(b, i) - ch(a, i)) * t)).join('')}`;
+};
+/** The roles of src/styles/origami.css, in the default identity's light theme. */
+const ROLE_FILL: Record<Role, string> = {
+  light: mix(COLORS.surface, COLORS.accent, ROLE_MIX.light),
+  mid: mix(COLORS.surface, COLORS.accent, ROLE_MIX.mid),
+  shade: mix(COLORS.surface, COLORS.accent, ROLE_MIX.shade),
+  deep: mix(COLORS.surface, COLORS.accent, ROLE_MIX.deep),
+  accent: COLORS.accent,
+  wing: COLORS.accentUi,
+  edge: mix(COLORS.accent, COLORS.ink, EDGE_MIX),
+};
+
 /**
  * The site's own pages (home, About, Changelog, Colophon, and the default for the rest): the
  * page's title as the kicker, its description as the headline, signed with the owner's name, and
- * the site's thesis as the picture, the folded fox over the crease pattern it folds from
- * (src/lib/fox.ts, the same geometry as the hero).
+ * the site's thesis as the picture: the default identity's figure (the blue morpho, Contour lines
+ * by day) over the crease pattern it folds from (src/lib/origami, the geometry the hero draws).
  */
 export async function ogPageImage({
   kicker,
@@ -153,36 +171,29 @@ export async function ogPageImage({
   title: string;
   name: string;
 }): Promise<Buffer> {
-  const ear = '#689EBF'; // about the hero's ear: accent-ui 75 % over the background (Contour lines)
-  const fill: Record<string, string> = {
-    'head-left': COLORS.accent,
-    'head-right': COLORS.ink,
-    'ear-left': ear,
-    'ear-right': ear,
-    'inner-left': COLORS.ink,
-    'inner-right': COLORS.ink,
-  };
-  const pattern = `<path d="${foxSheet}" fill="${COLORS.surface}" stroke="${COLORS.rule}" stroke-width="0.35"/>
-    <g fill="none" stroke="${COLORS.accentUi}" stroke-width="0.45" stroke-linejoin="round" stroke-linecap="round" opacity="0.55">
-      <path d="${foxMountainFolds}"/><path d="${foxValleyFolds}" stroke-dasharray="1.4 1.2"/>
+  const id = modelFor('contour-lines', false);
+  const flat = flatMark(id);
+  const figure = foldedMark(id)
+    .facets.map(
+      (f) =>
+        `<path d="${f.d}" fill="${ROLE_FILL[f.role]}" stroke="${COLORS.surface}" stroke-width="0.25" stroke-linejoin="round"/>`,
+    )
+    .join('');
+  const pattern = `${flat.facets.map((d) => `<path d="${d}" fill="${COLORS.surface}" stroke="${COLORS.rule}" stroke-width="0.3"/>`).join('')}
+    <g fill="none" stroke="${COLORS.accentUi}" stroke-width="0.45" stroke-linecap="round" opacity="0.55">
+      <path d="${flat.mountain}"/><path d="${flat.valley}" stroke-dasharray="1.4 1.2"/>
     </g>`;
-  // The fox stands on its pattern, a little smaller, so the folds still read around it.
-  const fox = `<g transform="translate(24 26) scale(0.62) translate(-24 -24)">${foxFacets
-    .map((f) => `<path d="${f.d}" fill="${fill[`${f.part}-${f.side}`]}"/>`)
-    .join('')}</g>`;
+  // The figure stands on its pattern, a little smaller, so the folds still read around it.
+  const standing = `<g transform="translate(24 26) scale(0.62) translate(-24 -24)">${figure}</g>`;
   return card({
     kicker,
     title,
     picture: svgData(
-      `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${foxViewBox}">${pattern}${fox}</svg>`,
+      `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${VIEWBOX}">${pattern}${standing}</svg>`,
     ),
     signature: el('div', { alignItems: 'center', gap: 18 }, [
       el('img', { width: 52, height: 52 }, undefined, {
-        src: svgData(
-          `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${foxViewBox}">${foxFacets
-            .map((f) => `<path d="${f.d}" fill="${fill[`${f.part}-${f.side}`]}"/>`)
-            .join('')}</svg>`,
-        ),
+        src: svgData(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="${VIEWBOX}">${figure}</svg>`),
         width: 52,
         height: 52,
       }),
