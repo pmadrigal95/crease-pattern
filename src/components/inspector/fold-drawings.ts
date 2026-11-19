@@ -181,8 +181,9 @@ export const drawPattern = (
   ink.append(...structure(sections));
   const parts = sections.flatMap((s) => [...s.querySelectorAll<HTMLElement>('[data-inspect]')]);
   const heaviest = Math.max(1, ...parts.map((p) => hooks.facts(p).lines ?? 0));
-  parts.forEach((part, k) => {
-    const p = part.getBoundingClientRect();
+  // Every box read first, then drawn: reads and writes interleaved would force a layout per part.
+  const boxes = parts.map((part) => ({ part, p: part.getBoundingClientRect() }));
+  boxes.forEach(({ part, p }, k) => {
     if (p.height < 4) return;
     const box = svgEl('rect', { x: p.left, y: p.top, width: p.width, height: p.height }, 'part draw');
     // Shaded by how much code it is: the plan shows where the complexity lives.

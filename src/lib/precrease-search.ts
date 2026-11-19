@@ -27,6 +27,7 @@ interface Strings {
   formats: Record<string, string>;
 }
 
+import { trustSameOriginScripts } from './trusted-types';
 import { readJsonData } from './dom';
 import { formatCount } from './format';
 import { isTypingTarget } from './keyboard';
@@ -101,6 +102,9 @@ export const excerptRuns = (excerpt: string): { text: string; marked: boolean }[
 let pagefind: Promise<Pagefind> | null = null;
 /** Pagefind's engine, downloaded the first time the box is used. */
 const loadPagefind = (): Promise<Pagefind> => {
+  // Pagefind runs its search in a Web Worker of its own (same origin): under Trusted Types its URL
+  // goes through the default policy (src/lib/trusted-types.ts).
+  trustSameOriginScripts();
   pagefind ??= import(/* @vite-ignore */ BUNDLE).then(async (module: Pagefind) => {
     await module.options({ excerptLength: 24 });
     return module;

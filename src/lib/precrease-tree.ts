@@ -94,7 +94,7 @@ export const isLive = (post: { draft: boolean; date: Date }, now: Date): boolean
 
 /** Crease numbers must run 1, 2, 3… with no gaps or repeats, in publication order. */
 export const checkNumbers = (posts: readonly PostLike[]): void => {
-  const sorted = [...posts].sort((a, b) => a.number - b.number);
+  const sorted = posts.toSorted((a, b) => a.number - b.number);
   sorted.forEach((p, i) => {
     if (p.number !== i + 1)
       throw new Error(`Crease numbers must run 1…${posts.length} without gaps: "${p.id}" has ${p.number}`);

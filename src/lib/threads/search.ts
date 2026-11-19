@@ -155,7 +155,7 @@ export const solveTask = (
 /** The best of several task results; ties go to the lowest task index, as in `search`. */
 export const pickBest = (results: readonly TaskResult[]): SearchResult => {
   const nodes = results.reduce((n, r) => n + r.nodes, 0);
-  const winner = [...results].sort((a, b) => b.score - a.score || a.index - b.index)[0];
+  const winner = results.toSorted((a, b) => b.score - a.score || a.index - b.index)[0];
   return winner
     ? { score: winner.score, moves: winner.moves, nodes }
     : { score: GAME_OVER, moves: [], nodes };

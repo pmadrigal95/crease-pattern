@@ -102,7 +102,8 @@
       "heading": "Contact",
       "intro": "Email reaches me fastest.",
       "copy": "Copy email address",
-      "copied": "Email address copied"
+      "copied": "Email address copied",
+      "copyFailed": "Couldn't copy it. The address is selected, so you can copy it yourself."
     }
   },
   "footer": {
@@ -285,6 +286,7 @@
       },
       "copy": "Copy feed address",
       "copied": "Feed address copied",
+      "copyFailed": "Couldn't copy it. The address is selected, so you can copy it yourself.",
       "topicsTitle": "Only some topics?",
       "topics": "Every topic has its own feed. Open a topic from the {map} and use its RSS feed link.",
       "mapLink": "topic map",

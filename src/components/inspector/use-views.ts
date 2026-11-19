@@ -14,6 +14,11 @@ export const views: View[] = ['layers', 'fold', 'pattern'];
 /** How long the tour rests on each section, in ms. */
 const STOP_MS = 3200;
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
+/** Lets the browser paint and handle input before heavy work; setTimeout where scheduler.yield is missing. */
+const yieldToMain = (): Promise<void> => {
+  const scheduler = (globalThis as { scheduler?: { yield?: () => Promise<void> } }).scheduler;
+  return scheduler?.yield ? scheduler.yield() : new Promise((r) => setTimeout(r, 0));
+};
 /** The hero's figure comes apart in the layer view; folded, it stays whole until the tour reaches it. */
 const figureApart = (on: boolean) => void heroScene().then((scene) => scene?.setInspecting(on));
 
@@ -29,6 +34,30 @@ export const useViews = (deps: {
   const view = ref<View>('layers');
   const touring = ref(false);
   let folded: Folded | null = null;
+  let opening: Promise<Folded | null> | null = null;
+
+  /** Loads the folded views and folds the page; null if the visitor went back to the layers first. */
+  const openFolded = async (): Promise<Folded | null> => {
+    deps.layers.off();
+    figureApart(false);
+    const { foldPage } = await import('./fold');
+    // The radio's new state paints first; measuring the whole page comes after (INP).
+    await yieldToMain();
+    if (view.value === 'layers') return null;
+    const keep = [document.querySelector('.inspector-root')].filter((n): n is Element => n !== null);
+    const { t } = deps;
+    return foldPage(keep, {
+      ...deps.hooks,
+      strings: {
+        openCrease: t.openCrease,
+        closeCrease: t.closeCrease,
+        lines: t.linesUnit,
+        tokens: t.tokensUnit,
+        mountain: t.mountainFold,
+        valley: t.valleyFold,
+      },
+    });
+  };
 
   const chooseView = async (next: View) => {
     touring.value = false;
@@ -41,24 +70,13 @@ export const useViews = (deps: {
       return;
     }
     if (!folded) {
-      deps.layers.off();
-      figureApart(false);
-      const { foldPage } = await import('./fold');
-      const keep = [document.querySelector('.inspector-root')].filter((n): n is Element => n !== null);
-      const { t } = deps;
-      folded = foldPage(keep, {
-        ...deps.hooks,
-        strings: {
-          openCrease: t.openCrease,
-          closeCrease: t.closeCrease,
-          lines: t.linesUnit,
-          tokens: t.tokensUnit,
-          mountain: t.mountainFold,
-          valley: t.valleyFold,
-        },
-      });
+      // One opening at a time: a second pick while it loads waits for the same fold.
+      opening ??= openFolded();
+      folded = await opening;
+      opening = null;
     }
-    folded.show(next);
+    // The visitor may have picked another view meanwhile: the latest pick wins.
+    if (folded && view.value !== 'layers') folded.show(view.value);
   };
 
   /** The tour belongs to the folded views: the camera brings each section of the sheet forward. */

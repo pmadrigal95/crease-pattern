@@ -147,7 +147,7 @@ export class FrameProbe {
     this.last = now;
     if (this.times.length < SAMPLES) return;
     this.done = true;
-    const sorted = [...this.times].sort((a, b) => a - b);
+    const sorted = this.times.toSorted((a, b) => a - b);
     if (sorted[Math.floor(sorted.length / 2)]! > SLOW_MS) this.onSlow();
   }
 

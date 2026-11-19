@@ -53,7 +53,7 @@ const drawings = (['wide', 'narrow'] as const).map((name) => ({
   p: profile(data, frames[name]),
 }));
 const byMajor = new Map(data.map((c) => [c.major, c]));
-const current = data[data.length - 1]!.major;
+const current = data.at(-1)!.major;
 const span = (major: number) => {
   const c = byMajor.get(major)!;
   return `${Math.floor(c.start)} – ${major === current ? t.present : Math.floor(c.end)}`;

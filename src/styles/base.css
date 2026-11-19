@@ -27,6 +27,12 @@
     --sticky-offset: 72px;
     scroll-padding-top: var(--sticky-offset);
     -webkit-text-size-adjust: 100%;
+    /* The browser's own UI follows the theme: light by default, dark where the tokens say so
+       (tokens.css, outside any layer, so it wins). Native controls and the page's scrollbar
+       wear the identity's accent and inks; the thumb keeps 3:1 against the track. */
+    color-scheme: light;
+    accent-color: var(--color-accent-ui);
+    scrollbar-color: var(--color-mute) var(--color-bg);
   }
 
   body {
@@ -72,6 +78,10 @@
   }
   .prose > * {
     margin: 0 0 var(--space-4);
+  }
+  /* Paragraphs avoid a lone last word where the browser can (progressive: ignored elsewhere). */
+  .prose :is(p, li) {
+    text-wrap: pretty;
   }
   .prose h2 {
     font-size: var(--size-xl);
@@ -319,7 +329,7 @@
   animation-delay: calc(var(--motion-stagger) * 5);
 }
 
-/* Reduced motion: no fold, no rise, no scroll-driven bars. Pages just swap with a short fade. */
+/* Reduced motion: no fold, no rise, no scroll-driven bars. Pages swap at once. */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -329,28 +339,15 @@
     scroll-behavior: auto !important;
   }
 
-  ::view-transition-old(root) {
-    clip-path: none;
-    animation: vt-fade-out 150ms ease both !important;
-  }
-
-  ::view-transition-new(root) {
-    animation: vt-fade-in 150ms ease both !important;
-  }
-
   .vt-fold .vt-crease {
     display: none;
   }
 }
 
-@keyframes vt-fade-out {
-  to {
-    opacity: 0;
-  }
-}
-
-@keyframes vt-fade-in {
-  from {
-    opacity: 0;
+/* Reduced motion: pages swap at once, no transition at all (Modern Web Guidance,
+   cross-document-transitions). */
+@media (prefers-reduced-motion: reduce) {
+  @view-transition {
+    navigation: none;
   }
 }

@@ -109,8 +109,8 @@ const compareVersions = (a: string, b: string) => {
 
 /** Releases newest first, each with its entries newest first. */
 export const releasesNewestFirst = (data: Career): Release[] => {
-  return [...data.releases]
-    .sort((a, b) => b.major - a.major)
+  return data.releases
+    .toSorted((a, b) => b.major - a.major)
     .map((r) => ({
       ...r,
       entries: data.entries
@@ -149,12 +149,12 @@ export const climbs = (data: Career, now: Date = new Date()): Climb[] => {
 
 /** The newest version shipped, as "3.2": the "you are here" on the profile. */
 export const currentVersion = (data: Career): string => {
-  const [latest] = [...data.entries].sort((a, b) => compareVersions(b.version, a.version));
+  const [latest] = data.entries.toSorted((a, b) => compareVersions(b.version, a.version));
   return latest ? latest.version.split('.').slice(0, 2).join('.') : '0.0';
 };
 
 /** Each release's place on the map, oldest first. */
 export const places = (data: Career) =>
-  [...data.releases]
-    .sort((a, b) => a.major - b.major)
+  data.releases
+    .toSorted((a, b) => a.major - b.major)
     .map((r) => ({ major: r.major, codename: r.codename, elevationM: r.elevationM, ...r.location }));

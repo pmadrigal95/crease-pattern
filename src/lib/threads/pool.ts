@@ -20,6 +20,7 @@ import {
   type ToWorker,
 } from './protocol';
 import { pickBest, rootTasks, type SearchResult } from './search';
+import { trustSameOriginScripts } from '../trusted-types';
 
 export interface WorkerLike {
   postMessage(message: ToWorker): void;
@@ -29,11 +30,14 @@ export interface WorkerLike {
 
 export type WorkerFactory = () => WorkerLike;
 
-export const browserWorkers: WorkerFactory = () =>
-  new Worker(new URL('./worker.ts', import.meta.url), {
+export const browserWorkers: WorkerFactory = () => {
+  // Under Trusted Types the Worker's URL goes through the default policy: same-origin only.
+  trustSameOriginScripts();
+  return new Worker(new URL('./worker.ts', import.meta.url), {
     type: 'module',
     name: 'threads',
   }) as unknown as WorkerLike;
+};
 
 export interface RunReport {
   model: Model;

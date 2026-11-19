@@ -199,7 +199,7 @@ const enter = (s: Stage, saved: number) => {
 const unfold = (s: Stage, sections: HTMLElement[], saved: number, unprepare: () => void) =>
   new Promise<void>((done) => {
     const root = document.documentElement;
-    root.classList.remove('fold-settled', 'fold-pattern', 'fold-live');
+    root.classList.remove('fold-settled', 'fold-pattern', 'fold-live', 'fold-moving');
     s.ink.replaceChildren();
     for (const el of sections) el.style.transform = '';
     s.model.style.transform = '';
@@ -248,12 +248,14 @@ export const foldPage = (keep: Element[], hooks: FoldHooks): Folded => {
   const drawFolded = () => drawFold(s.ink, nodes, { sections, creases, only: focused, hooks, toggle });
   const follow = () => {
     root.classList.remove('fold-settled');
+    root.classList.add('fold-moving');
     const start = performance.now();
     const running = until > start;
     until = Math.max(until, start + MS + 100);
     setTimeout(() => {
       if (performance.now() < until - 200) return;
       root.classList.add('fold-settled');
+      root.classList.remove('fold-moving');
       // The pattern draws itself once, when the page lies still under it.
       if (at.view === 'pattern' && focused === null) {
         nodes.clear();

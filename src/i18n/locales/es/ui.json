@@ -102,7 +102,8 @@
       "heading": "Contacto",
       "intro": "Por correo me encuentras más rápido.",
       "copy": "Copiar el correo",
-      "copied": "Correo copiado"
+      "copied": "Correo copiado",
+      "copyFailed": "No se pudo copiar. La dirección quedó seleccionada para que la copies tú."
     }
   },
   "footer": {
@@ -285,6 +286,7 @@
       },
       "copy": "Copiar la dirección del feed",
       "copied": "Dirección del feed copiada",
+      "copyFailed": "No se pudo copiar. La dirección quedó seleccionada para que la copies tú.",
       "topicsTitle": "¿Solo algunos temas?",
       "topics": "Cada tema tiene su propio feed. Abre un tema desde el {map} y usa su enlace al feed RSS.",
       "mapLink": "mapa de temas",

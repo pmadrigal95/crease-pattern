@@ -114,6 +114,21 @@ if (comments) {
 
 <script>
   // Self-contained (ENGINEERING.md, "Browser scripts"): giscus, on request.
+  const GISCUS = 'https://giscus.app/client.js';
+  // Under Trusted Types (astro.config.ts) a script URL needs a policy: this one admits giscus's
+  // script and nothing else. Browsers without Trusted Types take the plain string.
+  type ScriptUrlPolicy = { createScriptURL: (url: string) => string };
+  const factory = (
+    globalThis as {
+      trustedTypes?: { createPolicy: (name: string, rules: ScriptUrlPolicy) => ScriptUrlPolicy };
+    }
+  ).trustedTypes;
+  const policy = factory?.createPolicy('comments', {
+    createScriptURL: (url) => {
+      if (url !== GISCUS) throw new TypeError(`Trusted Types: only giscus's script, not ${url}`);
+      return url;
+    },
+  });
   const root = document.querySelector<HTMLElement>('[data-readers]');
   if (root) {
     const commentsButton = root.querySelector<HTMLButtonElement>('[data-comments]');
@@ -122,7 +137,7 @@ if (comments) {
       commentsButton.setAttribute('aria-expanded', 'true');
       const d = commentsButton.dataset;
       const script = document.createElement('script');
-      script.src = 'https://giscus.app/client.js';
+      script.src = policy ? policy.createScriptURL(GISCUS) : GISCUS;
       script.async = true;
       script.crossOrigin = 'anonymous';
       const attrs: Record<string, string> = {
