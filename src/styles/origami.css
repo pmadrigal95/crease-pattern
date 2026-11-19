@@ -7,23 +7,24 @@
 .origami .o-model {
   display: none;
 }
+/* revert: an SVG <use> goes back to inline, a block of text (the hero's figure card) to block. */
 :root[data-direction='washi-asagi'] .origami .o-crane,
 :root[data-direction='basalt-glacier'] .origami .o-fox,
 :root[data-direction='contour-lines'] .origami .o-morpho {
-  display: inline;
+  display: revert;
 }
 :root[data-direction='contour-lines'][data-theme='dark'] .origami .o-morpho {
   display: none;
 }
 :root[data-direction='contour-lines'][data-theme='dark'] .origami .o-frog {
-  display: inline;
+  display: revert;
 }
 @media (prefers-color-scheme: dark) {
   :root[data-direction='contour-lines']:not([data-theme='light']) .origami .o-morpho {
     display: none;
   }
   :root[data-direction='contour-lines']:not([data-theme='light']) .origami .o-frog {
-    display: inline;
+    display: revert;
   }
 }
 

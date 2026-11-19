@@ -20,7 +20,17 @@
         "unfolded": "Desdoblado: el patrón de pliegues",
         "mountain": "monte",
         "valley": "valle",
-        "caption": "La figura es lo que ves en pantalla: la interfaz. Al desdoblarla aparecen los pliegues que le dan forma: la arquitectura. Cada identidad dobla la suya: una grulla, una morfo azul de día y una rana de ojos rojos de noche, un zorro ártico. \"Ver cómo está hecha esta página\" abre cualquier página del sitio de la misma manera."
+        "caption": "La figura es lo que ves en pantalla: la interfaz. Al desdoblarla aparecen los pliegues que le dan forma: la arquitectura. Cada identidad dobla la suya: una grulla, una morfo azul de día y una rana de ojos rojos de noche, un zorro ártico. \"Ver cómo está hecha esta página\" abre cualquier página del sitio de la misma manera.",
+        "figures": {
+          "crane": "La grulla",
+          "morpho": "La morfo azul",
+          "frog": "La rana de ojos rojos",
+          "fox": "El zorro ártico"
+        },
+        "facets": "facetas",
+        "hinges": "bisagras",
+        "sheet": "hoja",
+        "drag": "Arrastra para girarla"
       },
       "who": "{name} · {role} · {location}"
     },

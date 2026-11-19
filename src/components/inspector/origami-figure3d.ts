@@ -15,6 +15,7 @@ import {
   Mesh,
   MeshPhysicalMaterial,
   MeshStandardMaterial,
+  SRGBColorSpace,
   Vector3,
   type Matrix4,
 } from 'three';
@@ -42,18 +43,32 @@ export const isDark = () => {
  */
 function roleColours(id: ModelId, css: Css): Record<Role, Color> {
   const night = isDark();
-  const surface = night ? css('--color-surface').lerp(css('--color-ink'), 0.9) : css('--color-surface');
+  const surface = night ? mix(css('--color-surface'), css('--color-ink'), 0.9) : css('--color-surface');
   const dark = night ? css('--color-bg') : css('--color-ink');
   const accent = css('--color-accent');
   return {
-    light: surface.clone().lerp(accent, ROLE_MIX.light),
-    mid: surface.clone().lerp(accent, ROLE_MIX.mid),
-    shade: surface.clone().lerp(accent, ROLE_MIX.shade),
-    deep: surface.clone().lerp(accent, ROLE_MIX.deep),
+    light: mix(surface, accent, ROLE_MIX.light),
+    mid: mix(surface, accent, ROLE_MIX.mid),
+    shade: mix(surface, accent, ROLE_MIX.shade),
+    deep: mix(surface, accent, ROLE_MIX.deep),
     accent: id === 'frog' ? new Color(FROG_EYE) : accent,
     wing: css('--color-accent-ui'),
-    edge: accent.clone().lerp(dark, EDGE_MIX),
+    edge: mix(accent, dark, EDGE_MIX),
   };
+}
+
+/**
+ * a toward b by k, mixed in sRGB as the SVG's color-mix() does (near enough to its oklab). three.js
+ * keeps colours linear, and a linear mix washes the accent out: the figure turned grey in 3D.
+ */
+function mix(a: Color, b: Color, k: number): Color {
+  const [x, y] = [a, b].map((c) => c.getRGB({ r: 0, g: 0, b: 0 }, SRGBColorSpace));
+  return new Color().setRGB(
+    x!.r + (y!.r - x!.r) * k,
+    x!.g + (y!.g - x!.g) * k,
+    x!.b + (y!.b - x!.b) * k,
+    SRGBColorSpace,
+  );
 }
 
 /** Paper for most facets; for the morpho's wings, an iridescent film: their blue is structural. */
