@@ -34,28 +34,31 @@ export interface IrazuMap {
   summit: { x: number; y: number };
 }
 
+/** The mean of the points within `radius` of (r, c) that are on the grid. */
+function neighbourhoodMean(
+  field: readonly (readonly number[])[],
+  r: number,
+  c: number,
+  radius: number,
+): number {
+  let sum = 0;
+  let count = 0;
+  for (let dr = -radius; dr <= radius; dr++)
+    for (let dc = -radius; dc <= radius; dc++) {
+      const v = field[r + dr]?.[c + dc];
+      if (v === undefined) continue;
+      sum += v;
+      count++;
+    }
+  return sum / count;
+}
+
 /** Averages each point with its neighbours within `radius`, `passes` times. */
 export function smooth(metres: ArrayLike<number>, n: number, passes: number, radius: number): number[][] {
   let field = Array.from({ length: n }, (_, r) => Array.from({ length: n }, (_, c) => metres[r * n + c]!));
   for (let p = 0; p < passes; p++) {
-    const next: number[][] = [];
-    for (let r = 0; r < n; r++) {
-      const row: number[] = [];
-      for (let c = 0; c < n; c++) {
-        let sum = 0;
-        let count = 0;
-        for (let dr = -radius; dr <= radius; dr++)
-          for (let dc = -radius; dc <= radius; dc++) {
-            const v = field[r + dr]?.[c + dc];
-            if (v === undefined) continue;
-            sum += v;
-            count++;
-          }
-        row.push(sum / count);
-      }
-      next.push(row);
-    }
-    field = next;
+    const before = field;
+    field = before.map((row, r) => row.map((_, c) => neighbourhoodMean(before, r, c, radius)));
   }
   return field;
 }

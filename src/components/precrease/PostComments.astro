@@ -1,0 +1,145 @@
+---
+/**
+ * Comments at the end of a post (PostReaders.astro). giscus loads nothing until the reader opens
+ * it; only then does this page allow giscus.app in its CSP and fetch it. Off while site.config.ts
+ * has no comments config. On an isolated post (content.config.ts, `isolated`) it is a link to the
+ * post's Discussions category on GitHub instead, since isolation blocks the giscus frame.
+ */
+import site from '../../../site.config';
+import { copyFor } from '../../i18n/dictionary';
+const copy = copyFor(Astro.currentLocale);
+
+interface Props {
+  isolated?: boolean | undefined;
+}
+const { isolated = false } = Astro.props;
+const t = copy.precrease.readers;
+const comments = isolated ? null : site.comments;
+const commentsLink =
+  isolated && site.comments
+    ? `https://github.com/${site.comments.repo}/discussions/categories/${site.comments.category.toLowerCase()}`
+    : null;
+if (comments) {
+  // giscus brings its script, its iframe and one stylesheet that sizes the iframe.
+  Astro.csp?.insertScriptResource('https://giscus.app');
+  Astro.csp?.insertStyleResource('https://giscus.app');
+  Astro.csp?.insertDirective('frame-src https://giscus.app');
+}
+---
+
+{commentsLink && (
+  <div class="comments-block">
+    <a class="comments" href={commentsLink} target="_blank" rel="noopener noreferrer">
+      <span>
+        <b>{t.comments}</b>
+        <small>{t.commentsElsewhere}</small>
+      </span>
+      <span class="chev" aria-hidden="true">
+        ↗
+      </span>
+    </a>
+  </div>
+)}
+
+{comments && (
+  <div class="comments-block">
+    <button
+      type="button"
+      class="comments"
+      aria-expanded="false"
+      data-comments
+      data-repo={comments.repo}
+      data-repo-id={comments.repoId}
+      data-category={comments.category}
+      data-category-id={comments.categoryId}
+    >
+      <span>
+        <b>{t.comments}</b>
+        <small>{t.commentsNote}</small>
+      </span>
+      <span class="chev" aria-hidden="true">
+        ›
+      </span>
+    </button>
+    <div class="giscus" data-giscus></div>
+  </div>
+)}
+
+<style>
+  .comments-block {
+    margin-top: var(--space-4);
+  }
+  .comments {
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    width: 100%;
+    padding: var(--space-4) 0;
+    border: 0;
+    border-block: 1px solid var(--color-rule);
+    background: none;
+    color: var(--color-ink);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+  }
+  .comments b {
+    font-weight: 600;
+  }
+  .comments small {
+    display: block;
+    font-size: var(--size-xs);
+    color: var(--color-mute);
+  }
+  .chev {
+    margin-left: auto;
+    color: var(--color-mute);
+    transition: transform var(--motion-base) var(--motion-ease-out);
+  }
+  .comments[aria-expanded='true'] .chev {
+    transform: rotate(90deg);
+  }
+  .giscus {
+    margin-top: var(--space-4);
+  }
+  .giscus:empty {
+    display: none;
+  }
+  .comments:focus-visible {
+    outline: 2px solid var(--color-accent-ui);
+    outline-offset: 2px;
+  }
+</style>
+
+<script>
+  // Self-contained (ENGINEERING.md, "Browser scripts"): giscus, on request.
+  const root = document.querySelector<HTMLElement>('[data-readers]');
+  if (root) {
+    const commentsButton = root.querySelector<HTMLButtonElement>('[data-comments]');
+    commentsButton?.addEventListener('click', () => {
+      if (commentsButton.getAttribute('aria-expanded') === 'true') return;
+      commentsButton.setAttribute('aria-expanded', 'true');
+      const d = commentsButton.dataset;
+      const script = document.createElement('script');
+      script.src = 'https://giscus.app/client.js';
+      script.async = true;
+      script.crossOrigin = 'anonymous';
+      const attrs: Record<string, string> = {
+        'data-repo': d.repo ?? '',
+        'data-repo-id': d.repoId ?? '',
+        'data-category': d.category ?? '',
+        'data-category-id': d.categoryId ?? '',
+        'data-mapping': 'pathname',
+        'data-strict': '1',
+        'data-reactions-enabled': '0',
+        'data-input-position': 'top',
+        'data-theme': 'preferred_color_scheme',
+        'data-lang': 'en',
+        'data-loading': 'eager',
+      };
+      for (const [k, v] of Object.entries(attrs)) script.setAttribute(k, v);
+      root.querySelector('[data-giscus]')!.append(script);
+    });
+  }
+</script>

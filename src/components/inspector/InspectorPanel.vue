@@ -16,6 +16,7 @@ import {
 import { explode, layersEnabled, markCurrent } from './layers';
 import { currentDirection, currentTheme, setDirection, setTheme, type Theme } from './identity';
 import { allVisualDirections, type VisualDirection } from '../../config/visual-direction';
+import { fill } from '../../lib/template';
 import type { Copy } from '../../i18n/dictionary';
 
 /** The panel's strings in the page's language, from the Inspect button (Masthead.astro). */
@@ -36,9 +37,6 @@ export interface Manifest {
 const props = defineProps<{ manifest: Manifest; openedAt: number; strings: InspectorStrings }>();
 const t = props.strings;
 const emit = defineEmits<{ close: [] }>();
-
-const fill = (s: string, v: Record<string, string | number>) =>
-  s.replace(/\{(\w+)\}/g, (_, k: string) => String(v[k] ?? ''));
 
 const elements = ref<HTMLElement[]>([]);
 const pinned = ref<HTMLElement | null>(null);
