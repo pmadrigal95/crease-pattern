@@ -22,7 +22,11 @@ test('"See how this page is built" opens the Inspector, which unfolds the figure
   await expect(page.locator('html')).toHaveClass(/inspecting/);
 });
 
-test('the measured figures are filled in by the build, never left as a placeholder', async ({ page }) => {
-  await page.goto('/');
-  await expect(page.locator('[data-metric="first-load-js"]')).toHaveText(/^\d+\.\d$/);
-});
+for (const home of ['/', '/es']) {
+  test(`${home}: the measured figures are filled in by the build, never left as a placeholder`, async ({
+    page,
+  }) => {
+    await page.goto(home);
+    await expect(page.locator('[data-metric="first-load-js"]')).toHaveText(/^\d+\.\d$/);
+  });
+}
