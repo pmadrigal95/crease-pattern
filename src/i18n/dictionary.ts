@@ -40,7 +40,7 @@ const placeholders = (s: string) =>
  * length, a string where a group should be, or a string with other placeholders. `where` names the
  * file and path in the error.
  */
-export function assertSameShape(base: Json, other: Json, where: string): void {
+export const assertSameShape = (base: Json, other: Json, where: string): void => {
   if (typeof base === 'string') {
     if (typeof other !== 'string') throw new Error(`${where}: must be a string`);
     if (placeholders(base) !== placeholders(other)) throw new Error(`${where}: placeholders differ`);
@@ -56,10 +56,10 @@ export function assertSameShape(base: Json, other: Json, where: string): void {
   const keys = (o: object) => Object.keys(o).sort().join();
   if (keys(base) !== keys(other)) throw new Error(`${where}: keys differ from ${DEFAULT_LANG}`);
   for (const [key, value] of Object.entries(base)) assertSameShape(value, other[key]!, `${where}.${key}`);
-}
+};
 
 /** Throws at the first empty string or malformed placeholder. */
-export function assertWellFormed(value: Json, where: string): void {
+export const assertWellFormed = (value: Json, where: string): void => {
   if (typeof value === 'string') {
     if (value.trim() === '') throw new Error(`${where}: is empty`);
     if (BROKEN_PLACEHOLDER.test(value)) throw new Error(`${where}: placeholders must look like {name}`);
@@ -67,12 +67,12 @@ export function assertWellFormed(value: Json, where: string): void {
   }
   const entries = Array.isArray(value) ? value.map((v, i) => [`[${i}]`, v] as const) : Object.entries(value);
   for (const [key, v] of entries) assertWellFormed(v, `${where}${key.startsWith('[') ? '' : '.'}${key}`);
-}
+};
 
 const files = import.meta.glob<Json>('./locales/*/*.json', { eager: true, import: 'default' });
 const file = (lang: string, part: string) => files[`./locales/${lang}/${part}.json`];
 
-function load(): Record<Lang, Dictionary> {
+const load = (): Record<Lang, Dictionary> => {
   const folders = new Set(Object.keys(files).map((path) => path.split('/')[2]));
   for (const folder of folders)
     if (!(LANGS as readonly string[]).includes(folder!))
@@ -91,7 +91,7 @@ function load(): Record<Lang, Dictionary> {
     byLang[lang] = dictionary as unknown as Dictionary;
   }
   return byLang;
-}
+};
 
 const dictionaries = load();
 

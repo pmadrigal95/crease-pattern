@@ -33,7 +33,7 @@ const write = (key: string, value: string) => {
 /** Remembers an explicit language choice. */
 export const rememberLang = (lang: string) => write(LANG_KEY, lang);
 
-export function initLanguage(): void {
+export const initLanguage = (): void => {
   for (const link of document.querySelectorAll<HTMLAnchorElement>('[data-lang-switch]'))
     link.addEventListener('click', () => rememberLang(link.dataset.langSwitch ?? ''));
 
@@ -46,4 +46,4 @@ export function initLanguage(): void {
     write(HINT_KEY, 'dismissed');
     hint.hidden = true;
   });
-}
+};

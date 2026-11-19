@@ -119,7 +119,7 @@ const here = unlocalize(path);
   let loading = false;
   const load = () => import('../inspector/mount');
 
-  async function open(trigger: HTMLElement | null) {
+  const open = async (trigger: HTMLElement | null) => {
     if (handle || loading) return;
     loading = true;
     try {
@@ -135,7 +135,7 @@ const here = unlocalize(path);
     } finally {
       loading = false;
     }
-  }
+  };
   const toggle = (trigger: HTMLElement | null) => (handle ? handle.close() : open(trigger));
 
   button?.addEventListener('click', () => toggle(button));

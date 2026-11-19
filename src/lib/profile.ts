@@ -15,8 +15,8 @@ const wordsSchema = z.strictObject({
   summary: z.string().max(160),
 });
 
-export async function getProfile(locale?: string | null) {
+export const getProfile = async (locale?: string | null) => {
   const entry = await getEntry('profile', 'owner');
   if (!entry) throw new Error('src/content/profile.json must define an "owner" entry.');
   return { ...entry.data, ...wordsSchema.parse(dictionary(locale).profile) };
-}
+};

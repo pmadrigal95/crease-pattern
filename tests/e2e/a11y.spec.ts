@@ -5,7 +5,7 @@ import { allVisualDirections } from '../../src/config/visual-direction';
 
 // axe measures the settled page: mid-fade text would read as low contrast. Scroll-driven
 // animations have no end to wait for, so only time-based ones (the first-load entrance) count.
-async function settleEntranceAnimations(page: Page) {
+const settleEntranceAnimations = async (page: Page) => {
   await page.evaluate(() =>
     Promise.all(
       document
@@ -14,7 +14,7 @@ async function settleEntranceAnimations(page: Page) {
         .map((a) => a.finished.catch(() => undefined)),
     ),
   );
-}
+};
 
 // Every page must pass axe in all 3 identities × 2 themes.
 

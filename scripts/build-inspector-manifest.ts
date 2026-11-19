@@ -40,17 +40,17 @@ const git = (root: string, args: string[]): string => {
 };
 
 /** Token names the site defines (src/generated/tokens.json, built just before this script). */
-function knownTokens(root: string): Set<string> {
+const knownTokens = (root: string): Set<string> => {
   const manifest = readTokens(root);
   const colors = Object.keys(firstColors(manifest)).map((k) => `color-${k}`);
   return new Set([...Object.keys(manifest.base), ...colors]);
-}
+};
 
 /**
  * Five colors per identity and theme for the Identity switcher's swatches, plus how many color
  * tokens every identity shares (the point of the switcher: same system, different values).
  */
-function identities(root: string) {
+const identities = (root: string) => {
   const manifest = readTokens(root);
   const { directions } = manifest;
   const SWATCH = ['bg', 'ink', 'accent', 'accent-ui', 'second'];
@@ -61,9 +61,9 @@ function identities(root: string) {
       Object.entries(directions).map(([id, d]) => [id, { light: pick(d.light), dark: pick(d.dark) }]),
     ),
   };
-}
+};
 
-export function buildManifest(root: string) {
+export const buildManifest = (root: string) => {
   const tokens = knownTokens(root);
   const files: Record<
     string,
@@ -113,7 +113,7 @@ export function buildManifest(root: string) {
     parts,
     identities: identities(root),
   };
-}
+};
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const root = join(dirname(fileURLToPath(import.meta.url)), '..');

@@ -31,7 +31,7 @@ export interface Features {
   bumpiness: number;
 }
 
-export function features(board: Board): Features {
+export const features = (board: Board): Features => {
   const heights = columnHeights(board);
   let holes = 0;
   for (let x = 0; x < board.width; x++)
@@ -39,14 +39,14 @@ export function features(board: Board): Features {
   let bumpiness = 0;
   for (let x = 1; x < board.width; x++) bumpiness += Math.abs(heights[x]! - heights[x - 1]!);
   return { aggregateHeight: heights.reduce((a, b) => a + b, 0), holes, bumpiness };
-}
+};
 
-export function boardScore(board: Board): number {
+export const boardScore = (board: Board): number => {
   const f = features(board);
   return (
     WEIGHTS.aggregateHeight * f.aggregateHeight + WEIGHTS.holes * f.holes + WEIGHTS.bumpiness * f.bumpiness
   );
-}
+};
 
 /** A chosen placement, without the resulting board (small enough to send between Workers). */
 export interface Move {
@@ -79,7 +79,7 @@ interface Best {
 }
 
 /** The search itself: the best future score from `board` with pieces[depth..end). */
-function searcher(pieces: readonly PieceName[], end: number, options: SearchOptions) {
+const searcher = (pieces: readonly PieceName[], end: number, options: SearchOptions) => {
   const memo = options.memo === true ? new Map<string, Best>() : null;
   let nodes = 0;
   const best = (board: Board, depth: number): Best => {
@@ -99,20 +99,20 @@ function searcher(pieces: readonly PieceName[], end: number, options: SearchOpti
     return found;
   };
   return { best, nodes: () => nodes };
-}
+};
 
 /** The best line of play for the next `depth` pieces (fewer if the list is shorter). */
-export function search(
+export const search = (
   board: Board,
   pieces: readonly PieceName[],
   depth: number,
   options: SearchOptions = {},
-): SearchResult {
+): SearchResult => {
   const end = Math.min(depth, pieces.length);
   const s = searcher(pieces, end, options);
   const found = s.best(board, 0);
   return { score: found.score, moves: found.moves, nodes: s.nodes() };
-}
+};
 
 /** One unit of parallel work: the subtree under one placement of the first piece. */
 export interface Task {
@@ -121,11 +121,11 @@ export interface Task {
   board: Board;
 }
 
-export function rootTasks(board: Board, pieces: readonly PieceName[]): Task[] {
+export const rootTasks = (board: Board, pieces: readonly PieceName[]): Task[] => {
   const [first] = pieces;
   if (!first) return [];
   return placements(board, first).map((p, index) => ({ index, move: toMove(p), board: p.board }));
-}
+};
 
 export interface TaskResult {
   index: number;
@@ -135,12 +135,12 @@ export interface TaskResult {
 }
 
 /** Searches one task's subtree; `depth` counts the first piece, as in `search`. */
-export function solveTask(
+export const solveTask = (
   task: Task,
   pieces: readonly PieceName[],
   depth: number,
   options: SearchOptions = {},
-): TaskResult {
+): TaskResult => {
   const end = Math.min(depth, pieces.length);
   const s = searcher(pieces, end, options);
   const rest = s.best(task.board, 1);
@@ -150,16 +150,16 @@ export function solveTask(
     moves: [task.move, ...rest.moves],
     nodes: s.nodes() + 1,
   };
-}
+};
 
 /** The best of several task results; ties go to the lowest task index, as in `search`. */
-export function pickBest(results: readonly TaskResult[]): SearchResult {
+export const pickBest = (results: readonly TaskResult[]): SearchResult => {
   const nodes = results.reduce((n, r) => n + r.nodes, 0);
   const winner = [...results].sort((a, b) => b.score - a.score || a.index - b.index)[0];
   return winner
     ? { score: winner.score, moves: winner.moves, nodes }
     : { score: GAME_OVER, moves: [], nodes };
-}
+};
 
 export interface GameResult {
   moves: Move[];
@@ -175,12 +175,12 @@ export interface GameResult {
  * the first move, as the 2022 assignment asked, but over every combination instead of one
  * piece at a time.
  */
-export function play(
+export const play = (
   board: Board,
   pieces: readonly PieceName[],
   lookahead: number,
   options: SearchOptions = {},
-): GameResult {
+): GameResult => {
   let current = board;
   const moves: Move[] = [];
   let lines = 0;
@@ -198,4 +198,4 @@ export function play(
     moves.push(next);
   }
   return { moves, board: current, lines, nodes, toppedOut: false };
-}
+};

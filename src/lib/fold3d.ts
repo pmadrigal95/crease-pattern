@@ -23,7 +23,7 @@ export const INSPECT_MS = { enter: 1600, exit: 420 } as const;
 const clamp01 = (x: number) => Math.min(1, Math.max(0, x));
 
 /** A cubic-bezier easing, solved by bisection (enough precision for animation). */
-export function cubicBezier(x1: number, y1: number, x2: number, y2: number): (x: number) => number {
+export const cubicBezier = (x1: number, y1: number, x2: number, y2: number): ((x: number) => number) => {
   const bx = (t: number) => 3 * x1 * t * (1 - t) ** 2 + 3 * x2 * t * t * (1 - t) + t ** 3;
   const by = (t: number) => 3 * y1 * t * (1 - t) ** 2 + 3 * y2 * t * t * (1 - t) + t ** 3;
   return (x) => {
@@ -38,7 +38,7 @@ export function cubicBezier(x1: number, y1: number, x2: number, y2: number): (x:
     }
     return by((lo + hi) / 2);
   };
-}
+};
 /** State to state (each fold). */
 export const stateToState = cubicBezier(0.65, 0, 0.35, 1);
 /** Entering and leaving (Inspect's phases). */
@@ -53,7 +53,7 @@ export interface InspectState {
   linear: Record<InspectPhase, number>;
 }
 
-export function inspectPhases(q: number): InspectState {
+export const inspectPhases = (q: number): InspectState => {
   const eased = {} as Record<InspectPhase, number>;
   const linear = {} as Record<InspectPhase, number>;
   for (const phase of Object.keys(INSPECT_WINDOWS) as InspectPhase[]) {
@@ -61,4 +61,4 @@ export function inspectPhases(q: number): InspectState {
     eased[phase] = easeOut(linear[phase]);
   }
   return { eased, linear };
-}
+};

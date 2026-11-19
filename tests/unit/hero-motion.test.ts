@@ -2,14 +2,14 @@ import { expect, test } from 'vitest';
 import { FoldControl, FrameProbe } from '../../src/components/inspector/hero-motion';
 
 /** Steps a FoldControl at 60 frames a second from `from` to `to` ms; returns the largest fold seen. */
-function run(fold: FoldControl, from: number, to: number) {
+const run = (fold: FoldControl, from: number, to: number) => {
   let peak = 0;
   for (let now = from; now <= to; now += 1000 / 60) {
     fold.step(now, 1 / 60);
     peak = Math.max(peak, fold.value);
   }
   return peak;
-}
+};
 
 test('the demonstration unfolds partway, then folds back and stops', () => {
   const fold = new FoldControl(0);
@@ -46,12 +46,12 @@ test('the fold follows the slider, eased, and stays inside 0 to 1', () => {
   expect(fold.value).toBe(1);
 });
 
-function probe(frameMs: number) {
+const probe = (frameMs: number) => {
   let slow = 0;
   const p = new FrameProbe(() => slow++);
   for (let i = 0; i <= 60; i++) p.frame(i * frameMs);
   return slow;
-}
+};
 
 test('a smooth device keeps the 3D figure', () => {
   expect(probe(16.7)).toBe(0);

@@ -25,7 +25,7 @@ export interface Model {
 
 type FaceSpec = readonly [string, string, string, Tag?];
 
-function model(id: ModelId, points: Record<string, Point>, faces: readonly FaceSpec[]): Model {
+const model = (id: ModelId, points: Record<string, Point>, faces: readonly FaceSpec[]): Model => {
   const all: Record<string, Point> = { ...points };
   for (const [name, [x, y, z]] of Object.entries(points))
     if (Math.abs(z) > 1e-9) all[`${name}'`] = [x, y, -z];
@@ -50,7 +50,7 @@ function model(id: ModelId, points: Record<string, Point>, faces: readonly FaceS
   }
   const pts = names.map((n) => all[n]!);
   return { id, points: pts, faces: out, tags, fold: buildFold(pts, out, 0) };
-}
+};
 
 /** Washi & asagi: the crane, the most iconic origami, in its place of origin. */
 const crane = model(

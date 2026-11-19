@@ -37,13 +37,13 @@ const tagsOf = (name: string, source: string): number =>
  * merged over its tags. Expressions (`text={data.title}`) are skipped: their value isn't known
  * until the page renders. Reads up to the tag's first `>`, enough for the props this site writes.
  */
-function literalProps(name: string, source: string): Record<string, string[]> {
+const literalProps = (name: string, source: string): Record<string, string[]> => {
   const props: Record<string, Set<string>> = {};
   for (const [, attrs = ''] of source.matchAll(new RegExp(`<${name}(?=[\\s/>])([^>]*)>`, 'g')))
     for (const [, key = '', value = ''] of attrs.matchAll(/([\w-]+)="([^"]*)"/g))
       (props[key] ??= new Set()).add(value);
   return Object.fromEntries(Object.entries(props).map(([k, v]) => [k, [...v].sort()]));
-}
+};
 
 interface Use {
   count: number;
@@ -54,7 +54,7 @@ interface Use {
  * `files`: repository-relative paths (forward slashes) with their source; `components`: the
  * repository-relative paths of the component files.
  */
-export function componentUsage(files: { path: string; source: string }[], components: string[]) {
+export const componentUsage = (files: { path: string; source: string }[], components: string[]) => {
   /** component → file → use */
   const uses = new Map<string, Map<string, Use>>(components.map((c) => [c, new Map()]));
   const add = (target: string, file: string, count: number, props: Record<string, string[]> = {}) => {
@@ -110,16 +110,16 @@ export function componentUsage(files: { path: string; source: string }[], compon
       unused: entries.filter((c) => c.uses === 0).map((c) => c.path),
     },
   };
-}
+};
 
-export function buildComponentUsage(root: string) {
+export const buildComponentUsage = (root: string) => {
   const components = list(root, COMPONENTS, COMPONENT_FILE);
   const files = SOURCES.flatMap((dir) => list(root, dir, SOURCE_FILE)).map((path) => ({
     path,
     source: readFileSync(join(root, path), 'utf8'),
   }));
   return componentUsage(files, components);
-}
+};
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const root = join(dirname(fileURLToPath(import.meta.url)), '..');

@@ -33,7 +33,7 @@ export const PREVIEW = process.env.PRECREASE_PREVIEW === '1';
 /** One clock per build, so every page agrees on what is out. */
 const buildTime = new Date();
 
-export async function getPosts(): Promise<PostSummary[]> {
+export const getPosts = async (): Promise<PostSummary[]> => {
   const entries = await getCollection('precrease');
   const posts = entries
     .map((entry) => ({
@@ -48,18 +48,18 @@ export async function getPosts(): Promise<PostSummary[]> {
   // Drafts and scheduled posts may hold a future number; the sequence rule applies to what is out.
   checkNumbers(posts.filter((p) => p.live));
   return posts.sort((a, b) => b.number - a.number);
-}
+};
 
 /** "Crease No. 001", worded by the copy file of the page's language. */
 export const creaseNumber = (value: number, lang: Lang = DEFAULT_LANG): string =>
   fill(copyFor(lang).precrease.number, { number: padNumber(value) });
 
 /** What kind of post it is: "Essay", or "Basic Folds 03" inside a series. */
-export function postKind(post: Post, lang: Lang = DEFAULT_LANG): string {
+export const postKind = (post: Post, lang: Lang = DEFAULT_LANG): string => {
   const { format, series } = post.data;
   const label = formatsFor(lang)[format].label;
   return series ? `${label} ${padNumber(series.part, 2)}` : label;
-}
+};
 
 export const postHref = (id: string) => `/precrease/${id}`;
 export const topicHref = (id: string, lang: Lang = DEFAULT_LANG) => localize(`/precrease/topics/${id}`, lang);

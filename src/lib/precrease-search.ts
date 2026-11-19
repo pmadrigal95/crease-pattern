@@ -41,21 +41,21 @@ const MAX_RESULTS = 8;
  * built from our own pages, so this never trips today; it keeps a tampered or broken index from
  * turning a result into a `javascript:` link or a link to another site.
  */
-export function resultHref(url: string): string | null {
+export const resultHref = (url: string): string | null => {
   // A path on this site: one leading slash, and no backslash (browsers read "/\host" as "//host").
   if (!/^\/(?!\/)/.test(url) || url.includes('\\')) return null;
   const clean = url.replace(/(?:\/index)?\.html(?=$|[?#])/, '');
   return clean === '' ? '/' : clean;
-}
+};
 
 /** Selected chips → Pagefind filters, leaving out groups with nothing selected. */
-export function toFilters(selected: Record<string, Set<string>>): Record<string, { any: string[] }> {
+export const toFilters = (selected: Record<string, Set<string>>): Record<string, { any: string[] }> => {
   const filters: Record<string, { any: string[] }> = {};
   for (const [group, values] of Object.entries(selected)) {
     if (values.size > 0) filters[group] = { any: [...values].sort() };
   }
   return filters;
-}
+};
 
 const ENTITIES: Record<string, string> = { lt: '<', gt: '>', quot: '"', '#39': "'", '#x27': "'", amp: '&' };
 
@@ -65,7 +65,7 @@ const ENTITIES: Record<string, string> = { lt: '<', gt: '>', quot: '"', '#39': "
  * every other tag, and decodes entities in a single pass (so `&amp;lt;` stays the text `&lt;`).
  * The runs are rendered as text nodes, never parsed as HTML.
  */
-export function excerptRuns(excerpt: string): { text: string; marked: boolean }[] {
+export const excerptRuns = (excerpt: string): { text: string; marked: boolean }[] => {
   const decode = (text: string) =>
     text.replace(/&(lt|gt|quot|#39|#x27|amp);/g, (_, name: string) => ENTITIES[name] ?? '');
   const runs: { text: string; marked: boolean }[] = [];
@@ -96,20 +96,20 @@ export function excerptRuns(excerpt: string): { text: string; marked: boolean }[
   }
   flush();
   return runs;
-}
+};
 
 let pagefind: Promise<Pagefind> | null = null;
 /** Pagefind's engine, downloaded the first time the box is used. */
-function loadPagefind(): Promise<Pagefind> {
+const loadPagefind = (): Promise<Pagefind> => {
   pagefind ??= import(/* @vite-ignore */ BUNDLE).then(async (module: Pagefind) => {
     await module.options({ excerptLength: 24 });
     return module;
   });
   return pagefind;
-}
+};
 
 /** One result: its Crease number and format, its title, and the excerpt with its matches marked. */
-function renderResult(result: PagefindResult, href: string, strings: Strings): HTMLLIElement {
+const renderResult = (result: PagefindResult, href: string, strings: Strings): HTMLLIElement => {
   const li = document.createElement('li');
   const a = document.createElement('a');
   a.href = href;
@@ -137,10 +137,10 @@ function renderResult(result: PagefindResult, href: string, strings: Strings): H
   a.append(kicker, title, excerpt);
   li.append(a);
   return li;
-}
+};
 
 /** The search box's parts, or null when the page doesn't have them all. */
-function parts(root: HTMLElement) {
+const parts = (root: HTMLElement) => {
   const input = root.querySelector<HTMLInputElement>('input[type="search"]');
   const panel = root.querySelector<HTMLElement>('.panel');
   const status = root.querySelector<HTMLElement>('.status');
@@ -151,13 +151,13 @@ function parts(root: HTMLElement) {
   if (!input || !panel || !status || !list || !clear || !form || !strings) return null;
   const chips = [...root.querySelectorAll<HTMLButtonElement>('[data-filter]')];
   return { input, panel, status, list, clear, form, strings, chips };
-}
+};
 type Parts = NonNullable<ReturnType<typeof parts>>;
 
 /** Runs the query and the chosen filters; a newer search always wins over a slower older one. */
-function searcher({ input, status, list, clear, strings }: Parts, selected: Record<string, Set<string>>) {
+const searcher = ({ input, status, list, clear, strings }: Parts, selected: Record<string, Set<string>>) => {
   let run = 0;
-  return async function update() {
+  return async () => {
     const query = input.value.trim();
     const filters = toFilters(selected);
     const filtering = Object.keys(filters).length > 0;
@@ -193,10 +193,10 @@ function searcher({ input, status, list, clear, strings }: Parts, selected: Reco
       list.replaceChildren();
     }
   };
-}
+};
 
 /** The panel closes on Escape, when focus leaves the box, or on a click anywhere else. */
-function closeWhenLeft(root: HTMLElement, { input, panel }: Parts) {
+const closeWhenLeft = (root: HTMLElement, { input, panel }: Parts) => {
   const close = () => (panel.hidden = true);
   root.addEventListener('keydown', (e) => {
     if (e.key !== 'Escape' || panel.hidden) return;
@@ -210,9 +210,9 @@ function closeWhenLeft(root: HTMLElement, { input, panel }: Parts) {
   document.addEventListener('pointerdown', (e) => {
     if (e.target instanceof Node && !root.contains(e.target)) close();
   });
-}
+};
 
-export function initPrecreaseSearch(): void {
+export const initPrecreaseSearch = (): void => {
   const root = document.querySelector<HTMLElement>('[data-precrease-search]');
   const found = root && parts(root);
   if (!root || !found) return;
@@ -274,4 +274,4 @@ export function initPrecreaseSearch(): void {
     open();
     void update();
   }
-}
+};

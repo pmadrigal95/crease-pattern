@@ -6,14 +6,14 @@
  */
 
 /** Lower case, accents stripped, punctuation turned into spaces: "Irazú!" → "irazu". */
-export function normalize(text: string): string {
+export const normalize = (text: string): string => {
   return text
     .normalize('NFD')
     .replace(/[̀-ͯ]/g, '')
     .toLowerCase()
     .replace(/[^\p{L}\p{N}]+/gu, ' ')
     .trim();
-}
+};
 
 export interface Searchable {
   /** What the option shows and matches first. */
@@ -23,7 +23,7 @@ export interface Searchable {
 }
 
 /** 0 when it doesn't match; higher is better. */
-export function score(item: Searchable, query: string): number {
+export const score = (item: Searchable, query: string): number => {
   const q = normalize(query);
   if (!q) return 1;
   const label = normalize(item.label);
@@ -33,13 +33,13 @@ export function score(item: Searchable, query: string): number {
   if (label.startsWith(q)) return 3;
   if (label.split(' ').some((word) => word.startsWith(terms[0]!))) return 2;
   return 1;
-}
+};
 
 /** The items that match, best first; ties keep their order. */
-export function rank<T extends Searchable>(items: readonly T[], query: string): T[] {
+export const rank = <T extends Searchable>(items: readonly T[], query: string): T[] => {
   return items
     .map((item, index) => ({ item, index, score: score(item, query) }))
     .filter((r) => r.score > 0)
     .sort((a, b) => b.score - a.score || a.index - b.index)
     .map((r) => r.item);
-}
+};

@@ -61,6 +61,15 @@ and tokens (`tokens/`) are data, read through `lib` and generated CSS.
 - `satisfies` to check a literal against a type without widening it.
 - Validate at the edges (content schemas with Zod, the dictionaries on import), then trust the types.
 
+### Functions
+
+Functions are arrow functions bound to a `const`: `const name = (…) => …`, never
+`function name() {}`, and callbacks are arrows too. A `const` exists only from its line on, so a
+file reads top to bottom: define a helper before the code that runs it. ESLint enforces it
+(`func-style`, `prefer-arrow-callback` and a `no-restricted-syntax` rule in eslint.config.ts). The
+language's own exceptions stay: generators (`const files = function* () {}`), class and object
+methods, and the few functions that need their own `this` (patching a prototype in a test).
+
 ## Text, copy and formatting
 
 - Languages are declared once, in `src/i18n/config.ts`. Routes, `<html lang>`, hreflang, date and

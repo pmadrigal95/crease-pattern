@@ -11,7 +11,7 @@ const GRID = 150; // samples per side
 const LEVELS = 16;
 const SEED = 0x0c0ffee;
 
-export function contourTile() {
+export const contourTile = () => {
   const rand = random(SEED);
   // Low frequencies give broad hills; a few higher ones add the wobble of real terrain.
   const waves = Array.from({ length: 9 }, (_, k) => {
@@ -106,4 +106,4 @@ export function contourTile() {
 
   const d = pathFrom(lines.filter((line) => line.length > 2));
   return { svg: tileSvg(TILE, [{ d, width: 1 }]), note: `${lines.length} contour lines` };
-}
+};

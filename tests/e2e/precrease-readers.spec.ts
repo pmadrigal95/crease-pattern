@@ -6,7 +6,7 @@ import { expect, test, type Page } from '@playwright/test';
 const post = '/precrease/the-work-before-the-shape';
 const api = '**/api/stats/the-work-before-the-shape';
 
-async function fakeApi(page: Page, counts = { views: 1204, reads: 312, helped: 12 }) {
+const fakeApi = async (page: Page, counts = { views: 1204, reads: 312, helped: 12 }) => {
   const events: string[] = [];
   await page.route(api, (route) => route.fulfill({ json: counts }));
   await page.route(`${api}/*`, (route) => {
@@ -14,7 +14,7 @@ async function fakeApi(page: Page, counts = { views: 1204, reads: 312, helped: 1
     return route.fulfill({ status: 204 });
   });
   return events;
-}
+};
 const readers = (page: Page) => page.getByRole('region', { name: 'Readers' });
 // The footer has its own LinkedIn link, so sheet links are looked up inside the sheet.
 const sheet = (page: Page) => page.locator('#share-sheet');

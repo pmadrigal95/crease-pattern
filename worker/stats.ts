@@ -43,32 +43,32 @@ const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const ROUTE = /^\/api\/stats\/([^/]+)(?:\/([^/]+))?$/;
 
 /** Handles /api/stats/*; returns null for any other path, so the caller can serve assets. */
-export async function handleStats(request: Request, deps: Deps): Promise<Response | null> {
+export const handleStats = async (request: Request, deps: Deps): Promise<Response | null> => {
   const url = new URL(request.url);
   const match = ROUTE.exec(url.pathname);
   if (!match) return null;
   const [, slug = '', event] = match;
   if (!SLUG.test(slug) || slug.length > 120) return json({ error: 'Unknown post.' }, 404);
   return event === undefined ? readCounts(request, slug, deps) : countEvent(request, slug, event, deps);
-}
+};
 
 /** GET a post's totals. */
-async function readCounts(request: Request, slug: string, deps: Deps): Promise<Response> {
+const readCounts = async (request: Request, slug: string, deps: Deps): Promise<Response> => {
   if (request.method !== 'GET' && request.method !== 'HEAD')
     return json({ error: 'Use GET.' }, 405, { Allow: 'GET, HEAD' });
   if (!(await deps.postExists(slug))) return json({ error: 'Unknown post.' }, 404);
   return json(await deps.store.get(slug), 200, { 'Cache-Control': 'public, max-age=60' });
-}
+};
 
 /** Only this site's own pages count: browsers mark cross-site requests, and those are refused. */
-function fromThisSite(request: Request, url: URL): boolean {
+const fromThisSite = (request: Request, url: URL): boolean => {
   const site = request.headers.get('Sec-Fetch-Site');
   const origin = request.headers.get('Origin');
   return !(site && site !== 'same-origin') && !(origin && origin !== url.origin);
-}
+};
 
 /** POST one event: a view, a read or a "this helped". */
-async function countEvent(request: Request, slug: string, event: string, deps: Deps): Promise<Response> {
+const countEvent = async (request: Request, slug: string, event: string, deps: Deps): Promise<Response> => {
   if (!isEvent(event)) return json({ error: 'Unknown event.' }, 404);
   if (request.method !== 'POST') return json({ error: 'Use POST.' }, 405, { Allow: 'POST' });
   if (!fromThisSite(request, new URL(request.url))) return json({ error: 'Not allowed.' }, 403);
@@ -77,7 +77,7 @@ async function countEvent(request: Request, slug: string, event: string, deps: D
   if (!(await deps.limiter.allow(`${ip}:${slug}`))) return json({ error: 'Too many requests.' }, 429);
   await deps.store.add(slug, event);
   return new Response(null, { status: 204, headers: { 'Cache-Control': 'no-store' } });
-}
+};
 
 const isEvent = (value: string): value is ReaderEvent => (EVENTS as readonly string[]).includes(value);
 

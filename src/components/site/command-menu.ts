@@ -57,7 +57,7 @@ interface Command extends Searchable {
 
 let index: Promise<Index> | null = null;
 /** Starts (or reuses) the index's download; a failed one is forgotten, so the next open retries. */
-function loadIndex(): Promise<Index> {
+const loadIndex = (): Promise<Index> => {
   index ??= fetch('/commands.json')
     .then((r) => (r.ok ? (r.json() as Promise<Index>) : Promise.reject(new Error(`commands: ${r.status}`))))
     .catch((error: unknown) => {
@@ -65,18 +65,18 @@ function loadIndex(): Promise<Index> {
       throw error;
     });
   return index;
-}
+};
 
 let menu: { open: (from: HTMLElement | null) => void } | null = null;
 
 /** Opens the menu, building it the first time; focus goes back to `from` when it closes. */
-export function openCommandMenu(strings: CommandStrings, from: HTMLElement | null) {
+export const openCommandMenu = (strings: CommandStrings, from: HTMLElement | null) => {
   menu ??= build(strings);
   menu.open(from);
-}
+};
 
 /** The dialog and its parts, appended to the page once. */
-function createDialog(t: CommandStrings) {
+const createDialog = (t: CommandStrings) => {
   const sheet = new CSSStyleSheet();
   sheet.replaceSync(styles);
   document.adoptedStyleSheets = [...document.adoptedStyleSheets, sheet];
@@ -109,10 +109,10 @@ function createDialog(t: CommandStrings) {
   dialog.append(input, list, status, hint);
   document.body.append(dialog);
   return { dialog, input, list, status };
-}
+};
 
 /** What the menu can do on any page: inspect, theme, identity, language, copy the email address. */
-function actionCommands(t: CommandStrings, status: HTMLElement): Command[] {
+const actionCommands = (t: CommandStrings, status: HTMLElement): Command[] => {
   const center = () => ({ x: innerWidth / 2, y: innerHeight / 2 });
   return [
     {
@@ -149,12 +149,12 @@ function actionCommands(t: CommandStrings, status: HTMLElement): Command[] {
       },
     },
   ];
-}
+};
 
 const go = (href: string) => () => location.assign(href);
 
 /** Where the menu can go: pages, their sections and posts, from /commands.json. */
-function placeCommands({ pages, posts }: Index, t: CommandStrings): Command[] {
+const placeCommands = ({ pages, posts }: Index, t: CommandStrings): Command[] => {
   const number = (n: number) => fill(t.number, { number: padNumber(n) });
   return [
     ...pages.map((p) => ({ group: 'pages' as const, label: p.title, aside: p.href, run: go(p.href) })),
@@ -175,7 +175,7 @@ function placeCommands({ pages, posts }: Index, t: CommandStrings): Command[] {
       run: go(p.href),
     })),
   ];
-}
+};
 
 /** With a query, the last option hands it to Precrease's full-text search. */
 const searchCommand = (query: string, t: CommandStrings): Command => ({
@@ -187,12 +187,12 @@ const searchCommand = (query: string, t: CommandStrings): Command => ({
 const optionId = (i: number) => `cmdk-option-${i}`;
 
 /** The listbox's options, grouped under their headings; `on` hears a pointer moving over or clicking one. */
-function renderOptions(
+const renderOptions = (
   list: HTMLElement,
   shown: readonly Command[],
   t: CommandStrings,
   on: (i: number, how: 'move' | 'click') => void,
-) {
+) => {
   const groups = new Map<string, HTMLElement>();
   list.replaceChildren();
   shown.forEach((command, i) => {
@@ -226,10 +226,10 @@ function renderOptions(
     option.addEventListener('click', () => on(i, 'click'));
     group.append(option);
   });
-}
+};
 
 /** The menu: what's shown for the query, which option is active, and the keys that move it. */
-function build(t: CommandStrings) {
+const build = (t: CommandStrings) => {
   const { dialog, input, list, status } = createDialog(t);
   const actions = actionCommands(t, status);
   let places: Command[] = [];
@@ -239,7 +239,7 @@ function build(t: CommandStrings) {
 
   let shown: Command[] = [];
   let active = 0;
-  function render() {
+  const render = () => {
     const query = input.value.trim();
     const matched = rank([...actions, ...places], query);
     // Without a query, sections and posts wait: actions and pages are the starting points.
@@ -251,8 +251,8 @@ function build(t: CommandStrings) {
     const count = shown.length;
     status.textContent = count === 0 ? t.empty : fill(count === 1 ? t.one : t.many, { count });
     select(active);
-  }
-  function select(i: number) {
+  };
+  const select = (i: number) => {
     if (!shown.length) {
       input.removeAttribute('aria-activedescendant');
       return;
@@ -262,13 +262,13 @@ function build(t: CommandStrings) {
       option.setAttribute('aria-selected', String(option.id === optionId(active)));
     input.setAttribute('aria-activedescendant', optionId(active));
     document.getElementById(optionId(active))?.scrollIntoView({ block: 'nearest' });
-  }
-  function runAt(i: number) {
+  };
+  const runAt = (i: number) => {
     const command = shown[i];
     if (!command) return;
     if (command.label !== t.actions.copyEmail) dialog.close();
     command.run();
-  }
+  };
 
   input.addEventListener('input', () => {
     active = 0;
@@ -303,4 +303,4 @@ function build(t: CommandStrings) {
       void indexReady.then(render);
     },
   };
-}
+};

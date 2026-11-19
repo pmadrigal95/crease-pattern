@@ -4,7 +4,7 @@
  */
 
 /** Parses `el.dataset[key]` as JSON, or returns `fallback` when it's missing. */
-export function readJsonData<T>(el: HTMLElement | null, key: string, fallback: T): T {
+export const readJsonData = <T>(el: HTMLElement | null, key: string, fallback: T): T => {
   const raw = el?.dataset[key];
   return raw ? (JSON.parse(raw) as T) : fallback;
-}
+};
