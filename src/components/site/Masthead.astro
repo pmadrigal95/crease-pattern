@@ -154,22 +154,21 @@ const here = unlocalize(path);
   // starts the download early. Ctrl+K everywhere, Cmd+K on Apple devices.
   const commandButton = document.querySelector<HTMLButtonElement>('[data-command-open]');
   const commandMenu = () => import('./command-menu');
-  const openCommands = (from: HTMLElement | null) => {
+  const openCommands = () => {
     const strings = commandButton?.dataset.strings;
     if (!strings) return;
     void commandMenu()
-      .then((m) => m.openCommandMenu(JSON.parse(strings) as Parameters<typeof m.openCommandMenu>[0], from))
+      .then((m) => m.openCommandMenu(JSON.parse(strings) as Parameters<typeof m.openCommandMenu>[0]))
       .catch((error: unknown) => console.warn('Commands could not open', error));
   };
-  commandButton?.addEventListener('click', () => openCommands(commandButton));
+  commandButton?.addEventListener('click', () => openCommands());
   commandButton?.addEventListener('pointerenter', () => void commandMenu(), { once: true });
   const shortcut = commandButton?.querySelector('[data-shortcut]');
   if (shortcut && /Mac|iPhone|iPad/.test(navigator.platform)) shortcut.textContent = '⌘ K';
   addEventListener('keydown', (e) => {
     if (e.key.toLowerCase() !== 'k' || !(e.ctrlKey || e.metaKey) || e.altKey || e.shiftKey) return;
     e.preventDefault();
-    const active = document.activeElement;
-    openCommands(active instanceof HTMLElement && active !== document.body ? active : commandButton);
+    openCommands();
   });
   addEventListener('keydown', (e) => {
     if (

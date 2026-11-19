@@ -655,6 +655,11 @@ main [data-inspect] {
 .fold-model {
   transition: transform 1100ms var(--motion-ease-in-out);
 }
+/* Folded, the whole page is measured and drawn: nothing skips its layout. */
+.fold-on .fold-sheet * {
+  /* !important: a component's own scoped rule would otherwise outrank this one. */
+  content-visibility: visible !important;
+}
 /* Every plane between the sheet and the sections is in the same 3D space: a background on any of
    them would hide whatever folds behind it. */
 .fold-on .fold-sheet,
@@ -672,6 +677,10 @@ main [data-inspect] {
   transition:
     transform 1100ms var(--motion-ease-in-out),
     opacity 400ms ease-out;
+}
+/* Layers on the GPU only while the sheet moves: seven page-sized layers held at rest cost memory. */
+.fold-moving .fold-section,
+.fold-live .fold-section {
   will-change: transform;
 }
 /* Valley faces turn away from the light: a shade, as on the figures' deep facets. */

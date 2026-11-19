@@ -81,9 +81,9 @@ export const textWidth = (text: string, size: number): number => text.length * s
  */
 export const profile = (climbs: readonly Climb[], frame: Frame): Profile => {
   if (climbs.length === 0) throw new Error('profile() needs at least one release');
-  const sorted = [...climbs].sort((a, b) => a.start - b.start);
+  const sorted = climbs.toSorted((a, b) => a.start - b.start);
   const from = sorted[0]!.start;
-  const to = sorted[sorted.length - 1]!.end;
+  const to = sorted.at(-1)!.end;
   const baseline = frame.height - frame.bottom;
   const plotRight = frame.width - frame.right;
   const x = (t: number) => ((t - from) / (to - from)) * plotRight;
@@ -119,7 +119,7 @@ export const profile = (climbs: readonly Climb[], frame: Frame): Profile => {
   const xy = points.map(([t, m]) => [x(t), y(m)] as [number, number]);
   const line = smoothPath(xy);
   const first = xy[0]!;
-  const end = xy[xy.length - 1]!;
+  const end = xy.at(-1)!;
   const area = `${line} L${round(end[0])},${baseline} L${round(first[0])},${baseline} Z`;
 
   const guides: Profile['guides'] = [];

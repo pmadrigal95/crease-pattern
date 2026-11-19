@@ -63,6 +63,11 @@ export default defineConfig({
         "base-uri 'self'",
         "form-action 'self'",
         "object-src 'none'",
+        // Trusted Types: no HTML or code from strings reaches the DOM; script URLs only through the
+        // default policy (same origin, src/lib/trusted-types.ts), Vue's own, and the comments' script
+        // (PostComments.astro).
+        "require-trusted-types-for 'script'",
+        'trusted-types default vue comments',
       ],
       // Declared explicitly so a page can add a source (giscus on posts) without replacing 'self':
       // Astro's insertStyleResource() overrides the default list instead of extending it.

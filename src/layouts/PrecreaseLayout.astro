@@ -32,8 +32,8 @@ const { title, description, image, type, noindex = false, feed, home = false, tr
 
 <PageLayout title={title} description={description} image={image} type={type} translations={translations}>
   <Fragment slot="head">
-    <!-- Both faces show above the fold (the wordmark is "Pre" italic + "crease" roman). Preloading them
-         lets font-display: optional use Newsreader on a first visit instead of keeping the fallback. -->
+    {/* Both faces show above the fold (the wordmark is "Pre" italic + "crease" roman). Preloading them
+         lets font-display: optional use Newsreader on a first visit instead of keeping the fallback. */}
     <link rel="preload" href={newsreaderNormal} as="font" type="font/woff2" crossorigin />
     <link rel="preload" href={newsreaderItalic} as="font" type="font/woff2" crossorigin />
     <link rel="alternate" type="application/rss+xml" title={copy.precrease.name} href="/precrease/rss.xml" />

@@ -295,6 +295,10 @@ const topicFilters = [...new Set(paths.flat().map((topic) => topic.id))];
   .related {
     padding-block: var(--space-8) var(--space-24);
     border-top: 1px solid var(--color-rule);
+    /* Always below the fold at load: laid out and painted only as it approaches. Its size held at
+       the last one measured (a heading and a row of cards, about 30rem before that). */
+    content-visibility: auto;
+    contain-intrinsic-size: auto 30rem;
   }
   .related h2 {
     font: italic 400 var(--size-2xl) var(--font-serif);

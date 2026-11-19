@@ -67,12 +67,12 @@ const loadIndex = (): Promise<Index> => {
   return index;
 };
 
-let menu: { open: (from: HTMLElement | null) => void } | null = null;
+let menu: { open: () => void } | null = null;
 
-/** Opens the menu, building it the first time; focus goes back to `from` when it closes. */
-export const openCommandMenu = (strings: CommandStrings, from: HTMLElement | null) => {
+/** Opens the menu, building it the first time. */
+export const openCommandMenu = (strings: CommandStrings) => {
   menu ??= build(strings);
-  menu.open(from);
+  menu.open();
 };
 
 /** The dialog and its parts, appended to the page once. */
@@ -85,7 +85,8 @@ const createDialog = (t: CommandStrings) => {
     for (const [name, value] of Object.entries(attrs)) el.setAttribute(name, value);
     return el;
   };
-  const dialog = element('dialog', { class: 'cmdk', 'aria-label': t.label });
+  // closedby="any": a click outside or Esc closes it, natively (Modern Web Guidance, dialog).
+  const dialog = element('dialog', { class: 'cmdk', 'aria-label': t.label, closedby: 'any' });
   const input = element('input', {
     type: 'text',
     placeholder: t.placeholder,
@@ -284,16 +285,23 @@ const build = (t: CommandStrings) => {
       runAt(active);
     }
   });
-  // A click on the backdrop (the dialog element itself, outside its content) closes it.
-  dialog.addEventListener('click', (e) => {
-    if (e.target === dialog) dialog.close();
-  });
-  let returnTo: HTMLElement | null = null;
-  dialog.addEventListener('close', () => returnTo?.focus());
+  // Where closedby isn't supported (Safari): close on a press and release outside the box. The
+  // pointer's position, not the target: the dialog is also the target of its own padding.
+  if (!('closedBy' in HTMLDialogElement.prototype)) {
+    const outside = (e: PointerEvent) => {
+      const r = dialog.getBoundingClientRect();
+      return e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom;
+    };
+    let pressedOutside = false;
+    dialog.addEventListener('pointerdown', (e) => (pressedOutside = outside(e)));
+    dialog.addEventListener('pointerup', (e) => {
+      if (pressedOutside && outside(e)) dialog.close();
+    });
+  }
 
   return {
-    open(from: HTMLElement | null) {
-      returnTo = from;
+    // The browser returns focus to what had it before the menu opened.
+    open() {
       input.value = '';
       active = 0;
       status.textContent = '';

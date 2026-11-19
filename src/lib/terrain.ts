@@ -95,7 +95,7 @@ export const expeditionMap = (places: readonly Place[], frame: MapFrame): Expedi
   }
 
   // The route runs straight from summit to summit, like a trail on a map, with round joins.
-  const ordered = [...points].sort((a, b) => a.place.major - b.place.major);
+  const ordered = points.toSorted((a, b) => a.place.major - b.place.major);
   const route = 'M' + ordered.map((p) => `${p.x},${p.y}`).join('L');
   const legs = ordered.slice(1).map((p, i) => [ordered[i]!, p] as const);
   const pins = placeLabels(ordered, frame, legs);
@@ -167,7 +167,7 @@ export const polylines = (segments: [number, number, number, number][]): string 
     // Grow from the tail, then from the head.
     for (const grow of ['tail', 'head'] as const) {
       for (;;) {
-        const [x, y] = grow === 'tail' ? line[line.length - 1]! : line[0]!;
+        const [x, y] = grow === 'tail' ? line.at(-1)! : line[0]!;
         const next = (ends.get(key(x, y)) ?? []).find((i) => !used.has(i));
         if (next === undefined) break;
         used.add(next);
@@ -232,7 +232,7 @@ const placeLabels = (
       }
     }
     if (!choice) {
-      const { short, width, height } = sizes[sizes.length - 1]!;
+      const { short, width, height } = sizes.at(-1)!;
       const fallback = candidatesAround(p, width, height);
       choice = { short, ...(fallback.find((c) => inside(c.box)) ?? fallback[0]!) };
     }
