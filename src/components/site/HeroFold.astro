@@ -14,6 +14,7 @@
  * square when it loads and folds the same geometry for real.
  */
 import { MODEL_IDS } from '../../lib/origami/models';
+import { spriteHref } from '../../lib/origami/sprite';
 import { VIEWBOX } from '../../lib/origami/marks';
 import { copyFor } from '../../i18n/dictionary';
 const copy = copyFor(Astro.currentLocale);
@@ -27,12 +28,12 @@ const strings = JSON.stringify({ folded: t.folded, unfolded: t.unfolded });
     <svg class="origami" viewBox={VIEWBOX} aria-hidden="true" focusable="false">
       <g class="flat">
         {MODEL_IDS.map((id) => (
-          <use class={`o-model o-${id}`} href={`#origami-${id}-flat`} />
+          <use class={`o-model o-${id}`} href={spriteHref(id, true)} />
         ))}
       </g>
       <g class="folded">
         {MODEL_IDS.map((id) => (
-          <use class={`o-model o-${id}`} href={`#origami-${id}`} />
+          <use class={`o-model o-${id}`} href={spriteHref(id)} />
         ))}
       </g>
       <g class="legend">

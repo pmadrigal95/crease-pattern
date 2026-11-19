@@ -54,7 +54,9 @@ const VIEWS: Record<ModelId, { yaw: number; pitch: number }> = {
   fox: { yaw: -0.55, pitch: 0.12 },
 };
 
-const r2 = (n: number) => Math.round(n * 100) / 100;
+// One decimal: a tenth of a unit in a 48-unit box is invisible at any size the marks are drawn,
+// and the figures file carries every one of these paths (src/lib/origami/sprite.ts).
+const r2 = (n: number) => Math.round(n * 10) / 10;
 const path = (pts: readonly (readonly [number, number])[]) =>
   `M${pts.map(([x, y]) => `${r2(x)} ${r2(y)}`).join('L')}z`;
 

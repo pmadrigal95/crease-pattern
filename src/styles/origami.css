@@ -1,15 +1,7 @@
 /*
- * The origami figures in SVG (src/components/site/OrigamiSprite.astro, OrigamiMark.astro,
- * HeroFold.astro): which one shows, and their colours. Global on purpose: the symbols' paths are
- * cloned into <use> instances, which only document-wide rules reach.
+ * The origami figures in SVG (OrigamiMark.astro, HeroFold.astro, NotFoundMap.astro): which one
+ * shows, and the paper colours their file (/origami.svg, src/lib/origami/sprite.ts) reads.
  */
-.origami-sprite {
-  position: absolute;
-  width: 0;
-  height: 0;
-  overflow: hidden;
-}
-
 /* Which figure: Washi & asagi the crane, Basalt & glacier the arctic fox, Contour lines the blue
    morpho by day and the red-eyed tree frog by night (src/lib/origami/marks.ts, modelFor). */
 .origami .o-model {
@@ -36,8 +28,8 @@
 }
 
 /* Paper is light in every theme: an arctic fox is white at night too. And the dark it shades to
-   is ink by day and the background by night. The 3D scene follows the same rule (paperBase in
-   src/components/inspector/scene3d.ts). */
+   is ink by day and the background by night. The figures' file and the 3D scene read these
+   (src/lib/origami/sprite.ts, src/components/inspector/scene3d.ts). */
 :root {
   --origami-paper: var(--color-surface);
   --origami-dark: var(--color-ink);
@@ -50,78 +42,5 @@
   :root:not([data-theme='light']) {
     --origami-paper: color-mix(in oklab, var(--color-ink) 90%, var(--color-surface));
     --origami-dark: var(--color-bg);
-  }
-}
-
-/* Colours: paper shaded toward the identity's accent by how much light a facet catches, and the
-   one accent that means something (a beak, an ear, an eye). The morpho's blue is its own. The
-   mixes are ROLE_MIX and EDGE_MIX in src/lib/origami/marks.ts, which the 3D scene reads. */
-.origami-sprite path {
-  stroke: var(--color-surface);
-  stroke-width: 0.25;
-  stroke-linejoin: round;
-}
-.o-light {
-  fill: color-mix(in oklab, var(--color-accent) 10%, var(--origami-paper));
-}
-.o-mid {
-  fill: color-mix(in oklab, var(--color-accent) 26%, var(--origami-paper));
-}
-.o-shade {
-  fill: color-mix(in oklab, var(--color-accent) 46%, var(--origami-paper));
-}
-.o-deep {
-  fill: color-mix(in oklab, var(--color-accent) 68%, var(--origami-paper));
-}
-.o-accent {
-  fill: var(--color-accent);
-}
-.o-wing {
-  fill: var(--color-accent-ui);
-}
-.o-edge {
-  fill: color-mix(in oklab, var(--color-accent) 45%, var(--origami-dark));
-  /* EDGE_MIX: 55 % of the way to ink. */
-}
-/* The frog's eyes are red: it's in the name. */
-#origami-frog .o-accent {
-  fill: #c4402f;
-}
-
-/* The crease pattern: the sheet laid open, mountain folds solid, valley folds dashed. */
-.origami-sprite .o-sheet {
-  fill: var(--color-surface);
-  stroke: var(--color-rule);
-  stroke-width: 0.3;
-}
-.origami-sprite .o-mountain,
-.origami-sprite .o-valley {
-  fill: none;
-  stroke: var(--color-accent-ui);
-  stroke-width: 0.55;
-  stroke-linecap: round;
-}
-.origami-sprite .o-valley {
-  stroke-dasharray: 1.4 1.2;
-}
-
-/* A mark (masthead, footer): the figure; while inspecting, its crease pattern instead. */
-.origami-mark .o-flat,
-.origami-mark .o-folded {
-  transition: opacity var(--motion-stage) var(--motion-ease-in-out);
-}
-.origami-mark .o-flat {
-  opacity: 0;
-}
-.inspecting .origami-mark .o-folded {
-  opacity: 0;
-}
-.inspecting .origami-mark .o-flat {
-  opacity: 1;
-}
-@media (prefers-reduced-motion: reduce) {
-  .origami-mark .o-flat,
-  .origami-mark .o-folded {
-    transition: none;
   }
 }

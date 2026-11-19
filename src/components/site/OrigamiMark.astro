@@ -1,11 +1,12 @@
 ---
 /**
  * The site's mark: the origami figure of the visitor's identity (src/lib/origami/marks.ts), drawn
- * from the symbols in OrigamiSprite. Every figure is here; src/styles/origami.css shows the one
- * that matches `data-direction` and the theme. While inspecting, the figure gives way to its crease
- * pattern: the interface, then the architecture.
+ * from the symbols in /origami.svg (src/lib/origami/sprite.ts). Every figure is here; src/styles/origami.css shows the one
+ * that matches `data-direction` and the theme. Only the folded figures: the crease pattern belongs to
+ * the hero (HeroFold.astro), and every <use> here is work for every page.
  */
 import { MODEL_IDS } from '../../lib/origami/models';
+import { spriteHref } from '../../lib/origami/sprite';
 import { VIEWBOX } from '../../lib/origami/marks';
 
 interface Props {
@@ -22,14 +23,7 @@ const { size = 26 } = Astro.props;
   aria-hidden="true"
   focusable="false"
 >
-  <g class="o-flat">
-    {MODEL_IDS.map((id) => (
-      <use class={`o-model o-${id}`} href={`#origami-${id}-flat`} />
-    ))}
-  </g>
-  <g class="o-folded">
-    {MODEL_IDS.map((id) => (
-      <use class={`o-model o-${id}`} href={`#origami-${id}`} />
-    ))}
-  </g>
+  {MODEL_IDS.map((id) => (
+    <use class={`o-model o-${id}`} href={spriteHref(id)} />
+  ))}
 </svg>

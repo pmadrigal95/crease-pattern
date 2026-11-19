@@ -8,6 +8,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { MODEL_IDS } from '../../lib/origami/models';
+import { spriteHref } from '../../lib/origami/sprite';
 import { VIEWBOX } from '../../lib/origami/marks';
 import { copyFor, fill } from '../../i18n/dictionary';
 import { formatNumber } from '../../lib/format';
@@ -50,7 +51,7 @@ const trail = `M${here.x} ${here.y}C${here.x - 30} ${here.y - 14} ${size - 70} $
       aria-hidden="true"
     >
       {MODEL_IDS.map((id) => (
-        <use class={`o-model o-${id}`} href={`#origami-${id}`} />
+        <use class={`o-model o-${id}`} href={spriteHref(id)} />
       ))}
     </svg>
     <circle class="ring" cx={here.x} cy={here.y} r="11"></circle>
