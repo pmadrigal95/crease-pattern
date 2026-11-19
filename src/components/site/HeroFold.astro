@@ -13,7 +13,7 @@
  * the first frame of the 3D scene (src/components/inspector/scene3d.ts), which takes over this same
  * square when it loads and folds the same geometry for real.
  */
-import { MODEL_IDS } from '../../lib/origami/models';
+import { MODEL_IDS, models } from '../../lib/origami/models';
 import { spriteHref } from '../../lib/origami/sprite';
 import { VIEWBOX } from '../../lib/origami/marks';
 import { copyFor } from '../../i18n/dictionary';
@@ -21,6 +21,8 @@ const copy = copyFor(Astro.currentLocale);
 
 const t = copy.home.hero.fold;
 const strings = JSON.stringify({ folded: t.folded, unfolded: t.unfolded });
+// Each figure's real numbers, from the geometry the scene folds: one hinge per facet but the first.
+const card = MODEL_IDS.map((id) => ({ id, facets: models[id].fold.faces.length }));
 ---
 
 <figure class="hero-fold" data-hero-fold data-strings={strings} data-inspect="HeroFold">
@@ -36,17 +38,35 @@ const strings = JSON.stringify({ folded: t.folded, unfolded: t.unfolded });
           <use class={`o-model o-${id}`} href={spriteHref(id)} />
         ))}
       </g>
-      <g class="legend">
-        <path class="mountain" d="M14 47.2h3.6"></path>
-        <text x="18.6" y="47.8">
-          {t.mountain}
-        </text>
-        <path class="valley" d="M27.6 47.2h3.6"></path>
-        <text x="32.2" y="47.8">
-          {t.valley}
-        </text>
-      </g>
     </svg>
+  </div>
+  <div class="card origami">
+    {card.map(({ id, facets }) => (
+      <div class={`o-model o-${id}`}>
+        <p class="name">{t.figures[id]}</p>
+        <dl class="counts">
+          <div>
+            <dd>{facets}</dd>
+            <dt>{t.facets}</dt>
+          </div>
+          <div>
+            <dd>{facets - 1}</dd>
+            <dt>{t.hinges}</dt>
+          </div>
+          <div>
+            <dd>1</dd>
+            <dt>{t.sheet}</dt>
+          </div>
+        </dl>
+      </div>
+    ))}
+    <div class="key">
+      <p class="legend" aria-hidden="true">
+        <span class="mountain">{t.mountain}</span>
+        <span class="valley">{t.valley}</span>
+      </p>
+      <p class="drag">{t.drag}</p>
+    </div>
   </div>
   <div class="scale" hidden data-scale>
     <span class="end on" data-end="interface">
@@ -108,14 +128,13 @@ const strings = JSON.stringify({ folded: t.folded, unfolded: t.unfolded });
 
   .flat,
   .folded,
-  .legend,
   .knob {
     transition:
       opacity var(--motion-stage) var(--motion-ease-in-out),
       transform var(--motion-stage) var(--motion-ease-in-out),
       left var(--motion-stage) var(--motion-ease-in-out);
   }
-  .scrubbing :is(.flat, .folded, .legend),
+  .scrubbing :is(.flat, .folded),
   .scrubbing ~ .scale .knob {
     transition: none;
   }
@@ -133,19 +152,75 @@ const strings = JSON.stringify({ folded: t.folded, unfolded: t.unfolded });
     opacity: var(--t);
     transform: scale(calc(0.9 + var(--t) * 0.1));
   }
+  /* The figure's card: its name, its real numbers and how to read its folds. */
+  .card {
+    display: grid;
+    gap: var(--space-2);
+    margin-top: var(--space-4);
+  }
+  .name {
+    margin: 0;
+    font-weight: 600;
+    font-size: var(--size-md);
+    color: var(--color-ink);
+  }
+  .counts {
+    display: flex;
+    gap: var(--space-6);
+    margin: var(--space-1) 0 0;
+  }
+  .counts div {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-1);
+  }
+  .counts dd {
+    margin: 0;
+    font: 600 var(--size-md) var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    color: var(--color-ink);
+  }
+  .counts dt {
+    font: var(--type-caption);
+    color: var(--color-mute);
+  }
   .legend {
-    opacity: calc(var(--t) * 2 - 1);
+    display: flex;
+    gap: var(--space-4);
+    margin: 0;
+    font: var(--type-caption);
+    color: var(--color-mute);
   }
-  .legend text {
-    font: 1.9px var(--font-mono);
-    fill: var(--color-mute);
+  .legend span::before {
+    content: '';
+    display: inline-block;
+    width: 18px;
+    margin-right: var(--space-1);
+    vertical-align: middle;
+    border-top: 2px solid var(--color-accent-ui);
   }
-  .legend path {
-    stroke: var(--color-accent-ui);
-    stroke-width: 0.5;
+  .legend .valley::before {
+    border-top-style: dashed;
   }
-  .legend .valley {
-    stroke-dasharray: 1.2 0.8;
+  /* The legend and the drag hint share a row, so the hint appearing never moves the slider. */
+  .key {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: var(--space-2) var(--space-4);
+  }
+  /* Only once the figure is 3D can it be turned. */
+  .drag {
+    visibility: hidden;
+    opacity: 0;
+    margin: 0;
+    font: var(--type-caption);
+    color: var(--color-mute);
+    transition: opacity var(--motion-base) ease-out;
+  }
+  .scene-3d .drag {
+    visibility: visible;
+    opacity: 1;
   }
 
   .scale {
@@ -210,7 +285,6 @@ const strings = JSON.stringify({ folded: t.folded, unfolded: t.unfolded });
   @media (prefers-reduced-motion: reduce) {
     .flat,
     .folded,
-    .legend,
     .knob {
       transition: none;
     }
@@ -238,6 +312,8 @@ const strings = JSON.stringify({ folded: t.folded, unfolded: t.unfolded });
     const set = (value: number) => {
       const t = Math.min(1, Math.max(0, value));
       figure.style.setProperty('--fold', t.toFixed(3));
+      // The 3D figure, once it's up, folds to the same value (src/components/inspector/scene3d.ts).
+      figure.dispatchEvent(new CustomEvent('hero-fold', { detail: t }));
       const unfolded = t >= 0.5;
       track.setAttribute('aria-valuenow', String(Math.round(t * 100)));
       track.setAttribute('aria-valuetext', unfolded ? strings.unfolded : strings.folded);
@@ -249,10 +325,12 @@ const strings = JSON.stringify({ folded: t.folded, unfolded: t.unfolded });
       return (e.clientX - box.left) / box.width;
     };
 
+    // In 3D the figure itself is for turning: only the slider folds it.
+    const in3d = () => figure.classList.contains('scene-3d');
     // Dragging across the figure or along the slider scrubs the fold; letting go settles it.
     for (const el of [stage, track]) {
       el.addEventListener('pointerdown', (e) => {
-        if (el === stage && e.pointerType !== 'mouse') return; // touch scrolls the page instead
+        if (el === stage && (e.pointerType !== 'mouse' || in3d())) return; // touch scrolls the page instead
         el.setPointerCapture(e.pointerId);
         figure.classList.add('scrubbing');
         set(fromPointer(e, el));
@@ -261,16 +339,18 @@ const strings = JSON.stringify({ folded: t.folded, unfolded: t.unfolded });
         if (el.hasPointerCapture(e.pointerId)) set(fromPointer(e, el));
       });
       el.addEventListener('pointerup', () => {
+        if (!figure.classList.contains('scrubbing')) return; // a drag that turned the 3D figure
         figure.classList.remove('scrubbing');
-        set(current() >= 0.5 ? 1 : 0);
+        // The SVG settles on one end; in 3D the fold stays wherever the hand left it.
+        if (!in3d()) set(current() >= 0.5 ? 1 : 0);
       });
     }
     // A mouse resting on the figure previews the unfold; leaving folds it back.
     stage.addEventListener('pointerenter', (e) => {
-      if (e.pointerType === 'mouse' && !e.buttons) set(1);
+      if (e.pointerType === 'mouse' && !e.buttons && !in3d()) set(1);
     });
     stage.addEventListener('pointerleave', (e) => {
-      if (e.pointerType === 'mouse' && !e.buttons) set(0);
+      if (e.pointerType === 'mouse' && !e.buttons && !in3d()) set(0);
     });
     track.addEventListener('keydown', (e) => {
       const step = { ArrowRight: 0.1, ArrowUp: 0.1, ArrowLeft: -0.1, ArrowDown: -0.1, Home: -1, End: 1 }[
@@ -281,4 +361,12 @@ const strings = JSON.stringify({ folded: t.folded, unfolded: t.unfolded });
       set(current() + step);
     });
   }
+</script>
+
+<script>
+  // The figure turns 3D at the visitor's first move (src/scripts/hero3d.ts). A script of its own,
+  // on the home page only: in the masthead's, its imports put two more modules in front of every
+  // page's first paint (About's LCP lost a round trip).
+  import { initHero3d } from '../../scripts/hero3d';
+  initHero3d();
 </script>

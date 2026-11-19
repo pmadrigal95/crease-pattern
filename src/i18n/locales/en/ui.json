@@ -20,7 +20,17 @@
         "unfolded": "Unfolded: the crease pattern",
         "mountain": "mountain",
         "valley": "valley",
-        "caption": "The figure is what you see on screen: the interface. Unfold it and you get the folds that shape it, the architecture. Each identity folds its own: a crane, a blue morpho by day and a red-eyed tree frog by night, an arctic fox. \"See how this page is built\" opens any page here the same way."
+        "caption": "The figure is what you see on screen: the interface. Unfold it and you get the folds that shape it, the architecture. Each identity folds its own: a crane, a blue morpho by day and a red-eyed tree frog by night, an arctic fox. \"See how this page is built\" opens any page here the same way.",
+        "figures": {
+          "crane": "The crane",
+          "morpho": "The blue morpho",
+          "frog": "The red-eyed tree frog",
+          "fox": "The arctic fox"
+        },
+        "facets": "facets",
+        "hinges": "hinges",
+        "sheet": "sheet",
+        "drag": "Drag to turn it"
       },
       "who": "{name} · {role} · {location}"
     },
