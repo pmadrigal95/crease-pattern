@@ -3,7 +3,8 @@
  * frame and a `step` that says whether it's still moving, so the scene draws only while something
  * does:
  *
- * - Orbit: drag to turn the figure, with a little inertia. Horizontal on touch screens, so a
+ * - Orbit: drag to turn the figure, with a little inertia, within a range that keeps it readable;
+ *   let go and it settles back to its resting view, the SVG's. Horizontal on touch screens, so a
  *   vertical swipe still scrolls the page.
  * - FoldControl: the fold the hero's slider asks for (0 the figure, 1 its crease pattern), eased so
  *   the hinges turn instead of jumping; and, once, a short demonstration that it unfolds.
@@ -14,8 +15,14 @@
 /** Drag sensitivity, in radians per pixel, and how fast a released spin slows down (per second). */
 const DRAG = 0.008;
 const FRICTION = 4;
-/** How far the figure tips up or down, in radians: enough to see under a wing, never upside down. */
-const PITCH_LIMIT = 0.5;
+/**
+ * How far the figure turns from its resting view, in radians: enough to see it is real and to look
+ * under a wing, never so far that it reads as another shape.
+ */
+const YAW_LIMIT = 0.8;
+const PITCH_LIMIT = 0.35;
+/** Seconds after letting go before it settles back, and how fast it settles (per second). */
+const SETTLE = { after: 1.2, rate: 2.5 };
 
 export class Orbit {
   yaw = 0;
@@ -23,6 +30,7 @@ export class Orbit {
   private spin = 0;
   private dragging: { x: number; y: number; yaw: number; pitch: number } | null = null;
   private last = { x: 0, t: 0 };
+  private idle = 0;
 
   constructor(target: HTMLElement, onMove: () => void) {
     target.style.touchAction = 'pan-y';
@@ -36,7 +44,7 @@ export class Orbit {
     });
     target.addEventListener('pointermove', (e) => {
       if (!this.dragging) return;
-      this.yaw = this.dragging.yaw + (e.clientX - this.dragging.x) * DRAG;
+      this.yaw = clamp(this.dragging.yaw + (e.clientX - this.dragging.x) * DRAG, -YAW_LIMIT, YAW_LIMIT);
       if (e.pointerType === 'mouse')
         this.pitch = clamp(
           this.dragging.pitch + (e.clientY - this.dragging.y) * DRAG,
@@ -50,6 +58,7 @@ export class Orbit {
     });
     const release = () => {
       this.dragging = null;
+      this.idle = 0;
       target.style.cursor = 'grab';
       onMove();
     };
@@ -57,12 +66,23 @@ export class Orbit {
     target.addEventListener('pointercancel', release);
   }
 
-  /** Lets a released spin coast to a stop; true while it's still turning. */
+  /** Lets a released spin coast to a stop, then settles back to rest; true while still turning. */
   step(dt: number): boolean {
     if (this.dragging) return true;
-    if (Math.abs(this.spin) < 0.01) return false;
-    this.yaw += this.spin * dt;
-    this.spin *= Math.exp(-FRICTION * dt);
+    if (Math.abs(this.spin) >= 0.01) {
+      this.yaw = clamp(this.yaw + this.spin * dt, -YAW_LIMIT, YAW_LIMIT);
+      this.spin = Math.abs(this.yaw) === YAW_LIMIT ? 0 : this.spin * Math.exp(-FRICTION * dt);
+      return true;
+    }
+    if (Math.abs(this.yaw) < 0.001 && Math.abs(this.pitch) < 0.001) {
+      this.yaw = this.pitch = 0;
+      return false;
+    }
+    this.idle += dt;
+    if (this.idle < SETTLE.after) return true;
+    const k = Math.min(1, dt * SETTLE.rate);
+    this.yaw -= this.yaw * k;
+    this.pitch -= this.pitch * k;
     return true;
   }
 }

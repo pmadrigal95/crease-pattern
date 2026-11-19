@@ -7,7 +7,8 @@
  * first frame is drawn, and hands it back when the Inspector closes. The figure is the one of the
  * visitor's identity and theme (src/lib/origami/marks.ts), folded for real: every facet turns on
  * its hinge (src/lib/origami/hinge.ts), so changing identity or theme unfolds it to its crease
- * pattern and folds the next figure from the sheet. Inspecting takes it apart, tips first (the
+ * pattern and folds the next figure from the sheet. In the hero it is drawn as the SVG draws it
+ * and rests at the SVG's view; inspecting, it turns to lit paper and comes apart, tips first (the
  * teardown), while the identity's scene rises behind it (inspectPhases, motion B).
  *
  * It renders only while something moves, then stops: a still scene costs nothing.
@@ -29,6 +30,7 @@ import { modelFor } from '../../lib/origami/marks';
 import { allVisualDirections, type VisualDirection } from '../../config/visual-direction';
 import { makeIdentityScene, type IdentityScene } from './identity-scenes3d';
 import { isDark, makeFigure, type Css, type Figure } from './origami-figure3d';
+import { CAMERA, drawFigure, mask, type Framed } from './figure-framing';
 import { FoldControl, FrameProbe, Orbit } from './hero-motion';
 
 export interface FigureScene {
@@ -40,12 +42,8 @@ export interface FigureScene {
   dispose(): void;
 }
 
-/** The camera looks slightly down on the figure, with the scene behind and below it. */
-const CAMERA = { fov: 32, y: 0.25, z: 5.2, lookY: -0.25 };
 /** A 3/4 view: a V fold seen face-on flattens out (teardown rule 6). */
-const FIGURE = { scale: 0.55, y: 0.2, z: 0.6, yaw: -0.55, pitch: 0.12 };
-/** In the hero, alone, the figure fills the square where the SVG drew it, so the hand-over doesn't jump. */
-const HERO = { scale: 0.8, x: -0.18, y: -0.62 };
+const FIGURE_Z = 0.6;
 /** Unfolding to the sheet, and folding the next figure from it. */
 const REFOLD_MS = { unfold: 1500, fold: 1800 };
 const FADE_MS = 300;
@@ -128,7 +126,7 @@ const css: Css = (name) =>
   new Color(getComputedStyle(document.documentElement).getPropertyValue(name).trim() || '#888');
 
 /** The canvas over the hero's square, its renderer, the camera and the lights. */
-function createStage(stage: HTMLElement) {
+const createStage = (stage: HTMLElement) => {
   const canvas = document.createElement('canvas');
   canvas.setAttribute('aria-hidden', 'true');
   // CSSOM, which the Content Security Policy allows; no inline style attribute.
@@ -156,10 +154,10 @@ function createStage(stage: HTMLElement) {
   sun.position.set(-3, 4, 3);
   scene.add(sun);
   return { canvas, renderer, scene, camera };
-}
+};
 
 /** The figure on stage, and the swap that replaces it with another, flat on the floor. */
-function figureSlot(holder: Group, first: ModelId) {
+const figureSlot = (holder: Group, first: ModelId) => {
   let shape: Figure = makeFigure(first);
   holder.add(shape.group);
   return {
@@ -172,43 +170,18 @@ function figureSlot(holder: Group, first: ModelId) {
       holder.add(shape.group);
     },
   };
-}
+};
 
 /** Where the figure stands: a 3/4 view, in front of the identity scene. */
-function figureHolder(scene: Scene) {
+const figureHolder = (scene: Scene) => {
   const holder = new Group();
-  holder.position.z = FIGURE.z;
+  holder.position.z = FIGURE_Z;
   scene.add(holder);
   return holder;
-}
-
-const mix = (a: number, b: number, k: number) => a + (b - a) * k;
-
-/**
- * Frames the figure for Inspect's progress q: alone in the hero at 0, smaller in front of its
- * identity scene at 1. The scene fades into the page at the square's edges (a mask) only while it's
- * there; the figure alone needs no edge.
- */
-function frame(holder: Group, canvas: HTMLCanvasElement, q: number, turn: { yaw: number; pitch: number }) {
-  const k = q * q * (3 - 2 * q);
-  holder.scale.setScalar(mix(HERO.scale, FIGURE.scale, k));
-  holder.position.x = mix(HERO.x, 0, k);
-  holder.position.y = mix(HERO.y, FIGURE.y, k);
-  holder.rotation.set(FIGURE.pitch + turn.pitch, FIGURE.yaw + turn.yaw, 0);
-  // The opaque core grows past the corners (141% of closest-side) as q goes to 0, so the mask
-  // comes and goes without a visible step.
-  const edge =
-    q < 0.001
-      ? 'none'
-      : `radial-gradient(closest-side, #000 ${mix(150, 70, k)}%, transparent ${mix(180, 100, k)}%)`;
-  if (canvas.style.maskImage !== edge) {
-    canvas.style.maskImage = edge;
-    canvas.style.webkitMaskImage = edge;
-  }
-}
+};
 
 /** The identity scenes behind the figure, each built the first time it's shown. */
-function identityActors(world: Group, requestFrame: () => void) {
+const identityActors = (world: Group, requestFrame: () => void) => {
   const actors = new Map<VisualDirection, { scene: IdentityScene; q: Progress }>();
   const actor = (id: VisualDirection) => {
     let a = actors.get(id);
@@ -222,13 +195,21 @@ function identityActors(world: Group, requestFrame: () => void) {
     return a;
   };
   return { actors, actor };
-}
+};
+
+/** The identity scenes at their progress: hidden at rest, rising and tracing in as they enter. */
+const drawActors = (actors: ReturnType<typeof identityActors>['actors']) => {
+  for (const a of actors.values()) {
+    a.scene.group.visible = a.q.value > 0.001;
+    if (a.scene.group.visible) a.scene.update(inspectPhases(a.q.value), 1);
+  }
+};
 
 /**
  * Draws only while something moves, then stops: a still scene costs nothing. `step(now)` advances
  * everything and draws one frame; it returns true while anything is still moving.
  */
-function frameLoop(step: (now: number) => boolean) {
+const frameLoop = (step: (now: number) => boolean) => {
   let running = false;
   const tick = () => {
     // The same clock the tweens started on (a frame's own timestamp can run on another time base).
@@ -240,10 +221,10 @@ function frameLoop(step: (now: number) => boolean) {
     running = true;
     requestAnimationFrame(tick);
   };
-}
+};
 
 /** Calls `onChange` when the identity, the theme or the system's colour scheme changes. */
-function watchIdentity(onChange: () => void) {
+const watchIdentity = (onChange: () => void) => {
   const attributes = new MutationObserver(onChange);
   attributes.observe(document.documentElement, {
     attributes: true,
@@ -255,13 +236,13 @@ function watchIdentity(onChange: () => void) {
     attributes.disconnect();
     scheme.removeEventListener('change', onChange);
   };
-}
+};
 
 /**
  * Once everything is back together (after `settle` ms), the SVG takes the square again; after its
  * fade, the GPU is freed. `stops` end the scene's watchers.
  */
-function handBack(
+const handBack = (
   settle: number,
   parts: {
     hero: HTMLElement | null;
@@ -270,7 +251,7 @@ function handBack(
     figure: () => Figure;
   },
   stops: (() => void)[],
-) {
+) => {
   setTimeout(() => {
     parts.hero?.classList.remove('scene-3d');
     parts.canvas.style.opacity = '0';
@@ -282,18 +263,18 @@ function handBack(
       parts.canvas.remove();
     }, FADE_MS);
   }, settle);
-}
+};
 
 /**
  * The visitor's hands on the figure: dragging turns it, the slider folds it, and frames are timed
  * while it moves. Only while the hero is on screen does any of it ask for frames.
  */
-function handsOn(
+const handsOn = (
   stage: HTMLElement,
   canvas: HTMLCanvasElement,
   requestFrame: () => void,
   onSlow: () => void,
-) {
+) => {
   const hero = stage.closest<HTMLElement>('[data-hero-fold]');
   const orbit = new Orbit(canvas, requestFrame);
   // Pick up wherever the slider already is (the SVG followed it until now).
@@ -320,9 +301,9 @@ function handsOn(
     return goOn;
   };
   return { orbit, fold, next, stop: () => sight.disconnect() };
-}
+};
 
-export function mountFigureScene(stage: HTMLElement, onSlow: () => void = () => {}): FigureScene {
+export const mountFigureScene = (stage: HTMLElement, onSlow: () => void = () => {}): FigureScene => {
   const hero = stage.closest<HTMLElement>('[data-hero-fold]');
   const { canvas, renderer, scene, camera } = createStage(stage);
   const holder = figureHolder(scene);
@@ -342,6 +323,8 @@ export function mountFigureScene(stage: HTMLElement, onSlow: () => void = () => 
   // ---------- Loop: only while something moves, and the hero is on screen ----------
   let shown = false;
   let inspecting = false;
+  /** The hero framing, eased toward each frame's target. */
+  const framed: Framed = { scale: 1, x: 0, y: 0 };
   let last = performance.now();
   const hands = handsOn(stage, canvas, () => requestFrame(), onSlow);
   const requestFrame = frameLoop((now) => {
@@ -352,12 +335,16 @@ export function mountFigureScene(stage: HTMLElement, onSlow: () => void = () => 
     moving = hands.fold.step(now, dt) || moving;
     moving = hands.orbit.step(dt) || moving;
     for (const a of actors.values()) moving = a.q.step(now) || moving;
-    frame(holder, canvas, figureQ.value, hands.orbit);
-    slot.figure().pose(Math.max(refold.u, hands.fold.value), inspectPhases(figureQ.value).eased.layers);
-    for (const a of actors.values()) {
-      a.scene.group.visible = a.q.value > 0.001;
-      if (a.scene.group.visible) a.scene.update(inspectPhases(a.q.value), 1);
-    }
+    const ease = shown ? Math.min(1, dt * 12) : 1;
+    drawFigure(holder, slot.figure(), framed, {
+      id: refold.shown,
+      q: figureQ.value,
+      refold: refold.u,
+      hands,
+      ease,
+    });
+    mask(canvas, figureQ.value);
+    drawActors(actors);
     renderer.render(scene, camera);
     if (!shown) {
       // First frame drawn: take over the square from the SVG, and show once that it unfolds.
@@ -369,27 +356,27 @@ export function mountFigureScene(stage: HTMLElement, onSlow: () => void = () => 
     }
     return hands.next(now, moving, figureQ.value === 0 && !inspecting);
   });
-  function resize() {
+  const resize = () => {
     const { width, height } = stage.getBoundingClientRect();
     if (!width || !height) return;
     renderer.setSize(width, height, false);
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
     requestFrame();
-  }
+  };
 
-  function setInspecting(on: boolean) {
+  const setInspecting = (on: boolean) => {
     inspecting = on;
     const now = performance.now();
     figureQ.to(on ? 1 : 0, now);
     if (on) actor(direction).q.to(1, now);
     else for (const a of actors.values()) a.q.to(0, now);
     requestFrame();
-  }
+  };
 
   // An identity or theme change repaints everything and, when the figure changes, refolds it from
   // the sheet; while inspecting, the identity scenes exchange.
-  function onIdentity() {
+  const onIdentity = () => {
     const now = performance.now();
     refold.request(modelFor(currentDirection(), isDark()), now);
     const next = currentDirection();
@@ -400,7 +387,7 @@ export function mountFigureScene(stage: HTMLElement, onSlow: () => void = () => 
     }
     paint();
     requestFrame();
-  }
+  };
   const unwatch = watchIdentity(onIdentity);
   const sizeWatch = new ResizeObserver(resize);
   sizeWatch.observe(stage);
@@ -425,4 +412,4 @@ export function mountFigureScene(stage: HTMLElement, onSlow: () => void = () => 
       ]);
     },
   };
-}
+};
