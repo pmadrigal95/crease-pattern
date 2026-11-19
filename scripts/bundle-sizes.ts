@@ -11,7 +11,9 @@
 //    only on the home page, on capable devices.
 //  - commandMenu: the command menu (src/components/site/command-menu.ts), loaded on any page the
 //    first time a visitor opens it with Ctrl/Cmd+K or its button.
-//  These three have budgets of their own, and the other groups stop at them.
+//  - inspectorViews: the Inspector's folded views (src/components/inspector/fold.ts), loaded the
+//    first time a visitor picks Fold or Pattern in the panel.
+//  These have budgets of their own, and the other groups stop at them.
 import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { brotliCompressSync } from 'node:zlib';
@@ -24,8 +26,11 @@ const isScene3d = (file: string): boolean => /^(scene3d|work3d)\.[\w-]+\.js$/.te
 const isWorkModel = (file: string): boolean => /^work-model\.[\w-]+\.js$/.test(file);
 /** The command menu's entry chunk. */
 const isCommandMenu = (file: string): boolean => /^command-menu\.[\w-]+\.js$/.test(file);
+/** The Inspector's folded views' entry chunk. */
+const isInspectorViews = (file: string): boolean => /^fold\.[\w-]+\.js$/.test(file);
 /** Where the page and on-demand groups stop: code with budgets of its own. */
-const isOwnBudget = (file: string): boolean => isScene3d(file) || isWorkModel(file) || isCommandMenu(file);
+const isOwnBudget = (file: string): boolean =>
+  isScene3d(file) || isWorkModel(file) || isCommandMenu(file) || isInspectorViews(file);
 
 /** Bytes, Brotli, per group. */
 export const measureBundles = (
@@ -36,6 +41,7 @@ export const measureBundles = (
   workModel: number;
   scene3d: number;
   commandMenu: number;
+  inspectorViews: number;
 } => {
   const assets = join(dist, '_astro');
   const read = (file: string): string => readFileSync(join(assets, file), 'utf8');
@@ -74,12 +80,18 @@ export const measureBundles = (
   const workModel = closure(scripts.filter(isWorkModel), new Set([...page, ...onDemand]), isScene3d);
   const scene3d = closure(scripts.filter(isScene3d), new Set([...page, ...onDemand, ...workModel]));
   const commandMenu = closure(scripts.filter(isCommandMenu), new Set([...page, ...onDemand]), isScene3d);
+  const inspectorViews = closure(
+    scripts.filter(isInspectorViews),
+    new Set([...page, ...onDemand]),
+    isScene3d,
+  );
   return {
     page: sum(page),
     onDemand: sum(onDemand),
     workModel: sum(workModel),
     scene3d: sum(scene3d),
     commandMenu: sum(commandMenu),
+    inspectorViews: sum(inspectorViews),
   };
 };
 

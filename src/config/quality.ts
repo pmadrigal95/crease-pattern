@@ -44,6 +44,12 @@ export const jsBudgetKb = {
    * time a visitor opens it: matching, actions, the dialog and its styles.
    */
   commandMenu: 8,
+  /**
+   * The Inspector's folded views (src/components/inspector/fold.ts, M4.8): the page folded like a
+   * Miura-ori, its gestures and its crease pattern, loaded the first time a visitor picks Fold or
+   * Pattern. 4.9 KB when it joined.
+   */
+  inspectorViews: 8,
   /** Its index of pages, sections and posts (/commands.json), fetched when the menu opens. */
   commandData: 6,
   /**
