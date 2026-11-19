@@ -12,11 +12,11 @@ import type { VisualDirection } from '../../config/visual-direction';
 import { creases, faceNormal, foldMatrices, posed } from './hinge';
 import { models, type ModelId, type Tag } from './models';
 
-export function modelFor(direction: VisualDirection, dark: boolean): ModelId {
+export const modelFor = (direction: VisualDirection, dark: boolean): ModelId => {
   if (direction === 'washi-asagi') return 'crane';
   if (direction === 'basalt-glacier') return 'fox';
   return dark ? 'frog' : 'morpho';
-}
+};
 
 /** A facet's colour role in SVG: its tag, or for paper, how much light it catches. */
 export type Role = Exclude<Tag, 'paper'> | 'light' | 'mid' | 'shade' | 'deep';
@@ -32,13 +32,16 @@ export const EDGE_MIX = 0.55;
 export const FROG_EYE = '#c4402f';
 
 /** A facet's role: its tag, or for paper, how much light it catches when folded. */
-export function facetRole(id: ModelId, i: number): Role {
+export const facetRole = (id: ModelId, i: number): Role => {
   const { fold, tags } = models[id];
   const tag = tags[i]!;
   if (tag !== 'paper') return tag;
-  const lit = Math.abs(faceNormal(fold.points, fold.faces[i]!).dot(LIGHT));
-  return lit > 0.8 ? 'light' : lit > 0.55 ? 'mid' : lit > 0.3 ? 'shade' : 'deep';
-}
+  return litRole(Math.abs(faceNormal(fold.points, fold.faces[i]!).dot(LIGHT)));
+};
+
+/** A paper facet's role from how squarely it faces the light (0 edge-on … 1 straight at it). */
+export const litRole = (lit: number): Role =>
+  lit > 0.8 ? 'light' : lit > 0.55 ? 'mid' : lit > 0.3 ? 'shade' : 'deep';
 
 export const VIEWBOX = '0 0 48 48';
 const SIZE = 48;
@@ -46,8 +49,11 @@ const MARGIN = 2.5;
 /** Light from the top right, toward the viewer (the 3D scene's key light). */
 export const LIGHT = new Vector3(0.45, 0.75, 0.5).normalize();
 
-/** Each figure's best three-quarter view: yaw and pitch, in radians. */
-const VIEWS: Record<ModelId, { yaw: number; pitch: number }> = {
+/**
+ * Each figure's best three-quarter view: yaw and pitch, in radians. The hero's 3D figure rests at
+ * the same view (src/components/inspector/scene3d.ts), so the SVG hands over to it unchanged.
+ */
+export const VIEWS: Record<ModelId, { yaw: number; pitch: number }> = {
   crane: { yaw: -0.65, pitch: 0.22 },
   morpho: { yaw: -0.5, pitch: 0.85 },
   frog: { yaw: -0.55, pitch: 0.42 },
@@ -61,7 +67,7 @@ const path = (pts: readonly (readonly [number, number])[]) =>
   `M${pts.map(([x, y]) => `${r2(x)} ${r2(y)}`).join('L')}z`;
 
 /** Fits 2D points into the 48 × 48 view box, centred, y down. */
-function fit(points: readonly (readonly [number, number])[]) {
+const fit = (points: readonly (readonly [number, number])[]) => {
   const xs = points.map((p) => p[0]);
   const ys = points.map((p) => p[1]);
   const [minX, maxX, minY, maxY] = [Math.min(...xs), Math.max(...xs), Math.min(...ys), Math.max(...ys)];
@@ -72,7 +78,7 @@ function fit(points: readonly (readonly [number, number])[]) {
     ox + (x - minX) * scale,
     oy + (maxY - y) * scale,
   ];
-}
+};
 
 export interface FoldedMark {
   /** Back to front, so later facets cover earlier ones. */
@@ -80,7 +86,7 @@ export interface FoldedMark {
 }
 
 /** The folded figure, seen in three-quarters: what the masthead, the footer and the hero show. */
-export function foldedMark(id: ModelId): FoldedMark {
+export const foldedMark = (id: ModelId): FoldedMark => {
   const { fold } = models[id];
   const { yaw, pitch } = VIEWS[id];
   const view = new Matrix4().makeRotationX(pitch).multiply(new Matrix4().makeRotationY(yaw));
@@ -93,7 +99,7 @@ export function foldedMark(id: ModelId): FoldedMark {
   });
   facets.sort((a, b) => a.depth - b.depth);
   return { facets: facets.map(({ d, role }) => ({ d, role })) };
-}
+};
 
 export interface FlatMark {
   /** The sheet laid open, seen from above. */
@@ -103,7 +109,7 @@ export interface FlatMark {
 }
 
 /** The figure unfolded: its crease pattern, mountain folds and valley folds apart. */
-export function flatMark(id: ModelId): FlatMark {
+export const flatMark = (id: ModelId): FlatMark => {
   const { fold } = models[id];
   const M = foldMatrices(fold, 1, 0);
   const tris = fold.faces.map((_, i) => posed(fold, M, i));
@@ -119,4 +125,4 @@ export function flatMark(id: ModelId): FlatMark {
       })
       .join('');
   return { facets: tris.map((t) => path(t.map(at))), mountain: segs('mountain'), valley: segs('valley') };
-}
+};
