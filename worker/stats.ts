@@ -49,23 +49,30 @@ export async function handleStats(request: Request, deps: Deps): Promise<Respons
   if (!match) return null;
   const [, slug = '', event] = match;
   if (!SLUG.test(slug) || slug.length > 120) return json({ error: 'Unknown post.' }, 404);
+  return event === undefined ? readCounts(request, slug, deps) : countEvent(request, slug, event, deps);
+}
 
-  if (event === undefined) {
-    if (request.method !== 'GET' && request.method !== 'HEAD')
-      return json({ error: 'Use GET.' }, 405, { Allow: 'GET, HEAD' });
-    if (!(await deps.postExists(slug))) return json({ error: 'Unknown post.' }, 404);
-    return json(await deps.store.get(slug), 200, { 'Cache-Control': 'public, max-age=60' });
-  }
+/** GET a post's totals. */
+async function readCounts(request: Request, slug: string, deps: Deps): Promise<Response> {
+  if (request.method !== 'GET' && request.method !== 'HEAD')
+    return json({ error: 'Use GET.' }, 405, { Allow: 'GET, HEAD' });
+  if (!(await deps.postExists(slug))) return json({ error: 'Unknown post.' }, 404);
+  return json(await deps.store.get(slug), 200, { 'Cache-Control': 'public, max-age=60' });
+}
 
-  if (!isEvent(event)) return json({ error: 'Unknown event.' }, 404);
-  if (request.method !== 'POST') return json({ error: 'Use POST.' }, 405, { Allow: 'POST' });
-  // Only this site's own pages count: browsers mark cross-site requests, and those are refused.
+/** Only this site's own pages count: browsers mark cross-site requests, and those are refused. */
+function fromThisSite(request: Request, url: URL): boolean {
   const site = request.headers.get('Sec-Fetch-Site');
   const origin = request.headers.get('Origin');
-  if ((site && site !== 'same-origin') || (origin && origin !== url.origin))
-    return json({ error: 'Not allowed.' }, 403);
-  if (!(await deps.postExists(slug))) return json({ error: 'Unknown post.' }, 404);
+  return !(site && site !== 'same-origin') && !(origin && origin !== url.origin);
+}
 
+/** POST one event: a view, a read or a "this helped". */
+async function countEvent(request: Request, slug: string, event: string, deps: Deps): Promise<Response> {
+  if (!isEvent(event)) return json({ error: 'Unknown event.' }, 404);
+  if (request.method !== 'POST') return json({ error: 'Use POST.' }, 405, { Allow: 'POST' });
+  if (!fromThisSite(request, new URL(request.url))) return json({ error: 'Not allowed.' }, 403);
+  if (!(await deps.postExists(slug))) return json({ error: 'Unknown post.' }, 404);
   const ip = request.headers.get('CF-Connecting-IP') ?? 'unknown';
   if (!(await deps.limiter.allow(`${ip}:${slug}`))) return json({ error: 'Too many requests.' }, 429);
   await deps.store.add(slug, event);

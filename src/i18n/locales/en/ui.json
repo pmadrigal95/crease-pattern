@@ -13,14 +13,14 @@
       "inspect": "See how this page is built",
       "releases": "Read the release notes",
       "fold": {
-        "label": "Unfold the fox into its crease pattern",
+        "label": "Unfold the figure into its crease pattern",
         "interface": "Interface",
         "architecture": "Architecture",
         "folded": "Folded: the interface",
         "unfolded": "Unfolded: the crease pattern",
         "mountain": "mountain",
         "valley": "valley",
-        "caption": "The fox is what you see on screen: the interface. Unfold it and you get the folds that shape it, the architecture. \"See how this page is built\" opens any page here the same way."
+        "caption": "The figure is what you see on screen: the interface. Unfold it and you get the folds that shape it, the architecture. Each identity folds its own: a crane, a blue morpho by day and a red-eyed tree frog by night, an arctic fox. \"See how this page is built\" opens any page here the same way."
       },
       "who": "{name} · {role} · {location}"
     },

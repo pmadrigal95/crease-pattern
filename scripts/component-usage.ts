@@ -65,6 +65,13 @@ export function componentUsage(files: { path: string; source: string }[], compon
   };
   const posts = files.filter((f) => f.path.endsWith('.mdx'));
 
+  /** A component handed to MDX content counts where each post uses it, not where it's handed over. */
+  const countInPosts = (name: string, target: string) => {
+    for (const post of posts) {
+      const count = tagsOf(name, post.source);
+      if (count) add(target, post.path, count, literalProps(name, post.source));
+    }
+  };
   for (const { path, source } of files) {
     const handedToContent = new Set(
       [...source.matchAll(CONTENT_MAP)].flatMap((m) => (m[1] ?? '').split(',').map((n) => n.trim())),
@@ -73,14 +80,8 @@ export function componentUsage(files: { path: string; source: string }[], compon
       if (!spec.startsWith('.')) continue;
       const target = posix.normalize(posix.join(posix.dirname(path), spec));
       if (!uses.has(target) || target === path) continue;
-      if (handedToContent.has(name)) {
-        for (const post of posts) {
-          const count = tagsOf(name, post.source);
-          if (count) add(target, post.path, count, literalProps(name, post.source));
-        }
-      } else {
-        add(target, path, Math.max(tagsOf(name, source), 1), literalProps(name, source));
-      }
+      if (handedToContent.has(name)) countInPosts(name, target);
+      else add(target, path, Math.max(tagsOf(name, source), 1), literalProps(name, source));
     }
   }
 

@@ -1,0 +1,29 @@
+---
+/**
+ * The site's mark: the origami figure of the visitor's identity (src/lib/origami/marks.ts), drawn
+ * from the symbols in /origami.svg (src/lib/origami/sprite.ts). Every figure is here; src/styles/origami.css shows the one
+ * that matches `data-direction` and the theme. Only the folded figures: the crease pattern belongs to
+ * the hero (HeroFold.astro), and every <use> here is work for every page.
+ */
+import { MODEL_IDS } from '../../lib/origami/models';
+import { spriteHref } from '../../lib/origami/sprite';
+import { VIEWBOX } from '../../lib/origami/marks';
+
+interface Props {
+  size?: number;
+}
+const { size = 26 } = Astro.props;
+---
+
+<svg
+  class="origami origami-mark"
+  width={size}
+  height={size}
+  viewBox={VIEWBOX}
+  aria-hidden="true"
+  focusable="false"
+>
+  {MODEL_IDS.map((id) => (
+    <use class={`o-model o-${id}`} href={spriteHref(id)} />
+  ))}
+</svg>

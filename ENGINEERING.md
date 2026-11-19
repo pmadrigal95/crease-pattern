@@ -98,6 +98,14 @@ skills before it ships; AGENTS.md says the same to coding agents.
 - Accessibility is part of the component: semantic elements first, ARIA only to fill gaps, no
   interactive element inside another (axe's `nested-interactive`).
 
+### Size limits
+
+ESLint enforces them on every change (eslint.config.ts): a file stays under 400 lines, a function
+under 100, a block under 5 levels deep, a function under 12 branches and 5 parameters. Past a
+limit, split by job: a component into the parts a reader would name (PostReaders: ShareSheet,
+PostComments, FoldedCorner), a function into the steps it already narrates in comments. Don't
+raise the number.
+
 ## Browser scripts
 
 - Progressive enhancement: the page works without JavaScript; an element that only works with it

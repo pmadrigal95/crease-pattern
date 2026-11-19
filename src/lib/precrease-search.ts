@@ -98,103 +98,129 @@ export function excerptRuns(excerpt: string): { text: string; marked: boolean }[
   return runs;
 }
 
-export function initPrecreaseSearch(): void {
-  const root = document.querySelector<HTMLElement>('[data-precrease-search]');
-  if (!root) return;
+let pagefind: Promise<Pagefind> | null = null;
+/** Pagefind's engine, downloaded the first time the box is used. */
+function loadPagefind(): Promise<Pagefind> {
+  pagefind ??= import(/* @vite-ignore */ BUNDLE).then(async (module: Pagefind) => {
+    await module.options({ excerptLength: 24 });
+    return module;
+  });
+  return pagefind;
+}
+
+/** One result: its Crease number and format, its title, and the excerpt with its matches marked. */
+function renderResult(result: PagefindResult, href: string, strings: Strings): HTMLLIElement {
+  const li = document.createElement('li');
+  const a = document.createElement('a');
+  a.href = href;
+  const kicker = document.createElement('span');
+  kicker.className = 'r-kicker';
+  kicker.textContent = [
+    result.meta.number ? fill(strings.number, { number: result.meta.number }) : '',
+    result.meta.format ? (strings.formats[result.meta.format] ?? '') : '',
+  ]
+    .filter(Boolean)
+    .join(' · ');
+  const title = document.createElement('span');
+  title.className = 'r-title';
+  title.textContent = result.meta.title ?? a.href;
+  const excerpt = document.createElement('span');
+  excerpt.className = 'r-excerpt';
+  excerpt.append(
+    ...excerptRuns(result.excerpt).map((run) => {
+      if (!run.marked) return document.createTextNode(run.text);
+      const mark = document.createElement('mark');
+      mark.textContent = run.text;
+      return mark;
+    }),
+  );
+  a.append(kicker, title, excerpt);
+  li.append(a);
+  return li;
+}
+
+/** The search box's parts, or null when the page doesn't have them all. */
+function parts(root: HTMLElement) {
   const input = root.querySelector<HTMLInputElement>('input[type="search"]');
   const panel = root.querySelector<HTMLElement>('.panel');
   const status = root.querySelector<HTMLElement>('.status');
   const list = root.querySelector<HTMLOListElement>('.results');
   const clear = root.querySelector<HTMLButtonElement>('[data-clear]');
   const form = root.querySelector('form');
-  if (!input || !panel || !status || !list || !clear || !form) return;
-  const data = readJsonData<Strings | null>(root, 'strings', null);
-  if (!data) return;
-  const strings: Strings = data;
+  const strings = readJsonData<Strings | null>(root, 'strings', null);
+  if (!input || !panel || !status || !list || !clear || !form || !strings) return null;
   const chips = [...root.querySelectorAll<HTMLButtonElement>('[data-filter]')];
-  const selected: Record<string, Set<string>> = { format: new Set(), topic: new Set() };
+  return { input, panel, status, list, clear, form, strings, chips };
+}
+type Parts = NonNullable<ReturnType<typeof parts>>;
 
-  root.hidden = false;
-
-  let pagefind: Promise<Pagefind> | null = null;
-  const load = () => {
-    pagefind ??= import(/* @vite-ignore */ BUNDLE).then(async (module: Pagefind) => {
-      await module.options({ excerptLength: 24 });
-      return module;
-    });
-    return pagefind;
-  };
-
-  const open = () => {
-    panel.hidden = false;
-  };
-  const close = () => {
-    panel.hidden = true;
-  };
-
+/** Runs the query and the chosen filters; a newer search always wins over a slower older one. */
+function searcher({ input, status, list, clear, strings }: Parts, selected: Record<string, Set<string>>) {
   let run = 0;
-  async function update() {
-    const query = input!.value.trim();
+  return async function update() {
+    const query = input.value.trim();
     const filters = toFilters(selected);
     const filtering = Object.keys(filters).length > 0;
-    clear!.hidden = !filtering;
+    clear.hidden = !filtering;
     if (!query && !filtering) {
-      status!.textContent = '';
-      list!.replaceChildren();
+      status.textContent = '';
+      list.replaceChildren();
       return;
     }
     const current = ++run;
-    status!.textContent = strings.loading;
+    status.textContent = strings.loading;
     try {
-      const api = await load();
+      const api = await loadPagefind();
       const found = await api.search(query || null, { filters });
       if (!found || current !== run) return;
       const data = await Promise.all(found.results.slice(0, MAX_RESULTS).map((r) => r.data()));
       if (current !== run) return;
-      const total = found.results.length;
-      status!.textContent = formatCount(total, { zero: strings.none, one: strings.one, many: strings.many });
-      list!.replaceChildren(
+      status.textContent = formatCount(found.results.length, {
+        zero: strings.none,
+        one: strings.one,
+        many: strings.many,
+      });
+      list.replaceChildren(
         ...data.flatMap((result) => {
           const href = resultHref(result.url);
-          return href ? [renderResult(result, href)] : [];
+          return href ? [renderResult(result, href, strings)] : [];
         }),
       );
     } catch (error) {
       if (current !== run) return;
       console.error('Precrease search failed to load', error);
-      status!.textContent = strings.failed;
-      list!.replaceChildren();
+      status.textContent = strings.failed;
+      list.replaceChildren();
     }
-  }
+  };
+}
 
-  function renderResult(result: PagefindResult, href: string): HTMLLIElement {
-    const li = document.createElement('li');
-    const a = document.createElement('a');
-    a.href = href;
-    const kicker = document.createElement('span');
-    kicker.className = 'r-kicker';
-    const parts = [
-      result.meta.number ? fill(strings.number, { number: result.meta.number }) : '',
-      result.meta.format ? (strings.formats[result.meta.format] ?? '') : '',
-    ].filter(Boolean);
-    kicker.textContent = parts.join(' · ');
-    const title = document.createElement('span');
-    title.className = 'r-title';
-    title.textContent = result.meta.title ?? a.href;
-    const excerpt = document.createElement('span');
-    excerpt.className = 'r-excerpt';
-    excerpt.append(
-      ...excerptRuns(result.excerpt).map((run) => {
-        if (!run.marked) return document.createTextNode(run.text);
-        const mark = document.createElement('mark');
-        mark.textContent = run.text;
-        return mark;
-      }),
-    );
-    a.append(kicker, title, excerpt);
-    li.append(a);
-    return li;
-  }
+/** The panel closes on Escape, when focus leaves the box, or on a click anywhere else. */
+function closeWhenLeft(root: HTMLElement, { input, panel }: Parts) {
+  const close = () => (panel.hidden = true);
+  root.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape' || panel.hidden) return;
+    e.preventDefault();
+    close();
+    input.focus();
+  });
+  root.addEventListener('focusout', (e) => {
+    if (!(e.relatedTarget instanceof Node) || !root.contains(e.relatedTarget)) close();
+  });
+  document.addEventListener('pointerdown', (e) => {
+    if (e.target instanceof Node && !root.contains(e.target)) close();
+  });
+}
+
+export function initPrecreaseSearch(): void {
+  const root = document.querySelector<HTMLElement>('[data-precrease-search]');
+  const found = root && parts(root);
+  if (!root || !found) return;
+  const { input, panel, list, clear, form, chips } = found;
+  const selected: Record<string, Set<string>> = { format: new Set(), topic: new Set() };
+  const update = searcher(found, selected);
+  const open = () => (panel.hidden = false);
+  root.hidden = false;
 
   let timer: ReturnType<typeof setTimeout> | undefined;
   input.addEventListener('input', () => {
@@ -204,7 +230,7 @@ export function initPrecreaseSearch(): void {
   });
   input.addEventListener('focus', () => {
     open();
-    void load().catch(() => undefined);
+    void loadPagefind().catch(() => undefined);
   });
   form.addEventListener('submit', (e) => {
     e.preventDefault();
@@ -213,6 +239,7 @@ export function initPrecreaseSearch(): void {
   for (const chip of chips) {
     chip.addEventListener('click', () => {
       const name = chip.dataset.filter ?? '';
+      // Own keys only: a chip named "constructor" must not reach Object's prototype.
       const group = Object.hasOwn(selected, name) ? selected[name] : undefined;
       const value = chip.dataset.value ?? '';
       if (!group) return;
@@ -231,19 +258,7 @@ export function initPrecreaseSearch(): void {
     input.focus();
     void update();
   });
-
-  root.addEventListener('keydown', (e) => {
-    if (e.key !== 'Escape' || panel.hidden) return;
-    e.preventDefault();
-    close();
-    input.focus();
-  });
-  root.addEventListener('focusout', (e) => {
-    if (!(e.relatedTarget instanceof Node) || !root.contains(e.relatedTarget)) close();
-  });
-  document.addEventListener('pointerdown', (e) => {
-    if (e.target instanceof Node && !root.contains(e.target)) close();
-  });
+  closeWhenLeft(root, found);
   // "/" focuses the box. Ctrl/Cmd+K belongs to the site's command menu (M4.7), which hands its
   // query over as ?q= when the visitor asks it to search the posts.
   addEventListener('keydown', (e) => {

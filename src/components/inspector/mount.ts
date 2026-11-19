@@ -15,7 +15,7 @@ import manifestUrl from '../../generated/inspector.json?url';
 // (src/config/quality.ts, inspectorStyles).
 import inspectorStylesUrl from './inspector.css?url';
 import { canRun3D, detectDevice } from '../../lib/scene3d-support';
-import type { FoxScene } from './scene3d';
+import type { FigureScene } from './scene3d';
 
 export interface InspectorHandle {
   close(): void;
@@ -63,7 +63,7 @@ function loadManifest(): Promise<Manifest> {
 void loadManifest().catch(() => undefined);
 void loadStyles().catch(() => undefined);
 
-// M4's 3D fox: only on a page with the hero fox, and only on a device that can run it
+// The 3D figure: only on a page with the hero, and only on a device that can run it
 // (decision 50). Its module is a chunk of its own with its own budget (scene3d), so the panel's
 // code never carries three.js. It starts loading alongside Vue, like the manifest.
 const heroStage = () => document.querySelector<HTMLElement>('[data-hero-fold] [data-stage]');
@@ -101,18 +101,18 @@ export async function openInspector(
   });
   app.mount(host);
 
-  // The 3D fox takes the hero's square when it's ready; the Inspector never waits for it.
-  let scene: FoxScene | null = null;
+  // The 3D figure takes the hero's square when it's ready; the Inspector never waits for it.
+  let scene: FigureScene | null = null;
   let closed = false;
   const stage = heroStage();
   void loadScene3d()
     ?.then((m) => {
       if (closed || !stage) return;
-      scene = m.mountFoxScene(stage);
+      scene = m.mountFigureScene(stage);
       scene.setInspecting(true);
     })
-    // Without the scene (offline, or no WebGL context after all), the SVG fox stays: a complete picture.
-    .catch((error: unknown) => console.warn('3D scene unavailable; the SVG fox stays', error));
+    // Without the scene (offline, or no WebGL context after all), the SVG figure stays: a complete picture.
+    .catch((error: unknown) => console.warn('3D scene unavailable; the SVG figure stays', error));
 
   const handle: InspectorHandle = {
     close() {

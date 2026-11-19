@@ -29,6 +29,21 @@ export default [
   {
     languageOptions: { globals: { ...globals.browser, ...globals.node } },
   },
+  // Size and shape limits (R4): a file, a function or a block past these is doing more than one
+  // job. Split it by job instead of raising the number; the limits are the review, applied to
+  // every change. Markup and styles count in .astro files too, so a component past 400 lines is
+  // usually two components.
+  {
+    files: ['**/*.{ts,astro,vue}'],
+    rules: {
+      complexity: ['error', 12],
+      'max-depth': ['error', 4],
+      'max-params': ['error', 4],
+      'max-lines-per-function': ['error', { max: 100, skipBlankLines: true, skipComments: true }],
+      'max-lines': ['error', { max: 400, skipBlankLines: true, skipComments: true }],
+      'no-duplicate-imports': 'error',
+    },
+  },
   // Layers (ENGINEERING.md): config → lib → components → layouts → pages. Each layer imports only
   // from the layers before it, so data and logic never depend on markup.
   ...layer('src/config/**', ['lib', 'components', 'layouts', 'pages']),
