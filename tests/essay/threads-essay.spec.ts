@@ -16,14 +16,14 @@ test.beforeEach(async ({ page }) => {
   await page.route('**/api/stats/when-threads-pay-off/*', (route) => route.fulfill({ status: 204 }));
 });
 
-function collectErrors(page: Page) {
+const collectErrors = (page: Page) => {
   const errors: string[] = [];
   page.on('pageerror', (e) => errors.push(e.message));
   page.on('console', (msg) => {
     if (msg.type() === 'error') errors.push(msg.text());
   });
   return errors;
-}
+};
 
 test('the page is cross-origin isolated, so shared memory is available', async ({ page }) => {
   await page.goto(essay);

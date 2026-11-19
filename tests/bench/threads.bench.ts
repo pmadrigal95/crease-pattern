@@ -22,7 +22,7 @@ const board = boardFromText(
 );
 const pieces: PieceName[] = ['T', 'I', 'S', 'L', 'O', 'Z', 'J', 'I', 'T', 'L', 'S', 'O', 'J', 'Z'];
 
-function measure(name: string, runs: number, fn: () => { nodes: number }) {
+const measure = (name: string, runs: number, fn: () => { nodes: number }) => {
   fn(); // warm up the JIT
   const times: number[] = [];
   let nodes = 0;
@@ -33,7 +33,7 @@ function measure(name: string, runs: number, fn: () => { nodes: number }) {
   }
   times.sort((a, b) => a - b);
   return { case: name, 'median ms': Number(times[Math.floor(runs / 2)]!.toFixed(2)), nodes };
-}
+};
 
 test('engine benchmark', () => {
   const rows = [

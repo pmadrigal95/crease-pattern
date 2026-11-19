@@ -74,7 +74,7 @@ const svgData = (svg: string) => `data:image/svg+xml;base64,${Buffer.from(svg).t
  * The card both kinds of preview share: an accent band, a kicker and a headline on the left, a
  * signature at the foot, and a 400 × 400 picture on the right.
  */
-async function card({
+const card = async ({
   kicker,
   title,
   signature,
@@ -84,7 +84,7 @@ async function card({
   title: string;
   signature: Node;
   picture: string;
-}) {
+}) => {
   const size = title.length > 60 ? 64 : title.length > 36 ? 76 : 92;
   // Satori sizes boxes without their padding, so the layout uses margins and explicit sizes:
   // a 14 px accent band, then a 1056 × 504 body inside 72 px / 56 px margins (1200 × 630 total).
@@ -116,10 +116,10 @@ async function card({
   ]);
   const svgCard = await satori(root as never, { width: 1200, height: 630, fonts: loadFonts() });
   return new Resvg(svgCard, { fitTo: { mode: 'width', value: 1200 } }).render().asPng();
-}
+};
 
 /** A Precrease post: its kicker, title and generated thumbnail, signed "Precrease". */
-export async function ogImage({ slug, family, kicker, title }: OgPost): Promise<Buffer> {
+export const ogImage = async ({ slug, family, kicker, title }: OgPost): Promise<Buffer> => {
   const { viewBox, shapes } = thumbnail(slug, family);
   return card({
     kicker,
@@ -136,7 +136,7 @@ export async function ogImage({ slug, family, kicker, title }: OgPost): Promise<
       el('span', { fontFamily: 'Newsreader', fontWeight: 600, color: COLORS.accent }, 'crease'),
     ]),
   });
-}
+};
 
 /** Mixes two #rrggbb colours: `t` of `b` over `a`. */
 const mix = (a: string, b: string, t: number) => {
@@ -162,7 +162,7 @@ const ROLE_FILL: Record<Role, string> = {
  * the site's thesis as the picture: the default identity's figure (the blue morpho, Contour lines
  * by day) over the crease pattern it folds from (src/lib/origami, the geometry the hero draws).
  */
-export async function ogPageImage({
+export const ogPageImage = async ({
   kicker,
   title,
   name,
@@ -170,7 +170,7 @@ export async function ogPageImage({
   kicker: string;
   title: string;
   name: string;
-}): Promise<Buffer> {
+}): Promise<Buffer> => {
   const id = modelFor('contour-lines', false);
   const flat = flatMark(id);
   const figure = foldedMark(id)
@@ -200,4 +200,4 @@ export async function ogPageImage({
       el('div', { fontFamily: 'Schibsted', fontSize: 34, color: COLORS.ink }, name),
     ]),
   });
-}
+};

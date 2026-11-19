@@ -43,7 +43,7 @@ const inProcess: WorkerFactory = () => {
   return worker;
 };
 
-function prng(seed: number) {
+const prng = (seed: number) => {
   let a = seed >>> 0;
   return () => {
     a = (a + 0x6d2b79f5) >>> 0;
@@ -52,8 +52,8 @@ function prng(seed: number) {
     t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
-}
-function randomProblem(seed: number, depth = 2): Problem {
+};
+const randomProblem = (seed: number, depth = 2): Problem => {
   const rand = prng(seed);
   const board: Board = emptyBoard();
   for (let x = 0; x < board.width; x++) {
@@ -64,7 +64,7 @@ function randomProblem(seed: number, depth = 2): Problem {
   for (let y = 0; y < board.height; y++) if (board.rows[y] === full) board.rows[y]! &= ~1;
   const pieces: PieceName[] = Array.from({ length: depth }, () => PIECE_NAMES[Math.floor(rand() * 7)]!);
   return { width: board.width, height: board.height, rows: [...board.rows], pieces, depth };
-}
+};
 
 describe('protocol', () => {
   test('static blocks cover every task once, as evenly as possible', () => {

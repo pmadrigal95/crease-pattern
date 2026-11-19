@@ -18,27 +18,27 @@ import { describe, expect, test } from 'vitest';
 const SRC = join(import.meta.dirname, '..', '..', 'src');
 const SOURCE = /\.(ts|astro|vue)$/;
 
-function* files(dir: string): Generator<string> {
+const files = function* (dir: string): Generator<string> {
   for (const name of readdirSync(dir)) {
     const path = join(dir, name);
     if (name === 'generated') continue;
     if (statSync(path).isDirectory()) yield* files(path);
     else if (SOURCE.test(name)) yield path;
   }
-}
+};
 const sources = [...files(SRC)].map((path) => ({
   file: relative(SRC, path).split(sep).join('/'),
   lines: readFileSync(path, 'utf8').split('\n'),
 }));
 
 /** Lines matching `pattern` outside the allowed files, as "file:line". */
-function offenders(pattern: RegExp, allowed: Record<string, string>) {
+const offenders = (pattern: RegExp, allowed: Record<string, string>) => {
   return sources
     .filter(({ file }) => !(file in allowed))
     .flatMap(({ file, lines }) =>
       lines.flatMap((line, i) => (pattern.test(line) ? [`${file}:${i + 1}  ${line.trim()}`] : [])),
     );
-}
+};
 
 describe('guards', () => {
   test('values are formatted only in lib/format.ts', () => {

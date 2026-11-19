@@ -58,14 +58,14 @@ const origin = (e: Event) => {
   const r = (e.target as HTMLElement).closest('label')?.getBoundingClientRect();
   return r ? { x: r.left + r.width / 2, y: r.top + r.height / 2 } : { x: innerWidth / 2, y: innerHeight / 2 };
 };
-function chooseDirection(id: VisualDirection, e: Event) {
+const chooseDirection = (id: VisualDirection, e: Event) => {
   direction.value = id;
   setDirection(id, origin(e));
-}
-function chooseTheme(value: Theme, e: Event) {
+};
+const chooseTheme = (value: Theme, e: Event) => {
   theme.value = value;
   setTheme(value, origin(e));
-}
+};
 const heading = ref<HTMLElement | null>(null);
 const layerButtons = ref<HTMLButtonElement[]>([]);
 const scripts = scriptBytes(props.openedAt);
@@ -81,10 +81,10 @@ const depthOf = (el: Element) => {
 // Phones: a bottom sheet with two heights, half the screen or most of it.
 const phone = matchMedia('(max-width: 720px)');
 const tall = ref(false);
-function toggleSheet() {
+const toggleSheet = () => {
   tall.value = !tall.value;
   document.getElementById('inspector')?.toggleAttribute('data-tall', tall.value);
-}
+};
 const part = (el: Element | null) => {
   const id = idOf(el);
   const file = props.manifest.parts[id];
@@ -116,12 +116,12 @@ const details = computed(() => {
   };
 });
 
-function place() {
+const place = () => {
   if (threeD) markCurrent(elements.value, current.value);
   else box.value = current.value ? current.value.getBoundingClientRect() : null;
-}
+};
 
-function pin(el: HTMLElement, focusList = false) {
+const pin = (el: HTMLElement, focusList = false) => {
   pinned.value = el;
   firstRun.value = false;
   announce.value = fill(t.selectedAnnouncement, { name: label(idOf(el)) });
@@ -135,9 +135,9 @@ function pin(el: HTMLElement, focusList = false) {
   } else el.scrollIntoView({ block: 'nearest', behavior });
   if (focusList) layerButtons.value[elements.value.indexOf(el)]?.focus();
   requestAnimationFrame(place);
-}
+};
 
-function onListKey(e: KeyboardEvent, index: number) {
+const onListKey = (e: KeyboardEvent, index: number) => {
   const step = { ArrowDown: 1, ArrowUp: -1 }[e.key];
   const edge = { Home: 0, End: elements.value.length - 1 }[e.key];
   if (step === undefined && edge === undefined) return;
@@ -146,27 +146,27 @@ function onListKey(e: KeyboardEvent, index: number) {
   layerButtons.value[next]?.focus();
   hovered.value = elements.value[next] ?? null;
   place();
-}
+};
 
 // Inspect mode on the page itself: hovering previews a part, clicking pins it.
-function onPointerOver(e: PointerEvent) {
+const onPointerOver = (e: PointerEvent) => {
   const el = (e.target as Element).closest<HTMLElement>('[data-inspect]');
   if (el && !el.closest('#inspector')) {
     hovered.value = el;
     place();
   }
-}
-function onClick(e: MouseEvent) {
+};
+const onClick = (e: MouseEvent) => {
   const el = (e.target as Element).closest<HTMLElement>('[data-inspect]');
   if (!el || el.closest('#inspector')) return;
   e.preventDefault();
   e.stopPropagation();
   hovered.value = null;
   pin(el);
-}
-function onKey(e: KeyboardEvent) {
+};
+const onKey = (e: KeyboardEvent) => {
   if (e.key === 'Escape') emit('close');
-}
+};
 
 let stopVitals = () => {};
 let settle = () => {};

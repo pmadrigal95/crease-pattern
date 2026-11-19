@@ -11,7 +11,7 @@ const FIBERS = 105;
 const SAMPLES = 10;
 const SEED = 0x3a5b1;
 
-export function washiTile() {
+export const washiTile = () => {
   const rand = random(SEED);
   const fine: Point[][] = [];
   const heavy: Point[][] = [];
@@ -53,4 +53,4 @@ export function washiTile() {
     ]),
     note: `${FIBERS} fibers`,
   };
-}
+};

@@ -4,10 +4,10 @@ import { DEFAULT_LANG } from '../../../i18n/routing';
 import { creaseNumber, getPosts } from '../../../lib/precrease';
 import { ogImage } from '../../../lib/og-image';
 
-export async function getStaticPaths() {
+export const getStaticPaths = async () => {
   const posts = await getPosts();
   return posts.map((post) => ({ params: { slug: post.id }, props: { post } }));
-}
+};
 
 export const GET: APIRoute = async ({ props }) => {
   const { post } = props as Awaited<ReturnType<typeof getStaticPaths>>[number]['props'];

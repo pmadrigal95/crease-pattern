@@ -35,7 +35,7 @@ path { stroke: var(--color-surface); stroke-width: 0.1; stroke-linejoin: round; 
   .trim()
   .replace(/\n/g, '');
 
-function symbols(id: ModelId): string {
+const symbols = (id: ModelId): string => {
   const folded = foldedMark(id)
     .facets.map((f) => `<path class="o-${f.role}" d="${f.d}"/>`)
     .join('');
@@ -46,7 +46,7 @@ function symbols(id: ModelId): string {
     `<path class="o-valley" d="${flat.valley}"/>`,
   ].join('');
   return `<symbol id="origami-${id}" viewBox="${VIEWBOX}">${folded}</symbol><symbol id="origami-${id}-flat" viewBox="${VIEWBOX}">${open}</symbol>`;
-}
+};
 
 /** The whole file. */
 export const spriteSvg = (): string =>

@@ -16,18 +16,18 @@ export interface Device {
 export const MIN_MEMORY_GB = 4;
 export const MIN_CORES = 4;
 
-export function canRun3D(device: Device): boolean {
+export const canRun3D = (device: Device): boolean => {
   if (!device.webgl2 || device.reducedMotion) return false;
   if (device.deviceMemory !== undefined) return device.deviceMemory >= MIN_MEMORY_GB;
   return (device.cores ?? 0) >= MIN_CORES;
-}
+};
 
 /**
  * Reads this browser. Creating a throwaway WebGL2 context is the only reliable test; asking it to
  * fail on a major performance caveat turns away software rendering (no usable GPU), and the
  * context is released right after.
  */
-export function detectDevice(): Device {
+export const detectDevice = (): Device => {
   let webgl2 = false;
   try {
     const gl = document.createElement('canvas').getContext('webgl2', { failIfMajorPerformanceCaveat: true });
@@ -42,4 +42,4 @@ export function detectDevice(): Device {
     cores: navigator.hardwareConcurrency,
     reducedMotion: matchMedia('(prefers-reduced-motion: reduce)').matches,
   };
-}
+};

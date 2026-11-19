@@ -16,7 +16,7 @@ export const GOOD = { lcp: 2500, cls: 0.1, inp: 200 } as const;
  * Starts observing Web Vitals. Buffered entries cover everything since the page loaded, so
  * opening the Inspector late still reports the real LCP and CLS.
  */
-export function observeVitals(onChange: (v: Vitals) => void): () => void {
+export const observeVitals = (onChange: (v: Vitals) => void): (() => void) => {
   const vitals: Vitals = { lcp: null, cls: 0, inp: null };
   const observers: PerformanceObserver[] = [];
   const watch = (type: string, handle: (entries: PerformanceEntryList) => void, extra = {}) => {
@@ -48,15 +48,15 @@ export function observeVitals(onChange: (v: Vitals) => void): () => void {
 
   onChange({ ...vitals });
   return () => observers.forEach((o) => o.disconnect());
-}
+};
 
 /** Bytes of JavaScript the page loaded before the Inspector itself. */
-export function scriptBytes(before: number): number {
+export const scriptBytes = (before: number): number => {
   return performance
     .getEntriesByType('resource')
     .filter((r) => (r as PerformanceResourceTiming).initiatorType === 'script' && r.startTime < before)
     .reduce((sum, r) => sum + ((r as PerformanceResourceTiming).transferSize || 0), 0);
-}
+};
 
 const channel = (c: number) => {
   const v = c / 255;
@@ -67,16 +67,16 @@ const luminance = ([r = 0, g = 0, b = 0]: number[]) =>
   0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b);
 
 /** The first opaque background behind an element, walking up the tree. */
-function backgroundOf(el: Element | null): number[] {
+const backgroundOf = (el: Element | null): number[] => {
   for (let node = el; node; node = node.parentElement) {
     const [r, g, b, a = 1] = rgb(getComputedStyle(node).backgroundColor);
     if (a > 0.9 && r !== undefined) return [r, g ?? 0, b ?? 0];
   }
   return [255, 255, 255];
-}
+};
 
 /** WCAG contrast of the lowest-contrast visible text inside a part, or null if it has none. */
-export function lowestTextContrast(part: Element): { ratio: number; large: boolean } | null {
+export const lowestTextContrast = (part: Element): { ratio: number; large: boolean } | null => {
   let worst: { ratio: number; large: boolean } | null = null;
   const walker = document.createTreeWalker(part, NodeFilter.SHOW_TEXT);
   for (let text = walker.nextNode(); text; text = walker.nextNode()) {
@@ -91,7 +91,7 @@ export function lowestTextContrast(part: Element): { ratio: number; large: boole
     if (!worst || ratio < worst.ratio) worst = { ratio, large };
   }
   return worst;
-}
+};
 
 export interface OutlineItem {
   label: string;
@@ -99,7 +99,7 @@ export interface OutlineItem {
 }
 
 /** Landmarks and headings, as a screen reader would list them. */
-export function accessibilityOutline(): { landmarks: OutlineItem[]; headings: OutlineItem[] } {
+export const accessibilityOutline = (): { landmarks: OutlineItem[]; headings: OutlineItem[] } => {
   const roles: Record<string, string> = {
     HEADER: 'banner',
     NAV: 'navigation',
@@ -124,4 +124,4 @@ export function accessibilityOutline(): { landmarks: OutlineItem[]; headings: Ou
       level: Number(el.tagName[1]),
     }));
   return { landmarks, headings };
-}
+};

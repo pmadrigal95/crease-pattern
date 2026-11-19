@@ -24,14 +24,14 @@ let gaveUp = false;
 
 const stage = () => document.querySelector<HTMLElement>('[data-hero-fold] [data-stage]');
 
-function allowed(): boolean {
+const allowed = (): boolean => {
   if (gaveUp || !stage()) return false;
   const connection = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection;
   return !connection?.saveData && canRun3D(detectDevice());
-}
+};
 
 /** The hero's scene, mounted the first time it's asked for; null where 3D doesn't belong. */
-export function heroScene(): Promise<FigureScene | null> {
+export const heroScene = (): Promise<FigureScene | null> => {
   if (scene) return scene;
   if (!allowed()) return Promise.resolve(null);
   scene = import('../components/inspector/scene3d')
@@ -50,14 +50,14 @@ export function heroScene(): Promise<FigureScene | null> {
       return null;
     });
   return scene;
-}
+};
 
 /** Mounts the hero's scene at the visitor's first move, on pages that have the hero. */
-export function initHero3d(): void {
+export const initHero3d = (): void => {
   if (!stage()) return;
   const go = () => {
     for (const type of FIRST_MOVES) removeEventListener(type, go);
     void heroScene();
   };
   for (const type of FIRST_MOVES) addEventListener(type, go, { passive: true, once: true });
-}
+};

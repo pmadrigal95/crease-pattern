@@ -35,12 +35,12 @@ export interface IrazuMap {
 }
 
 /** The mean of the points within `radius` of (r, c) that are on the grid. */
-function neighbourhoodMean(
+const neighbourhoodMean = (
   field: readonly (readonly number[])[],
   r: number,
   c: number,
   radius: number,
-): number {
+): number => {
   let sum = 0;
   let count = 0;
   for (let dr = -radius; dr <= radius; dr++)
@@ -51,20 +51,20 @@ function neighbourhoodMean(
       count++;
     }
   return sum / count;
-}
+};
 
 /** Averages each point with its neighbours within `radius`, `passes` times. */
-export function smooth(metres: ArrayLike<number>, n: number, passes: number, radius: number): number[][] {
+export const smooth = (metres: ArrayLike<number>, n: number, passes: number, radius: number): number[][] => {
   let field = Array.from({ length: n }, (_, r) => Array.from({ length: n }, (_, c) => metres[r * n + c]!));
   for (let p = 0; p < passes; p++) {
     const before = field;
     field = before.map((row, r) => row.map((_, c) => neighbourhoodMean(before, r, c, radius)));
   }
   return field;
-}
+};
 
 /** The contour map of the Irazú, from the grid's metres (rows north to south). */
-export function irazuMap(metres: ArrayLike<number>): IrazuMap {
+export const irazuMap = (metres: ArrayLike<number>): IrazuMap => {
   const n = IRAZU_DEM.size;
   const field = smooth(metres, n, IRAZU_MAP.passes, IRAZU_MAP.radius);
   let low = Infinity;
@@ -85,4 +85,4 @@ export function irazuMap(metres: ArrayLike<number>): IrazuMap {
     if (d) lines.push({ level, major: level % IRAZU.major === 0, d });
   }
   return { size: (n - 1) * IRAZU_MAP.cell, lines, summit };
-}
+};

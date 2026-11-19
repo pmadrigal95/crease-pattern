@@ -4,6 +4,24 @@ import astro from 'eslint-plugin-astro';
 import vue from 'eslint-plugin-vue';
 import globals from 'globals';
 
+/** Forbids `files` from importing any of the `later` layers. */
+const layer = (files: string, later: string[]) => [
+  {
+    files: [files],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: later.map((name) => ({
+            group: [`**/${name}/**`],
+            message: `Layer rule (ENGINEERING.md): ${files.split('/')[1]} must not import from ${name}.`,
+          })),
+        },
+      ],
+    },
+  },
+];
+
 export default [
   {
     ignores: [
@@ -44,6 +62,24 @@ export default [
       'no-duplicate-imports': 'error',
     },
   },
+  // Functions are arrow functions: `const name = (…) => …`, never `function name() {}`. A const is
+  // defined before it is used, so the order of a file reads top to bottom. The language's own
+  // exceptions stay: generators (`function*`), methods, and functions that need their own `this`.
+  {
+    files: ['**/*.{ts,astro,vue}'],
+    rules: {
+      'func-style': ['error', 'expression'],
+      'prefer-arrow-callback': 'error',
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector:
+            'FunctionExpression:not([generator=true]):not(:has(ThisExpression)):not(MethodDefinition > FunctionExpression):not(Property[method=true] > FunctionExpression):not(Property[kind="get"] > FunctionExpression):not(Property[kind="set"] > FunctionExpression)',
+          message: 'Use an arrow function: `const name = (…) => …` (ENGINEERING.md, "Functions").',
+        },
+      ],
+    },
+  },
   // Layers (ENGINEERING.md): config → lib → components → layouts → pages. Each layer imports only
   // from the layers before it, so data and logic never depend on markup.
   ...layer('src/config/**', ['lib', 'components', 'layouts', 'pages']),
@@ -51,23 +87,3 @@ export default [
   ...layer('src/components/**', ['layouts', 'pages']),
   ...layer('src/layouts/**', ['pages']),
 ];
-
-/** Forbids `files` from importing any of the `later` layers. */
-function layer(files: string, later: string[]) {
-  return [
-    {
-      files: [files],
-      rules: {
-        'no-restricted-imports': [
-          'error',
-          {
-            patterns: later.map((name) => ({
-              group: [`**/${name}/**`],
-              message: `Layer rule (ENGINEERING.md): ${files.split('/')[1]} must not import from ${name}.`,
-            })),
-          },
-        ],
-      },
-    },
-  ];
-}

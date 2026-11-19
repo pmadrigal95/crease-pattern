@@ -58,7 +58,7 @@ export interface ExpeditionMapGeometry {
 const LABEL = { name: 15, detail: 12, compact: 13, gap: 14, lineGap: 16 } as const;
 const PIN_RADIUS = 8;
 
-export function expeditionMap(places: readonly Place[], frame: MapFrame): ExpeditionMapGeometry {
+export const expeditionMap = (places: readonly Place[], frame: MapFrame): ExpeditionMapGeometry => {
   if (places.length === 0) throw new Error('expeditionMap() needs at least one place');
   const project = projection(places, frame);
   const points = places.map((p) => ({ place: p, ...project(p.lat, p.lon) }));
@@ -100,10 +100,10 @@ export function expeditionMap(places: readonly Place[], frame: MapFrame): Expedi
   const legs = ordered.slice(1).map((p, i) => [ordered[i]!, p] as const);
   const pins = placeLabels(ordered, frame, legs);
   return { contours, route, pins };
-}
+};
 
 /** Equirectangular projection fitted to the frame, with longitude scaled by latitude. */
-function projection(places: readonly Place[], frame: MapFrame) {
+const projection = (places: readonly Place[], frame: MapFrame) => {
   const lats = places.map((p) => p.lat);
   const lons = places.map((p) => p.lon);
   const [latMin, latMax] = [Math.min(...lats), Math.max(...lats)];
@@ -121,10 +121,10 @@ function projection(places: readonly Place[], frame: MapFrame) {
     x: round(offX + (lon - lonMin) * k * scale),
     y: round(offY + (latMax - lat) * scale),
   });
-}
+};
 
 /** Marching squares: the segments where the field crosses `level`. */
-export function march(field: number[][], level: number, cell: number): [number, number, number, number][] {
+export const march = (field: number[][], level: number, cell: number): [number, number, number, number][] => {
   const out: [number, number, number, number][] = [];
   for (let r = 0; r < field.length - 1; r++) {
     for (let c = 0; c < field[0]!.length - 1; c++) {
@@ -146,10 +146,10 @@ export function march(field: number[][], level: number, cell: number): [number, 
     }
   }
   return out;
-}
+};
 
 /** Joins segments that share an end into polylines and writes them as one path. */
-export function polylines(segments: [number, number, number, number][]): string {
+export const polylines = (segments: [number, number, number, number][]): string => {
   const key = (x: number, y: number) => `${Math.round(x * 10)},${Math.round(y * 10)}`;
   const ends = new Map<string, number[]>();
   segments.forEach(([x1, y1, x2, y2], i) => {
@@ -183,18 +183,18 @@ export function polylines(segments: [number, number, number, number][]): string 
     .filter((l) => l.length > 2)
     .map((l) => 'M' + l.map(([x, y]) => `${Math.round(x)},${Math.round(y)}`).join('L'))
     .join('');
-}
+};
 
 /**
  * Each pin's label (name, then altitude and version) goes on the first side that stays inside the
  * frame and clear of the other labels, the pins and the route: right, left, above, below, then
  * the four corners, as map labels are placed.
  */
-function placeLabels(
+const placeLabels = (
   points: { place: Place; x: number; y: number }[],
   frame: MapFrame,
   legs: readonly (readonly [{ x: number; y: number }, { x: number; y: number }])[],
-): Pin[] {
+): Pin[] => {
   const pinBoxes: Box[] = points.map((p) => ({
     x: p.x - PIN_RADIUS,
     y: p.y - PIN_RADIUS,
@@ -253,10 +253,10 @@ function placeLabels(
       label: { x: round(x), y: round(box.y + size - 2), anchor: choice.anchor, box, short: choice.short },
     };
   });
-}
+};
 
 /** The eight places a label can go around its pin, in order of preference. */
-function candidatesAround(p: { x: number; y: number }, width: number, height: number) {
+const candidatesAround = (p: { x: number; y: number }, width: number, height: number) => {
   const g = LABEL.gap;
   const d = g * 0.7;
   return [
@@ -269,10 +269,10 @@ function candidatesAround(p: { x: number; y: number }, width: number, height: nu
     { anchor: 'start', box: { x: p.x + d, y: p.y + d, width, height } },
     { anchor: 'end', box: { x: p.x - d - width, y: p.y + d, width, height } },
   ] as const;
-}
+};
 
 /** Whether the segment a→z passes through the box, padded a little for the line's width. */
-export function crosses(box: Box, a: { x: number; y: number }, z: { x: number; y: number }): boolean {
+export const crosses = (box: Box, a: { x: number; y: number }, z: { x: number; y: number }): boolean => {
   const pad = 3;
   const steps = Math.ceil(Math.hypot(z.x - a.x, z.y - a.y) / 3);
   for (let i = 0; i <= steps; i++) {
@@ -282,7 +282,7 @@ export function crosses(box: Box, a: { x: number; y: number }, z: { x: number; y
       return true;
   }
   return false;
-}
+};
 
 /** Whether two boxes overlap (touching edges don't count). */
 export const overlaps = (a: Box, b: Box): boolean =>

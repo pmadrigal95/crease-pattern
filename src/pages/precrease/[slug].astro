@@ -19,10 +19,10 @@ import { langOf } from '../../i18n/routing';
 const lang = langOf(Astro.currentLocale);
 const copy = copyFor(Astro.currentLocale);
 
-export async function getStaticPaths() {
+export const getStaticPaths = async () => {
   const posts = await getPosts();
   return posts.map((post) => ({ params: { slug: post.id }, props: { post, posts } }));
-}
+};
 
 interface Props {
   post: PostSummary;

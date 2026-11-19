@@ -16,13 +16,13 @@ import { join } from 'node:path';
 const dist = join(import.meta.dirname, '..', 'dist');
 const check = process.argv.includes('--check');
 
-function* htmlFiles(dir: string): Generator<string> {
+const htmlFiles = function* (dir: string): Generator<string> {
   for (const name of readdirSync(dir)) {
     const path = join(dir, name);
     if (statSync(path).isDirectory()) yield* htmlFiles(path);
     else if (name.endsWith('.html')) yield path;
   }
-}
+};
 
 const hashOf = (text: string): string =>
   `'sha256-${createHash('sha256').update(text, 'utf8').digest('base64')}'`;

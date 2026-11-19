@@ -13,17 +13,17 @@ const warmed = new Set<string>();
 
 type Connection = { saveData?: boolean; effectiveType?: string };
 
-function warm(href: string) {
+const warm = (href: string) => {
   if (warmed.has(href)) return;
   warmed.add(href);
   const link = document.createElement('link');
   link.rel = 'prefetch';
   link.href = href;
   document.head.append(link);
-}
+};
 
 /** The page a link leads to, if it's another page of this site worth loading ahead. */
-function target(event: Event): string | null {
+const target = (event: Event): string | null => {
   const link = event.target instanceof Element ? event.target.closest<HTMLAnchorElement>('a[href]') : null;
   if (!link || link.target === '_blank' || link.hasAttribute('download')) return null;
   const url = new URL(link.href, location.href);
@@ -31,9 +31,9 @@ function target(event: Event): string | null {
   if (url.pathname.startsWith('/api/')) return null;
   url.hash = '';
   return url.href;
-}
+};
 
-export function initPrefetch(): void {
+export const initPrefetch = (): void => {
   const connection = (navigator as Navigator & { connection?: Connection }).connection;
   if (HTMLScriptElement.supports?.('speculationrules')) return;
   if (connection?.saveData || /2g/.test(connection?.effectiveType ?? '')) return;
@@ -57,4 +57,4 @@ export function initPrefetch(): void {
       },
       { passive: true },
     );
-}
+};

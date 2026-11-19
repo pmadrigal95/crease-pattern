@@ -38,7 +38,7 @@ const FLOOR_Y = -1.6;
 const FADE_MS = 300;
 
 /** The canvas over the star's square, its renderer with soft shadows, the camera, lights and floor. */
-function createWorkStage(stage: HTMLElement) {
+const createWorkStage = (stage: HTMLElement) => {
   const canvas = document.createElement('canvas');
   canvas.setAttribute('aria-hidden', 'true');
   // CSSOM, which the Content Security Policy allows; no inline style attribute.
@@ -77,10 +77,10 @@ function createWorkStage(stage: HTMLElement) {
   scene.add(floor);
 
   return { canvas, renderer, scene, camera };
-}
+};
 
 /** The star: one group per unit, so a unit moves as one piece along its direction. */
-function buildStar(scene: Scene) {
+const buildStar = (scene: Scene) => {
   const { model, directions, rank } = star();
   const holder = new Group();
   // Turned like the SVG (around y, then tipped), less the tilt the camera's height already gives.
@@ -111,9 +111,9 @@ function buildStar(scene: Scene) {
   });
 
   return { units, directions, rank, edgeMaterial };
-}
+};
 
-export function mountWorkScene(stage: HTMLElement, figure: HTMLElement, redraw: () => void): StarRenderer {
+export const mountWorkScene = (stage: HTMLElement, figure: HTMLElement, redraw: () => void): StarRenderer => {
   const { canvas, renderer, scene, camera } = createWorkStage(stage);
 
   // The star: one group per unit, so a unit moves as one piece along its direction.
@@ -122,7 +122,7 @@ export function mountWorkScene(stage: HTMLElement, figure: HTMLElement, redraw: 
   // Colours: the five papers of Crease No. 003, from the active identity's tokens.
   const css = (name: string) =>
     new Color(getComputedStyle(document.documentElement).getPropertyValue(name).trim() || '#888');
-  function paint() {
+  const paint = () => {
     const accent = css('--color-accent-ui');
     const ink = css('--color-ink');
     const bg = css('--color-bg');
@@ -136,7 +136,7 @@ export function mountWorkScene(stage: HTMLElement, figure: HTMLElement, redraw: 
     units.forEach((u, i) => u.material.color.copy(papers[i % 5]!));
     edgeMaterial.color.copy(ink);
     redraw();
-  }
+  };
   const themeWatch = new MutationObserver(paint);
   themeWatch.observe(document.documentElement, {
     attributes: true,
@@ -145,14 +145,14 @@ export function mountWorkScene(stage: HTMLElement, figure: HTMLElement, redraw: 
   const schemeQuery = matchMedia('(prefers-color-scheme: dark)');
   schemeQuery.addEventListener('change', paint);
 
-  function resize() {
+  const resize = () => {
     const { width, height } = stage.getBoundingClientRect();
     if (!width || !height) return;
     renderer.setSize(width, height, false);
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
     redraw();
-  }
+  };
   const sizeWatch = new ResizeObserver(resize);
   sizeWatch.observe(stage);
   paint();
@@ -188,4 +188,4 @@ export function mountWorkScene(stage: HTMLElement, figure: HTMLElement, redraw: 
       canvas.remove();
     },
   };
-}
+};

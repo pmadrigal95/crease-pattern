@@ -21,7 +21,7 @@ export interface FormatInfo {
 validateTree(topicTree);
 
 /** The topic tree in a page's language. A topic without words fails the build. */
-export function topicsFor(locale: string | undefined | null): readonly Topic[] {
+export const topicsFor = (locale: string | undefined | null): readonly Topic[] => {
   const words: Record<string, { label: string; intro: string } | undefined> =
     dictionary(locale).taxonomy.topics;
   return topicTree.map((node) => {
@@ -29,10 +29,10 @@ export function topicsFor(locale: string | undefined | null): readonly Topic[] {
     if (!own) throw new Error(`taxonomy.json: topic "${node.id}" has no words`);
     return { ...node, ...own };
   });
-}
+};
 
 /** Each format's label, description and thumbnail family in a page's language. */
-export function formatsFor(locale: string | undefined | null): Record<Format, FormatInfo> {
+export const formatsFor = (locale: string | undefined | null): Record<Format, FormatInfo> => {
   const words: Record<string, { label: string; description: string } | undefined> =
     dictionary(locale).taxonomy.formats;
   return Object.fromEntries(
@@ -42,4 +42,4 @@ export function formatsFor(locale: string | undefined | null): Record<Format, Fo
       return [id, { ...own, family }];
     }),
   ) as Record<Format, FormatInfo>;
-}
+};

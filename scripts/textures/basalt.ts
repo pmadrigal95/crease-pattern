@@ -14,7 +14,7 @@ const SEED = 0xba5a17;
 const OFFSETS = [-1, 0, 1].flatMap((i) => [-1, 0, 1].map((j): Point => [i * TILE, j * TILE]));
 
 /** Sutherland–Hodgman: keeps the part of `poly` where (p - m) · n <= 0. */
-function clip(poly: Point[], m: Point, n: Point): Point[] {
+const clip = (poly: Point[], m: Point, n: Point): Point[] => {
   const side = ([x, y]: Point) => (x - m[0]) * n[0] + (y - m[1]) * n[1];
   const out: Point[] = [];
   for (let i = 0; i < poly.length; i++) {
@@ -29,10 +29,10 @@ function clip(poly: Point[], m: Point, n: Point): Point[] {
     }
   }
   return out;
-}
+};
 
 /** The Voronoi cell of `p` among `others` (all seed copies). */
-function cell(p: Point, others: Point[]): Point[] {
+const cell = (p: Point, others: Point[]): Point[] => {
   const reach = TILE / 2;
   let poly: Point[] = [
     [p[0] - reach, p[1] - reach],
@@ -47,9 +47,9 @@ function cell(p: Point, others: Point[]): Point[] {
     poly = clip(poly, [(p[0] + q[0]) / 2, (p[1] + q[1]) / 2], [dx, dy]);
   }
   return poly;
-}
+};
 
-function centroid(poly: Point[]): Point {
+const centroid = (poly: Point[]): Point => {
   let a = 0;
   let cx = 0;
   let cy = 0;
@@ -62,13 +62,13 @@ function centroid(poly: Point[]): Point {
     cy += (y0 + y1) * f;
   }
   return [cx / (3 * a), cy / (3 * a)];
-}
+};
 
 const copies = (seeds: Point[]): Point[] =>
   seeds.flatMap(([x, y]) => OFFSETS.map(([ox, oy]): Point => [x + ox, y + oy]));
 const wrap = (v: number): number => ((v % TILE) + TILE) % TILE;
 
-export function basaltTile() {
+export const basaltTile = () => {
   const rand = random(SEED);
   let seeds = Array.from({ length: SEEDS }, (): Point => [rand() * TILE, rand() * TILE]);
   for (let round = 0; round < RELAX; round++) {
@@ -103,4 +103,4 @@ export function basaltTile() {
     svg: tileSvg(TILE, [{ d: pathFrom(edges), width: 1 }]),
     note: `${SEEDS} cells, ${edges.length} joints`,
   };
-}
+};

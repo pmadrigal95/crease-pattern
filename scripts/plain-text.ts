@@ -15,11 +15,11 @@ const ENTITIES: Record<string, string> = {
   '&amp;': '&',
 };
 
-export function plainText(html: string): string {
+export const plainText = (html: string): string => {
   let text = html.replace(/&(?:#39|#x27|quot|lt|gt|amp);/g, (entity) => ENTITIES[entity] ?? '');
   for (let previous = ''; previous !== text;) {
     previous = text;
     text = text.replace(/<[^<>]*>/g, '');
   }
   return text.replace(/[<>]/g, '').replace(/\s+/g, ' ').trim();
-}
+};

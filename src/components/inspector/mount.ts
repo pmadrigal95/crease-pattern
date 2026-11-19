@@ -25,7 +25,7 @@ let styles: CSSStyleSheet | null = null;
 let stylesRequest: Promise<string> | null = null;
 
 /** Starts (or reuses) the styles' download; a failed one is forgotten, so the next open retries. */
-function loadStyles(): Promise<string> {
+const loadStyles = (): Promise<string> => {
   stylesRequest ??= fetch(inspectorStylesUrl)
     .then((r) => (r.ok ? r.text() : Promise.reject(new Error(`inspector styles: ${r.status}`))))
     .catch((error: unknown) => {
@@ -33,20 +33,20 @@ function loadStyles(): Promise<string> {
       throw error;
     });
   return stylesRequest;
-}
+};
 
 /** Adopts the Inspector's styles once; kept after closing so the layers can settle back. */
-function adoptStyles(css: string) {
+const adoptStyles = (css: string) => {
   if (styles) return;
   styles = new CSSStyleSheet();
   styles.replaceSync(css);
   document.adoptedStyleSheets = [...document.adoptedStyleSheets, styles];
-}
+};
 
 let manifestRequest: Promise<Manifest> | null = null;
 
 /** Starts (or reuses) the manifest download; a failed one is forgotten, so the next open retries. */
-function loadManifest(): Promise<Manifest> {
+const loadManifest = (): Promise<Manifest> => {
   manifestRequest ??= fetch(manifestUrl)
     .then((r) =>
       r.ok ? (r.json() as Promise<Manifest>) : Promise.reject(new Error(`manifest: ${r.status}`)),
@@ -56,7 +56,7 @@ function loadManifest(): Promise<Manifest> {
       throw error;
     });
   return manifestRequest;
-}
+};
 // This module loads when a visitor first reaches for the Inspector (hovering its button counts), so
 // start the manifest now, alongside Vue, instead of after it.
 void loadManifest().catch(() => undefined);
@@ -66,10 +66,10 @@ void loadStyles().catch(() => undefined);
 // opening the Inspector brings it up, alongside Vue, like the manifest.
 void heroScene();
 
-export async function openInspector(
+export const openInspector = async (
   trigger: HTMLElement | null,
   onClosed: () => void,
-): Promise<InspectorHandle> {
+): Promise<InspectorHandle> => {
   const [manifest, css] = await Promise.all([loadManifest(), loadStyles()]);
   adoptStyles(css);
   // A box-less wrapper: the panel (aside#inspector) and the part's outline render side by side in
@@ -109,4 +109,4 @@ export async function openInspector(
     },
   };
   return handle;
-}
+};

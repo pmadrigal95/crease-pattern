@@ -20,12 +20,12 @@ export interface FoldStage {
 export const PAPER = 4;
 
 /** Reflects point p across the line through a and b: where a corner lands when folded on that line. */
-export function reflect(p: Vec2, a: Vec2, b: Vec2): Vec2 {
+export const reflect = (p: Vec2, a: Vec2, b: Vec2): Vec2 => {
   const [dx, dy] = [b[0] - a[0], b[1] - a[1]];
   const t = ((p[0] - a[0]) * dx + (p[1] - a[1]) * dy) / (dx * dx + dy * dy);
   const foot: Vec2 = [a[0] + t * dx, a[1] + t * dy];
   return [2 * foot[0] - p[0], 2 * foot[1] - p[1]];
-}
+};
 
 // Stage 3: the strip runs from y = 1 to y = 3. The bottom-left corner folds up on the line through
 // (0, 1) and (2, 3), the top-right corner down on the line through (2, 1) and (4, 3).
@@ -125,9 +125,9 @@ export const area = (points: readonly Vec2[]): number =>
   ) / 2;
 
 /** The smallest box around a stage, for its SVG viewBox. */
-export function bounds(stage: FoldStage): { x: number; y: number; width: number; height: number } {
+export const bounds = (stage: FoldStage): { x: number; y: number; width: number; height: number } => {
   const xs = stage.outline.map(([x]) => x);
   const ys = stage.outline.map(([, y]) => y);
   const [x, y] = [Math.min(...xs), Math.min(...ys)];
   return { x, y, width: Math.max(...xs) - x, height: Math.max(...ys) - y };
-}
+};

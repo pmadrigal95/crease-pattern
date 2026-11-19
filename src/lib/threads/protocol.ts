@@ -77,16 +77,16 @@ export type FromWorker = {
 const HEADER = 6;
 const MOVE_FIELDS = 5;
 
-export function sharedLayout(problem: Problem, tasks: number) {
+export const sharedLayout = (problem: Problem, tasks: number) => {
   const pieces = HEADER;
   const rows = pieces + problem.pieces.length;
   const results = rows + problem.height;
   const slot = 2 + problem.depth * MOVE_FIELDS;
   return { pieces, rows, results, slot, length: results + tasks * slot };
-}
+};
 
 /** Writes the problem into a new shared buffer, with room for every task's result. */
-export function shareProblem(problem: Problem, tasks: number): SharedArrayBuffer {
+export const shareProblem = (problem: Problem, tasks: number): SharedArrayBuffer => {
   const layout = sharedLayout(problem, tasks);
   const buffer = new SharedArrayBuffer(layout.length * Int32Array.BYTES_PER_ELEMENT);
   const view = new Int32Array(buffer);
@@ -94,19 +94,19 @@ export function shareProblem(problem: Problem, tasks: number): SharedArrayBuffer
   problem.pieces.forEach((p, i) => (view[layout.pieces + i] = PIECE_NAMES.indexOf(p)));
   view.set(problem.rows, layout.rows);
   return buffer;
-}
+};
 
 /** Reads the problem back from shared memory, without copying the board into a message. */
-export function readProblem(view: Int32Array): { problem: Problem; tasks: number } {
+export const readProblem = (view: Int32Array): { problem: Problem; tasks: number } => {
   const [, tasks = 0, width = 0, height = 0, depth = 0, pieceCount = 0] = view;
   const pieces = Array.from(view.subarray(HEADER, HEADER + pieceCount), (i) => PIECE_NAMES[i]!);
   const problem: Problem = { width, height, depth, pieces, rows: [] };
   const layout = sharedLayout(problem, tasks);
   problem.rows = Array.from(view.subarray(layout.rows, layout.rows + height));
   return { problem, tasks };
-}
+};
 
-export function writeResult(view: Int32Array, problem: Problem, tasks: number, result: TaskResult): void {
+export const writeResult = (view: Int32Array, problem: Problem, tasks: number, result: TaskResult): void => {
   const layout = sharedLayout(problem, tasks);
   const at = layout.results + result.index * layout.slot;
   view[at] = result.score;
@@ -115,9 +115,9 @@ export function writeResult(view: Int32Array, problem: Problem, tasks: number, r
     const o = at + 2 + i * MOVE_FIELDS;
     view.set([PIECE_NAMES.indexOf(m.piece) + 1, m.rotation, m.x, m.y, m.lines], o);
   });
-}
+};
 
-export function readResults(view: Int32Array, problem: Problem, tasks: number): TaskResult[] {
+export const readResults = (view: Int32Array, problem: Problem, tasks: number): TaskResult[] => {
   const layout = sharedLayout(problem, tasks);
   return Array.from({ length: tasks }, (_, index) => {
     const at = layout.results + index * layout.slot;
@@ -136,10 +136,10 @@ export function readResults(view: Int32Array, problem: Problem, tasks: number): 
     }
     return { index, score: view[at]!, nodes: view[at + 1]!, moves };
   });
-}
+};
 
 /** Contiguous blocks, as evenly sized as possible: worker w gets block w. */
-export function staticBlocks(tasks: number, workers: number): number[][] {
+export const staticBlocks = (tasks: number, workers: number): number[][] => {
   const size = Math.floor(tasks / workers);
   const extra = tasks % workers;
   const out: number[][] = [];
@@ -150,4 +150,4 @@ export function staticBlocks(tasks: number, workers: number): number[][] {
     next += n;
   }
   return out;
-}
+};

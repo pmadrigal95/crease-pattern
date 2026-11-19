@@ -10,7 +10,7 @@ const root = join(import.meta.dirname, '..', 'dist');
 const port = Number(process.argv[2] ?? 4410);
 
 /** `_headers` as rules: a path (exact, or ending in `*`) and the headers it adds. */
-function headerRules(): { path: string; headers: [name: string, value: string][] }[] {
+const headerRules = (): { path: string; headers: [name: string, value: string][] }[] => {
   const rules: { path: string; headers: [name: string, value: string][] }[] = [];
   for (const line of readFileSync(join(root, '_headers'), 'utf8').split('\n')) {
     if (!line.trim() || line.trimStart().startsWith('#')) continue;
@@ -21,7 +21,7 @@ function headerRules(): { path: string; headers: [name: string, value: string][]
     }
   }
   return rules;
-}
+};
 const rules = headerRules();
 const matches = (rule: string, path: string): boolean =>
   rule.endsWith('*') ? path.startsWith(rule.slice(0, -1)) : path === rule;
@@ -41,14 +41,14 @@ const TYPES: Record<string, string> = {
 };
 
 /** `/about` → about.html (build.format 'file'), `/` → index.html; null outside dist or missing. */
-function fileFor(path: string): string | null {
+const fileFor = (path: string): string | null => {
   const candidates = path.endsWith('/') ? [`${path}index.html`] : [path, `${path}.html`];
   for (const candidate of candidates) {
     const file = normalize(join(root, decodeURIComponent(candidate)));
     if (file.startsWith(root) && existsSync(file) && statSync(file).isFile()) return file;
   }
   return null;
-}
+};
 
 createServer((req, res) => {
   const path = new URL(req.url ?? '/', 'http://localhost').pathname;

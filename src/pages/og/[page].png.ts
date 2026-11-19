@@ -10,7 +10,7 @@ import { getProfile } from '../../lib/profile';
 import { getPage } from '../../lib/pages';
 import { ogPageImage } from '../../lib/og-image';
 
-export async function getStaticPaths() {
+export const getStaticPaths = async () => {
   const profile = await getProfile();
   const page = async (id: 'about' | 'colophon') => {
     const entry = await getPage(id, DEFAULT_LANG);
@@ -30,7 +30,7 @@ export async function getStaticPaths() {
     params: { page: id },
     props: { ...card, name: profile.name },
   }));
-}
+};
 
 export const GET: APIRoute = async ({ props }) => {
   const { kicker, title, name } = props as { kicker: string; title: string; name: string };
