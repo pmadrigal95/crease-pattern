@@ -103,6 +103,9 @@ const here = unlocalize(path);
   // language (M5). Imported only here, so it joins this script instead of adding a request.
   import { initLanguage } from '../../scripts/lang';
   initLanguage();
+  // The next page loads when a link shows intent (src/scripts/prefetch.ts), in this same script.
+  import { initPrefetch } from '../../scripts/prefetch';
+  initPrefetch();
   // Opens the Inspector (decision 44): the button, any [data-inspector-open], Shift+I or ?inspect. Vue and the
   // panel download only now, on first use; hovering the button starts that download early.
   type Handle = { close(): void };
