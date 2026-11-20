@@ -11,6 +11,7 @@ import {
   measureCommandData,
   measurePosts,
   measureSceneData,
+  measureSolver2022,
   toKb,
 } from './bundle-sizes.ts';
 
@@ -38,6 +39,7 @@ const rows: { label: string; group: Group; bytes: number }[] = [
   { label: 'inspectorStyles', group: 'inspectorStyles', bytes: measureInspectorStyles(dist) },
   { label: 'commandData', group: 'commandData', bytes: measureCommandData(dist) },
   { label: 'sceneData', group: 'sceneData', bytes: measureSceneData(dist) },
+  { label: 'solver2022', group: 'solver2022', bytes: measureSolver2022(dist) },
   ...measurePosts(dist, postPaths).map(({ path, bytes }) => ({
     label: `post ${path}`,
     group: 'post' as const,

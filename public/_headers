@@ -17,6 +17,12 @@
   Cross-Origin-Embedder-Policy: credentialless
   Cross-Origin-Resource-Policy: same-origin
 
+# Pablo's 2022 solver (M7): its glue starts Web Workers from these files, which an isolated page
+# only allows with an embedder policy, like the built assets above.
+/wasm/*
+  Cross-Origin-Embedder-Policy: credentialless
+  Cross-Origin-Resource-Policy: same-origin
+
 # Cross-origin isolation (SharedArrayBuffer for real threads), only on the posts that set
 # `isolated: true`; tests/unit/guards.test.ts checks every such post has its block here.
 # `credentialless` rather than `require-corp`: third-party scripts such as Cloudflare Web

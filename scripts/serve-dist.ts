@@ -29,6 +29,10 @@ const matches = (rule: string, path: string): boolean =>
 const TYPES: Record<string, string> = {
   '.html': 'text/html; charset=utf-8',
   '.js': 'text/javascript; charset=utf-8',
+  // The 2022 solver (public/wasm/solver-2022): module workers need a JavaScript type, and
+  // WebAssembly.instantiateStreaming needs application/wasm.
+  '.mjs': 'text/javascript; charset=utf-8',
+  '.wasm': 'application/wasm',
   '.css': 'text/css; charset=utf-8',
   '.json': 'application/json',
   '.svg': 'image/svg+xml',
