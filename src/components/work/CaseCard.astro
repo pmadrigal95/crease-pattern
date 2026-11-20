@@ -1,0 +1,113 @@
+---
+/**
+ * A case study's card (M6): in /work and on the home page. The thumbnail is the case's plates seen
+ * from above, the lead one in accent, so every card says "a set of plates" without a picture.
+ */
+interface Props {
+  href: string;
+  meta: string;
+  title: string;
+  summary: string;
+  link: string;
+  /** How many plates the case has, the lead one first; 0 draws the site's own mark instead. */
+  plates: number;
+  headingLevel?: 'h2' | 'h3';
+}
+const { href, meta, title, summary, link, plates, headingLevel: Heading = 'h2' } = Astro.props;
+---
+
+<a class="case-card" href={href} data-inspect="CaseCard">
+  <svg class="thumb" viewBox="0 0 320 150" aria-hidden="true" focusable="false">
+    {plates > 0 ? (
+      Array.from({ length: plates }, (_, i) => (
+        <rect
+          class:list={['sheet', { lead: i === 0 }]}
+          x={18 + i * 58}
+          y={i === 0 ? 24 : 34 + (i % 2) * 14}
+          width="50"
+          height={i === 0 ? 92 : 72 - (i % 2) * 14}
+          rx="3"
+        />
+      ))
+    ) : (
+      <>
+        <path class="crease" d="M40 128 L160 28 L280 128 Z" />
+        <path class="crease lead-line" d="M160 28 V128" />
+      </>
+    )}
+  </svg>
+  <p class="meta">{meta}</p>
+  <Heading class="title">{title}</Heading>
+  <p class="summary">{summary}</p>
+  <span class="go">{link} →</span>
+</a>
+
+<style>
+  .case-card {
+    display: grid;
+    gap: var(--space-3);
+    padding: var(--space-6);
+    border-radius: 16px;
+    background: var(--color-surface);
+    box-shadow: inset 0 0 0 1px var(--color-rule);
+    color: var(--color-ink);
+    text-decoration: none;
+    transition:
+      box-shadow var(--motion-base) var(--motion-ease-out),
+      translate var(--motion-base) var(--motion-ease-out);
+  }
+  .case-card:hover {
+    box-shadow: inset 0 0 0 1px var(--color-accent-ui);
+    translate: 0 -2px;
+  }
+  .thumb {
+    width: 100%;
+    height: auto;
+    border-radius: 10px;
+    background: var(--color-bg);
+  }
+  .sheet {
+    fill: var(--color-surface);
+    stroke: var(--color-ink);
+    stroke-width: 1.5;
+  }
+  .sheet.lead {
+    fill: color-mix(in oklab, var(--color-accent-ui) 14%, var(--color-surface));
+    stroke: var(--color-accent-ui);
+    stroke-width: 2;
+  }
+  .crease {
+    fill: none;
+    stroke: var(--color-mute);
+    stroke-width: 1.5;
+    stroke-dasharray: 10 4 2 4;
+  }
+  .crease.lead-line {
+    stroke: var(--color-accent-ui);
+    stroke-dasharray: 6 5;
+  }
+  .meta {
+    margin: 0;
+    font: var(--type-caption);
+    color: var(--color-mute);
+  }
+  .title {
+    margin: 0;
+    font-size: var(--size-xl);
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+  }
+  .summary {
+    margin: 0;
+    color: var(--color-mute);
+  }
+  .go {
+    font-weight: 600;
+    color: var(--color-accent);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .case-card {
+      transition: none;
+    }
+  }
+</style>

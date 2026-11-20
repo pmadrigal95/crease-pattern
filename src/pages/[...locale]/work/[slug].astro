@@ -1,0 +1,282 @@
+---
+/**
+ * A case study (M6): its head (title, lede, facts), a local index that stays in view, four plates
+ * (the lead one first and larger), a short closing plate and the way back. The plates unfold as
+ * they come into view; the index marks the one being read. Both are progressive: without
+ * JavaScript the page reads the same, open and still.
+ */
+import PageLayout from '../../../layouts/PageLayout.astro';
+import CasePlate from '../../../components/work/CasePlate.astro';
+import { copyFor } from '../../../i18n/dictionary';
+import { padNumber } from '../../../lib/format';
+import { getProfile } from '../../../lib/profile';
+import { LANGS, DEFAULT_LANG, langOf, localize } from '../../../i18n/routing';
+import { caseSlug, getCases, type Case } from '../../../lib/cases';
+
+export const getStaticPaths = async () => {
+  const perLang = await Promise.all(
+    LANGS.map(async (lang) =>
+      (await getCases(lang)).map((entry) => ({
+        params: { locale: lang === DEFAULT_LANG ? undefined : lang, slug: caseSlug(entry) },
+        props: { entry },
+      })),
+    ),
+  );
+  return perLang.flat();
+};
+
+interface Props {
+  entry: Case;
+}
+const { entry } = Astro.props;
+const { data } = entry;
+const lang = langOf(Astro.currentLocale);
+const t = copyFor(lang).cases.case;
+const profile = await getProfile(lang);
+const total = data.plates.length + 1;
+// The lead plate comes first whatever order the file lists them in.
+const plates = data.plates.toSorted((a, b) => Number(b.lead) - Number(a.lead));
+---
+
+<PageLayout title={data.title} description={data.summary}>
+  <div class="wrap">
+    <header class="head" data-inspect="[slug]#case-head">
+      <div>
+        <p class="eyebrow">{t.eyebrow}</p>
+        <h1>{data.title}</h1>
+        <p class="lede">{data.lede}</p>
+      </div>
+      <dl class="facts">
+        {data.facts.map((f) => (
+          <div>
+            <dt>{f.label}</dt>
+            <dd>{f.value}</dd>
+          </div>
+        ))}
+      </dl>
+    </header>
+  </div>
+
+  <nav class="toc" aria-label={t.plates} data-toc data-inspect="[slug]#case-index">
+    <ol class="wrap">
+      {plates.map((p, i) => (
+        <li>
+          <a href={`#${p.id}`}>
+            {padNumber(i + 1, 2)} {p.short}
+          </a>
+        </li>
+      ))}
+      <li>
+        <a href="#base">
+          {padNumber(total, 2)} {data.brief.short}
+        </a>
+      </li>
+    </ol>
+  </nav>
+
+  <div class="wrap plates" data-plates>
+    {plates.map((plate, i) => (
+      <CasePlate
+        plate={plate}
+        number={i + 1}
+        total={total}
+        company={data.company}
+        t={t}
+        author={profile.name}
+      />
+    ))}
+    <section
+      class="plate-brief"
+      id="base"
+      aria-labelledby="t-base"
+      data-plate
+      data-inspect="[slug]#case-base"
+    >
+      <h2 id="t-base">{data.brief.title}</h2>
+      <div class="brief">
+        {data.brief.items.map((item) => (
+          <div>
+            <h3>{item.title}</h3>
+            <p>{item.text}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+  </div>
+
+  <div class="wrap foot">
+    <a href={localize('/work', lang)}>← {t.back}</a>
+    <a href={localize('/changelog', lang)}>{t.career} →</a>
+  </div>
+</PageLayout>
+
+<style>
+  .head {
+    display: grid;
+    grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+    gap: var(--space-8);
+    align-items: end;
+    padding-block: var(--space-16) var(--space-8);
+  }
+  h1 {
+    margin: 0;
+    font-size: clamp(2.4rem, 5.4vw, 4.2rem);
+    line-height: 1.03;
+    letter-spacing: -0.03em;
+    text-wrap: balance;
+  }
+  .lede {
+    max-width: 56ch;
+    margin: var(--space-4) 0 0;
+    font-size: var(--size-lg);
+    line-height: 1.5;
+    color: var(--color-mute);
+  }
+  .facts {
+    margin: 0;
+    border-radius: 14px;
+    background: var(--color-surface);
+    box-shadow: inset 0 0 0 1px var(--color-rule);
+    font-size: var(--size-sm);
+  }
+  .facts div {
+    display: grid;
+    grid-template-columns: 6.5rem 1fr;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    border-top: 1px dashed var(--color-rule);
+  }
+  .facts div:first-child {
+    border-top: 0;
+  }
+  .facts dt {
+    font: var(--type-caption);
+    color: var(--color-mute);
+    padding-top: 3px;
+  }
+  .facts dd {
+    margin: 0;
+    font-weight: 500;
+  }
+  /* The local index stays under the site's header while the plates scroll; it marks where you are. */
+  .toc {
+    position: sticky;
+    top: calc(var(--sticky-offset) - var(--space-3));
+    z-index: 5;
+    border-block: 1px solid var(--color-rule);
+    background: color-mix(in oklab, var(--color-bg) 92%, transparent);
+    backdrop-filter: blur(8px);
+  }
+  .toc ol {
+    display: flex;
+    gap: var(--space-2);
+    margin: 0 auto;
+    padding-block: var(--space-3);
+    list-style: none;
+    overflow-x: auto;
+  }
+  .toc a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 32px;
+    padding: 0 var(--space-3);
+    border-radius: var(--radius-pill);
+    box-shadow: inset 0 0 0 1px var(--color-rule);
+    font: var(--type-caption);
+    color: var(--color-mute);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .toc a:hover {
+    color: var(--color-ink);
+    box-shadow: inset 0 0 0 1px var(--color-accent-ui);
+  }
+  .toc a[aria-current='true'] {
+    background: var(--color-ink);
+    color: var(--color-bg);
+    box-shadow: none;
+  }
+  .plates {
+    display: grid;
+    gap: var(--space-24);
+    padding-block: var(--space-12) var(--space-16);
+    /* A plate still folded leans out in perspective; it must not widen the page. */
+    overflow-x: clip;
+  }
+  .plate-brief {
+    scroll-margin-top: calc(var(--sticky-offset) + 64px);
+    padding-top: var(--space-6);
+    border-top: 1.5px dashed var(--color-accent-ui);
+  }
+  .plate-brief h2 {
+    margin: 0 0 var(--space-6);
+    font-size: clamp(1.625rem, 2.6vw, 2.125rem);
+    letter-spacing: -0.02em;
+  }
+  .brief {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-8);
+  }
+  .brief h3 {
+    margin: 0 0 var(--space-2);
+    font-size: var(--size-md);
+  }
+  .brief p {
+    margin: 0;
+    color: var(--color-mute);
+  }
+  .foot {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: var(--space-4);
+    padding-block: var(--space-8) var(--space-24);
+    border-top: 1px solid var(--color-rule);
+    font-weight: 600;
+  }
+  .foot a {
+    text-decoration-color: var(--color-accent-ui);
+    text-underline-offset: 4px;
+  }
+  @media (max-width: 860px) {
+    .head {
+      grid-template-columns: 1fr;
+    }
+    .brief {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<script>
+  // Self-contained (ENGINEERING.md, "Browser scripts"). Two progressive touches: the plates unfold
+  // as they come into view, and the local index marks the plate being read.
+  const plates = document.querySelector<HTMLElement>('[data-plates]');
+  const links = [...document.querySelectorAll<HTMLAnchorElement>('[data-toc] a')];
+  if (plates) {
+    const sheets = [...plates.querySelectorAll<HTMLElement>('[data-plate]')];
+    if (!matchMedia('(prefers-reduced-motion: reduce)').matches && 'IntersectionObserver' in window) {
+      plates.classList.add('will-unfold');
+      const unfold = new IntersectionObserver(
+        (entries) =>
+          entries.forEach((e) => {
+            if (!e.isIntersecting) return;
+            e.target.classList.add('unfolded');
+            unfold.unobserve(e.target);
+          }),
+        { threshold: 0.2 },
+      );
+      sheets.forEach((s) => unfold.observe(s));
+    }
+    const spy = new IntersectionObserver(
+      (entries) =>
+        entries.forEach((e) => {
+          if (!e.isIntersecting) return;
+          links.forEach((a) => a.setAttribute('aria-current', String(a.hash === `#${e.target.id}`)));
+        }),
+      { rootMargin: '-45% 0px -50% 0px' },
+    );
+    sheets.forEach((s) => spy.observe(s));
+  }
+</script>

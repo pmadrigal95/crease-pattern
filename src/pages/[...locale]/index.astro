@@ -6,6 +6,7 @@ import CopyText from '../../components/site/CopyText.astro';
 import HeroFold from '../../components/site/HeroFold.astro';
 import HomePrecrease from '../../components/site/HomePrecrease.astro';
 import WorkModel from '../../components/site/WorkModel.astro';
+import HomeCases from '../../components/work/HomeCases.astro';
 import { getProfile } from '../../lib/profile';
 import { copyFor, fill } from '../../i18n/dictionary';
 import { auditedPages, jsBudgetKb, themes } from '../../config/quality';
@@ -104,6 +105,7 @@ export const getStaticPaths = localeStaticPaths;
           <a href={site.repository}>{work.links.repo}</a>
         </p>
       </div>
+      <HomeCases />
     </div>
   </section>
 
