@@ -362,7 +362,8 @@
         "faster": "Con {count}, el código de 2022 corrió {times}× más rápido que la versión simple en este dispositivo.",
         "differentBoard": "Además, la corrida con hilos terminó en otro tablero. Cuando dos jugadas empatan, el código de 2022 se queda con la del hilo que toma el candado primero, así que el resultado puede cambiar de una corrida a otra.",
         "changes": "Es el código de 2022 con dos cambios: ya no imprime cada jugada ni escribe un archivo por nivel, y tiene cuatro errores de memoria corregidos. Los tiempos salen de su propio reloj.",
-        "noSharedMemory": "Este navegador no puede compartir memoria en esta página, así que aquí solo corre la versión simple. Chrome, Edge y Firefox corren las dos.",
+        "noSharedMemory": "Este navegador no permite compartir memoria en esta página, así que solo corre la versión simple.",
+        "serialOnly": "La versión simple tardó {ms} ms en este dispositivo. La versión con hilos no puede correr aquí.",
         "failed": "El código de 2022 no pudo correr aquí. Recarga la página para intentarlo de nuevo."
       },
       "needsJs": "Las demos de esta página se ejecutan en tu navegador y necesitan JavaScript.",

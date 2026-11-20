@@ -362,7 +362,8 @@
         "faster": "With {count}, the 2022 code ran {times}× faster than the plain version on this device.",
         "differentBoard": "The threaded run also ended on a different board. When two moves score the same, the 2022 code keeps the one from whichever thread takes the lock first, so the result can change from run to run.",
         "changes": "It's the 2022 code with two changes: it no longer prints every move or writes a file per level, and four memory bugs are fixed. Times come from its own clock.",
-        "noSharedMemory": "This browser can't share memory on this page, so only the plain version runs here. Chrome, Edge and Firefox run both.",
+        "noSharedMemory": "This browser doesn't allow shared memory on this page, so only the plain version runs.",
+        "serialOnly": "The plain version took {ms} ms on this device. The threaded one can't run here.",
         "failed": "The 2022 code couldn't run here. Reload the page to try again."
       },
       "needsJs": "The demos on this page run in your browser and need JavaScript.",

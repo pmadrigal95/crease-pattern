@@ -256,6 +256,7 @@ Astro.csp?.insertScriptResource("'wasm-unsafe-eval'");
     threadOne: string;
     threadMany: string;
     slower: string;
+    serialOnly: string;
     faster: string;
     failed: string;
   }
@@ -277,20 +278,27 @@ Astro.csp?.insertScriptResource("'wasm-unsafe-eval'");
     const count = (n: number) => (n === 1 ? t.threadOne : fill(t.threadMany, { n }));
     const picked = () => Number(root.querySelector<HTMLInputElement>('input:checked')?.value ?? 4);
 
+    // Without shared memory only the plain version runs: the thread picker and the threaded row
+    // would only show controls that do nothing, so they go, and the note says why.
     sharedNote.hidden = threaded;
-    controls.disabled = !threaded;
+    controls.hidden = !threaded;
+    controls.disabled = false;
+    row('pthreads').hidden = !threaded;
     button.disabled = false;
     controls.addEventListener('change', () => (threadsNote.textContent = count(picked())));
 
     const show = (results: Timed2022[]) => {
       const slowest = Math.max(...results.map((x) => x.ms));
       const serial = results.find((x) => x.version === 'serial');
+      if (!serial) return;
+      if (results.length === 1)
+        readout.textContent = fill(t.serialOnly, { ms: formatDecimal(serial.ms, lang) });
       for (const x of results) {
         const li = row(x.version);
         li.querySelector('[data-fill]')!.setAttribute('width', ((x.ms / slowest) * 100).toFixed(1));
         li.querySelector('[data-time]')!.textContent = `${formatDecimal(x.ms, lang)} ms`;
         const speed = li.querySelector<HTMLElement>('[data-speed]')!;
-        if (x.version === 'pthreads' && serial) {
+        if (x.version === 'pthreads') {
           const times = serial.ms / x.ms;
           speed.textContent = `${formatDecimal(times, lang)}×`;
           speed.classList.toggle('slower', times < 1);
@@ -317,7 +325,7 @@ Astro.csp?.insertScriptResource("'wasm-unsafe-eval'");
         readout.textContent = t.failed;
       } finally {
         button.disabled = false;
-        controls.disabled = !threaded;
+        controls.disabled = false;
         button.textContent = t.run;
       }
     });
