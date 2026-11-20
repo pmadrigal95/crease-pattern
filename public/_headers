@@ -14,24 +14,25 @@
 # page must carry one too. On every other page it has no effect.
 /_astro/*
   Cache-Control: public, max-age=31536000, immutable
-  Cross-Origin-Embedder-Policy: credentialless
+  Cross-Origin-Embedder-Policy: require-corp
   Cross-Origin-Resource-Policy: same-origin
 
 # Pablo's 2022 solver (M7): its glue starts Web Workers from these files, which an isolated page
 # only allows with an embedder policy, like the built assets above.
 /wasm/*
-  Cross-Origin-Embedder-Policy: credentialless
+  Cross-Origin-Embedder-Policy: require-corp
   Cross-Origin-Resource-Policy: same-origin
 
 # Cross-origin isolation (SharedArrayBuffer for real threads), only on the posts that set
 # `isolated: true`; tests/unit/guards.test.ts checks every such post has its block here.
-# `credentialless` rather than `require-corp`: third-party scripts such as Cloudflare Web
-# Analytics still load (without credentials). Safari doesn't support it, so there the page isn't
-# isolated and the essay runs the models that don't need shared memory.
+# `require-corp`, which every browser supports (Safari doesn't support `credentialless`, which the
+# site used until M7.4): a resource from another origin loads only if it allows it. The one such
+# resource here is Cloudflare Web Analytics' beacon, which sends Cross-Origin-Resource-Policy:
+# cross-origin; the site's own files are same-origin.
 /precrease/when-threads-pay-off
   Cross-Origin-Opener-Policy: same-origin
-  Cross-Origin-Embedder-Policy: credentialless
+  Cross-Origin-Embedder-Policy: require-corp
 
 /es/precrease/cuando-los-hilos-valen-la-pena
   Cross-Origin-Opener-Policy: same-origin
-  Cross-Origin-Embedder-Policy: credentialless
+  Cross-Origin-Embedder-Policy: require-corp

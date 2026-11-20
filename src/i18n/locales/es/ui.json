@@ -347,7 +347,7 @@
       "faster": "{times}× más rápido",
       "result": "Lo más rápido en este dispositivo: {model}, {times}× más rápido que un solo worker.",
       "cores": "Este dispositivo reporta {cores} núcleos; las demos usan {workers} workers.",
-      "noShared": "Este navegador no permite memoria compartida aquí, así que se omiten los dos modelos que la necesitan. Chrome, Edge y Firefox ejecutan los cuatro.",
+      "noShared": "Este navegador no permite memoria compartida en esta página, así que los dos modelos que la necesitan no pueden correr aquí.",
       "unavailable": "No disponible en este navegador",
       "replay2022": {
         "intro": "Este es el código de la tabla, compilado a WebAssembly y corriendo en tu dispositivo. Coloca las 14 piezas del ensayo una por una, como en 2022.",

@@ -347,7 +347,7 @@
       "faster": "{times}× faster",
       "result": "Fastest on this device: {model}, {times}× faster than one worker.",
       "cores": "This device reports {cores} cores; the demos use {workers} workers.",
-      "noShared": "This browser doesn't allow shared memory here, so the two models that need it are skipped. Chrome, Edge and Firefox run all four.",
+      "noShared": "This browser doesn't allow shared memory on this page, so the two models that need it can't run here.",
       "unavailable": "Not available in this browser",
       "replay2022": {
         "intro": "This is the code from the table, compiled to WebAssembly and running on your device. It places the essay's 14 pieces one at a time, as it did in 2022.",
