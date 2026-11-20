@@ -21,8 +21,14 @@ import { LANGS, commandIndexPath } from '../src/i18n/config.ts';
 
 export const toKb = (bytes: number): number => Math.round((bytes / 1024) * 10) / 10;
 
-/** The 3D scenes' entry chunks, as Vite names them after their source files. */
-const isScene3d = (file: string): boolean => /^(scene3d|work3d)\.[\w-]+\.js$/.test(file);
+/**
+ * The 3D scenes' chunks, as Vite names them after their source files: the scenes, and their loader
+ * (src/scripts/hero3d.ts) with the device check it runs first (src/lib/scene3d-support.ts). The
+ * hero and the Inspector both call the loader to bring the figure up; it is 3D code either way, so
+ * it counts here, not in the Inspector's onDemand (where it took 0.8 KB until 2026-11-20).
+ */
+const isScene3d = (file: string): boolean =>
+  /^(scene3d|work3d|hero3d|scene3d-support)\.[\w-]+\.js$/.test(file);
 /** The Work animator's entry chunk. */
 const isWorkModel = (file: string): boolean => /^work-model\.[\w-]+\.js$/.test(file);
 /** The command menu's entry chunk. */
