@@ -48,6 +48,14 @@ const precrease = defineCollection({
             /** One line on why it's here. */
             note: z.string().max(160).optional(),
             kind: z.enum(['source', 'further']),
+            /**
+             * The title's language when it isn't the post's (an English book cited in a Spanish
+             * edition), so screen readers pronounce it right. A BCP 47 tag: "en", "ja".
+             */
+            lang: z
+              .string()
+              .regex(/^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$/)
+              .optional(),
           }),
         )
         .optional(),

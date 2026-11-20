@@ -150,3 +150,26 @@ export const checkEditions = (editions: readonly EditionLike[], defaultLang: str
     pairs.add(pair);
   }
 };
+
+/**
+ * Editions their original has outgrown: the original was updated (`updated`) after the edition was
+ * published or last updated, so the correction may be missing from the edition. A warning, not an
+ * error: a fix to the original must never wait on its translation.
+ */
+export const staleEditions = (
+  editions: readonly {
+    id: string;
+    lang: string;
+    date: Date;
+    updated?: Date | undefined;
+    translationOf?: string | undefined;
+  }[],
+  defaultLang: string,
+): { edition: string; original: string }[] => {
+  const originals = new Map(editions.filter((e) => e.lang === defaultLang).map((e) => [e.id, e]));
+  return editions.flatMap((e) => {
+    const original = e.translationOf ? originals.get(e.translationOf) : undefined;
+    if (!original?.updated) return [];
+    return original.updated > (e.updated ?? e.date) ? [{ edition: e.id, original: original.id }] : [];
+  });
+};
