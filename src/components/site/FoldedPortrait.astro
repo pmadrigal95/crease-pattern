@@ -83,7 +83,6 @@ const valueText = (fold: number) => fill(t.value, { photo: fold, contours: 100 -
       --duo-low: var(--color-bg);
     }
     :global(:root:not([data-theme='light'])) .photo {
-      -webkit-mask: url('../../assets/portrait/silhouette.png') center / cover no-repeat;
       mask: url('../../assets/portrait/silhouette.png') center / cover no-repeat;
     }
   }
@@ -92,7 +91,6 @@ const valueText = (fold: number) => fill(t.value, { photo: fold, contours: 100 -
     --duo-low: var(--color-bg);
   }
   :global(:root[data-theme='dark']) .photo {
-    -webkit-mask: url('../../assets/portrait/silhouette.png') center / cover no-repeat;
     mask: url('../../assets/portrait/silhouette.png') center / cover no-repeat;
   }
 

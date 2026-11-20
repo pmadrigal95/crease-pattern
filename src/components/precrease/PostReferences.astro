@@ -14,6 +14,7 @@ type Reference = {
   url: string;
   note?: string | undefined;
   kind: 'source' | 'further';
+  lang?: string | undefined;
 };
 
 interface Props {
@@ -40,7 +41,9 @@ const byline = (r: Reference) => [r.author, r.year].filter(Boolean).join(', ');
         <ul>
           {g.items.map((r) => (
             <li>
-              <a href={r.url}>{r.title}</a>
+              <a href={r.url} lang={r.lang}>
+                {r.title}
+              </a>
               {byline(r) && <span class="byline">{byline(r)}</span>}
               {r.note && <span class="note">{r.note}</span>}
             </li>

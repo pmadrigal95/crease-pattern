@@ -3,6 +3,7 @@ import { formats, topicTree as topics, type TopicNode as Topic } from '../../src
 import {
   checkEditions,
   checkNumbers,
+  staleEditions,
   isLive,
   pathTo,
   postsUnder,
@@ -94,6 +95,31 @@ describe('Editions in other languages', () => {
     expect(() => checkEditions([en('fold', 1), { ...en('crane', 2), translationOf: 'fold' }], 'en')).toThrow(
       /original/,
     );
+  });
+});
+
+describe('Editions behind their original', () => {
+  const day = (d: number) => new Date(2027, 0, d);
+  test('an original updated after its edition flags the edition, and only then', () => {
+    const fold = { id: 'fold', lang: 'en', date: day(1), updated: day(10) };
+    expect(
+      staleEditions([fold, { id: 'pliegue', lang: 'es', date: day(5), translationOf: 'fold' }], 'en'),
+    ).toEqual([{ edition: 'pliegue', original: 'fold' }]);
+    expect(
+      staleEditions(
+        [fold, { id: 'pliegue', lang: 'es', date: day(5), updated: day(11), translationOf: 'fold' }],
+        'en',
+      ),
+    ).toEqual([]);
+    expect(
+      staleEditions(
+        [
+          { ...fold, updated: undefined },
+          { id: 'p', lang: 'es', date: day(5), translationOf: 'fold' },
+        ],
+        'en',
+      ),
+    ).toEqual([]);
   });
 });
 

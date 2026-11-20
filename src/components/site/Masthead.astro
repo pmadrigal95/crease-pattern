@@ -2,7 +2,15 @@
 import OrigamiMark from './OrigamiMark.astro';
 import { copyFor, fill } from '../../i18n/dictionary';
 import { publicPath } from '../../lib/url';
-import { LOCALES, languageLinks, langOf, localize, unlocalize, type Translations } from '../../i18n/routing';
+import {
+  LOCALES,
+  inspectorStringsPath,
+  languageLinks,
+  langOf,
+  localize,
+  unlocalize,
+  type Translations,
+} from '../../i18n/routing';
 const lang = langOf(Astro.currentLocale);
 const copy = copyFor(lang);
 
@@ -27,7 +35,6 @@ const commandStrings = JSON.stringify({
   identities: copy.identities,
 });
 // The Inspector's strings, in the page's language, read by the panel when it first opens.
-const inspectorStrings = JSON.stringify({ ...copy.inspector, identities: copy.identities });
 
 const home = localize('/', lang);
 const links = [
@@ -69,7 +76,7 @@ const here = unlocalize(path);
       aria-expanded="false"
       aria-keyshortcuts="Shift+I"
       data-inspector-toggle
-      data-strings={inspectorStrings}
+      data-strings-url={inspectorStringsPath(langOf(Astro.currentLocale))}
     >
       <svg class="icon" viewBox="0 0 20 20" aria-hidden="true" focusable="false">
         <path d="M3 7h10v10H3z" />
