@@ -472,6 +472,39 @@
       }
     }
   },
+  "cases": {
+    "index": {
+      "title": "Case studies",
+      "description": "Pablo Madrigal's case studies: what had to be achieved, what he decided and what came of it, with only what each company approved for publication.",
+      "eyebrow": "Work",
+      "intro": "How I approached real work: what had to be achieved, what I decided and what came of it. Each case includes only what the company approved for publication.",
+      "read": "Read the case",
+      "since": "since {year}",
+      "site": {
+        "meta": "Personal project · 2026",
+        "title": "This site",
+        "summary": "A portfolio you can inspect: every number is measured when it's published.",
+        "link": "See how it's built"
+      }
+    },
+    "case": {
+      "eyebrow": "Work · case study",
+      "plates": "Plates",
+      "lead": "Lead plate",
+      "goal": "goal",
+      "approach": "approach",
+      "result": "result",
+      "project": "project",
+      "plate": "plate",
+      "author": "author",
+      "practice": "practice",
+      "valley": "valley",
+      "mountain": "mountain",
+      "built": "what I built",
+      "back": "Back to case studies",
+      "career": "See my career, version by version"
+    }
+  },
   "commands": {
     "open": "Search and commands",
     "label": "Search and commands",

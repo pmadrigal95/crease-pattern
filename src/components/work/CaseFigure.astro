@@ -1,0 +1,29 @@
+---
+/**
+ * A case plate's diagram (M6): generic boxes and lines only, never a system's real names, so a
+ * figure explains the practice without describing anyone's infrastructure. Each kind (./figures)
+ * has a wide drawing and a tall one for narrow screens; the words come from the case file
+ * (labels), so both languages share one drawing. Accent lines mark what Pablo built; the plate
+ * draws them in when it unfolds (CasePlate.astro).
+ */
+import './case-figure.css';
+import FigureArch from './figures/FigureArch.astro';
+import FigureDeploy from './figures/FigureDeploy.astro';
+import FigureReview from './figures/FigureReview.astro';
+import FigureDecisions from './figures/FigureDecisions.astro';
+
+interface Props {
+  kind: 'arch' | 'deploy' | 'review' | 'decisions';
+  labels: Record<string, string>;
+  /** Read aloud instead of the drawing. */
+  description: string;
+}
+const { kind, labels, description } = Astro.props;
+const Figure = { arch: FigureArch, deploy: FigureDeploy, review: FigureReview, decisions: FigureDecisions }[
+  kind
+];
+---
+
+<figure class="case-figure" data-inspect="CaseFigure">
+  <Figure labels={labels} description={description} />
+</figure>

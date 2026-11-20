@@ -38,7 +38,7 @@ const commandStrings = JSON.stringify({
 
 const home = localize('/', lang);
 const links = [
-  { href: `${home}#work`, label: copy.nav.work, match: null },
+  { href: localize('/work', lang), label: copy.nav.work, match: '/work' },
   { href: localize('/changelog', lang), label: copy.nav.changelog, match: '/changelog' },
   { href: localize('/precrease', lang), label: copy.nav.precrease, match: '/precrease' },
   { href: localize('/about', lang), label: copy.nav.about, match: '/about' },

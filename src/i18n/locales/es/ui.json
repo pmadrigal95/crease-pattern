@@ -472,6 +472,39 @@
       }
     }
   },
+  "cases": {
+    "index": {
+      "title": "Casos",
+      "description": "Casos de trabajo de Pablo Madrigal: qué había que lograr, qué decidió y qué resultó, con lo que cada empresa aprobó publicar.",
+      "eyebrow": "Trabajo",
+      "intro": "Cómo resolví trabajo real: qué había que lograr, qué decidí y qué resultó. Cada caso incluye solo lo que la empresa aprobó publicar.",
+      "read": "Leer el caso",
+      "since": "desde {year}",
+      "site": {
+        "meta": "Proyecto propio · 2026",
+        "title": "Este sitio",
+        "summary": "Un portafolio que se puede inspeccionar: cada número se mide al publicar.",
+        "link": "Ver cómo está hecho"
+      }
+    },
+    "case": {
+      "eyebrow": "Trabajo · caso",
+      "plates": "Láminas",
+      "lead": "Lámina principal",
+      "goal": "objetivo",
+      "approach": "enfoque",
+      "result": "resultado",
+      "project": "proyecto",
+      "plate": "lámina",
+      "author": "autor",
+      "practice": "práctica",
+      "valley": "valle",
+      "mountain": "montaña",
+      "built": "lo que construí",
+      "back": "Volver a los casos",
+      "career": "Ver mi trayectoria, versión por versión"
+    }
+  },
   "commands": {
     "open": "Buscar y comandos",
     "label": "Buscar y comandos",

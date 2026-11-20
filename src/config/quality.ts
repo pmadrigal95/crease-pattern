@@ -7,6 +7,8 @@
  */
 export const auditedPages = [
   '/',
+  '/work',
+  '/work/buo',
   '/changelog',
   '/about',
   '/colophon',

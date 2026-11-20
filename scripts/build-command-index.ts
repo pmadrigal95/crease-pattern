@@ -21,6 +21,7 @@ const dist = join(import.meta.dirname, '..', 'dist');
 /** The pages ⌘K lists, in this order: the site's own, then Precrease's. */
 const PAGES = [
   '/',
+  '/work',
   '/about',
   '/changelog',
   '/colophon',
@@ -70,7 +71,15 @@ const build = (lang: Lang) => {
   if (!home) throw new Error(`The ${lang} home page is missing: run astro build first.`);
   const owner = titleTag(home).split(' · ')[0] ?? '';
 
-  const pages = PAGES.map((path) => localize(path, lang)).flatMap((path) => {
+  // Case studies (M6) right after /work, found in the build: a new case needs no change here.
+  const workDir = join(dist, localize('/work', lang));
+  const casePages = (existsSync(workDir) ? readdirSync(workDir) : [])
+    .filter((name) => name.endsWith('.html'))
+    .map((name) => `${localize('/work', lang)}/${name.replace(/\.html$/, '')}`);
+  const paths = PAGES.map((path) => localize(path, lang)).flatMap((path) =>
+    path === localize('/work', lang) ? [path, ...casePages] : [path],
+  );
+  const pages = paths.flatMap((path) => {
     const page = html(path);
     if (!page) return [];
     const isHome = path === localize('/', lang);

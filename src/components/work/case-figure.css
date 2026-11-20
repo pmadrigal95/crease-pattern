@@ -1,0 +1,89 @@
+/* Case figures (CaseFigure.astro and ./figures): shared by every drawing, so each figure file
+   holds only its geometry. Scoped by hand to .case-figure. */
+.case-figure {
+  margin: 0;
+}
+.case-figure .dg {
+  display: block;
+  width: 100%;
+  height: auto;
+  color: var(--color-ink);
+}
+.case-figure .tall {
+  display: none;
+}
+@media (max-width: 640px) {
+  .case-figure .wide {
+    display: none;
+  }
+  .case-figure .tall {
+    display: block;
+    max-width: 360px;
+    margin-inline: auto;
+  }
+}
+.case-figure .box {
+  fill: var(--color-surface);
+  stroke: currentColor;
+  stroke-width: 1.5;
+}
+.case-figure .box.soft {
+  stroke: var(--color-mute);
+  stroke-dasharray: 4 4;
+}
+.case-figure .box.key {
+  stroke: var(--color-accent-ui);
+  stroke-width: 2;
+}
+.case-figure .fillkey {
+  fill: color-mix(in oklab, var(--color-accent-ui) 14%, var(--color-surface));
+}
+.case-figure text {
+  fill: currentColor;
+  font: 12px var(--font-mono);
+}
+.case-figure .lbl {
+  font: 600 13px var(--font-sans);
+}
+.case-figure .small,
+.case-figure .dimt {
+  font-size: 10.5px;
+  fill: var(--color-mute);
+}
+.case-figure .ln {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+}
+.case-figure .ln.key {
+  stroke: var(--color-accent-ui);
+  stroke-width: 2;
+}
+.case-figure .ln.valley {
+  stroke-dasharray: 6 5;
+}
+.case-figure .ln.soft {
+  stroke: var(--color-mute);
+}
+.case-figure .dim {
+  fill: none;
+  stroke: var(--color-earth);
+  stroke-width: 1;
+}
+.case-figure .dot {
+  fill: var(--color-accent-ui);
+}
+.case-figure .dot.soft {
+  fill: var(--color-mute);
+}
+/* What Pablo built draws itself in when its plate unfolds (CasePlate.astro adds .unfolded). */
+.plates.will-unfold .case-figure .ln.key,
+.plates.will-unfold .case-figure .box.key {
+  stroke-dasharray: 700;
+  stroke-dashoffset: 700;
+  transition: stroke-dashoffset 900ms 250ms var(--motion-ease-out);
+}
+.plates.will-unfold .unfolded .case-figure .ln.key,
+.plates.will-unfold .unfolded .case-figure .box.key {
+  stroke-dashoffset: 0;
+}
