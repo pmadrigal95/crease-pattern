@@ -17,6 +17,7 @@
 import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { brotliCompressSync } from 'node:zlib';
+import { LANGS, commandIndexPath } from '../src/i18n/config.ts';
 
 export const toKb = (bytes: number): number => Math.round((bytes / 1024) * 10) / 10;
 
@@ -138,12 +139,14 @@ export const measureInspectorStyles = (dist: string): number => {
 };
 
 /**
- * The command menu's index (/commands.json, scripts/build-command-index.ts), Brotli: fetched the
- * first time the menu opens.
+ * The command menu's index (/commands.json, /es/commands.json…: scripts/build-command-index.ts),
+ * Brotli: fetched the first time the menu opens. A page loads only its language's, so the budget
+ * holds the largest.
  */
-export const measureCommandData = (dist: string): number => {
-  return brotliCompressSync(readFileSync(join(dist, 'commands.json'))).length;
-};
+export const measureCommandData = (dist: string): number =>
+  Math.max(
+    ...LANGS.map((lang) => brotliCompressSync(readFileSync(join(dist, commandIndexPath(lang)))).length),
+  );
 
 /**
  * The 3D scenes' data files as Vite emits them (/_astro/*.<hash>.bin, such as the Irazú's height

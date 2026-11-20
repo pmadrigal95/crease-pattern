@@ -1,7 +1,6 @@
 import { defineConfig } from 'astro/config';
 import vue from '@astrojs/vue';
 import mdx from '@astrojs/mdx';
-import sitemap from '@astrojs/sitemap';
 import siteConfig from './site.config.ts';
 import { pageRevealScript, restoreIdentityScript, sha256, speculationRules } from './scripts/csp-hashes.ts';
 import { devIsolation } from './scripts/dev-isolation.ts';
@@ -14,7 +13,8 @@ export default defineConfig({
   // Code blocks: Prism marks tokens with classes, styled in base.css with the site's own colors.
   // Shiki (the default) writes inline style attributes, which the Content Security Policy blocks.
   markdown: { syntaxHighlight: 'prism' },
-  integrations: [vue(), mdx(), sitemap()],
+  // The sitemap and robots.txt are written from the built pages (scripts/build-sitemap.ts).
+  integrations: [vue(), mdx()],
   // The Inspector uses Vue's Composition API only: drop the Options API and devtools hooks from the
   // production runtime to keep the panel inside its 30 KB budget.
   vite: {
