@@ -114,4 +114,51 @@ const pages = defineCollection({
   }),
 });
 
-export const collections = { precrease, profile, pages };
+/**
+ * Case studies (M6): one file per case and language, src/content/cases/<lang>/<slug>.md, the same
+ * slug in every language. Data only: the page draws every case the same way (src/pages/[...locale]/work).
+ * A case says only what the company approved for publication, in the most conservative terms:
+ * practices and outcomes, never tools, stack, implementation, past problems or security detail.
+ * The editorial rule is four plates and a short closing one; the schema holds it.
+ */
+const plate = z.strictObject({
+  /** Anchor id, also the figure's key: arch, deploy, review or decisions. */
+  id: z.string().regex(/^[a-z-]+$/),
+  /** The local index's label. */
+  short: z.string().max(24),
+  title: z.string().max(60),
+  goal: z.string().max(220),
+  approach: z.string().max(520),
+  result: z.string().max(260),
+  /** The practice it shows, in the title block (never a tool). */
+  practice: z.string().max(48),
+  figure: z.enum(['arch', 'deploy', 'review', 'decisions']),
+  /** The figure's words, in this language. */
+  labels: z.record(z.string(), z.string().max(48)),
+  /** The case's lead plate: first, drawn larger. */
+  lead: z.boolean().default(false),
+});
+
+const cases = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/cases' }),
+  schema: z.strictObject({
+    company: z.string().min(1),
+    role: z.string().min(1),
+    /** When the work started; a case with an end date is a past job. */
+    start: z.coerce.date(),
+    end: z.coerce.date().optional(),
+    title: z.string().max(80),
+    /** One line for the card in /work and on the home page. */
+    summary: z.string().max(120),
+    lede: z.string().max(320),
+    facts: z.array(z.strictObject({ label: z.string(), value: z.string() })).max(5),
+    plates: z.array(plate).length(4),
+    brief: z.strictObject({
+      title: z.string().max(40),
+      short: z.string().max(24),
+      items: z.array(z.strictObject({ title: z.string().max(40), text: z.string().max(240) })).length(3),
+    }),
+  }),
+});
+
+export const collections = { precrease, profile, pages, cases };

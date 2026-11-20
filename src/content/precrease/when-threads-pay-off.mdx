@@ -54,6 +54,7 @@ import ThreadsTimeline from '../../components/threads/ThreadsTimeline.astro';
 import AmdahlDemo from '../../components/threads/AmdahlDemo.astro';
 import GranularityDemo from '../../components/threads/GranularityDemo.astro';
 import GustafsonDemo from '../../components/threads/GustafsonDemo.astro';
+import Replay2022 from '../../components/threads/Replay2022.astro';
 
 <ThreadsRun />
 
@@ -111,6 +112,8 @@ then three that split the work. These are the times I measured, one run each:
 | MPI      | 3       | 0.933 s | 0.04    |
 | MPI      | 5       | 0.028 s | 1.30    |
 | MPI      | 10      | 0.374 s | 0.10    |
+
+<Replay2022 />
 
 A speedup below 1 means slower than the plain version.<MarginNote>**Speedup** is how many times faster something got: plain time divided by new time. 2 means twice as fast; 0.5 means twice as slow.</MarginNote>
 Almost every split was slower. The one exception, MPI with five, is a single run between two much slower ones, so
@@ -191,8 +194,8 @@ pieces ahead. Each run is the middle value of five, after one warm-up run. Your 
 buttons show them.
 
 The demos use as many workers as your device has cores, up to sixteen. Devices with fewer than six cores, like
-most phones, look three pieces ahead so the demos stay quick. Safari doesn't allow shared memory on this page, so
-it runs the one-worker and message-passing versions only.
+most phones, look three pieces ahead so the demos stay quick. A browser that doesn't allow shared memory on this page
+runs the one-worker and message-passing versions only.
 
 The solver, the four versions and their tests are in the [repository](https://github.com/pmadrigal95/crease-pattern/tree/main/src/lib/threads).
 If your device gives numbers that surprise you, I'd be glad to hear about them.

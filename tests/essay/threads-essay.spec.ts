@@ -132,3 +132,38 @@ test('the essay cites Amdahl and Gustafson as sources', async ({ page }) => {
     'https://doi.org/10.1145/42411.42415',
   );
 });
+
+// M7: Pablo's 2022 C code, compiled to WebAssembly (public/wasm/solver-2022), runs in the essay.
+test.describe('the 2022 replay', () => {
+  for (const [path, slowerOrFaster] of [
+    [essay, /ran (at|[\d.]+× faster)/],
+    ['/es/precrease/cuando-los-hilos-valen-la-pena', /corrió (a|[\d,]+× más rápido)/],
+  ] as const) {
+    test(`runs the 2022 code, plain and with threads, on ${path}`, async ({ page }) => {
+      await page.route('**/api/stats/**', (route) =>
+        route.fulfill({ json: { views: 0, reads: 0, helped: 0 } }),
+      );
+      const errors = collectErrors(page);
+      await page.goto(path);
+      const panel = page.locator('[data-replay-2022]');
+      await panel.scrollIntoViewIfNeeded();
+      await panel.locator('input[value="2"]').check({ force: true });
+      await panel.locator('[data-run]').click();
+      await expect(panel.locator('[data-readout]')).toHaveText(slowerOrFaster, { timeout: 60_000 });
+      await expect(panel.locator('[data-row="serial"] [data-time]')).toHaveText(/\d ms$/);
+      await expect(panel.locator('[data-row="pthreads"] [data-time]')).toHaveText(/\d ms$/);
+      await expect(panel.locator('[data-row="pthreads"] [data-speed]')).toHaveText(/×$/);
+      // A second run reads a fresh input (callMain changes its argument list; the port resets errno).
+      await panel.locator('[data-run]').click();
+      await expect(panel.locator('[data-run]')).toBeEnabled({ timeout: 60_000 });
+      await expect(panel.locator('[data-readout]')).toHaveText(slowerOrFaster);
+      expect(errors).toEqual([]);
+    });
+  }
+
+  test('the panel passes axe', async ({ page }) => {
+    await page.goto(essay);
+    const results = await new AxeBuilder({ page }).include('[data-replay-2022]').analyze();
+    expect(results.violations).toEqual([]);
+  });
+});

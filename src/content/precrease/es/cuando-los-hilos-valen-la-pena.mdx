@@ -61,6 +61,7 @@ import ThreadsTimeline from '../../../components/threads/ThreadsTimeline.astro';
 import AmdahlDemo from '../../../components/threads/AmdahlDemo.astro';
 import GranularityDemo from '../../../components/threads/GranularityDemo.astro';
 import GustafsonDemo from '../../../components/threads/GustafsonDemo.astro';
+import Replay2022 from '../../../components/threads/Replay2022.astro';
 
 <ThreadsRun />
 
@@ -121,6 +122,8 @@ versión simple y después tres que repartían el trabajo. Estos son los tiempos
 | MPI      | 3     | 0,933 s | 0,04        |
 | MPI      | 5     | 0,028 s | 1,30        |
 | MPI      | 10    | 0,374 s | 0,10        |
+
+<Replay2022 />
 
 Una aceleración menor que 1 significa más lento que la versión simple.<MarginNote>La **aceleración** (_speedup_) dice cuántas veces más rápido quedó algo: el tiempo de la versión simple dividido entre el tiempo nuevo. 2 es el doble de rápido; 0,5 es el doble de lento.</MarginNote>
 Casi todas las versiones repartidas fueron más lentas. La única excepción, MPI con cinco, es una sola corrida entre
@@ -205,7 +208,7 @@ Tus números van a ser distintos, y los botones te los muestran.
 
 Las demos usan tantos workers como núcleos tenga tu dispositivo, hasta dieciséis. En dispositivos con menos de
 seis núcleos, como la mayoría de los teléfonos, miran tres piezas hacia adelante para que las demos sigan siendo
-rápidas. Safari no permite memoria compartida en esta página, así que solo corre la versión de un worker y la de
+rápidas. Si un navegador no permite memoria compartida en esta página, solo corre la versión de un worker y la de
 paso de mensajes.
 
 El solucionador, las cuatro versiones y sus pruebas están en el [repositorio](https://github.com/pmadrigal95/crease-pattern/tree/main/src/lib/threads).

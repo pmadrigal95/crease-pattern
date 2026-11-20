@@ -347,8 +347,25 @@
       "faster": "{times}× más rápido",
       "result": "Lo más rápido en este dispositivo: {model}, {times}× más rápido que un solo worker.",
       "cores": "Este dispositivo reporta {cores} núcleos; las demos usan {workers} workers.",
-      "noShared": "Este navegador no permite memoria compartida aquí, así que se omiten los dos modelos que la necesitan. Chrome, Edge y Firefox ejecutan los cuatro.",
+      "noShared": "Este navegador no permite memoria compartida en esta página, así que los dos modelos que la necesitan no pueden correr aquí.",
       "unavailable": "No disponible en este navegador",
+      "replay2022": {
+        "intro": "Este es el código de la tabla, compilado a WebAssembly y corriendo en tu dispositivo. Coloca las 14 piezas del ensayo una por una, como en 2022.",
+        "threadsLabel": "Hilos para la versión con pthreads",
+        "run": "Correr el código de 2022",
+        "running": "Corriendo…",
+        "plain": "Simple",
+        "pthreads": "pthreads",
+        "threadOne": "1 hilo",
+        "threadMany": "{n} hilos",
+        "slower": "Con {count}, el código de 2022 corrió a {times}× la velocidad de la versión simple: más lento, como entonces.",
+        "faster": "Con {count}, el código de 2022 corrió {times}× más rápido que la versión simple en este dispositivo.",
+        "differentBoard": "Además, la corrida con hilos terminó en otro tablero. Cuando dos jugadas empatan, el código de 2022 se queda con la del hilo que toma el candado primero, así que el resultado puede cambiar de una corrida a otra.",
+        "changes": "Es el código de 2022 con dos cambios: ya no imprime cada jugada ni escribe un archivo por nivel, y tiene cuatro errores de memoria corregidos. Los tiempos salen de su propio reloj.",
+        "noSharedMemory": "Este navegador no permite compartir memoria en esta página, así que solo corre la versión simple.",
+        "serialOnly": "La versión simple tardó {ms} ms en este dispositivo. La versión con hilos no puede correr aquí.",
+        "failed": "El código de 2022 no pudo correr aquí. Recarga la página para intentarlo de nuevo."
+      },
       "needsJs": "Las demos de esta página se ejecutan en tu navegador y necesitan JavaScript.",
       "bestMove": "La jugada que eligió el solucionador",
       "measuredResult": "En mi computadora de escritorio: {model}, {times}× más rápido que un solo worker.",
@@ -453,6 +470,39 @@
         "folded": "Unidades dobladas",
         "caption": "Siempre la misma unidad. Lo que cambia es cuántas hay y dónde se juntan."
       }
+    }
+  },
+  "cases": {
+    "index": {
+      "title": "Casos",
+      "description": "Casos de trabajo de Pablo Madrigal: qué había que lograr, qué decidió y qué resultó, con lo que cada empresa aprobó publicar.",
+      "eyebrow": "Trabajo",
+      "intro": "Cómo resolví trabajo real: qué había que lograr, qué decidí y qué resultó. Cada caso incluye solo lo que la empresa aprobó publicar.",
+      "read": "Leer el caso",
+      "since": "desde {year}",
+      "site": {
+        "meta": "Proyecto propio · 2026",
+        "title": "Este sitio",
+        "summary": "Un portafolio que se puede inspeccionar: cada número se mide al publicar.",
+        "link": "Ver cómo está hecho"
+      }
+    },
+    "case": {
+      "eyebrow": "Trabajo · caso",
+      "plates": "Láminas",
+      "lead": "Lámina principal",
+      "goal": "objetivo",
+      "approach": "enfoque",
+      "result": "resultado",
+      "project": "proyecto",
+      "plate": "lámina",
+      "author": "autor",
+      "practice": "práctica",
+      "valley": "valle",
+      "mountain": "montaña",
+      "built": "lo que construí",
+      "back": "Volver a los casos",
+      "career": "Ver mi trayectoria, versión por versión"
     }
   },
   "commands": {

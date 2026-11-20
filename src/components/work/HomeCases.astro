@@ -1,0 +1,53 @@
+---
+/**
+ * The case studies (M6) on the home page, under what the site measures: real work next to the site
+ * itself. One card per case in the page's language; the label links to /work.
+ */
+import CaseCard from './CaseCard.astro';
+import { copyFor, fill } from '../../i18n/dictionary';
+import { langOf, localize } from '../../i18n/routing';
+import { caseHref, caseSlug, getCases } from '../../lib/cases';
+const lang = langOf(Astro.currentLocale);
+const t = copyFor(lang).cases.index;
+const cases = await getCases(lang);
+---
+
+<div class="home-cases" data-inspect="HomeCases">
+  <p class="eyebrow">
+    <a href={localize('/work', lang)}>{t.title}</a>
+  </p>
+  <div class="row">
+    {cases.map((c) => (
+      <CaseCard
+        href={caseHref(caseSlug(c), lang)}
+        meta={`${c.data.role} · ${fill(t.since, { year: c.data.start.getUTCFullYear() })}`}
+        title={c.data.company}
+        summary={c.data.summary}
+        link={t.read}
+        plates={c.data.plates.length + 1}
+        headingLevel="h3"
+      />
+    ))}
+  </div>
+</div>
+
+<style>
+  .home-cases {
+    margin-top: var(--space-12);
+  }
+  /* 24px tall at least, a comfortable target even with the Inspector's layers apart (WCAG 2.5.8). */
+  .eyebrow a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 24px;
+    margin-bottom: var(--space-4);
+    color: inherit;
+    text-decoration-color: var(--color-accent-ui);
+    text-underline-offset: 4px;
+  }
+  .row {
+    display: grid;
+    gap: var(--space-6);
+    grid-template-columns: repeat(auto-fill, minmax(min(320px, 100%), 1fr));
+  }
+</style>

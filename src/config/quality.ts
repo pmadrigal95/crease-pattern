@@ -7,6 +7,8 @@
  */
 export const auditedPages = [
   '/',
+  '/work',
+  '/work/buo',
   '/changelog',
   '/about',
   '/colophon',
@@ -60,7 +62,8 @@ export const jsBudgetKb = {
   /**
    * M4's 3D scenes, the hero's fox and the Work star, which share one three.js. They load only on
    * the home page, on a device that can run them (src/lib/scene3d-support.ts). Set at 180 KB in
-   * the M4 plan; about 100 KB at M4.1.
+   * the M4 plan; about 100 KB at M4.1. Their loader (hero3d.ts and its device check) counts here
+   * too since 2026-11-20; it used to be measured with the Inspector's onDemand.
    */
   scene3d: 180,
   /**
@@ -68,6 +71,12 @@ export const jsBudgetKb = {
    * GLO-30 (src/assets/scenes/irazu-dem.bin), 28.5 KB. The M4 plan capped it at 150 KB.
    */
   sceneData: 150,
+  /**
+   * Pablo's 2022 solver compiled to WebAssembly (public/wasm/solver-2022, M7), fetched in Crease
+   * No. 002 when a reader runs it: the larger of its two builds, module and glue together. The
+   * pthreads build was 34.5 KB when it joined.
+   */
+  solver2022: 40,
   /**
    * Everything one Precrease post can run, Web Workers included, checked for every post in the
    * build (drafts only exist in preview builds). Set at 45 KB for Crease No. 002, the heaviest
