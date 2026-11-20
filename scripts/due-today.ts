@@ -16,7 +16,8 @@ const dir = fileURLToPath(new URL('../src/content/precrease/', import.meta.url))
 const today = new Date().toISOString().slice(0, 10);
 const earliest = new Date(Date.now() - (WINDOW_DAYS - 1) * 86_400_000).toISOString().slice(0, 10);
 
-const due = readdirSync(dir)
+// Editions in other languages sit in a folder per language (es/…): each is due on its own date.
+const due = readdirSync(dir, { recursive: true, encoding: 'utf8' })
   .filter((file) => /\.mdx?$/.test(file))
   .filter((file) => {
     const front = readFileSync(join(dir, file), 'utf8').split(/^---\s*$/m)[1] ?? '';

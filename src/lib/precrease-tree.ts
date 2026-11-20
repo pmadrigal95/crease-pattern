@@ -104,3 +104,49 @@ export const checkNumbers = (posts: readonly PostLike[]): void => {
       throw new Error(`Crease No. ${sorted[i]!.number} is dated before No. ${sorted[i - 1]!.number}`);
   }
 };
+
+/** One file of a post in one language, as checkEditions reads it. */
+export interface EditionLike {
+  /** The edition's own slug. */
+  id: string;
+  number: number;
+  lang: string;
+  /** The folder its file sits in under src/content/precrease: '' for the default language. */
+  folder: string;
+  /** The original's slug, for an edition in another language. */
+  translationOf?: string | undefined;
+}
+
+/**
+ * Posts in other languages (M5.4): the original is written in the default language at the root of
+ * src/content/precrease; each other language's edition sits in that language's folder with a slug
+ * of its own and names its original in `translationOf`. Throws on anything that would publish a
+ * broken pair: a slug used twice, a translation of nothing, two editions in one language, a
+ * number that differs from the original's.
+ */
+export const checkEditions = (editions: readonly EditionLike[], defaultLang: string): void => {
+  const slugs = new Set<string>();
+  for (const e of editions) {
+    if (slugs.has(e.id)) throw new Error(`Precrease slug "${e.id}" is used by two posts`);
+    slugs.add(e.id);
+  }
+  const originals = new Map(editions.filter((e) => e.lang === defaultLang).map((e) => [e.id, e]));
+  const pairs = new Set<string>();
+  for (const e of editions) {
+    if (e.lang === defaultLang) {
+      if (e.folder !== '') throw new Error(`"${e.id}" is in ${defaultLang}: its file belongs at the root`);
+      if (e.translationOf) throw new Error(`"${e.id}" is an original: it can't be a translation`);
+      continue;
+    }
+    if (e.folder !== e.lang) throw new Error(`"${e.id}" is in ${e.lang}: its file belongs in ${e.lang}/`);
+    const original = e.translationOf ? originals.get(e.translationOf) : undefined;
+    if (!original) throw new Error(`"${e.id}" must name its original in translationOf`);
+    if (original.number !== e.number)
+      throw new Error(
+        `"${e.id}" has number ${e.number}; its original "${original.id}" has ${original.number}`,
+      );
+    const pair = `${original.id}:${e.lang}`;
+    if (pairs.has(pair)) throw new Error(`"${original.id}" has two editions in ${e.lang}`);
+    pairs.add(pair);
+  }
+};

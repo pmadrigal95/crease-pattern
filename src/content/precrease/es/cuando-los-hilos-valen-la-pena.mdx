@@ -1,0 +1,206 @@
+---
+number: 2
+title: Cuando los hilos valen la pena
+description: Agregar hilos puede hacer más lento un programa. Un solucionador que corre en tu navegador muestra cuándo pasa y qué diseño hace que los hilos rindan.
+date: 2026-11-19
+format: essay
+topics: [concurrency, performance]
+lang: es
+translationOf: when-threads-pay-off
+draft: false
+isolated: true
+references:
+  - title: Validity of the single processor approach to achieving large scale computing capabilities
+    author: Gene M. Amdahl
+    year: 1967
+    url: https://doi.org/10.1145/1465482.1465560
+    note: El artículo detrás de la ley de Amdahl.
+    kind: source
+  - title: Reevaluating Amdahl's law
+    author: John L. Gustafson
+    year: 1988
+    url: https://doi.org/10.1145/42411.42415
+    note: El artículo detrás de la ley de Gustafson.
+    kind: source
+  - title: Using Web Workers
+    author: MDN Web Docs
+    url: https://developer.mozilla.org/es/docs/Web/API/Web_Workers_API/Using_web_workers
+    note: Cómo el navegador corre código en otros hilos.
+    kind: further
+  - title: SharedArrayBuffer
+    author: MDN Web Docs
+    url: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/SharedArrayBuffer
+    note: La memoria que leen y escriben los modelos de memoria compartida de este post.
+    kind: further
+  - title: Atomics
+    author: MDN Web Docs
+    url: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Atomics
+    note: Las operaciones de un solo paso detrás de la cola compartida.
+    kind: further
+  - title: Make your website "cross-origin isolated" using COOP and COEP
+    author: web.dev
+    url: https://web.dev/articles/coop-coep
+    note: Por qué esta página necesita encabezados especiales antes de poder compartir memoria.
+    kind: further
+  - title: Tetris AI – The (Near) Perfect Bot
+    author: Yiyuan Lee
+    year: 2013
+    url: https://codemyroad.wordpress.com/2013/04/14/tetris-ai-the-near-perfect-player/
+    note: Las cuatro medidas con que este solucionador califica un tablero (altura, líneas, huecos, irregularidad), con pesos ajustados por un algoritmo genético.
+    kind: further
+---
+
+import ThreadsRun from '../../../components/threads/ThreadsRun.astro';
+import ThreadsTimeline from '../../../components/threads/ThreadsTimeline.astro';
+import AmdahlDemo from '../../../components/threads/AmdahlDemo.astro';
+import GranularityDemo from '../../../components/threads/GranularityDemo.astro';
+import GustafsonDemo from '../../../components/threads/GustafsonDemo.astro';
+
+<ThreadsRun />
+
+Este es un solucionador para un juego de bloques que caen. Antes de colocar una pieza, prueba todas las formas de
+colocar las cuatro siguientes y se queda con la mejor. El botón corre esa búsqueda en tu dispositivo de cuatro
+maneras: con un solo worker, y repartida entre varios.<MarginNote>Un **hilo** es una secuencia de instrucciones que un programa sigue paso a paso. Un **núcleo** es la parte del procesador que ejecuta un hilo; casi todas las computadoras de hoy tienen varios. En el navegador, un **worker** es un hilo que corre al lado de la página, así que varios workers pueden mantener ocupados varios núcleos.</MarginNote>
+En mi computadora de escritorio, la manera más rápida terminó unas 8,6 veces antes que un solo worker. La tabla
+muestra lo que hace la tuya.
+
+El resto de este post explica por qué la misma idea también puede hacer más lento un programa. Eso fue lo que me
+pasó la primera vez que escribí este solucionador.<MarginNote>Un programa **concurrente** está organizado en varias partes de trabajo que pueden avanzar por separado. Un programa **paralelo** es uno concurrente que de verdad ejecuta esas partes al mismo tiempo, en núcleos distintos. Este post trata del paralelo.</MarginNote>
+
+## Qué hace el solucionador
+
+El tablero mide diez columnas de ancho y veinte filas de alto. Cada una de las siete piezas tiene cuatro cuadros
+y cae en línea recta. Una fila completa desaparece.
+
+Para evaluar una jugada, el solucionador mira el tablero que queda y cuenta cuatro cosas: qué tan altas están las
+columnas, cuántos huecos quedaron tapados, qué tan dispareja está la superficie y cuántas filas se borraron. Es
+una regla práctica clásica para este juego.<MarginNote>Los programadores le dicen **heurística** a una regla así: una forma rápida de calificar una jugada que casi siempre acierta, sin jugar la partida hasta el final.</MarginNote>
+
+El trabajo sale de mirar hacia adelante. La primera pieza puede caer en 34 lugares. Cada uno deja un tablero
+nuevo donde la siguiente pieza tiene sus propias opciones, y así se va multiplicando. Mirar cuatro piezas hacia
+adelante significa probar 344 522 posiciones en total. Eso es lo que el botón reparte.
+
+## Cuatro formas de repartir el trabajo
+
+<ThreadsTimeline />
+
+Cada una de las 34 posiciones de la primera pieza es una tarea: buscar todo lo que viene después y reportar el
+mejor puntaje.<MarginNote>Una **tarea** es una parte del trabajo que se puede hacer por sí sola. Repartir bien el trabajo depende sobre todo de escoger buenas tareas: suficientes y de tamaño parecido.</MarginNote>
+Cada barra del gráfico es una tarea y cada fila es un worker. Estas son las cuatro formas de repartirlas:
+
+- **Un solo worker** hace las 34 en orden. Es la referencia.
+- **Paso de mensajes** le da a cada worker su propia copia del tablero y una cantidad fija de tareas. Los workers
+  no comparten nada; solo devuelven sus resultados.
+- **Fork-join** mantiene un solo tablero que todos los workers pueden leer, y le da a cada uno una cantidad fija.
+- **Memoria compartida con una cola** usa ese mismo tablero, pero sin cantidades fijas. El worker que termina toma
+  la siguiente tarea de una lista, así que uno rápido simplemente hace más.<MarginNote>Tres de las cuatro imitan herramientas que se usan en C: **MPI** (paso de mensajes), **OpenMP** (fork-join) y **pthreads** (memoria compartida). Un solo worker no tiene herramienta propia; es la referencia contra la que se miden las otras tres.</MarginNote>
+
+En mi computadora, la cola ganó en mis tres corridas, por poco: 8,6 veces más rápida que un solo worker, contra
+7,6 del paso de mensajes y 7,4 de fork-join. Fíjate, eso sí, en dónde terminan las filas. Treinta y cuatro tareas
+para dieciséis workers dan unas dos para cada uno, y al que le toca una tercera termina de último mientras los
+demás esperan.
+
+## La versión que escribí mientras estudiaba esto
+
+En 2022 escribí este solucionador para un curso de concurrencia (CI0117, Universidad de Costa Rica): primero una
+versión simple y después tres que repartían el trabajo. Estos son los tiempos que medí, una corrida de cada una:
+
+| Versión  | Hilos | Tiempo  | Aceleración |
+| -------- | ----- | ------- | ----------- |
+| Simple   | 1     | 0,036 s | 1,00        |
+| pthreads | 8     | 0,058 s | 0,62        |
+| pthreads | 16    | 0,046 s | 0,78        |
+| OpenMP   | 8     | 0,065 s | 0,56        |
+| OpenMP   | 16    | 0,450 s | 0,08        |
+| MPI      | 3     | 0,933 s | 0,04        |
+| MPI      | 5     | 0,028 s | 1,30        |
+| MPI      | 10    | 0,374 s | 0,10        |
+
+Una aceleración menor que 1 significa más lento que la versión simple.<MarginNote>La **aceleración** (_speedup_) dice cuántas veces más rápido quedó algo: el tiempo de la versión simple dividido entre el tiempo nuevo. 2 es el doble de rápido; 0,5 es el doble de lento.</MarginNote>
+Casi todas las versiones repartidas fueron más lentas. La única excepción, MPI con cinco, es una sola corrida entre
+dos mucho más lentas, así que la tomo como ruido.
+
+Tres cosas jugaron en contra de esos hilos.
+
+**Había muy poco trabajo.** Ese solucionador escogía una pieza a la vez, y toda la corrida duraba 36
+milisegundos. Crear hilos y esperarlos también cuesta tiempo, y con tan poco trabajo casi no había nada que ganar.
+Mueve el control para agregarle un costo a cada hilo:
+
+<AmdahlDemo />
+
+Sin costo, más hilos siempre ayudan. Con un par de milisegundos por hilo, la curva llega pronto a su punto más
+alto y después cae por debajo de 1.<MarginNote>Este límite se conoce como la **ley de Amdahl**: las partes que no se pueden repartir, y lo que cuesta repartir, deciden cuánto más rápido se puede llegar.</MarginNote>
+Los números de 2022 viven en ese lado de bajada.
+
+**El trabajo venía en diez partes.** Cada hilo tomaba columnas enteras del tablero, por turnos. Este es mi ciclo
+de la versión con pthreads:
+
+```c
+// Copyright 2022 Pablo Madrigal. From the pthreads version, Tarea02.
+void insert_by_col(private_data_t *private_data,  figure_t *figure) {
+    // Mapeo Ciclico
+    for (size_t col = private_data->thread_num;
+    col < private_data->input_data->columns;
+    col = col + private_data->num_threads) {
+        validate_insert_figure(private_data, figure, col);
+    }
+}
+```
+
+El tablero tiene diez columnas, así que solo había diez partes de trabajo, sin importar cuántos hilos creara:
+
+<GranularityDemo />
+
+**Los hilos se detenían entre sí.** Cada intento hacía una copia nueva del tablero, cada mejor puntaje se
+guardaba detrás de un candado y cada intento imprimía una línea en la consola.<MarginNote>Un **candado** (_lock_) deja que solo un hilo a la vez toque algo compartido. La consola funciona igual: los hilos hacen fila para escribir en ella.</MarginNote>
+Cada una de esas cosas es pequeña, pero pasaban miles de veces en esos 36 milisegundos.
+
+## Darle trabajo de verdad
+
+El solucionador nuevo revisa todas las combinaciones de las piezas siguientes, así que su trabajo crece rápido
+según qué tan lejos mire. Esta demo deja el mismo dispositivo y los mismos workers, y cambia solo eso:
+
+<GustafsonDemo />
+
+En mi computadora, con una pieza hacia adelante da 0,8: más lento que un solo worker, igual que en 2022. Con dos
+es 2,2 veces más rápido, con tres 6,2 y con cuatro 8,5. Los hilos no cambiaron. El trabajo creció hasta que el
+costo de usarlos dejó de pesar.<MarginNote>Esta es la **ley de Gustafson**, la otra cara de Amdahl: dale a cada hilo más trabajo y los costos fijos se vuelven pequeños en comparación.</MarginNote>
+
+## Qué hace que el nuevo escale
+
+Tener más trabajo es la mitad del cambio. El solucionador nuevo además evita desperdiciarlo:
+
+- **Un tablero barato de copiar.** Cada fila se guarda como un solo número, así que copiar todo el tablero es
+  copiar veinte números. En 2022 cada intento armaba un tablero nuevo en memoria.
+- **Workers que se crean una vez.** Arrancan la primera vez que tocas un botón, y todas las demos de esta página
+  los reutilizan. En 2022 los hilos se volvían a crear para cada pieza.
+- **Nadie hace fila.** En la versión con cola, tomar la siguiente tarea es un solo paso sobre un contador
+  compartido, y cada tarea escribe su resultado en su propio espacio. Nadie espera un candado mientras busca.
+- **Medir antes de optimizar.** Esperaba que guardar los tableros ya revisados ayudara. En este tablero no
+  encontró ninguno para reutilizar y hizo la búsqueda casi el doble de lenta, así que está apagado.
+
+## Antes de agregar hilos
+
+Esto es lo que reviso ahora antes de repartir trabajo en cualquier lenguaje, incluidos los Web Workers en una
+página de producto:
+
+- **¿Cuánto dura con un solo hilo?** Si son unos pocos milisegundos, crear workers puede costar más de lo que se
+  ahorra.
+- **¿Cuántas partes de trabajo hay?** Diez partes para dieciséis hilos dejan a seis sin nada que hacer.
+- **¿Qué comparten los workers?** Cada candado, cada memoria nueva y cada línea en consola dentro del ciclo es un
+  lugar donde esperar.
+- **¿Qué worker termina de último?** La corrida completa dura lo que dura el más lento.
+
+## Pruébalo tú
+
+Mis números salen de un Intel Core i7-12700K (12 núcleos, 20 hilos) en Chrome, con 16 workers, mirando cuatro
+piezas hacia adelante. Cada resultado es el valor del medio de cinco corridas, después de una de calentamiento.
+Tus números van a ser distintos, y los botones te los muestran.
+
+Las demos usan tantos workers como núcleos tenga tu dispositivo, hasta dieciséis. En dispositivos con menos de
+seis núcleos, como la mayoría de los teléfonos, miran tres piezas hacia adelante para que las demos sigan siendo
+rápidas. Safari no permite memoria compartida en esta página, así que solo corre la versión de un worker y la de
+paso de mensajes.
+
+El solucionador, las cuatro versiones y sus pruebas están en el [repositorio](https://github.com/pmadrigal95/crease-pattern/tree/main/src/lib/threads).
+Si tu dispositivo da números que te sorprenden, me encantaría saberlo.

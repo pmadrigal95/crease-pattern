@@ -13,13 +13,14 @@ const copy = copyFor(lang);
 const topics = topicsFor(lang);
 
 export const getStaticPaths = async () => {
-  const posts = await getPosts();
-  return localeStaticPaths().flatMap(({ params }) =>
-    topicsFor(langOf(params.locale)).map((topic) => ({
+  const paths = localeStaticPaths().map(async ({ params }) => {
+    const posts = await getPosts(langOf(params.locale));
+    return topicsFor(langOf(params.locale)).map((topic) => ({
       params: { ...params, topic: topic.id },
       props: { topic, posts },
-    })),
-  );
+    }));
+  });
+  return (await Promise.all(paths)).flat();
 };
 
 interface Props {

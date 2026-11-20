@@ -1,26 +1,40 @@
 /**
  * Precrease's content, ready for pages: published posts newest first, checked once per build.
  * Drafts show in `astro dev` so they can be previewed, and never in a build.
+ *
+ * A post can exist in several languages (M5.4): the original in the default language, and an
+ * edition per other language with a slug of its own (checkEditions, precrease-tree.ts). Lists ask
+ * for a language with getPosts(lang) and get one entry per post: that language's edition, or the
+ * original while there is none. Routes that build every edition use getEditions().
  */
 import { getCollection, type CollectionEntry } from 'astro:content';
 import { copyFor } from '../i18n/dictionary';
-import { DEFAULT_LANG, localize, type Lang } from '../i18n/routing';
+import { DEFAULT_LANG, localize, type Lang, type Translations } from '../i18n/routing';
 import { formatsFor } from './taxonomy';
 import { padNumber } from './format';
 import { fill } from './template';
-import { checkNumbers, isLive } from './precrease-tree';
+import { checkEditions, checkNumbers, isLive } from './precrease-tree';
 
 export type Post = CollectionEntry<'precrease'>;
 
 /** Flattened shape the pure helpers in precrease-tree.ts work with. */
 export interface PostSummary {
+  /** This edition's slug, the last part of its URL. */
   id: string;
+  /**
+   * The original's slug, shared by every edition of the post: it seeds the thumbnail, and keys the
+   * reader counts and the comments, so a post read in two languages is still one post.
+   */
+  key: string;
+  lang: Lang;
   number: number;
   topics: string[];
   date: Date;
   /** Published: not a draft and its date has arrived. Only `astro dev` ever sees other posts. */
   live: boolean;
   entry: Post;
+  /** Where each edition of the post this build has lives (the language switch, hreflang). */
+  translations: Translations;
 }
 
 /**
@@ -33,21 +47,58 @@ export const PREVIEW = process.env.PRECREASE_PREVIEW === '1';
 /** One clock per build, so every page agrees on what is out. */
 const buildTime = new Date();
 
-export const getPosts = async (): Promise<PostSummary[]> => {
+const editionPath = (slug: string, lang: Lang) => localize(`/precrease/${slug}`, lang);
+
+/** Every edition of every post in this build, in every language. */
+export const getEditions = async (): Promise<PostSummary[]> => {
   const entries = await getCollection('precrease');
-  const posts = entries
-    .map((entry) => ({
-      id: entry.id,
-      number: entry.data.number,
-      topics: entry.data.topics,
-      date: entry.data.date,
-      live: isLive(entry.data, buildTime),
-      entry,
-    }))
+  const files = entries.map((entry) => {
+    const parts = entry.id.split('/');
+    return { entry, id: parts.at(-1)!, folder: parts.length > 1 ? parts[0]! : '' };
+  });
+  checkEditions(
+    files.map(({ entry, id, folder }) => ({ id, folder, ...entry.data })),
+    DEFAULT_LANG,
+  );
+  const originalLive = new Map(
+    files
+      .filter((f) => f.entry.data.lang === DEFAULT_LANG)
+      .map((f) => [f.id, isLive(f.entry.data, buildTime)]),
+  );
+  const editions = files
+    .map(({ entry, id }) => {
+      const key = entry.data.translationOf ?? id;
+      return {
+        id,
+        key,
+        lang: entry.data.lang,
+        number: entry.data.number,
+        topics: entry.data.topics,
+        date: entry.data.date,
+        // An edition is out only once its original is.
+        live: isLive(entry.data, buildTime) && originalLive.get(key) === true,
+        entry,
+        translations: {} as Translations,
+      };
+    })
     .filter((p) => import.meta.env.DEV || PREVIEW || p.live);
+  for (const p of editions) {
+    for (const other of editions.filter((o) => o.key === p.key)) {
+      p.translations[other.lang] = editionPath(other.id, other.lang);
+    }
+  }
+  return editions;
+};
+
+/** One entry per post, newest first: its edition in `lang`, or the original while it has none. */
+export const getPosts = async (lang: Lang = DEFAULT_LANG): Promise<PostSummary[]> => {
+  const editions = await getEditions();
+  const originals = editions.filter((p) => p.lang === DEFAULT_LANG);
   // Drafts and scheduled posts may hold a future number; the sequence rule applies to what is out.
-  checkNumbers(posts.filter((p) => p.live));
-  return posts.sort((a, b) => b.number - a.number);
+  checkNumbers(originals.filter((p) => p.live));
+  return originals
+    .map((o) => editions.find((p) => p.key === o.key && p.lang === lang) ?? o)
+    .sort((a, b) => b.number - a.number);
 };
 
 /** "Crease No. 001", worded by the copy file of the page's language. */
@@ -61,5 +112,6 @@ export const postKind = (post: Post, lang: Lang = DEFAULT_LANG): string => {
   return series ? `${label} ${padNumber(series.part, 2)}` : label;
 };
 
-export const postHref = (id: string) => `/precrease/${id}`;
+/** Where a post's edition lives: /precrease/<slug>, /es/precrease/<slug>. */
+export const postHref = (post: Pick<PostSummary, 'id' | 'lang'>) => editionPath(post.id, post.lang);
 export const topicHref = (id: string, lang: Lang = DEFAULT_LANG) => localize(`/precrease/topics/${id}`, lang);

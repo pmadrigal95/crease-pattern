@@ -27,6 +27,7 @@ import FoldedCorner from './FoldedCorner.astro';
 const copy = copyFor(Astro.currentLocale);
 
 interface Props {
+  /** The original's slug: every edition of a post shares its counts and its comments. */
   slug: string;
   title: string;
   url: string;
@@ -94,7 +95,7 @@ const t = copy.precrease.readers;
   </div>
 
   <ShareSheet url={url} title={title} />
-  <PostComments isolated={isolated} />
+  <PostComments slug={slug} isolated={isolated} />
 
   <p class="status" role="status" aria-live="polite" data-status></p>
   <span class="sentinel" aria-hidden="true" data-read-sentinel></span>

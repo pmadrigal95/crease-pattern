@@ -260,6 +260,9 @@
     "chapter": "Capítulo: {chapter}",
     "draft": "Borrador: solo visible en desarrollo",
     "scheduled": "Programada para el {date}: solo visible en desarrollo",
+    "untranslated": "En inglés",
+    "edition": "Edición en español. El original, en inglés, salió el {date}.",
+    "original": "Leer el original",
     "search": {
       "label": "Buscar en Precrease",
       "placeholder": "Buscar entradas",
@@ -350,7 +353,7 @@
       "bestMove": "La jugada que eligió el solucionador",
       "measuredResult": "En mi computadora de escritorio: {model}, {times}× más rápido que un solo worker.",
       "batteryNote": "Una ejecución mantiene ocupados los núcleos del procesador por cerca de un segundo, así que gasta un poco de batería.",
-      "measuredNote": "Medido en {device} con {browser}, con {workers} workers y cuatro piezas por delante. Pulsa Ejecutar para medir tu propio dispositivo.",
+      "measuredNote": "Medido en un {device} ({cores} núcleos, {threads} hilos) con {browser}, con {workers} workers y cuatro piezas por delante. Pulsa Ejecutar para medir tu propio dispositivo.",
       "modelLabel": "Modelo",
       "summary": "{model}: {ms} ms · {tasks} tareas por worker",
       "legendWork": "Buscando en una tarea",

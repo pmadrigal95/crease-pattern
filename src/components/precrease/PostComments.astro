@@ -7,12 +7,18 @@
  */
 import site from '../../../site.config';
 import { copyFor } from '../../i18n/dictionary';
+import { LOCALES, langOf } from '../../i18n/routing';
 const copy = copyFor(Astro.currentLocale);
 
 interface Props {
+  /**
+   * The original's slug. Every edition of a post opens the same discussion: the term is the
+   * original's path, which is what giscus matched by pathname before posts had editions.
+   */
+  slug: string;
   isolated?: boolean | undefined;
 }
-const { isolated = false } = Astro.props;
+const { slug, isolated = false } = Astro.props;
 const t = copy.precrease.readers;
 const comments = isolated ? null : site.comments;
 const commentsLink =
@@ -52,6 +58,8 @@ if (comments) {
       data-repo-id={comments.repoId}
       data-category={comments.category}
       data-category-id={comments.categoryId}
+      data-term={`precrease/${slug}`}
+      data-lang={LOCALES[langOf(Astro.currentLocale)].htmlLang}
     >
       <span>
         <b>{t.comments}</b>
@@ -145,12 +153,13 @@ if (comments) {
         'data-repo-id': d.repoId ?? '',
         'data-category': d.category ?? '',
         'data-category-id': d.categoryId ?? '',
-        'data-mapping': 'pathname',
+        'data-mapping': 'specific',
+        'data-term': d.term ?? '',
         'data-strict': '1',
         'data-reactions-enabled': '0',
         'data-input-position': 'top',
         'data-theme': 'preferred_color_scheme',
-        'data-lang': 'en',
+        'data-lang': d.lang ?? 'en',
         'data-loading': 'eager',
       };
       for (const [k, v] of Object.entries(attrs)) script.setAttribute(k, v);

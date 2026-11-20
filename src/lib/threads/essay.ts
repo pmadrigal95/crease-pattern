@@ -119,7 +119,10 @@ export const speedupPath = (
  * Measured 2026-11-13 on a Cloudflare preview of the production build.
  */
 export const MEASURED = {
-  device: 'an Intel Core i7-12700K (12 cores, 20 threads)',
+  // The words around these ("an", "cores") come from each language's copy (measuredNote).
+  device: 'Intel Core i7-12700K',
+  cores: 12,
+  threads: 20,
   browser: 'Chrome',
   workers: 16,
   depth: 4,
