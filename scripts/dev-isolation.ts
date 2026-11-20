@@ -31,7 +31,7 @@ export const devIsolation = () => {
     configureServer(server: DevServer) {
       server.middlewares.use((req, res, next) => {
         const path = (req.url ?? '').split('?')[0] ?? '';
-        res.setHeader('Cross-Origin-Embedder-Policy', 'credentialless');
+        res.setHeader('Cross-Origin-Embedder-Policy', 'require-corp');
         if (isolatedPaths().includes(path)) res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
         next();
       });

@@ -90,11 +90,11 @@ describe('cross-origin isolation', () => {
     expect(block, `Add a ${path} block to public/_headers`).toMatch(
       /Cross-Origin-Opener-Policy: same-origin/,
     );
-    expect(block).toMatch(/Cross-Origin-Embedder-Policy: credentialless/);
+    expect(block).toMatch(/Cross-Origin-Embedder-Policy: require-corp/);
   });
 
   test('built assets carry an embedder policy, so workers started by isolated pages are allowed', () => {
-    expect(blockFor('/_astro/*')).toMatch(/Cross-Origin-Embedder-Policy: credentialless/);
+    expect(blockFor('/_astro/*')).toMatch(/Cross-Origin-Embedder-Policy: require-corp/);
   });
 });
 
