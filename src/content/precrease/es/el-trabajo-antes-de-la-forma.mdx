@@ -1,0 +1,94 @@
+---
+number: 1
+title: El trabajo antes de la forma
+description: Quién soy, por qué este sitio se dibuja como un patrón de pliegues y qué va a cubrir Precrease mientras aprendo en público.
+date: 2026-11-19
+format: essay
+topics: [craft, architecture]
+lang: es
+translationOf: the-work-before-the-shape
+draft: false
+references:
+  - title: Origami Design Secrets, 2nd Edition
+    author: Robert J. Lang
+    year: 2011
+    url: https://langorigami.com/publication/origami-design-secrets-2nd-edition/
+    note: Cómo los diseñadores de origami planean un modelo a partir de su patrón de pliegues.
+    kind: further
+---
+
+Soy Pablo Madrigal. Vivo en Costa Rica y trabajo de forma remota como Lead Frontend Architect en Buo, una
+plataforma de People Analytics con IA para empresas en México y Latinoamérica. Mi trabajo es la base compartida detrás de un producto web: los componentes, las pruebas y
+el proceso de publicación que le permiten a un equipo sacar funciones nuevas sin romper lo que ya funciona. Este
+es el primer post de Precrease, la parte de mi sitio donde escribo cómo se hace ese trabajo.
+
+Empecé en 2015, estudiando informática en Cartago. Mi primer proyecto profesional llegó dos años después, como
+practicante, trabajando sobre un sistema web heredado en Node.js y Express. Desde 2019 trabajo sobre todo con
+Vue: primero como desarrollador full stack sobre APIs en .NET Core, y después en Buo, donde entré en 2021
+como el único desarrollador frontend y, conforme el equipo creció, pasé a Frontend Lead y luego a Lead
+Frontend Architect.
+
+## Por qué un patrón de pliegues
+
+En origami, lo que la gente ve es el zorro terminado. Si lo desdoblas, aparece un cuadrado de papel lleno de
+líneas: pliegues de montaña, pliegues de valle, el plan que hizo posible al zorro. Esa hoja se llama patrón de
+pliegues (_crease pattern_).
+
+El software tiene las mismas dos capas. La interfaz es el zorro. La arquitectura que está debajo es el patrón de
+pliegues, y casi siempre decide si el próximo cambio toma una tarde o un mes. Este sitio intenta mostrar las
+dos. En la página de inicio, "See how this page is built" abre el Inspector: la página se inclina en capas, cada
+parte muestra los valores de diseño que usa y cuándo cambió su código por última vez, y el zorro se desdobla en
+sus pliegues. También funciona en este post.
+
+## Por qué Precrease
+
+Antes de doblar, se premarca el papel (_precrease_): se marcan las líneas en la hoja plana para que los pliegues
+de verdad caigan donde deben. Es la parte tranquila del proceso, y buena parte del resultado depende de ella.
+
+De eso trata este blog. Precrease cubre el desarrollo de software en general: arquitectura y frontend, backend,
+sistemas, entrega e IA. El hilo común es el trabajo que pasa antes de que algo tome su forma, y un relato honesto
+de lo que pasó después.
+
+Si quieres algo para probar esta semana, es el premarcado más pequeño que conozco: antes de construir la
+próxima función, escribe en unas pocas líneas la decisión que hay detrás. Qué elegiste, qué más consideraste y
+por qué. Este sitio guarda las suyas en [docs/decisions](https://github.com/pmadrigal95/crease-pattern/tree/main/docs/decisions). En mi experiencia, esas pocas
+líneas muchas veces son lo que permite que un cambio posterior tome una tarde en lugar de un mes.
+
+## Aprender en público
+
+Buena parte de lo que sé lo aprendí trabajando, cuando un proyecto lo pedía. Es un camino común, y deja sus
+propios huecos: libros que conozco más por su fama que por haberlos leído, y fundamentos que aprendí en
+desorden.
+
+Precrease es un lugar para trabajar esos huecos con calma y a la vista. Algunos posts van a revisitar un clásico
+y preguntarse qué sigue valiendo ahora que buena parte de nuestro código se escribe al lado de un asistente de
+IA. Otros van a volver a fundamentos que es fácil saltarse y que vale la pena conocer bien. Voy a escribir de
+ellos conforme vayan saliendo, sin una lista fija.
+
+## Qué vas a encontrar
+
+Los posts vienen en cuatro formatos:
+
+- **Ensayos:** lecturas largas, muchas veces con algo para probar. El primero va a correr un solucionador de
+  rompecabezas con hilos reales en tu navegador, y va a mirar por qué la primera versión que escribí mientras
+  aprendía concurrencia no escalaba.
+- **Notas:** cortas, una idea y un ejemplo.
+- **Dog-ear:** revisitan un libro capítulo por capítulo: la idea con mis palabras, cómo se sostiene hoy con un
+  ejemplo real, qué cambia con la IA y una cita breve con el enlace al libro.
+- **Basic Folds:** una serie sobre fundamentos de ingeniería para quienes construyen con IA y quieren bases
+  firmes antes de escribir el prompt.
+
+Puedes [suscribirte](/precrease/subscribe) a todo el blog o a un solo tema.
+
+## Cómo escribo aquí
+
+Los números de este sitio están medidos, y el código que los mide está en el repositorio. Cuando algo no
+funciona, también muestro esa parte, porque casi siempre ahí está la lección. El código y los ejemplos son reales.
+
+## Desdóblalo tú
+
+Puedes mirar cómo está construida esta página, o abrir el
+[repositorio](https://github.com/pmadrigal95/crease-pattern) y leer las decisiones que hay detrás.
+
+Si hay un libro que te gustaría ver revisitado aquí, o un fundamento que te hubiera gustado que alguien te
+explicara antes, me encantaría saberlo. Mi correo está en el pie de página.

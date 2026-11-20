@@ -92,7 +92,7 @@ test('an English browser sees no suggestion', async ({ page }) => {
   await expect(page.locator(suggestion)).toBeHidden();
 });
 
-for (const path of ['/es', '/es/about', '/es/precrease']) {
+for (const path of ['/es', '/es/about', '/es/precrease', '/es/precrease/el-trabajo-antes-de-la-forma']) {
   test(`${path} has no axe violations`, async ({ page }) => {
     await page.goto(path);
     await page.evaluate(() =>
@@ -132,5 +132,43 @@ test('the Spanish changelog and topic map use Spanish data', async ({ page }) =>
   await expect(page.getByRole('link', { name: 'Arquitectura y diseño' })).toHaveAttribute(
     'href',
     '/es/precrease/topics/architecture',
+  );
+});
+
+// Posts in Spanish (M5.4): a slug of their own under /es/precrease/, paired with the original by
+// `translationOf`, listed on the Spanish pages, and one post with the original for counts and comments.
+test('a Spanish edition has its own URL, its pair, and the original’s counts', async ({ page }) => {
+  await page.goto('/es/precrease');
+  await page.getByRole('link', { name: 'El trabajo antes de la forma' }).first().click();
+  await expect(page).toHaveURL(/\/es\/precrease\/el-trabajo-antes-de-la-forma$/);
+  await expect(page.locator('html')).toHaveAttribute('lang', 'es');
+  const alternates = await page
+    .locator('link[rel="alternate"][hreflang]')
+    .evaluateAll((links) =>
+      links.map((l) => `${l.getAttribute('hreflang')} ${new URL(l.getAttribute('href')!).pathname}`),
+    );
+  expect(alternates.toSorted()).toEqual([
+    'en /precrease/the-work-before-the-shape',
+    'es /es/precrease/el-trabajo-antes-de-la-forma',
+    'x-default /precrease/the-work-before-the-shape',
+  ]);
+  await expect(page.locator('.edition')).toContainText(
+    'El original, en inglés, salió el 11 de noviembre de 2026.',
+  );
+  await expect(page.locator('[data-readers]')).toHaveAttribute('data-slug', 'the-work-before-the-shape');
+  await expect(page.locator(switchInMast)).toHaveAttribute('href', '/precrease/the-work-before-the-shape');
+  await page.goto('/precrease/the-work-before-the-shape');
+  await expect(page.locator(switchInMast)).toHaveAttribute(
+    'href',
+    '/es/precrease/el-trabajo-antes-de-la-forma',
+  );
+  await expect(page.locator('.edition')).toHaveCount(0);
+});
+
+test('the Spanish essay’s demos speak Spanish', async ({ page }) => {
+  await page.goto('/es/precrease/cuando-los-hilos-valen-la-pena');
+  await expect(page.locator('[data-threads-run]')).toContainText('Ejecutar en este dispositivo');
+  await expect(page.locator('[data-threads-run]')).toContainText(
+    'Medido en un Intel Core i7-12700K (12 núcleos, 20 hilos)',
   );
 });

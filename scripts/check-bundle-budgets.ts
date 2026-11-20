@@ -16,10 +16,17 @@ import {
 
 const root = join(import.meta.dirname, '..');
 const dist = join(root, 'dist');
-/** Every post's page, from the content folder: one MDX file per post. */
-const postPaths = readdirSync(join(root, 'src/content/precrease'))
+/**
+ * Every post's page, from the content folder: one MDX file per post and language. Editions in
+ * other languages sit in a folder per language (es/<slug>.mdx → /es/precrease/<slug>).
+ */
+const postPaths = readdirSync(join(root, 'src/content/precrease'), { recursive: true, encoding: 'utf8' })
+  .map((f) => f.replaceAll('\\', '/'))
   .filter((f) => /\.mdx?$/.test(f))
-  .map((f) => `/precrease/${f.replace(/\.mdx?$/, '')}`);
+  .map((f) => {
+    const [lang, slug] = f.includes('/') ? f.split('/') : [undefined, f];
+    return `${lang ? `/${lang}` : ''}/precrease/${slug!.replace(/\.mdx?$/, '')}`;
+  });
 type Group = keyof typeof jsBudgetKb;
 const rows: { label: string; group: Group; bytes: number }[] = [
   ...Object.entries(measureBundles(dist)).map(([group, bytes]) => ({

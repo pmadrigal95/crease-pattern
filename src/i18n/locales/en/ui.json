@@ -260,6 +260,9 @@
     "chapter": "Chapter: {chapter}",
     "draft": "Draft: only visible in development",
     "scheduled": "Scheduled for {date}: only visible in development",
+    "untranslated": "Not in English yet",
+    "edition": "English edition. The original came out on {date}.",
+    "original": "Read the original",
     "search": {
       "label": "Search Precrease",
       "placeholder": "Search posts",
@@ -350,7 +353,7 @@
       "bestMove": "The move the solver chose",
       "measuredResult": "On my desktop: {model}, {times}× faster than one worker.",
       "batteryNote": "A run keeps your processor's cores busy for about a second, so it uses a little battery.",
-      "measuredNote": "Measured on {device} in {browser}, with {workers} workers, four pieces ahead. Press Run to time your own device.",
+      "measuredNote": "Measured on an {device} ({cores} cores, {threads} threads) in {browser}, with {workers} workers, four pieces ahead. Press Run to time your own device.",
       "modelLabel": "Model",
       "summary": "{model}: {ms} ms · {tasks} tasks per worker",
       "legendWork": "Searching a task",

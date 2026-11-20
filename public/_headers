@@ -25,3 +25,7 @@
 /precrease/when-threads-pay-off
   Cross-Origin-Opener-Policy: same-origin
   Cross-Origin-Embedder-Policy: credentialless
+
+/es/precrease/cuando-los-hilos-valen-la-pena
+  Cross-Origin-Opener-Policy: same-origin
+  Cross-Origin-Embedder-Policy: credentialless

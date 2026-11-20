@@ -14,7 +14,7 @@ export const feed = (posts: PostSummary[], title: string, description: string) =
       title: `${creaseNumber(p.number)} · ${p.entry.data.title}`,
       description: p.entry.data.description,
       pubDate: p.entry.data.date,
-      link: postHref(p.id),
+      link: postHref(p),
       categories: p.entry.data.topics,
     })),
     customData: `<language>en</language>`,

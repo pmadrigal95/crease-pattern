@@ -14,7 +14,7 @@ const copy = copyFor(Astro.currentLocale);
 const topics = topicsFor(langOf(Astro.currentLocale));
 
 const t = copy.precrease;
-const posts = await getPosts();
+const posts = await getPosts(langOf(Astro.currentLocale));
 
 const grow = (parent: string | undefined): (Branch & Topic)[] =>
   childrenOf(topics, parent).map((topic) => ({
