@@ -67,17 +67,17 @@ const SHAPES: Record<PieceName, Cells> = {
 };
 
 /** Moves the cells so the smallest x and y are 0, and sorts them, so equal shapes compare equal. */
-function normalize(cells: Cells): Cells {
+const normalize = (cells: Cells): Cells => {
   const minX = Math.min(...cells.map(([x]) => x));
   const minY = Math.min(...cells.map(([, y]) => y));
   return cells
     .map(([x, y]) => [x - minX, y - minY] as const)
     .sort(([ax, ay], [bx, by]) => ay - by || ax - bx);
-}
+};
 
 const turn = (cells: Cells): Cells => cells.map(([x, y]) => [y, -x] as const);
 
-function toRotation(cells: Cells): Rotation {
+const toRotation = (cells: Cells): Rotation => {
   const width = Math.max(...cells.map(([x]) => x)) + 1;
   const height = Math.max(...cells.map(([, y]) => y)) + 1;
   const rows = Array.from({ length: height }, (_, y) =>
@@ -87,9 +87,9 @@ function toRotation(cells: Cells): Rotation {
     Math.min(...cells.filter(([cx]) => cx === x).map(([, y]) => y)),
   );
   return { rows, width, height, bottom };
-}
+};
 
-function rotationsOf(shape: Cells): Rotation[] {
+const rotationsOf = (shape: Cells): Rotation[] => {
   const seen = new Set<string>();
   const out: Rotation[] = [];
   let cells = normalize(shape);
@@ -102,7 +102,7 @@ function rotationsOf(shape: Cells): Rotation[] {
     cells = normalize(turn(cells));
   }
   return out;
-}
+};
 
 /** Every distinct rotation of every piece, computed once. */
 export const ROTATIONS: Readonly<Record<PieceName, readonly Rotation[]>> = {

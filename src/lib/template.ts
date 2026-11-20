@@ -5,9 +5,9 @@
  *
  * Dependency-free on purpose: browser scripts import it too, without pulling in the copy loader.
  */
-export function fill(template: string, values: Record<string, string | number>): string {
+export const fill = (template: string, values: Record<string, string | number>): string => {
   return template.replace(/\{(\w+)\}/g, (_, key: string) => {
     if (!(key in values)) throw new Error(`Missing value for {${key}} in "${template}"`);
     return String(values[key]);
   });
-}
+};

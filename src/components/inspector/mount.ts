@@ -7,6 +7,7 @@ import InspectorPanel, { type InspectorStrings, type Manifest } from './Inspecto
 // The manifest is a file of its own (Vite emits it hashed under /_astro/), fetched when the panel
 // loads, not bundled into it: it grows with every inspectable part, and the panel's code
 // shouldn't. Its size has its own budget (src/config/quality.ts, inspectorData).
+import { heroScene } from '../../scripts/hero3d';
 import manifestUrl from '../../generated/inspector.json?url';
 // The panel's styles are a file of their own (Vite emits it hashed under /_astro/), fetched when
 // the Inspector loads and adopted as a constructed stylesheet: a CSS import here would make Astro
@@ -14,8 +15,6 @@ import manifestUrl from '../../generated/inspector.json?url';
 // every visual change to the panel weigh on the on-demand JavaScript. Its size has its own budget
 // (src/config/quality.ts, inspectorStyles).
 import inspectorStylesUrl from './inspector.css?url';
-import { canRun3D, detectDevice } from '../../lib/scene3d-support';
-import type { FigureScene } from './scene3d';
 
 export interface InspectorHandle {
   close(): void;
@@ -26,7 +25,7 @@ let styles: CSSStyleSheet | null = null;
 let stylesRequest: Promise<string> | null = null;
 
 /** Starts (or reuses) the styles' download; a failed one is forgotten, so the next open retries. */
-function loadStyles(): Promise<string> {
+const loadStyles = (): Promise<string> => {
   stylesRequest ??= fetch(inspectorStylesUrl)
     .then((r) => (r.ok ? r.text() : Promise.reject(new Error(`inspector styles: ${r.status}`))))
     .catch((error: unknown) => {
@@ -34,20 +33,20 @@ function loadStyles(): Promise<string> {
       throw error;
     });
   return stylesRequest;
-}
+};
 
 /** Adopts the Inspector's styles once; kept after closing so the layers can settle back. */
-function adoptStyles(css: string) {
+const adoptStyles = (css: string) => {
   if (styles) return;
   styles = new CSSStyleSheet();
   styles.replaceSync(css);
   document.adoptedStyleSheets = [...document.adoptedStyleSheets, styles];
-}
+};
 
 let manifestRequest: Promise<Manifest> | null = null;
 
 /** Starts (or reuses) the manifest download; a failed one is forgotten, so the next open retries. */
-function loadManifest(): Promise<Manifest> {
+const loadManifest = (): Promise<Manifest> => {
   manifestRequest ??= fetch(manifestUrl)
     .then((r) =>
       r.ok ? (r.json() as Promise<Manifest>) : Promise.reject(new Error(`manifest: ${r.status}`)),
@@ -57,31 +56,20 @@ function loadManifest(): Promise<Manifest> {
       throw error;
     });
   return manifestRequest;
-}
+};
 // This module loads when a visitor first reaches for the Inspector (hovering its button counts), so
 // start the manifest now, alongside Vue, instead of after it.
 void loadManifest().catch(() => undefined);
 void loadStyles().catch(() => undefined);
 
-// The 3D figure: only on a page with the hero, and only on a device that can run it
-// (decision 50). Its module is a chunk of its own with its own budget (scene3d), so the panel's
-// code never carries three.js. It starts loading alongside Vue, like the manifest.
-const heroStage = () => document.querySelector<HTMLElement>('[data-hero-fold] [data-stage]');
-let scene3d: Promise<typeof import('./scene3d')> | null = null;
-function loadScene3d() {
-  if (!heroStage() || !canRun3D(detectDevice())) return null;
-  scene3d ??= import('./scene3d').catch((error: unknown) => {
-    scene3d = null;
-    throw error;
-  });
-  return scene3d;
-}
-void loadScene3d()?.catch(() => undefined);
+// The hero's 3D figure is shared with the hero itself (src/scripts/hero3d.ts): if it isn't up yet,
+// opening the Inspector brings it up, alongside Vue, like the manifest.
+void heroScene();
 
-export async function openInspector(
+export const openInspector = async (
   trigger: HTMLElement | null,
   onClosed: () => void,
-): Promise<InspectorHandle> {
+): Promise<InspectorHandle> => {
   const [manifest, css] = await Promise.all([loadManifest(), loadStyles()]);
   adoptStyles(css);
   // A box-less wrapper: the panel (aside#inspector) and the part's outline render side by side in
@@ -101,25 +89,17 @@ export async function openInspector(
   });
   app.mount(host);
 
-  // The 3D figure takes the hero's square when it's ready; the Inspector never waits for it.
-  let scene: FigureScene | null = null;
+  // The 3D figure comes apart while inspecting; the Inspector never waits for it.
   let closed = false;
-  const stage = heroStage();
-  void loadScene3d()
-    ?.then((m) => {
-      if (closed || !stage) return;
-      scene = m.mountFigureScene(stage);
-      scene.setInspecting(true);
-    })
-    // Without the scene (offline, or no WebGL context after all), the SVG figure stays: a complete picture.
-    .catch((error: unknown) => console.warn('3D scene unavailable; the SVG figure stays', error));
+  void heroScene().then((scene) => {
+    if (!closed) scene?.setInspecting(true);
+  });
 
   const handle: InspectorHandle = {
     close() {
       if (!app) return;
       closed = true;
-      scene?.dispose();
-      scene = null;
+      void heroScene().then((scene) => scene?.setInspecting(false));
       app.unmount();
       app = null;
       host.remove();
@@ -129,4 +109,4 @@ export async function openInspector(
     },
   };
   return handle;
-}
+};

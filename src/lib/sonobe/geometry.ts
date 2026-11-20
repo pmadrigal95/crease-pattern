@@ -51,10 +51,10 @@ interface Deltahedron {
 }
 
 /** Scales to edge length 1 and winds every face outward (counter-clockwise seen from outside). */
-function normalize(
+const normalize = (
   vertices: readonly Vec3[],
   faces: readonly (readonly [number, number, number])[],
-): Deltahedron {
+): Deltahedron => {
   const [a, b] = faces[0]!;
   const k = 1 / length(sub(vertices[a]!, vertices[b]!));
   const v = vertices.map((p) => scale(p, k));
@@ -65,9 +65,9 @@ function normalize(
       return dot(n, centroid([v[i]!, v[j]!, v[l]!])) > 0 ? ([i, j, l] as const) : ([i, l, j] as const);
     }),
   };
-}
+};
 
-function octahedron(): Deltahedron {
+const octahedron = (): Deltahedron => {
   const v: Vec3[] = [
     [1, 0, 0],
     [-1, 0, 0],
@@ -79,9 +79,9 @@ function octahedron(): Deltahedron {
   const faces: [number, number, number][] = [];
   for (const x of [0, 1]) for (const y of [2, 3]) for (const z of [4, 5]) faces.push([x, y, z]);
   return normalize(v, faces);
-}
+};
 
-function icosahedron(): Deltahedron {
+const icosahedron = (): Deltahedron => {
   const p = (1 + Math.sqrt(5)) / 2;
   const v: Vec3[] = [
     [-1, p, 0],
@@ -104,13 +104,13 @@ function icosahedron(): Deltahedron {
     for (let j = i + 1; j < 12; j++)
       for (let l = j + 1; l < 12; l++) if (edge(i, j) && edge(j, l) && edge(i, l)) faces.push([i, j, l]);
   return normalize(v, faces);
-}
+};
 
 /** Height of a Sonobe pyramid on an equilateral face of side 1: its sides meet at 90°. */
 export const PYRAMID_HEIGHT = 1 / Math.sqrt(6);
 
 /** One unit per edge of the base solid, each covering the two pyramid sides over that edge. */
-function stellate(base: Deltahedron): Assembly {
+const stellate = (base: Deltahedron): Assembly => {
   const { vertices: v, faces } = base;
   const apex = faces.map((f) => {
     const pts = f.map((i) => v[i]!);
@@ -134,10 +134,10 @@ function stellate(base: Deltahedron): Assembly {
     for (const { face, from, to } of sides) facets.push({ unit, points: [v[from]!, v[to]!, apex[face]!] });
   });
   return { units: edges.size, facets };
-}
+};
 
 /** The 6-unit cube: each unit's square face is one face of the cube (edge 1). */
-function cube(): Assembly {
+const cube = (): Assembly => {
   const h = 0.5;
   const faces: Vec3[][] = [
     [
@@ -178,7 +178,7 @@ function cube(): Assembly {
     ],
   ];
   return { units: 6, facets: faces.map((points, unit) => ({ unit, points })) };
-}
+};
 
 /** The models the essay builds, by how many units they take. */
 export const ASSEMBLIES = {
@@ -191,16 +191,16 @@ export type UnitCount = keyof typeof ASSEMBLIES;
 export const assembly = (units: UnitCount): Assembly => ASSEMBLIES[units]();
 
 /** Outward normal of a facet (unit length). */
-export function normal(points: readonly Vec3[]): Vec3 {
+export const normal = (points: readonly Vec3[]): Vec3 => {
   const n = cross(sub(points[1]!, points[0]!), sub(points[2]!, points[0]!));
   return scale(n, 1 / length(n));
-}
+};
 
 /**
  * The same model with one unit pushed `distance` out along each of its facets' normals: a unit
  * that no longer sits where the others expect it, so the model doesn't close (act 5).
  */
-export function displace(model: Assembly, unit: number, distance: number): Assembly {
+export const displace = (model: Assembly, unit: number, distance: number): Assembly => {
   return {
     units: model.units,
     facets: model.facets.map((f) => {
@@ -209,7 +209,7 @@ export function displace(model: Assembly, unit: number, distance: number): Assem
       return { unit: f.unit, points: f.points.map((p) => add(p, offset)) };
     }),
   };
-}
+};
 
 export interface Projected {
   unit: number;
@@ -223,7 +223,7 @@ export interface Projected {
  * facets turned away are dropped, the rest come back far to near, so drawing them in order
  * paints the near ones on top. y points down, as in SVG.
  */
-export function project(model: Assembly, yaw: number, pitch: number): Projected[] {
+export const project = (model: Assembly, yaw: number, pitch: number): Projected[] => {
   const [cy, sy, cp, sp] = [Math.cos(yaw), Math.sin(yaw), Math.cos(pitch), Math.sin(pitch)];
   const turn = ([x, y, z]: Vec3): Vec3 => {
     const x1 = x * cy + z * sy;
@@ -238,7 +238,7 @@ export function project(model: Assembly, yaw: number, pitch: number): Projected[
     .filter((f) => f.n[2] > 1e-9)
     .sort((a, b) => a.depth - b.depth)
     .map((f) => ({ unit: f.unit, points: f.pts.map(([x, y]) => [x, -y] as const), light: f.n[2] }));
-}
+};
 
 /**
  * The flat unit, as the essay draws it: a parallelogram one high, with the square face in the

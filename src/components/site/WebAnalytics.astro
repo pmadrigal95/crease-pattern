@@ -19,11 +19,17 @@ import site from '../../../site.config';
     (navigator as Navigator & { globalPrivacyControl?: boolean }).globalPrivacyControl === true ||
     navigator.doNotTrack === '1';
 
-  if (token && hosts.includes(location.hostname) && !optedOut) {
+  const load = () => {
     const beacon = document.createElement('script');
     beacon.defer = true;
     beacon.src = 'https://static.cloudflareinsights.com/beacon.min.js';
     beacon.dataset.cfBeacon = JSON.stringify({ token });
     document.head.append(beacon);
+  };
+  if (token && hosts.includes(location.hostname) && !optedOut) {
+    // A prerendered page (src/scripts/prefetch.ts) isn't a visit until it's shown.
+    const doc = document as Document & { prerendering?: boolean };
+    if (doc.prerendering) document.addEventListener('prerenderingchange', load, { once: true });
+    else load();
   }
 </script>

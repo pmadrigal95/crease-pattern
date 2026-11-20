@@ -19,10 +19,10 @@ const clamp01 = (x: number) => Math.min(1, Math.max(0, x));
 export const EXCHANGE_DELAY_MS = 120;
 
 /** A seeded random sequence (Park–Miller): the same paper on every visit. */
-export function seeded(seed: number): () => number {
+export const seeded = (seed: number): (() => number) => {
   let s = seed;
   return () => (s = (s * 16807) % 2147483647) / 2147483647;
-}
+};
 
 // ---------- Contour lines: the Irazú ----------
 
@@ -60,7 +60,7 @@ export interface IrazuModel {
 }
 
 /** Turns the grid's metres into model heights, on the plane's scale times the exaggeration. */
-export function irazuModel(metres: ArrayLike<number>): IrazuModel {
+export const irazuModel = (metres: ArrayLike<number>): IrazuModel => {
   let base = Infinity;
   let top = -Infinity;
   for (let i = 0; i < metres.length; i++) {
@@ -77,18 +77,18 @@ export function irazuModel(metres: ArrayLike<number>): IrazuModel {
     toMetres: (h) => base + h / unitsPerMetre,
     unitsPer: (m) => m * unitsPerMetre,
   };
-}
+};
 
 /**
  * Where the tracing contour is, in model height: it walks down from the summit to the base across
  * the whole detail window (linear progress d), so every line is the working one for a moment.
  * Above the model before it starts, below it once done.
  */
-export function contourFront(d: number, hmax: number): number {
+export const contourFront = (d: number, hmax: number): number => {
   if (d <= 0) return hmax + 1;
   if (d >= 1) return -1;
   return hmax * (1 - stateToState(d));
-}
+};
 
 // ---------- Basalt & glacier: columns ----------
 
@@ -106,7 +106,7 @@ export interface BasaltColumn {
 }
 
 /** The columns on a hexagonal grid, highest near the back-centre, in rings from the centre. */
-export function basaltColumns(): BasaltColumn[] {
+export const basaltColumns = (): BasaltColumn[] => {
   const R = BASALT.radius;
   const columns: BasaltColumn[] = [];
   for (let q = -9; q <= 9; q++)
@@ -128,21 +128,21 @@ export function basaltColumns(): BasaltColumn[] {
       });
     }
   return columns;
-}
+};
 
 /**
  * How far ring `ring` of `rings` has risen, from the rise phase's linear progress. Each ring takes
  * a fifth of the phase, so two or three rings move at once: one working front, centre outward.
  */
-export function ringProgress(rise: number, ring: number, rings: number): number {
+export const ringProgress = (rise: number, ring: number, rings: number): number => {
   return clamp01(rise * 5 - (ring / rings) * 4);
-}
+};
 
 // ---------- Washi & asagi: sheets ----------
 
 export const WASHI = { sheets: 5, width: 2.5, height: 1.75 } as const;
 
 /** How far sheet `i` (0 at the bottom of the stack) has lifted: the top sheets lift first. */
-export function sheetProgress(rise: number, i: number): number {
+export const sheetProgress = (rise: number, i: number): number => {
   return clamp01(rise * 2 - (WASHI.sheets - 1 - i) * 0.25);
-}
+};

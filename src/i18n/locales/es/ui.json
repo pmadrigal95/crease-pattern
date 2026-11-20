@@ -20,7 +20,17 @@
         "unfolded": "Desdoblado: el patrón de pliegues",
         "mountain": "monte",
         "valley": "valle",
-        "caption": "La figura es lo que ves en pantalla: la interfaz. Al desdoblarla aparecen los pliegues que le dan forma: la arquitectura. Cada identidad dobla la suya: una grulla, una morfo azul de día y una rana de ojos rojos de noche, un zorro ártico. \"Ver cómo está hecha esta página\" abre cualquier página del sitio de la misma manera."
+        "caption": "La figura es lo que ves en pantalla: la interfaz. Al desdoblarla aparecen los pliegues que le dan forma: la arquitectura. Cada identidad dobla la suya: una grulla, una morfo azul de día y una rana de ojos rojos de noche, un zorro ártico. \"Ver cómo está hecha esta página\" abre cualquier página del sitio de la misma manera.",
+        "figures": {
+          "crane": "La grulla",
+          "morpho": "La morfo azul",
+          "frog": "La rana de ojos rojos",
+          "fox": "El zorro ártico"
+        },
+        "facets": "facetas",
+        "hinges": "bisagras",
+        "sheet": "hoja",
+        "drag": "Arrastra para girarla"
       },
       "who": "{name} · {role} · {location}"
     },
@@ -92,7 +102,8 @@
       "heading": "Contacto",
       "intro": "Por correo me encuentras más rápido.",
       "copy": "Copiar el correo",
-      "copied": "Correo copiado"
+      "copied": "Correo copiado",
+      "copyFailed": "No se pudo copiar. La dirección quedó seleccionada para que la copies tú."
     }
   },
   "footer": {
@@ -164,6 +175,18 @@
     "title": "Inspector",
     "close": "Cerrar el inspector",
     "intro": "Pasa el cursor por un bloque · Haz clic para fijarlo · Esc para salir",
+    "view": "Vista",
+    "views": { "layers": "Capas", "fold": "Plegar", "pattern": "Patrón" },
+    "tour": "Recorrer",
+    "tourStop": "Detener el recorrido",
+    "openCrease": "Abrir este pliegue",
+    "closeCrease": "Cerrar este pliegue",
+    "mountainFold": "pliegue de monte",
+    "valleyFold": "pliegue de valle",
+    "linesUnit": "líneas",
+    "tokensUnit": "tokens",
+    "downloadPattern": "Descargar el patrón (SVG)",
+    "foldHint": "Arrastra hacia arriba o abajo para plegar más la página o abrirla, y hacia los lados para girarla. Haz clic en el círculo de un pliegue para abrirlo o cerrarlo. Con el teclado: flechas, y R para volver al inicio.",
     "layers": "Capas",
     "selected": "Seleccionado",
     "nothingSelected": "Pasa el cursor o elige una capa para ver de dónde viene.",
@@ -237,6 +260,9 @@
     "chapter": "Capítulo: {chapter}",
     "draft": "Borrador: solo visible en desarrollo",
     "scheduled": "Programada para el {date}: solo visible en desarrollo",
+    "untranslated": "En inglés",
+    "edition": "Edición en español. El original, en inglés, salió el {date}.",
+    "original": "Leer el original",
     "search": {
       "label": "Buscar en Precrease",
       "placeholder": "Buscar entradas",
@@ -263,6 +289,7 @@
       },
       "copy": "Copiar la dirección del feed",
       "copied": "Dirección del feed copiada",
+      "copyFailed": "No se pudo copiar. La dirección quedó seleccionada para que la copies tú.",
       "topicsTitle": "¿Solo algunos temas?",
       "topics": "Cada tema tiene su propio feed. Abre un tema desde el {map} y usa su enlace al feed RSS.",
       "mapLink": "mapa de temas",
@@ -326,7 +353,7 @@
       "bestMove": "La jugada que eligió el solucionador",
       "measuredResult": "En mi computadora de escritorio: {model}, {times}× más rápido que un solo worker.",
       "batteryNote": "Una ejecución mantiene ocupados los núcleos del procesador por cerca de un segundo, así que gasta un poco de batería.",
-      "measuredNote": "Medido en {device} con {browser}, con {workers} workers y cuatro piezas por delante. Pulsa Ejecutar para medir tu propio dispositivo.",
+      "measuredNote": "Medido en un {device} ({cores} núcleos, {threads} hilos) con {browser}, con {workers} workers y cuatro piezas por delante. Pulsa Ejecutar para medir tu propio dispositivo.",
       "modelLabel": "Modelo",
       "summary": "{model}: {ms} ms · {tasks} tareas por worker",
       "legendWork": "Buscando en una tarea",

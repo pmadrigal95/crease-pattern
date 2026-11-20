@@ -42,13 +42,13 @@ const edgesOf = (f: Face): [number, number][] => [
 const runs = (f: Face, a: number, b: number) => edgesOf(f).some(([p, q]) => p === a && q === b);
 
 /** The unit normal of a face, from its winding. */
-export function faceNormal(points: readonly Vector3[], f: Face): Vector3 {
+export const faceNormal = (points: readonly Vector3[], f: Face): Vector3 => {
   const [a, b, c] = [points[f[0]]!, points[f[1]]!, points[f[2]]!];
   return b.clone().sub(a).cross(c.clone().sub(a)).normalize();
-}
+};
 
 /** Builds the fold tree of a sheet; throws if any facet isn't joined to the rest. */
-export function buildFold(points: readonly Point[], faces: readonly Face[], root = 0): Fold {
+export const buildFold = (points: readonly Point[], faces: readonly Face[], root = 0): Fold => {
   const V = points.map((p) => new Vector3(...p));
   const F: Face[] = faces.map((f) => [f[0], f[1], f[2]]);
   const byEdge = new Map<string, number[]>();
@@ -98,7 +98,7 @@ export function buildFold(points: readonly Point[], faces: readonly Face[], root
     rootNormal: faceNormal(V, r),
     rootCentre: V[r[0]]!.clone().add(V[r[1]]!).add(V[r[2]]!).divideScalar(3),
   };
-}
+};
 
 const easeInOut = (x: number) => (x < 0.5 ? 4 * x ** 3 : 1 - (-2 * x + 2) ** 3 / 2);
 const clamp01 = (x: number) => Math.min(1, Math.max(0, x));
@@ -107,13 +107,13 @@ const clamp01 = (x: number) => Math.min(1, Math.max(0, x));
  * How far a facet at `depth` has turned at unfold amount `u`: the tips open in the first quarter of
  * the timeline, each layer closer to the root a little later, the root lies down at the end.
  */
-export function share(fold: Fold, depth: number, u: number): number {
+export const share = (fold: Fold, depth: number, u: number): number => {
   const slot = (fold.maxDepth - depth) / (fold.maxDepth + 1);
   return easeInOut(clamp01((u - slot * 0.75) / 0.25 / (1 + 0.75 / (fold.maxDepth + 1))));
-}
+};
 
 /** Every facet's matrix at unfold amount `u`; flat, the sheet lies centred on the floor at `floorY`. */
-export function foldMatrices(fold: Fold, u: number, floorY: number): Matrix4[] {
+export const foldMatrices = (fold: Fold, u: number, floorY: number): Matrix4[] => {
   const M = fold.faces.map(() => new Matrix4());
   const lay = share(fold, 0, u);
   const toFloor = new Quaternion().setFromUnitVectors(fold.rootNormal, new Vector3(0, 1, 0));
@@ -134,7 +134,7 @@ export function foldMatrices(fold: Fold, u: number, floorY: number): Matrix4[] {
     M[j]!.multiplyMatrices(M[fold.parent[j]!]!, local);
   }
   return M;
-}
+};
 
 /** A facet's three corners at a pose. */
 export const posed = (fold: Fold, M: readonly Matrix4[], i: number): [Vector3, Vector3, Vector3] => {
@@ -143,10 +143,10 @@ export const posed = (fold: Fold, M: readonly Matrix4[], i: number): [Vector3, V
 };
 
 /** Each hinge at a pose, as a mountain or a valley fold. */
-export function creases(
+export const creases = (
   fold: Fold,
   M: readonly Matrix4[],
-): { kind: 'mountain' | 'valley'; a: Vector3; b: Vector3 }[] {
+): { kind: 'mountain' | 'valley'; a: Vector3; b: Vector3 }[] => {
   return fold.order.slice(1).map((j) => {
     const [a, b] = fold.hinge[j]!;
     return {
@@ -155,4 +155,4 @@ export function creases(
       b: fold.points[b]!.clone().applyMatrix4(M[j]!),
     };
   });
-}
+};

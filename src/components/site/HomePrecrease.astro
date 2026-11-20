@@ -16,12 +16,15 @@ import PostThumb from '../precrease/PostThumb.astro';
 import { copyFor, fill } from '../../i18n/dictionary';
 import { formatDate } from '../../lib/format';
 import { creaseNumber, getPosts, postHref, postKind } from '../../lib/precrease';
-import { langOf, localize } from '../../i18n/routing';
+import { LOCALES, langOf, localize } from '../../i18n/routing';
 const lang = langOf(Astro.currentLocale);
 const copy = copyFor(Astro.currentLocale);
 
 const t = copy.home.notes;
-const [latest, ...older] = (await getPosts()).slice(0, 3);
+/** A post not yet in this page's language shows its original: its language, for lang="" and the label. */
+const otherLang = (post: { lang: string }) =>
+  post.lang === lang ? undefined : LOCALES[langOf(post.lang)].htmlLang;
+const [latest, ...older] = (await getPosts(lang)).slice(0, 3);
 const fonts = JSON.stringify([
   { url: newsreader400, weight: '400', style: 'normal' },
   { url: newsreader600, weight: '600', style: 'normal' },
@@ -47,8 +50,8 @@ const fonts = JSON.stringify([
     </div>
     {latest && (
       <article class="latest">
-        <a class="thumb" href={postHref(latest.id)} aria-hidden="true" tabindex="-1">
-          <PostThumb slug={latest.id} format={latest.entry.data.format} />
+        <a class="thumb" href={postHref(latest)} aria-hidden="true" tabindex="-1">
+          <PostThumb slug={latest.key} format={latest.entry.data.format} />
         </a>
         <div>
           <p class="kicker">
@@ -59,9 +62,14 @@ const fonts = JSON.stringify([
             })}
           </p>
           <h3>
-            <a href={postHref(latest.id)}>{latest.entry.data.title}</a>
+            <a href={postHref(latest)} lang={otherLang(latest)}>
+              {latest.entry.data.title}
+            </a>
           </h3>
-          <p class="dek">{latest.entry.data.description}</p>
+          <p class="dek" lang={otherLang(latest)}>
+            {latest.entry.data.description}
+          </p>
+          {otherLang(latest) && <p class="kicker">{copy.precrease.untranslated}</p>}
         </div>
       </article>
     )}
@@ -70,7 +78,9 @@ const fonts = JSON.stringify([
         {older.map((p) => (
           <li>
             <span class="kicker">{creaseNumber(p.number, lang)}</span>
-            <a href={postHref(p.id)}>{p.entry.data.title}</a>
+            <a href={postHref(p)} lang={otherLang(p)}>
+              {p.entry.data.title}
+            </a>
             <span class="date">{formatDate(p.entry.data.date, lang)}</span>
           </li>
         ))}

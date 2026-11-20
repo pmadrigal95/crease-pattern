@@ -27,6 +27,7 @@ import FoldedCorner from './FoldedCorner.astro';
 const copy = copyFor(Astro.currentLocale);
 
 interface Props {
+  /** The original's slug: every edition of a post shares its counts and its comments. */
   slug: string;
   title: string;
   url: string;
@@ -94,7 +95,7 @@ const t = copy.precrease.readers;
   </div>
 
   <ShareSheet url={url} title={title} />
-  <PostComments isolated={isolated} />
+  <PostComments slug={slug} isolated={isolated} />
 
   <p class="status" role="status" aria-live="polite" data-status></p>
   <span class="sentinel" aria-hidden="true" data-read-sentinel></span>
@@ -367,25 +368,33 @@ const t = copy.precrease.readers;
       })
       .catch(() => undefined);
 
-    if (!quiet) {
-      // A view: the page was opened. A read: the reader reached the end after spending at least
-      // a third of the estimated reading time on the page (and never less than 20 seconds).
-      void send('view');
-      const needed = Math.max(20, Number(root.dataset.minutes ?? 1) * 20);
-      let active = 0;
-      let atEnd = false;
-      let counted = false;
-      const tick = window.setInterval(() => {
-        if (document.visibilityState === 'visible') active += 1;
-        if (!counted && atEnd && active >= needed) {
-          counted = true;
-          window.clearInterval(tick);
-          void send('read');
-        }
-      }, 1000);
-      new IntersectionObserver(([entry]) => {
-        if (entry?.isIntersecting) atEnd = true;
-      }).observe(root.querySelector('[data-read-sentinel]')!);
-    }
+    // A prerendered page (src/scripts/prefetch.ts) runs before anyone sees it: count nothing
+    // until it's actually shown.
+    const whenShown = (count: () => void) => {
+      const doc = document as Document & { prerendering?: boolean };
+      if (doc.prerendering) document.addEventListener('prerenderingchange', count, { once: true });
+      else count();
+    };
+    if (!quiet)
+      whenShown(() => {
+        // A view: the page was opened. A read: the reader reached the end after spending at least
+        // a third of the estimated reading time on the page (and never less than 20 seconds).
+        void send('view');
+        const needed = Math.max(20, Number(root.dataset.minutes ?? 1) * 20);
+        let active = 0;
+        let atEnd = false;
+        let counted = false;
+        const tick = window.setInterval(() => {
+          if (document.visibilityState === 'visible') active += 1;
+          if (!counted && atEnd && active >= needed) {
+            counted = true;
+            window.clearInterval(tick);
+            void send('read');
+          }
+        }, 1000);
+        new IntersectionObserver(([entry]) => {
+          if (entry?.isIntersecting) atEnd = true;
+        }).observe(root.querySelector('[data-read-sentinel]')!);
+      });
   }
 </script>

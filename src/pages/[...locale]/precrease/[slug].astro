@@ -1,38 +1,58 @@
 ---
 import { render } from 'astro:content';
-import PrecreaseLayout from '../../layouts/PrecreaseLayout.astro';
-import FoldTitle from '../../components/precrease/FoldTitle.astro';
-import PostThumb from '../../components/precrease/PostThumb.astro';
-import PostCard from '../../components/precrease/PostCard.astro';
-import MarginNote from '../../components/precrease/MarginNote.astro';
-import PostToc from '../../components/precrease/PostToc.astro';
-import PostReaders from '../../components/precrease/PostReaders.astro';
-import PostReferences from '../../components/precrease/PostReferences.astro';
-import site from '../../../site.config';
-import { formatsFor, topicsFor } from '../../lib/taxonomy';
-import { copyFor, fill } from '../../i18n/dictionary';
-import { formatDate, padNumber } from '../../lib/format';
-import { creaseNumber, getPosts, postHref, postKind, topicHref, type PostSummary } from '../../lib/precrease';
-import { pathTo, related } from '../../lib/precrease-tree';
-import { readingMinutes } from '../../lib/reading';
-import { langOf } from '../../i18n/routing';
+import PrecreaseLayout from '../../../layouts/PrecreaseLayout.astro';
+import FoldTitle from '../../../components/precrease/FoldTitle.astro';
+import PostThumb from '../../../components/precrease/PostThumb.astro';
+import PostCard from '../../../components/precrease/PostCard.astro';
+import MarginNote from '../../../components/precrease/MarginNote.astro';
+import PostToc from '../../../components/precrease/PostToc.astro';
+import PostReaders from '../../../components/precrease/PostReaders.astro';
+import PostReferences from '../../../components/precrease/PostReferences.astro';
+import site from '../../../../site.config';
+import { formatsFor, topicsFor } from '../../../lib/taxonomy';
+import { copyFor, fill } from '../../../i18n/dictionary';
+import { formatDate, padNumber } from '../../../lib/format';
+import {
+  creaseNumber,
+  getEditions,
+  getPosts,
+  postHref,
+  postKind,
+  topicHref,
+  type PostSummary,
+} from '../../../lib/precrease';
+import { pathTo, related } from '../../../lib/precrease-tree';
+import { readingMinutes } from '../../../lib/reading';
+import { DEFAULT_LANG, LANGS, langOf } from '../../../i18n/routing';
 const lang = langOf(Astro.currentLocale);
 const copy = copyFor(Astro.currentLocale);
 
-export async function getStaticPaths() {
-  const posts = await getPosts();
-  return posts.map((post) => ({ params: { slug: post.id }, props: { post, posts } }));
-}
+/** Every edition of every post, each under its own language: /precrease/<slug>, /es/precrease/<slug>. */
+export const getStaticPaths = async () => {
+  const lists = new Map(await Promise.all(LANGS.map(async (l) => [l, await getPosts(l)] as const)));
+  const editions = await getEditions();
+  return editions.map((post) => ({
+    params: { locale: post.lang === DEFAULT_LANG ? undefined : post.lang, slug: post.id },
+    props: {
+      post,
+      posts: lists.get(post.lang) ?? [],
+      original: editions.find((p) => p.lang === DEFAULT_LANG && p.id === post.key),
+    },
+  }));
+};
 
 interface Props {
   post: PostSummary;
   posts: PostSummary[];
+  /** For an edition in another language, the post it translates. */
+  original?: PostSummary | undefined;
 }
-const { post, posts } = Astro.props;
+const { post, posts, original } = Astro.props;
+const translated = original && original !== post ? original : undefined;
 const { data } = post.entry;
 const { Content, headings } = await render(post.entry);
 // Every edit to the post is a commit, so its history is the file's log on GitHub.
-const historyHref = `${site.repository}/commits/main/src/content/precrease/${post.id}.mdx`;
+const historyHref = `${site.repository}/commits/main/${post.entry.filePath}`;
 const t = copy.precrease;
 const number = padNumber(data.number);
 const topics = topicsFor(lang);
@@ -48,6 +68,7 @@ const topicFilters = [...new Set(paths.flat().map((topic) => topic.id))];
   image={`/precrease/og/${post.id}.png`}
   noindex={!post.live}
   type="article"
+  translations={post.translations}
 >
   <div class="progress" aria-hidden="true"></div>
   <article class="post" data-pagefind-body>
@@ -86,12 +107,20 @@ const topicFilters = [...new Set(paths.flat().map((topic) => topic.id))];
           <span>{fill(t.minutes, { minutes: readingMinutes(post.entry.body ?? '') })}</span>
           <a href={historyHref}>{t.history}</a>
         </p>
+        {translated && (
+          <p class="edition" data-pagefind-ignore>
+            {fill(t.edition, { date: formatDate(translated.date, lang) })}{' '}
+            <a href={postHref(translated)} hreflang={translated.lang}>
+              {t.original}
+            </a>
+          </p>
+        )}
         <nav class="topics" aria-label={t.breadcrumb} data-pagefind-ignore>
           {paths.map((path) => (
             <ol>
               {path.map((topic) => (
                 <li>
-                  <a href={topicHref(topic.id)}>{topic.label}</a>
+                  <a href={topicHref(topic.id, lang)}>{topic.label}</a>
                 </li>
               ))}
             </ol>
@@ -99,7 +128,7 @@ const topicFilters = [...new Set(paths.flat().map((topic) => topic.id))];
         </nav>
       </div>
       <div class="thumb">
-        <PostThumb slug={post.id} format={data.format} />
+        <PostThumb slug={post.key} format={data.format} />
       </div>
     </header>
 
@@ -108,9 +137,9 @@ const topicFilters = [...new Set(paths.flat().map((topic) => topic.id))];
         <Content components={{ MarginNote }} />
         <PostReferences references={data.references ?? []} />
         <PostReaders
-          slug={post.id}
+          slug={post.key}
           title={data.title}
-          url={new URL(postHref(post.id), site.url).href}
+          url={new URL(postHref(post), site.url).href}
           minutes={readingMinutes(post.entry.body ?? '')}
           number={creaseNumber(data.number, lang)}
           isolated={data.isolated}
@@ -236,6 +265,15 @@ const topicFilters = [...new Set(paths.flat().map((topic) => topic.id))];
     margin: var(--space-3) 0 0;
     font: italic 1.05rem var(--font-serif);
   }
+  .edition {
+    margin: var(--space-3) 0 0;
+    font: var(--type-caption);
+    color: var(--color-mute);
+  }
+  .edition a {
+    color: var(--color-ink);
+    text-decoration-color: var(--color-accent-ui);
+  }
   .facts {
     display: flex;
     flex-wrap: wrap;
@@ -295,6 +333,10 @@ const topicFilters = [...new Set(paths.flat().map((topic) => topic.id))];
   .related {
     padding-block: var(--space-8) var(--space-24);
     border-top: 1px solid var(--color-rule);
+    /* Always below the fold at load: laid out and painted only as it approaches. Its size held at
+       the last one measured (a heading and a row of cards, about 30rem before that). */
+    content-visibility: auto;
+    contain-intrinsic-size: auto 30rem;
   }
   .related h2 {
     font: italic 400 var(--size-2xl) var(--font-serif);

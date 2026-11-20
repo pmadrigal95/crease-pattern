@@ -31,7 +31,7 @@ export const ASSEMBLE = {
 const clamp01 = (x: number) => Math.min(1, Math.max(0, x));
 
 /** A cubic-bezier easing, solved by bisection. */
-function cubicBezier(x1: number, y1: number, x2: number, y2: number) {
+const cubicBezier = (x1: number, y1: number, x2: number, y2: number) => {
   const bx = (t: number) => 3 * x1 * t * (1 - t) ** 2 + 3 * x2 * t * t * (1 - t) + t ** 3;
   const by = (t: number) => 3 * y1 * t * (1 - t) ** 2 + 3 * y2 * t * t * (1 - t) + t ** 3;
   return (x: number) => {
@@ -46,7 +46,7 @@ function cubicBezier(x1: number, y1: number, x2: number, y2: number) {
     }
     return by((lo + hi) / 2);
   };
-}
+};
 /** Arriving units ease out; Inspect runs state to state. The site's two motion curves. */
 const easeOut = cubicBezier(0.23, 1, 0.32, 1);
 const stateToState = cubicBezier(0.65, 0, 0.35, 1);
@@ -60,7 +60,7 @@ export interface Star {
 }
 
 /** The 30-unit star with every unit's direction and its turn in the assembly. */
-export function star(): Star {
+export const star = (): Star => {
   const model = assembly(STAR_UNITS);
   const sums = Array.from({ length: STAR_UNITS }, () => [0, 0, 0] as [number, number, number]);
   for (const f of model.facets)
@@ -77,26 +77,26 @@ export function star(): Star {
   const rank: number[] = [];
   order.forEach((unit, i) => (rank[unit] = i));
   return { model, directions, rank };
-}
+};
 
 /** How far the unit with this rank has arrived, 0 → 1, at assembly a. */
-export function arrived(rank: number, a: number): number {
+export const arrived = (rank: number, a: number): number => {
   const start = (rank / (STAR_UNITS - 1)) * (1 - ASSEMBLE.arrive);
   return clamp01((a - start) / ASSEMBLE.arrive);
-}
+};
 
 /** How far the unit with this rank sits out along its direction, at assembly a and Inspect e. */
-export function unitOffset(rank: number, a: number, e: number): number {
+export const unitOffset = (rank: number, a: number, e: number): number => {
   return ASSEMBLE.far * (1 - easeOut(arrived(rank, a))) + ASSEMBLE.part * stateToState(e);
-}
+};
 
 /** A point of the model turned into the shared view: around y by `yaw`, then by `pitch`. */
-export function toView([x, y, z]: Vec3, yaw: number = ASSEMBLE.yaw, pitch: number = ASSEMBLE.pitch): Vec3 {
+export const toView = ([x, y, z]: Vec3, yaw: number = ASSEMBLE.yaw, pitch: number = ASSEMBLE.pitch): Vec3 => {
   const [cy, sy, cp, sp] = [Math.cos(yaw), Math.sin(yaw), Math.cos(pitch), Math.sin(pitch)];
   const x1 = x * cy + z * sy;
   const z1 = -x * sy + z * cy;
   return [x1, y * cp - z1 * sp, y * sp + z1 * cp];
-}
+};
 
 export interface DrawnFacet {
   /** Index into the model's facets, stable across frames. */
@@ -115,7 +115,7 @@ export interface DrawnFacet {
  * or not yet arrived are dropped, the rest come back far to near, so drawing them in order paints
  * the near ones on top. The build draws the first frame with it, the SVG renderer every frame.
  */
-export function drawStar({ model, directions, rank }: Star, a: number, e: number): DrawnFacet[] {
+export const drawStar = ({ model, directions, rank }: Star, a: number, e: number): DrawnFacet[] => {
   return model.facets
     .map((f, index) => {
       const d = directions[f.unit]!;
@@ -138,4 +138,4 @@ export function drawStar({ model, directions, rank }: Star, a: number, e: number
       light,
       presence,
     }));
-}
+};

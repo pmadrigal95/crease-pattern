@@ -617,3 +617,344 @@ main [data-inspect] {
     transition: none;
   }
 }
+
+/* The folded views (fold.ts, prototype). The page is one sheet of paper on a deeper ground: it
+   folds like a Miura-ori beside the panel, or opens flat under its crease pattern. */
+.fold-on,
+.fold-on body {
+  overflow: hidden;
+  height: 100%;
+}
+.fold-on .fold-stage {
+  /* The table the sheet lies on: the page's ground, a step deeper, in either theme. */
+  --fold-ground: color-mix(in oklab, var(--color-bg) 91%, #000);
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  background:
+    radial-gradient(
+      ellipse at 38% 50%,
+      transparent 30%,
+      color-mix(in oklab, var(--color-ink) 6%, transparent)
+    ),
+    var(--fold-ground);
+}
+.fold-cam,
+.fold-fit {
+  transform-origin: 0 0;
+  transition: transform 1100ms var(--motion-ease-in-out);
+}
+.fold-persp {
+  perspective: 2600px;
+}
+.fold-model,
+.fold-sheet,
+.fold-trunk {
+  transform-style: preserve-3d;
+}
+.fold-model {
+  transition: transform 1100ms var(--motion-ease-in-out);
+}
+/* Folded, the whole page is measured and drawn: nothing skips its layout. */
+.fold-on .fold-sheet * {
+  /* !important: a component's own scoped rule would otherwise outrank this one. */
+  content-visibility: visible !important;
+}
+/* Every plane between the sheet and the sections is in the same 3D space: a background on any of
+   them would hide whatever folds behind it. */
+.fold-on .fold-sheet,
+.fold-on .fold-trunk {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+/* Each section is a panel of the same sheet: the page's own paper, a thin edge, a soft shadow. */
+.fold-on .fold-section {
+  transform-origin: 50% 0;
+  background: var(--color-bg);
+  box-shadow:
+    0 0 0 1px color-mix(in oklab, var(--color-ink) 16%, transparent),
+    0 24px 48px -24px rgb(0 0 0 / 0.35);
+  transition:
+    transform 1100ms var(--motion-ease-in-out),
+    opacity 400ms ease-out;
+}
+/* Layers on the GPU only while the sheet moves: seven page-sized layers held at rest cost memory. */
+.fold-moving .fold-section,
+.fold-live .fold-section {
+  will-change: transform;
+}
+/* Valley faces turn away from the light: a shade, as on the figures' deep facets. */
+.fold-shade {
+  position: absolute;
+  inset: 0;
+  background: var(--color-ink);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 1100ms var(--motion-ease-in-out);
+}
+.fold-on:not(.fold-pattern) .fold-away > .fold-shade {
+  opacity: 0.07;
+}
+.fold-measure *,
+.fold-measure .fold-fit,
+.fold-measure .fold-cam,
+.fold-live .fold-section,
+.fold-live .fold-model,
+.fold-live .fold-fit,
+.fold-live .fold-cam {
+  transition: none !important;
+}
+/* The page answers the hand: grab to fold it closer or open, and to turn it. */
+.fold-on:not(.fold-pattern) .fold-stage {
+  cursor: grab;
+  touch-action: none;
+}
+.fold-on .fold-stage.grabbing {
+  cursor: grabbing;
+}
+.fold-on .skip-link,
+.fold-on .suggest,
+.fold-on .vt-crease {
+  display: none !important;
+}
+.fold-hinge {
+  position: absolute;
+  inset: auto 0 -1px;
+  border-top: 2px solid var(--color-accent-ui);
+  pointer-events: none;
+  transition: opacity 400ms;
+}
+.fold-hinge.valley {
+  border-top-style: dashed;
+}
+.fold-hinge.open,
+.fold-hinge.end {
+  opacity: 0;
+}
+/* A point at the middle of each section's left edge: where its label's leader lands. */
+.fold-anchor {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 0;
+  height: 0;
+}
+.fold-pattern .fold-hinge {
+  opacity: 0;
+}
+.fold-on .fold-section.fold-dim {
+  opacity: 0.12;
+}
+.fold-on .fold-section.fold-current {
+  outline: 3px solid var(--color-accent-ui);
+}
+/* The pattern: the page gives way to its drawing on a clean sheet. */
+.fold-pattern .fold-section > :not(.fold-hinge, .fold-shade) {
+  opacity: 0;
+  transition: opacity 600ms;
+}
+.fold-ink,
+.fold-labels {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 55;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 300ms;
+}
+.fold-settled .fold-ink,
+.fold-settled .fold-labels {
+  opacity: 1;
+}
+.fold-ink path {
+  fill: none;
+  stroke: color-mix(in oklab, var(--color-ink) 40%, transparent);
+}
+.fold-ink circle {
+  fill: var(--fold-ground, var(--color-bg));
+  stroke: var(--color-accent-ui);
+  stroke-width: 1.5;
+}
+.fold-ink .sheet {
+  fill: var(--color-surface);
+  stroke: color-mix(in oklab, var(--color-ink) 45%, transparent);
+  stroke-width: 1;
+}
+.fold-ink .part {
+  fill: color-mix(in oklab, var(--color-accent-ui) 8%, transparent);
+  stroke: var(--color-accent-ui);
+  stroke-width: 1;
+}
+.fold-ink .mountain,
+.fold-ink .valley {
+  stroke: var(--color-accent-ui);
+  stroke-width: 1.5;
+}
+.fold-ink .valley {
+  stroke-dasharray: 6 4;
+}
+/* The sections' structure, as on an architect's plan. */
+.fold-ink .sk-head {
+  fill: var(--color-ink);
+  fill-opacity: 0.5;
+}
+.fold-ink .sk-text {
+  fill: var(--color-ink);
+  fill-opacity: 0.1;
+}
+.fold-ink .sk-media rect,
+.fold-ink .sk-media line {
+  fill: none;
+  stroke: color-mix(in oklab, var(--color-ink) 40%, transparent);
+  stroke-width: 0.75;
+}
+.fold-ink .sk-control {
+  fill: none;
+  stroke: color-mix(in oklab, var(--color-ink) 55%, transparent);
+}
+.fold-ink .part-name {
+  font: 500 11px/1 var(--font-mono);
+  fill: var(--color-accent-ui);
+  pointer-events: none;
+}
+.fold-ink .legend-text {
+  font: 500 11px/1 var(--font-mono);
+  fill: var(--color-mute);
+}
+.fold-ink .dim line {
+  stroke: color-mix(in oklab, var(--color-ink) 45%, transparent);
+}
+/* A handle on each crease: open it flat, or close it again. */
+/* 24 px: the smallest target WCAG 2.5.8 allows. */
+.fold-crease {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 1.5px solid var(--color-accent-ui);
+  border-radius: 50%;
+  background: var(--color-bg);
+  cursor: pointer;
+  pointer-events: auto;
+  transition:
+    background var(--motion-fast) ease,
+    scale var(--motion-fast) ease;
+}
+.fold-crease::after {
+  content: '';
+  position: absolute;
+  inset: 10px 5px;
+  border-top: 1.5px solid var(--color-accent-ui);
+}
+.fold-crease.open {
+  background: var(--color-accent-ui);
+}
+.fold-crease.open::after {
+  border-color: var(--color-bg);
+}
+.fold-crease:hover,
+.fold-crease:focus-visible {
+  scale: 1.15;
+}
+/* The pattern draws itself in: the sheet, the components, the creases in folding order, the margins. */
+.fold-ink .draw {
+  animation: fold-draw 520ms var(--motion-ease-out) both;
+  transform-box: fill-box;
+}
+.fold-ink line.draw {
+  transform-origin: left center;
+}
+@keyframes fold-draw {
+  from {
+    opacity: 0;
+    scale: 0 1;
+  }
+}
+.fold-ink rect.draw,
+.fold-ink g.draw {
+  animation-name: fold-appear;
+}
+@keyframes fold-appear {
+  from {
+    opacity: 0;
+  }
+}
+.fold-labels .late {
+  animation: fold-appear 400ms ease-out 1100ms both;
+}
+.fold-ink .part {
+  pointer-events: all;
+  cursor: pointer;
+}
+.fold-ink .part:hover {
+  stroke-width: 2;
+  fill: color-mix(in oklab, var(--color-accent-ui) 30%, transparent);
+}
+/* The tag that follows the pointer over a component: its name and real numbers. */
+.fold-tag {
+  position: absolute;
+  left: 0;
+  top: 0;
+  padding: 4px 8px;
+  border: 1px solid var(--color-rule);
+  border-radius: 6px;
+  background: var(--color-surface);
+  font: 500 12px/1.3 var(--font-mono);
+  color: var(--color-ink);
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity var(--motion-fast) ease;
+}
+.fold-tag.on {
+  opacity: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .fold-ink .draw,
+  .fold-labels .late {
+    animation: none;
+  }
+}
+.fold-label,
+.fold-dim {
+  position: absolute;
+  left: 0;
+  top: 0;
+  font: 500 12px/1.3 var(--font-mono);
+  color: var(--color-ink);
+  white-space: nowrap;
+}
+.fold-label {
+  width: 180px;
+  text-align: right;
+}
+.fold-label.on {
+  color: var(--color-accent-ui);
+  font-size: 14px;
+}
+.fold-dim {
+  color: var(--color-mute);
+  font-size: 11px;
+}
+.inspector-panel .tour {
+  margin-top: var(--space-3);
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  font: inherit;
+  color: var(--color-ink);
+  background: transparent;
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-control);
+  cursor: pointer;
+}
+.inspector-panel .tour:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.inspector-panel .tour[aria-pressed='true'] {
+  border-color: var(--color-accent-ui);
+  background: color-mix(in oklab, var(--color-accent-ui) 14%, transparent);
+}

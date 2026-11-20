@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import { formats, topicTree as topics, type TopicNode as Topic } from '../../src/config/precrease';
 import {
+  checkEditions,
   checkNumbers,
   isLive,
   pathTo,
@@ -63,6 +64,35 @@ describe('Crease numbers', () => {
     );
     expect(() => checkNumbers([post('a', 1, ['craft'], 5), post('b', 2, ['craft'], 2)])).toThrow(
       /dated before/,
+    );
+  });
+});
+
+describe('Editions in other languages', () => {
+  const en = (id: string, number: number) => ({ id, number, lang: 'en', folder: '' });
+  const es = (id: string, number: number, translationOf?: string, folder = 'es') => ({
+    id,
+    number,
+    lang: 'es',
+    folder,
+    translationOf,
+  });
+  test('an edition names its original, carries its number and sits in its language folder', () => {
+    expect(() => checkEditions([en('fold', 1), es('pliegue', 1, 'fold')], 'en')).not.toThrow();
+    expect(() => checkEditions([en('fold', 1), es('pliegue', 1)], 'en')).toThrow(/translationOf/);
+    expect(() => checkEditions([en('fold', 1), es('pliegue', 1, 'nothing')], 'en')).toThrow(/translationOf/);
+    expect(() => checkEditions([en('fold', 1), es('pliegue', 2, 'fold')], 'en')).toThrow(/number 2/);
+    expect(() => checkEditions([en('fold', 1), es('pliegue', 1, 'fold', '')], 'en')).toThrow(/belongs in es/);
+  });
+  test('one edition per language, and every slug once', () => {
+    expect(() => checkEditions([en('fold', 1), es('a', 1, 'fold'), es('b', 1, 'fold')], 'en')).toThrow(
+      /two editions/,
+    );
+    expect(() => checkEditions([en('fold', 1), es('fold', 1, 'fold')], 'en')).toThrow(/used by two/);
+  });
+  test('an original is never a translation', () => {
+    expect(() => checkEditions([en('fold', 1), { ...en('crane', 2), translationOf: 'fold' }], 'en')).toThrow(
+      /original/,
     );
   });
 });

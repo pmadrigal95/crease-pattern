@@ -18,7 +18,7 @@ export type Family = 'crease' | 'truchet' | 'corner' | 'cells';
 const SIZE = 120;
 
 /** Deterministic random numbers from a string (cyrb-style hash feeding a xorshift-like mixer). */
-export function seeded(text: string): () => number {
+export const seeded = (text: string): (() => number) => {
   let h = 1779033703 ^ text.length;
   for (const c of text) {
     h = Math.imul(h ^ c.charCodeAt(0), 3432918353);
@@ -29,11 +29,11 @@ export function seeded(text: string): () => number {
     h = Math.imul(h ^ (h >>> 13), 3266489909);
     return ((h ^= h >>> 16) >>> 0) / 4294967296;
   };
-}
+};
 
 const r1 = (n: number) => Math.round(n * 10) / 10;
 
-function crease(rand: () => number): string {
+const crease = (rand: () => number): string => {
   const n = 4;
   const s = SIZE / n;
   let out = `<rect x="1" y="1" width="${SIZE - 2}" height="${SIZE - 2}" fill="none" stroke="currentColor" stroke-width="1.5"/>`;
@@ -50,9 +50,9 @@ function crease(rand: () => number): string {
     out += `<path d="M${i * s} 0V${SIZE}M0 ${i * s}H${SIZE}" stroke="currentColor" stroke-width="1" opacity=".55"${dash}/>`;
   }
   return out;
-}
+};
 
-function truchet(rand: () => number): string {
+const truchet = (rand: () => number): string => {
   const n = 6;
   const s = SIZE / n;
   const h = s / 2;
@@ -67,9 +67,9 @@ function truchet(rand: () => number): string {
           : `M${X + h} ${Y}A${h} ${h} 0 0 0 ${X + s} ${Y + h}M${X} ${Y + h}A${h} ${h} 0 0 1 ${X + h} ${Y + s}`;
     }
   return `<path d="${d}" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"/>`;
-}
+};
 
-function corner(rand: () => number): string {
+const corner = (rand: () => number): string => {
   const n = 4;
   const s = SIZE / n;
   let out = '';
@@ -88,9 +88,9 @@ function corner(rand: () => number): string {
         out += `<path d="M${X} ${Y + s}A${s / 2} ${s / 2} 0 0 1 ${X + s} ${Y + s}Z" fill="currentColor" ${rotate}/>`;
     }
   return out;
-}
+};
 
-function cells(rand: () => number): string {
+const cells = (rand: () => number): string => {
   const n = 9;
   const s = SIZE / n;
   const cx = rand() * SIZE;
@@ -105,15 +105,15 @@ function cells(rand: () => number): string {
       out += `<circle cx="${r1(px)}" cy="${r1(py)}" r="${r1(radius)}" fill="currentColor"/>`;
     }
   return out;
-}
+};
 
 const draw: Record<Family, (rand: () => number) => string> = { crease, truchet, corner, cells };
 
 /** The viewBox and the shapes for a post's thumbnail. The crease family fills the whole sheet. */
-export function thumbnail(slug: string, family: Family): { viewBox: string; shapes: string } {
+export const thumbnail = (slug: string, family: Family): { viewBox: string; shapes: string } => {
   const pad = family === 'crease' ? 0 : 10;
   return {
     viewBox: `${-pad} ${-pad} ${SIZE + pad * 2} ${SIZE + pad * 2}`,
     shapes: draw[family](seeded(slug)),
   };
-}
+};

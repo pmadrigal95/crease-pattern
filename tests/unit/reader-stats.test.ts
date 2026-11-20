@@ -3,7 +3,7 @@ import { handleStats, type CountStore, type Counts, type Deps } from '../../work
 
 // The reader-count API (M3a.3, decision 37), run without Cloudflare: a Map as the store and a
 // counter as the rate limiter.
-function setup(limit = 100) {
+const setup = (limit = 100) => {
   const rows = new Map<string, Counts>();
   const store: CountStore = {
     async get(slug) {
@@ -27,7 +27,7 @@ function setup(limit = 100) {
     postExists: async (slug) => slug === 'the-work-before-the-shape',
   };
   return { rows, seen, deps };
-}
+};
 
 const site = 'https://example.dev';
 const post = (path: string, headers: Record<string, string> = {}) =>

@@ -103,6 +103,9 @@ const here = unlocalize(path);
   // language (M5). Imported only here, so it joins this script instead of adding a request.
   import { initLanguage } from '../../scripts/lang';
   initLanguage();
+  // The next page loads when a link shows intent (src/scripts/prefetch.ts), in this same script.
+  import { initPrefetch } from '../../scripts/prefetch';
+  initPrefetch();
   // Opens the Inspector (decision 44): the button, any [data-inspector-open], Shift+I or ?inspect. Vue and the
   // panel download only now, on first use; hovering the button starts that download early.
   type Handle = { close(): void };
@@ -116,7 +119,7 @@ const here = unlocalize(path);
   let loading = false;
   const load = () => import('../inspector/mount');
 
-  async function open(trigger: HTMLElement | null) {
+  const open = async (trigger: HTMLElement | null) => {
     if (handle || loading) return;
     loading = true;
     try {
@@ -132,7 +135,7 @@ const here = unlocalize(path);
     } finally {
       loading = false;
     }
-  }
+  };
   const toggle = (trigger: HTMLElement | null) => (handle ? handle.close() : open(trigger));
 
   button?.addEventListener('click', () => toggle(button));
@@ -151,22 +154,21 @@ const here = unlocalize(path);
   // starts the download early. Ctrl+K everywhere, Cmd+K on Apple devices.
   const commandButton = document.querySelector<HTMLButtonElement>('[data-command-open]');
   const commandMenu = () => import('./command-menu');
-  const openCommands = (from: HTMLElement | null) => {
+  const openCommands = () => {
     const strings = commandButton?.dataset.strings;
     if (!strings) return;
     void commandMenu()
-      .then((m) => m.openCommandMenu(JSON.parse(strings) as Parameters<typeof m.openCommandMenu>[0], from))
+      .then((m) => m.openCommandMenu(JSON.parse(strings) as Parameters<typeof m.openCommandMenu>[0]))
       .catch((error: unknown) => console.warn('Commands could not open', error));
   };
-  commandButton?.addEventListener('click', () => openCommands(commandButton));
+  commandButton?.addEventListener('click', () => openCommands());
   commandButton?.addEventListener('pointerenter', () => void commandMenu(), { once: true });
   const shortcut = commandButton?.querySelector('[data-shortcut]');
   if (shortcut && /Mac|iPhone|iPad/.test(navigator.platform)) shortcut.textContent = '⌘ K';
   addEventListener('keydown', (e) => {
     if (e.key.toLowerCase() !== 'k' || !(e.ctrlKey || e.metaKey) || e.altKey || e.shiftKey) return;
     e.preventDefault();
-    const active = document.activeElement;
-    openCommands(active instanceof HTMLElement && active !== document.body ? active : commandButton);
+    openCommands();
   });
   addEventListener('keydown', (e) => {
     if (

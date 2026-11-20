@@ -3,7 +3,7 @@ import vue from '@astrojs/vue';
 import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
 import siteConfig from './site.config.ts';
-import { pageRevealScript, restoreIdentityScript, sha256 } from './scripts/csp-hashes.ts';
+import { pageRevealScript, restoreIdentityScript, sha256, speculationRules } from './scripts/csp-hashes.ts';
 import { devIsolation } from './scripts/dev-isolation.ts';
 import { DEFAULT_LANG, LANGS } from './src/i18n/config.ts';
 
@@ -63,6 +63,11 @@ export default defineConfig({
         "base-uri 'self'",
         "form-action 'self'",
         "object-src 'none'",
+        // Trusted Types: no HTML or code from strings reaches the DOM; script URLs only through the
+        // default policy (same origin, src/lib/trusted-types.ts), Vue's own, and the comments' script
+        // (PostComments.astro).
+        "require-trusted-types-for 'script'",
+        'trusted-types default vue comments',
       ],
       // Declared explicitly so a page can add a source (giscus on posts) without replacing 'self':
       // Astro's insertStyleResource() overrides the default list instead of extending it.
@@ -72,7 +77,7 @@ export default defineConfig({
       scriptDirective: {
         // Precrease search adds 'wasm-unsafe-eval' on its own pages only (PrecreaseSearch.astro).
         resources: ["'self'", 'https://static.cloudflareinsights.com'],
-        hashes: [sha256(restoreIdentityScript), sha256(pageRevealScript)],
+        hashes: [sha256(restoreIdentityScript), sha256(pageRevealScript), sha256(speculationRules)],
       },
     },
   },

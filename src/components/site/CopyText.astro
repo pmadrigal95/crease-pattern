@@ -1,7 +1,8 @@
 ---
 /**
  * A value people copy (the contact email, a feed address): the value as a link, a copy button,
- * and a live region that confirms the copy. Without clipboard access it selects the text instead.
+ * and a live region that says how it went. Without clipboard access it selects the text instead,
+ * and says so. The message clears after a few seconds, so no stale "copied" stays for screen readers.
  */
 interface Props {
   /** The text that gets copied and shown. */
@@ -10,32 +11,48 @@ interface Props {
   href: string;
   copyLabel: string;
   copiedLabel: string;
+  /** Said when the clipboard refuses: the text is selected instead. */
+  failedLabel: string;
 }
-const { value, href, copyLabel, copiedLabel } = Astro.props;
+const { value, href, copyLabel, copiedLabel, failedLabel } = Astro.props;
 ---
 
 <div class="copy-text" data-inspect="CopyText">
   <a class="address" href={href}>
     {value}
   </a>
-  <button type="button" class="btn" data-copy={value} data-done={copiedLabel}>
+  <button type="button" class="btn" data-copy={value} data-done={copiedLabel} data-failed={failedLabel}>
     {copyLabel}
   </button>
   <span class="status" role="status" aria-live="polite"></span>
 </div>
 
 <script>
-  // Copies the value and confirms in a live region; falls back to selecting the text.
+  // Copies the value and says how it went in a live region; without clipboard access it selects the
+  // text instead and says so. Another click restarts the message; it never stacks timers.
+  const CLEAR_MS = { done: 3000, failed: 6000 };
   for (const button of document.querySelectorAll<HTMLButtonElement>('.copy-text .btn')) {
+    const root = button.closest('.copy-text');
+    const status = root?.querySelector<HTMLElement>('.status');
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const say = (outcome: 'done' | 'failed') => {
+      clearTimeout(timer);
+      if (!status) return;
+      status.textContent = button.dataset[outcome] ?? '';
+      button.dataset.outcome = outcome;
+      timer = setTimeout(() => {
+        status.textContent = '';
+        delete button.dataset.outcome;
+      }, CLEAR_MS[outcome]);
+    };
     button.addEventListener('click', async () => {
-      const root = button.closest('.copy-text');
-      const status = root?.querySelector<HTMLElement>('.status');
       try {
         await navigator.clipboard.writeText(button.dataset.copy ?? '');
-        if (status) status.textContent = button.dataset.done ?? '';
+        say('done');
       } catch {
         const address = root?.querySelector('.address');
         if (address) window.getSelection()?.selectAllChildren(address);
+        say('failed');
       }
     });
   }

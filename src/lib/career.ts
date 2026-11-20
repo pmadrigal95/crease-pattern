@@ -61,7 +61,7 @@ export type CareerEntry = Career['entries'][number];
 export type Release = Career['releases'][number] & { entries: CareerEntry[] };
 
 /** The facts with one language's words; throws at the first release or entry without words. */
-export function joinCareer(facts: Facts, words: Words, where: string): Career {
+export const joinCareer = (facts: Facts, words: Words, where: string): Career => {
   const own = <T>(table: Record<string, T>, key: string, what: string): T => {
     const found = table[key];
     if (!found) throw new Error(`${where}: ${what} ${key} has no words`);
@@ -87,7 +87,7 @@ export function joinCareer(facts: Facts, words: Words, where: string): Career {
     unreleased: words.unreleased,
     entries: facts.entries.map((e) => ({ ...e, ...own(words.entries, e.version, 'entry') })),
   };
-}
+};
 
 const facts = factsSchema.parse(raw);
 const careers = Object.fromEntries(
@@ -108,29 +108,29 @@ const compareVersions = (a: string, b: string) => {
 };
 
 /** Releases newest first, each with its entries newest first. */
-export function releasesNewestFirst(data: Career): Release[] {
-  return [...data.releases]
-    .sort((a, b) => b.major - a.major)
+export const releasesNewestFirst = (data: Career): Release[] => {
+  return data.releases
+    .toSorted((a, b) => b.major - a.major)
     .map((r) => ({
       ...r,
       entries: data.entries
         .filter((e) => majorOf(e.version) === r.major)
         .sort((a, b) => compareVersions(b.version, a.version)),
     }));
-}
+};
 
 /** Whole years between `since` (YYYY-MM) and `now`. */
-export function yearsSince(since: string, now: Date = new Date()): number {
+export const yearsSince = (since: string, now: Date = new Date()): number => {
   const [y, m = 1] = since.split('-').map(Number);
   const months = (now.getFullYear() - (y ?? 0)) * 12 + (now.getMonth() + 1 - m);
   return Math.floor(months / 12);
-}
+};
 
 /**
  * Each release as a stretch of time, oldest first, for the drawings: it starts with its first
  * entry and runs until the next release starts; the current one runs until `now`.
  */
-export function climbs(data: Career, now: Date = new Date()): Climb[] {
+export const climbs = (data: Career, now: Date = new Date()): Climb[] => {
   const starts = data.releases.map((r) => {
     const own = data.entries.filter((e) => majorOf(e.version) === r.major);
     if (own.length === 0) throw new Error(`Release v${r.major} has no entries`);
@@ -145,16 +145,16 @@ export function climbs(data: Career, now: Date = new Date()): Climb[] {
     start,
     end: starts[i + 1]?.start ?? yearOf(now),
   }));
-}
+};
 
 /** The newest version shipped, as "3.2": the "you are here" on the profile. */
-export function currentVersion(data: Career): string {
-  const [latest] = [...data.entries].sort((a, b) => compareVersions(b.version, a.version));
+export const currentVersion = (data: Career): string => {
+  const [latest] = data.entries.toSorted((a, b) => compareVersions(b.version, a.version));
   return latest ? latest.version.split('.').slice(0, 2).join('.') : '0.0';
-}
+};
 
 /** Each release's place on the map, oldest first. */
 export const places = (data: Career) =>
-  [...data.releases]
-    .sort((a, b) => a.major - b.major)
+  data.releases
+    .toSorted((a, b) => a.major - b.major)
     .map((r) => ({ major: r.major, codename: r.codename, elevationM: r.elevationM, ...r.location }));

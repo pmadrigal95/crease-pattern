@@ -14,17 +14,17 @@ interface DevServer {
 }
 
 /** The posts public/_headers isolates (COOP + COEP), as site paths. */
-function isolatedPaths(): string[] {
+const isolatedPaths = (): string[] => {
   const lines = readFileSync(join(import.meta.dirname, '..', 'public', '_headers'), 'utf8').split('\n');
   const paths: string[] = [];
   lines.forEach((line, i) => {
-    if (line.startsWith('/precrease/') && /Cross-Origin-Opener-Policy/.test(lines[i + 1] ?? ''))
+    if (/^(\/[a-z]{2})?\/precrease\//.test(line) && /Cross-Origin-Opener-Policy/.test(lines[i + 1] ?? ''))
       paths.push(line.trim());
   });
   return paths;
-}
+};
 
-export function devIsolation() {
+export const devIsolation = () => {
   return {
     name: 'crease-pattern:dev-isolation',
     apply: 'serve' as const,
@@ -37,4 +37,4 @@ export function devIsolation() {
       });
     },
   };
-}
+};

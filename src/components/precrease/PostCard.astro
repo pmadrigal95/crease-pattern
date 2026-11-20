@@ -5,7 +5,7 @@ import { copyFor, fill } from '../../i18n/dictionary';
 import { formatDate, padNumber } from '../../lib/format';
 import { postHref, postKind, type PostSummary } from '../../lib/precrease';
 import { readingMinutes } from '../../lib/reading';
-import { langOf } from '../../i18n/routing';
+import { LOCALES, langOf } from '../../i18n/routing';
 const lang = langOf(Astro.currentLocale);
 const copy = copyFor(Astro.currentLocale);
 
@@ -16,16 +16,21 @@ interface Props {
 const { post, headingLevel: Heading = 'h2' } = Astro.props;
 const { data } = post.entry;
 const t = copy.precrease;
+// A post with no edition in this page's language yet shows its original, marked as such.
+const otherLang = post.lang === lang ? undefined : LOCALES[post.lang].htmlLang;
 ---
 
 <article class="post-card" data-inspect="PostCard">
-  <a href={postHref(post.id)} class="link">
+  <a href={postHref(post)} class="link">
     <span class="num">{padNumber(data.number)}</span>
-    <PostThumb slug={post.id} format={data.format} />
-    <Heading class="title">{data.title}</Heading>
+    <PostThumb slug={post.key} format={data.format} />
+    <Heading class="title" lang={otherLang}>
+      {data.title}
+    </Heading>
   </a>
   <p class="meta">
     <span>{postKind(post.entry, lang)}</span>
+    {otherLang && <span>{t.untranslated}</span>}
     <span>{fill(t.minutes, { minutes: readingMinutes(post.entry.body ?? '') })}</span>
     {data.draft && <span class="draft">{t.draft}</span>}
     {!data.draft && !post.live && (

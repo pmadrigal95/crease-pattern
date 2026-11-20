@@ -16,6 +16,8 @@ import {
 import { explode, layersEnabled, markCurrent } from './layers';
 import { currentDirection, currentTheme, setDirection, setTheme, type Theme } from './identity';
 import { allVisualDirections, type VisualDirection } from '../../config/visual-direction';
+import { useViews } from './use-views';
+import InspectorViews from './InspectorViews.vue';
 import { fill } from '../../lib/template';
 import type { Copy } from '../../i18n/dictionary';
 
@@ -28,7 +30,11 @@ export interface Manifest {
   commit: string;
   files: Record<
     string,
-    { tokens: string[]; lastChange: { commit: string; date: string; subject: string } | null }
+    {
+      tokens: string[];
+      lines?: number;
+      lastChange: { commit: string; date: string; subject: string } | null;
+    }
   >;
   parts: Record<string, string>;
   identities: { tokenCount: number; swatches: Record<string, { light: string[]; dark: string[] }> };
@@ -58,14 +64,14 @@ const origin = (e: Event) => {
   const r = (e.target as HTMLElement).closest('label')?.getBoundingClientRect();
   return r ? { x: r.left + r.width / 2, y: r.top + r.height / 2 } : { x: innerWidth / 2, y: innerHeight / 2 };
 };
-function chooseDirection(id: VisualDirection, e: Event) {
+const chooseDirection = (id: VisualDirection, e: Event) => {
   direction.value = id;
   setDirection(id, origin(e));
-}
-function chooseTheme(value: Theme, e: Event) {
+};
+const chooseTheme = (value: Theme, e: Event) => {
   theme.value = value;
   setTheme(value, origin(e));
-}
+};
 const heading = ref<HTMLElement | null>(null);
 const layerButtons = ref<HTMLButtonElement[]>([]);
 const scripts = scriptBytes(props.openedAt);
@@ -81,10 +87,10 @@ const depthOf = (el: Element) => {
 // Phones: a bottom sheet with two heights, half the screen or most of it.
 const phone = matchMedia('(max-width: 720px)');
 const tall = ref(false);
-function toggleSheet() {
+const toggleSheet = () => {
   tall.value = !tall.value;
   document.getElementById('inspector')?.toggleAttribute('data-tall', tall.value);
-}
+};
 const part = (el: Element | null) => {
   const id = idOf(el);
   const file = props.manifest.parts[id];
@@ -116,28 +122,32 @@ const details = computed(() => {
   };
 });
 
-function place() {
+const place = () => {
   if (threeD) markCurrent(elements.value, current.value);
   else box.value = current.value ? current.value.getBoundingClientRect() : null;
-}
+};
 
-function pin(el: HTMLElement, focusList = false) {
+/** Scrolls a part into view; on phones, into the space above the sheet that covers the bottom. */
+const bringIntoView = (el: HTMLElement) => {
+  const behavior = matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
+  if (!phone.matches) return el.scrollIntoView({ block: 'nearest', behavior });
+  const sheet = document.getElementById('inspector')?.getBoundingClientRect().height ?? 0;
+  const rect = el.getBoundingClientRect();
+  const free = innerHeight - sheet;
+  scrollBy({ top: rect.top - Math.max(16, (free - rect.height) / 2), behavior });
+};
+
+const pin = (el: HTMLElement, focusList = false) => {
   pinned.value = el;
   firstRun.value = false;
   announce.value = fill(t.selectedAnnouncement, { name: label(idOf(el)) });
-  const behavior = matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
-  if (phone.matches) {
-    // The sheet covers the bottom of the screen: bring the part into the space above it.
-    const sheet = document.getElementById('inspector')?.getBoundingClientRect().height ?? 0;
-    const rect = el.getBoundingClientRect();
-    const free = innerHeight - sheet;
-    scrollBy({ top: rect.top - Math.max(16, (free - rect.height) / 2), behavior });
-  } else el.scrollIntoView({ block: 'nearest', behavior });
+  // Folded, the page doesn't scroll: the camera brings the part's section to the front instead.
+  if (!bringForward(el)) bringIntoView(el);
   if (focusList) layerButtons.value[elements.value.indexOf(el)]?.focus();
   requestAnimationFrame(place);
-}
+};
 
-function onListKey(e: KeyboardEvent, index: number) {
+const onListKey = (e: KeyboardEvent, index: number) => {
   const step = { ArrowDown: 1, ArrowUp: -1 }[e.key];
   const edge = { Home: 0, End: elements.value.length - 1 }[e.key];
   if (step === undefined && edge === undefined) return;
@@ -146,27 +156,53 @@ function onListKey(e: KeyboardEvent, index: number) {
   layerButtons.value[next]?.focus();
   hovered.value = elements.value[next] ?? null;
   place();
-}
+};
 
 // Inspect mode on the page itself: hovering previews a part, clicking pins it.
-function onPointerOver(e: PointerEvent) {
+const onPointerOver = (e: PointerEvent) => {
   const el = (e.target as Element).closest<HTMLElement>('[data-inspect]');
   if (el && !el.closest('#inspector')) {
     hovered.value = el;
     place();
   }
-}
-function onClick(e: MouseEvent) {
+};
+const onClick = (e: MouseEvent) => {
   const el = (e.target as Element).closest<HTMLElement>('[data-inspect]');
   if (!el || el.closest('#inspector')) return;
   e.preventDefault();
   e.stopPropagation();
   hovered.value = null;
   pin(el);
-}
-function onKey(e: KeyboardEvent) {
+};
+const onKey = (e: KeyboardEvent) => {
   if (e.key === 'Escape') emit('close');
-}
+};
+
+// ---------- Views: the layers, the folded page, its crease pattern; and the tour ----------
+const { view, touring, chooseView, tour, downloadPattern, bringForward, close } = useViews({
+  layers: {
+    on: () => (settle = explode(elements.value)),
+    off: () => {
+      settle();
+      settle = () => {};
+    },
+  },
+  hooks: {
+    name: (el) => label(idOf(el)),
+    facts: (el) => {
+      const p = part(el);
+      return { lines: p?.lines, tokens: p?.tokens.length ?? 0, date: p?.lastChange?.date };
+    },
+    onHover: (el) => {
+      hovered.value = el;
+      place();
+    },
+    onPick: (el) => pin(el),
+  },
+  t,
+  pin: (el) => pin(el),
+  title: () => `${document.title} · ${t.views.pattern}`,
+});
 
 let stopVitals = () => {};
 let settle = () => {};
@@ -183,6 +219,7 @@ onMounted(async () => {
   heading.value?.focus();
 });
 onBeforeUnmount(() => {
+  close();
   stopVitals();
   settle();
   document.removeEventListener('pointerover', onPointerOver);
@@ -265,6 +302,16 @@ const metrics = computed(() => [
           </label>
         </fieldset>
       </section>
+
+      <InspectorViews
+        v-if="threeD"
+        :t="t"
+        :view="view"
+        :touring="touring"
+        @choose="chooseView"
+        @tour="tour"
+        @download="downloadPattern"
+      />
 
       <section aria-labelledby="inspector-layers">
         <h3 id="inspector-layers">{{ t.layers }}</h3>

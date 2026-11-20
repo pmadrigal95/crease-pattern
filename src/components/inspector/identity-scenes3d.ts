@@ -49,7 +49,7 @@ import irazuDemUrl from '../../assets/scenes/irazu-dem.bin?url';
 
 let irazuDem: Promise<Uint16Array> | null = null;
 /** Starts (or reuses) the height grid's download; a failed one is forgotten, so a later try retries. */
-function loadIrazuDem() {
+const loadIrazuDem = () => {
   irazuDem ??= fetch(irazuDemUrl)
     .then((r) => (r.ok ? r.arrayBuffer() : Promise.reject(new Error(`irazu-dem: ${r.status}`))))
     // uint16 little-endian, which every browser's typed arrays read natively.
@@ -59,7 +59,7 @@ function loadIrazuDem() {
       throw error;
     });
   return irazuDem;
-}
+};
 // Contour lines is the default identity, so the grid starts downloading with the scene's code.
 void loadIrazuDem().catch(() => undefined);
 
@@ -81,7 +81,7 @@ const presence = (rise: number, alpha: number, speed = 3) => Math.min(1, rise * 
 /** How far the terrain tips toward the camera, in radians. */
 const TERRAIN_TILT = 0.42;
 
-function contourLines(redraw: () => void): IdentityScene {
+const contourLines = (redraw: () => void): IdentityScene => {
   const geometry = new PlaneGeometry(TERRAIN.size, TERRAIN.size, TERRAIN.segments, TERRAIN.segments);
   geometry.rotateX(-Math.PI / 2);
   // Flat until the grid arrives (a few dozen KB, usually before the scene starts to rise). The
@@ -167,11 +167,11 @@ function contourLines(redraw: () => void): IdentityScene {
       u.fade!.value = presence(eased.rise, alpha);
     },
   };
-}
+};
 
 // ---------- Basalt & glacier: columns ----------
 
-function basaltGlacier(): IdentityScene {
+const basaltGlacier = (): IdentityScene => {
   const R = BASALT.radius * 0.97;
   const wallGeometry = new CylinderGeometry(R, R, 1, 6, 1, true);
   wallGeometry.translate(0, 0.5, 0);
@@ -241,19 +241,19 @@ function basaltGlacier(): IdentityScene {
       wallMaterial.opacity = capMaterial.opacity = presence(eased.rise, alpha);
     },
   };
-}
+};
 
 // ---------- Washi & asagi: sheets ----------
 
 /** A small canvas texture drawn once from a seed, so the paper looks the same on every visit. */
-function seededTexture(draw: (g: CanvasRenderingContext2D, random: () => number) => void, seed: number) {
+const seededTexture = (draw: (g: CanvasRenderingContext2D, random: () => number) => void, seed: number) => {
   const canvas = document.createElement('canvas');
   canvas.width = canvas.height = 256;
   draw(canvas.getContext('2d')!, seeded(seed));
   return new CanvasTexture(canvas);
-}
+};
 
-function washiAsagi(): IdentityScene {
+const washiAsagi = (): IdentityScene => {
   const fibre = seededTexture((g, random) => {
     g.fillStyle = '#fff';
     g.fillRect(0, 0, 256, 256);
@@ -354,7 +354,7 @@ function washiAsagi(): IdentityScene {
       ink.scale.setScalar(0.55 + 0.45 * eased.detail);
     },
   };
-}
+};
 
 const builders: Record<VisualDirection, (redraw: () => void) => IdentityScene> = {
   'contour-lines': contourLines,

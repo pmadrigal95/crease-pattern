@@ -5,7 +5,7 @@
 import type { TopicNode } from '../config/precrease';
 
 /** Throws when a parent is unknown, a topic id repeats, or the parents form a cycle. */
-export function validateTree(topics: readonly TopicNode[]): void {
+export const validateTree = (topics: readonly TopicNode[]): void => {
   const ids = new Set<string>();
   for (const t of topics) {
     if (ids.has(t.id)) throw new Error(`Precrease topic "${t.id}" is defined twice`);
@@ -19,26 +19,26 @@ export function validateTree(topics: readonly TopicNode[]): void {
       seen.add(p);
     }
   }
-}
+};
 
 /** Root first: the breadcrumb from the top of the tree down to `id`, inclusive. */
-export function pathTo<T extends TopicNode>(topics: readonly T[], id: string): T[] {
+export const pathTo = <T extends TopicNode>(topics: readonly T[], id: string): T[] => {
   const path: T[] = [];
   for (let t = topics.find((x) => x.id === id); t; t = topics.find((x) => x.id === t?.parent)) {
     path.unshift(t);
   }
   return path;
-}
+};
 
 export const childrenOf = <T extends TopicNode>(topics: readonly T[], id: string | undefined) =>
   topics.filter((t) => t.parent === id);
 
 /** `id` and every topic below it, at any depth. */
-export function subtree(topics: readonly TopicNode[], id: string): Set<string> {
+export const subtree = (topics: readonly TopicNode[], id: string): Set<string> => {
   const out = new Set([id]);
   for (const child of childrenOf(topics, id)) subtree(topics, child.id).forEach((x) => out.add(x));
   return out;
-}
+};
 
 export interface PostLike {
   id: string;
@@ -48,25 +48,25 @@ export interface PostLike {
 }
 
 /** Posts on `id` or anywhere below it, newest first. */
-export function postsUnder<P extends PostLike>(
+export const postsUnder = <P extends PostLike>(
   topics: readonly TopicNode[],
   posts: readonly P[],
   id: string,
-): P[] {
+): P[] => {
   const ids = subtree(topics, id);
   return posts.filter((p) => p.topics.some((t) => ids.has(t)));
-}
+};
 
 /**
  * Up to `count` other posts, ranked by shared topics. Sharing an ancestor counts too, at half
  * weight, so a post on Accessibility still finds one on Performance (both under Frontend).
  */
-export function related<P extends PostLike>(
+export const related = <P extends PostLike>(
   topics: readonly TopicNode[],
   posts: readonly P[],
   post: P,
   count = 3,
-): P[] {
+): P[] => {
   const family = (ids: readonly string[]) =>
     new Set(ids.flatMap((id) => pathTo(topics, id).map((t) => t.id)));
   const mine = new Set(post.topics);
@@ -82,7 +82,7 @@ export function related<P extends PostLike>(
     .sort((a, b) => b.score - a.score || b.p.date.getTime() - a.p.date.getTime())
     .slice(0, count)
     .map((x) => x.p);
-}
+};
 
 /**
  * Whether a post is out: not a draft, and its date has arrived. A post dated in the future is
@@ -93,8 +93,8 @@ export const isLive = (post: { draft: boolean; date: Date }, now: Date): boolean
   !post.draft && post.date.getTime() <= now.getTime();
 
 /** Crease numbers must run 1, 2, 3… with no gaps or repeats, in publication order. */
-export function checkNumbers(posts: readonly PostLike[]): void {
-  const sorted = [...posts].sort((a, b) => a.number - b.number);
+export const checkNumbers = (posts: readonly PostLike[]): void => {
+  const sorted = posts.toSorted((a, b) => a.number - b.number);
   sorted.forEach((p, i) => {
     if (p.number !== i + 1)
       throw new Error(`Crease numbers must run 1…${posts.length} without gaps: "${p.id}" has ${p.number}`);
@@ -103,4 +103,50 @@ export function checkNumbers(posts: readonly PostLike[]): void {
     if (sorted[i]!.date < sorted[i - 1]!.date)
       throw new Error(`Crease No. ${sorted[i]!.number} is dated before No. ${sorted[i - 1]!.number}`);
   }
+};
+
+/** One file of a post in one language, as checkEditions reads it. */
+export interface EditionLike {
+  /** The edition's own slug. */
+  id: string;
+  number: number;
+  lang: string;
+  /** The folder its file sits in under src/content/precrease: '' for the default language. */
+  folder: string;
+  /** The original's slug, for an edition in another language. */
+  translationOf?: string | undefined;
 }
+
+/**
+ * Posts in other languages (M5.4): the original is written in the default language at the root of
+ * src/content/precrease; each other language's edition sits in that language's folder with a slug
+ * of its own and names its original in `translationOf`. Throws on anything that would publish a
+ * broken pair: a slug used twice, a translation of nothing, two editions in one language, a
+ * number that differs from the original's.
+ */
+export const checkEditions = (editions: readonly EditionLike[], defaultLang: string): void => {
+  const slugs = new Set<string>();
+  for (const e of editions) {
+    if (slugs.has(e.id)) throw new Error(`Precrease slug "${e.id}" is used by two posts`);
+    slugs.add(e.id);
+  }
+  const originals = new Map(editions.filter((e) => e.lang === defaultLang).map((e) => [e.id, e]));
+  const pairs = new Set<string>();
+  for (const e of editions) {
+    if (e.lang === defaultLang) {
+      if (e.folder !== '') throw new Error(`"${e.id}" is in ${defaultLang}: its file belongs at the root`);
+      if (e.translationOf) throw new Error(`"${e.id}" is an original: it can't be a translation`);
+      continue;
+    }
+    if (e.folder !== e.lang) throw new Error(`"${e.id}" is in ${e.lang}: its file belongs in ${e.lang}/`);
+    const original = e.translationOf ? originals.get(e.translationOf) : undefined;
+    if (!original) throw new Error(`"${e.id}" must name its original in translationOf`);
+    if (original.number !== e.number)
+      throw new Error(
+        `"${e.id}" has number ${e.number}; its original "${original.id}" has ${original.number}`,
+      );
+    const pair = `${original.id}:${e.lang}`;
+    if (pairs.has(pair)) throw new Error(`"${original.id}" has two editions in ${e.lang}`);
+    pairs.add(pair);
+  }
+};

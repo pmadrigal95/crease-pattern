@@ -5,7 +5,7 @@ import { copyFor } from '../i18n/dictionary';
 import { DEFAULT_LANG } from '../i18n/routing';
 import { creaseNumber, postHref, type PostSummary } from './precrease';
 
-export function feed(posts: PostSummary[], title: string, description: string) {
+export const feed = (posts: PostSummary[], title: string, description: string) => {
   return rss({
     title,
     description,
@@ -14,11 +14,11 @@ export function feed(posts: PostSummary[], title: string, description: string) {
       title: `${creaseNumber(p.number)} · ${p.entry.data.title}`,
       description: p.entry.data.description,
       pubDate: p.entry.data.date,
-      link: postHref(p.id),
+      link: postHref(p),
       categories: p.entry.data.topics,
     })),
     customData: `<language>en</language>`,
   });
-}
+};
 
 export const blogTitle = copyFor(DEFAULT_LANG).precrease.name;

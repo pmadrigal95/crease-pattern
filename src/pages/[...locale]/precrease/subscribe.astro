@@ -29,7 +29,13 @@ export const getStaticPaths = localeStaticPaths;
         <li>{t.steps.reader}</li>
         <li>
           {t.steps.add}
-          <CopyText value={feed} href={feed} copyLabel={t.copy} copiedLabel={t.copied} />
+          <CopyText
+            value={feed}
+            href={feed}
+            copyLabel={t.copy}
+            copiedLabel={t.copied}
+            failedLabel={t.copyFailed}
+          />
         </li>
         <li>{t.steps.done}</li>
       </ol>

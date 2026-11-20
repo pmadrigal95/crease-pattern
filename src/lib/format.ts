@@ -38,22 +38,22 @@ const andList = lazy((l) => new Intl.ListFormat(l, { type: 'conjunction' }));
 export const formatDate = (date: Date, lang: Lang = DEFAULT_LANG): string => longDate(lang).format(date);
 
 /** "Sep 2019" from `2019-09`; a bare year stays as it is. */
-export function formatMonth(value: string, lang: Lang = DEFAULT_LANG): string {
+export const formatMonth = (value: string, lang: Lang = DEFAULT_LANG): string => {
   const [year, month] = value.split('-').map(Number);
   return month
     ? `${shortMonth(lang).format(new Date(Date.UTC(year ?? 0, month - 1, 1)))} ${year}`
     : String(year);
-}
+};
 
 /** "Sep 2019 – Jul 2022", "Jul 2024 – Present" or "2015 – 2017". */
-export function formatRange(
+export const formatRange = (
   start: string,
   end: string | null | undefined,
   present: string,
   lang: Lang = DEFAULT_LANG,
-): string {
+): string => {
   return `${formatMonth(start, lang)} – ${end ? formatMonth(end, lang) : present}`;
-}
+};
 
 /** "3,432". */
 export const formatNumber = (value: number, lang: Lang = DEFAULT_LANG): string => integer(lang).format(value);
@@ -70,12 +70,12 @@ export const formatList = (items: readonly string[], lang: Lang = DEFAULT_LANG):
 export const padNumber = (value: number, digits = 3): string => String(value).padStart(digits, '0');
 
 /** Picks the sentence for a count: `zero` (optional), `one`, or `many` with `{count}`. */
-export function formatCount(
+export const formatCount = (
   count: number,
   forms: { zero?: string; one: string; many: string },
   lang: Lang = DEFAULT_LANG,
-): string {
+): string => {
   if (count === 0 && forms.zero) return forms.zero;
   if (count === 1) return forms.one;
   return fill(forms.many, { count: formatNumber(count, lang) });
-}
+};

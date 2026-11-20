@@ -21,7 +21,7 @@ export interface StarRenderer {
 const clamp01 = (x: number) => Math.min(1, Math.max(0, x));
 
 /** The SVG renderer: moves the build-time polygons; each facet keeps its element. */
-function svgRenderer(svg: SVGSVGElement): StarRenderer {
+const svgRenderer = (svg: SVGSVGElement): StarRenderer => {
   const model = star();
   const ns = 'http://www.w3.org/2000/svg';
   const polygons = model.model.facets.map((f, i) => {
@@ -49,9 +49,9 @@ function svgRenderer(svg: SVGSVGElement): StarRenderer {
     },
     dispose() {},
   };
-}
+};
 
-export function animateWorkModel(figure: HTMLElement) {
+export const animateWorkModel = (figure: HTMLElement) => {
   const stage = figure.querySelector<HTMLElement>('[data-stage]');
   const svg = figure.querySelector<SVGSVGElement>('[data-star]');
   if (!stage || !svg) return;
@@ -64,7 +64,7 @@ export function animateWorkModel(figure: HTMLElement) {
   const tweens: Partial<Record<'a' | 'e', Tween>> = {};
 
   let running = false;
-  function tick() {
+  const tick = () => {
     const now = performance.now();
     let moving = false;
     for (const key of ['a', 'e'] as const) {
@@ -78,13 +78,13 @@ export function animateWorkModel(figure: HTMLElement) {
     renderer.draw(state.a, state.e);
     if (moving) requestAnimationFrame(tick);
     else running = false;
-  }
-  function requestFrame() {
+  };
+  const requestFrame = () => {
     if (running) return;
     running = true;
     requestAnimationFrame(tick);
-  }
-  function run(key: 'a' | 'e', to: number, ms: number) {
+  };
+  const run = (key: 'a' | 'e', to: number, ms: number) => {
     if (reduced) {
       state[key] = to;
       requestFrame();
@@ -92,7 +92,7 @@ export function animateWorkModel(figure: HTMLElement) {
     }
     tweens[key] = { from: state[key], to, start: performance.now(), ms: ms * Math.abs(to - state[key]) };
     requestFrame();
-  }
+  };
 
   // The assembly plays once, in view. The loader runs this half a screen early, so while the star
   // is still (mostly) out of sight it takes itself apart; if it's already well in view (a link to
@@ -133,4 +133,4 @@ export function animateWorkModel(figure: HTMLElement) {
         requestFrame();
       })
       .catch((error: unknown) => console.warn('3D model unavailable; the SVG star stays', error));
-}
+};

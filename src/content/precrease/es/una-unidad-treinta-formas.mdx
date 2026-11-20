@@ -1,0 +1,143 @@
+---
+number: 3
+title: Una unidad, treinta formas
+description: Una unidad Sonobe es un cuadrado de papel doblado siempre igual. Treinta de ellas forman una estrella. Qué dice eso de los componentes, y qué responden los componentes de este sitio.
+date: 2026-11-19
+format: essay
+topics: [architecture, frontend]
+lang: es
+translationOf: one-unit-thirty-shapes
+draft: false
+references:
+  - title: Sonobe
+    author: Wikipedia
+    url: https://en.wikipedia.org/wiki/Sonobe
+    note: La unidad, los modelos que forma y lo que se sabe de quién la dobló primero.
+    kind: source
+  - title: Design Tokens Format Module
+    author: W3C Design Tokens Community Group
+    url: https://www.designtokens.org/tr/drafts/format/
+    note: Un formato común para los design tokens, los valores con nombre que definen las identidades de este sitio.
+    kind: source
+  - title: 'Unit Origami: Multidimensional Transformations'
+    author: Tomoko Fuse
+    year: 1990
+    url: https://openlibrary.org/works/OL8686738W
+    note: El libro clásico del origami modular, con modelos Sonobe.
+    kind: further
+  - title: Atomic Design
+    author: Brad Frost
+    url: https://atomicdesign.bradfrost.com/
+    note: Una manera de construir interfaces con piezas pequeñas que se combinan.
+    kind: further
+---
+
+import UnitFold from '../../../components/sonobe/UnitFold.astro';
+import ContractFit from '../../../components/sonobe/ContractFit.astro';
+import ScaleDemo from '../../../components/sonobe/ScaleDemo.astro';
+import TokenPaper from '../../../components/sonobe/TokenPaper.astro';
+import ExceptionUnit from '../../../components/sonobe/ExceptionUnit.astro';
+import SiteComponents from '../../../components/sonobe/SiteComponents.astro';
+
+Una unidad Sonobe empieza como un cuadrado de papel. Lo doblas siempre de la misma manera y terminas con un
+paralelogramo pequeño: un cuadrado en el centro y un triángulo en cada extremo. Con seis se arma un cubo. Con doce,
+una estrella de ocho puntas, y con treinta, una de veinte puntas. Nadie diseña una pieza nueva para el modelo más
+grande. Se doblan más de la misma: treinta veces la misma decisión.<MarginNote>Las unidades **Sonobe** llevan el nombre de Mitsunobu Sonobe: el modelo Sonobe más antiguo que se conoce es un cubo que se le atribuye, de 1968. No se sabe con certeza quién diseñó la unidad primero. El origami que se arma con muchas piezas dobladas iguales se llama **origami modular**.</MarginNote>
+
+Con los componentes se hace la misma promesa: construyes una pieza una vez y la usas en todas partes. Este post
+dobla la unidad, une algunas y después revisa esa promesa contra el código de este mismo sitio. Todas las cifras
+salen del build del sitio, así que están al día cada vez que se publica la página.
+
+## La unidad
+
+<UnitFold />
+
+Cada etapa del doblez deja algo resuelto para siempre. El primer pliegue decide dónde está el centro. Las esquinas
+deciden el ángulo que van a compartir todas las unidades que vengan después.
+
+Escribir un componente se parece mucho. PostCard, que muestra un post dentro de una lista en este sitio, salió de
+una necesidad y tres decisiones: qué recibe (un post), qué le deja a la página (dónde va y qué tan ancho es) y qué
+puede cambiar de un lugar a otro (el nivel del título).<MarginNote>Un **componente** es una pieza de la interfaz que se escribe una vez y se usa por su nombre, algo así como una función que devuelve marcado. Sus **props** son los valores que le pasas cada vez que lo usas.</MarginNote>
+Dos props son una superficie pequeña, y es a propósito. Todo lo que PostCard no recibe es algo en lo que ninguna
+página tiene que pensar.
+
+## El contrato
+
+<ContractFit />
+
+Las unidades se sostienen sin pegamento. Una pestaña entra en un bolsillo, el papel agarra y la unión es tan firme
+como el doblez. Dos unidades encajan porque cada una espera muy poco de la otra: una pestaña de un tamaño y un
+bolsillo del mismo tamaño.
+
+El Sonobe muestra dos ideas que a veces se confunden. Reutilizar es usar la misma pieza en varios lugares:
+PostCard aparece en tres archivos. Componer es armar algo más grande con piezas que no saben cómo está hecha la
+otra: PostCard lleva dentro a PostThumb, el dibujo pequeño de cada post.<MarginNote>**Componer** es armar una pieza con otras piezas. Cada una conserva su propio trabajo y solo toca a las demás en sus bordes.</MarginNote>
+
+Los componentes se unen por medio de su interfaz. Una prop opcional no rompe nada: los lugares que ya usan el
+componente siguen funcionando igual. Lo que crece es el contrato, con una combinación más que probar. Una prop
+obligatoria es otra cosa, porque cada lugar que usa el componente tiene que cambiar.<MarginNote>La **interfaz** es lo que una parte del código le muestra al resto. En un componente, son sus props y lo que dibuja. Las interfaces pequeñas se unen con facilidad porque hay menos en qué ponerse de acuerdo.</MarginNote>
+
+## La escala
+
+<ScaleDemo />
+
+Seis unidades, luego doce, luego treinta. El contador de unidades diseñadas se queda en uno. Lo que cambia es
+cuántas doblas y dónde se encuentran. La estrella grande toma más tiempo de doblar y nada de diseño extra.
+
+Esta es la parte de la metáfora que mejor se sostiene. Cuando una unidad está bien hecha, crecer es casi pura
+repetición.
+
+## El token
+
+<TokenPaper />
+
+Cambia el papel y todas las unidades cambian con él. No hay que volver a doblar nada.
+
+Este sitio tiene tres identidades: Basalt & glacier, Washi & asagi y Contour lines. Cada una define los mismos
+nueve nombres de color, de `bg` a `earth`, con valores propios. Los componentes piden un nombre como `accent` o
+`rule`, nunca un valor hexadecimal, así que cambiar de identidad no toca ni un solo componente.<MarginNote>Un **design token** es un valor de diseño con nombre, como un color o un paso de espaciado. Los componentes usan el nombre; cada tema decide el valor.</MarginNote>
+
+## La excepción
+
+<ExceptionUnit />
+
+Ahora haz que una unidad sea especial: una pestaña un poco distinta, solo para un lugar. El modelo ya no cierra, y
+hay dos tipos de unidad que doblar y dos formas que revisar.
+
+Este sitio tiene un ejemplo pequeño propio. FoldTitle, el título grande que se despliega en Precrease, recibe una
+prop `unfold` con dos valores: `hover` en el índice y `load` en un post. Un valor para cada lugar.<MarginNote>Una **variante** es una versión de un componente que se escoge con una prop: un tamaño, un estilo, un comportamiento. Cada una es un caso más que construir y probar.</MarginNote>
+Una variante que cambia cómo se ve algo o cuándo se mueve cabe en un solo componente. Cuando una variante empieza
+a hacer otro trabajo, como traer otros datos o cumplir otra función, ya son dos componentes con el mismo nombre.
+FoldTitle está en el primer caso: `hover` y `load` solo cambian cuándo se despliega el título.
+
+## Este sitio
+
+<SiteComponents />
+
+Esos son todos los componentes de crease-pattern, contados desde el código cuando se construyó esta página. La
+tabla incluye las seis demos de este post. Sin ellas, cuando escribí esto, el sitio tenía 27 componentes y 42 usos,
+y solo 5 componentes se usaban en más de un archivo: PostCard, PostThumb, CopyText, FoldTitle y TopicChips.
+
+Es menos reutilización de la que sugiere la metáfora, y me parece bien. La mayoría de las piezas de un sitio
+pequeño existen para un solo lugar: la apertura del inicio, el retrato plegado de About, las demos de este post.
+Escribirlas como componentes igual vale la pena, porque cada página se compone de ellas, y cada una tiene un
+borde claro y una interfaz pequeña. La
+reutilización es lo que pasa cuando un segundo lugar necesita lo mismo. Antes de eso, hacer algo genérico solo suma
+props que nadie usa todavía.
+
+Lo que sí comparten todas las páginas es el papel: los mismos nombres de color, los mismos pasos de espaciado, los
+mismos tamaños de letra. Ahí es donde este sitio más se repite, y donde un solo cambio llega a todo a la vez.
+
+## Antes de hacerlo reutilizable
+
+Esto es lo que reviso ahora antes de convertir una pieza en un componente compartido:
+
+- **¿Hay un segundo lugar que lo necesite hoy?** Si no, déjalo donde está, con un borde claro.
+- **¿Qué tan pequeña puede ser la interfaz?** Cada prop es una decisión para todos los que lo usan.
+- **¿Pide tokens o valores?** Los nombres viajan entre temas; los valores hexadecimales no.
+- **¿La variante nueva cambia cómo se ve, o qué trabajo hace?** Un trabajo nuevo es un componente nuevo.
+
+La estrella de treinta unidades sale de una unidad bien resuelta y de saber dónde se une con la siguiente. Es lo
+que busco en un componente.
+
+Los componentes, sus conteos y el código detrás de este post están en el [repositorio](https://github.com/pmadrigal95/crease-pattern/tree/main/src/components).

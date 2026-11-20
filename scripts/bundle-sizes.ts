@@ -11,7 +11,9 @@
 //    only on the home page, on capable devices.
 //  - commandMenu: the command menu (src/components/site/command-menu.ts), loaded on any page the
 //    first time a visitor opens it with Ctrl/Cmd+K or its button.
-//  These three have budgets of their own, and the other groups stop at them.
+//  - inspectorViews: the Inspector's folded views (src/components/inspector/fold.ts), loaded the
+//    first time a visitor picks Fold or Pattern in the panel.
+//  These have budgets of their own, and the other groups stop at them.
 import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { brotliCompressSync } from 'node:zlib';
@@ -24,17 +26,23 @@ const isScene3d = (file: string): boolean => /^(scene3d|work3d)\.[\w-]+\.js$/.te
 const isWorkModel = (file: string): boolean => /^work-model\.[\w-]+\.js$/.test(file);
 /** The command menu's entry chunk. */
 const isCommandMenu = (file: string): boolean => /^command-menu\.[\w-]+\.js$/.test(file);
+/** The Inspector's folded views' entry chunk. */
+const isInspectorViews = (file: string): boolean => /^fold\.[\w-]+\.js$/.test(file);
 /** Where the page and on-demand groups stop: code with budgets of its own. */
-const isOwnBudget = (file: string): boolean => isScene3d(file) || isWorkModel(file) || isCommandMenu(file);
+const isOwnBudget = (file: string): boolean =>
+  isScene3d(file) || isWorkModel(file) || isCommandMenu(file) || isInspectorViews(file);
 
 /** Bytes, Brotli, per group. */
-export function measureBundles(dist: string): {
+export const measureBundles = (
+  dist: string,
+): {
   page: number;
   onDemand: number;
   workModel: number;
   scene3d: number;
   commandMenu: number;
-} {
+  inspectorViews: number;
+} => {
   const assets = join(dist, '_astro');
   const read = (file: string): string => readFileSync(join(assets, file), 'utf8');
   const size = (file: string): number => brotliCompressSync(readFileSync(join(assets, file))).length;
@@ -72,21 +80,27 @@ export function measureBundles(dist: string): {
   const workModel = closure(scripts.filter(isWorkModel), new Set([...page, ...onDemand]), isScene3d);
   const scene3d = closure(scripts.filter(isScene3d), new Set([...page, ...onDemand, ...workModel]));
   const commandMenu = closure(scripts.filter(isCommandMenu), new Set([...page, ...onDemand]), isScene3d);
+  const inspectorViews = closure(
+    scripts.filter(isInspectorViews),
+    new Set([...page, ...onDemand]),
+    isScene3d,
+  );
   return {
     page: sum(page),
     onDemand: sum(onDemand),
     workModel: sum(workModel),
     scene3d: sum(scene3d),
     commandMenu: sum(commandMenu),
+    inspectorViews: sum(inspectorViews),
   };
-}
+};
 
 /**
  * Everything one page runs on load: the external scripts it references plus the scripts Astro
  * inlined into it (small ones with no imports), each Brotli-compressed. This is what the home
  * page's "JavaScript on first load" figure reports.
  */
-export function measurePage(dist: string, page: string): number {
+export const measurePage = (dist: string, page: string): number => {
   const html = readFileSync(join(dist, page), 'utf8');
   const external = [...html.matchAll(/<script[^>]*\ssrc="\/_astro\/([^"]+\.js)"/g)].map((m) =>
     readFileSync(join(dist, '_astro', m[1] ?? '')),
@@ -99,48 +113,48 @@ export function measurePage(dist: string, page: string): number {
     .map((m) => m[1] ?? '')
     .filter((code) => code.trim());
   return [...external, ...inline].reduce((sum, code) => sum + brotliCompressSync(code).length, 0);
-}
+};
 
 /**
  * The Inspector's manifest as Vite emits it (/_astro/inspector.<hash>.json), Brotli. Zero when the
  * build has none.
  */
-export function measureInspectorData(dist: string): number {
+export const measureInspectorData = (dist: string): number => {
   const assets = join(dist, '_astro');
   return readdirSync(assets)
     .filter((f) => /^inspector\.[\w-]+\.json$/.test(f))
     .reduce((sum, f) => sum + brotliCompressSync(readFileSync(join(assets, f))).length, 0);
-}
+};
 
 /**
  * The Inspector's styles as Vite emits them (/_astro/inspector.<hash>.css), Brotli: fetched when
  * the panel opens, like its manifest. Zero when the build has none.
  */
-export function measureInspectorStyles(dist: string): number {
+export const measureInspectorStyles = (dist: string): number => {
   const assets = join(dist, '_astro');
   return readdirSync(assets)
     .filter((f) => /^inspector\.[\w-]+\.css$/.test(f))
     .reduce((sum, f) => sum + brotliCompressSync(readFileSync(join(assets, f))).length, 0);
-}
+};
 
 /**
  * The command menu's index (/commands.json, scripts/build-command-index.ts), Brotli: fetched the
  * first time the menu opens.
  */
-export function measureCommandData(dist: string): number {
+export const measureCommandData = (dist: string): number => {
   return brotliCompressSync(readFileSync(join(dist, 'commands.json'))).length;
-}
+};
 
 /**
  * The 3D scenes' data files as Vite emits them (/_astro/*.<hash>.bin, such as the Irazú's height
  * grid), Brotli. They download with the scene, on the home page only.
  */
-export function measureSceneData(dist: string): number {
+export const measureSceneData = (dist: string): number => {
   const assets = join(dist, '_astro');
   return readdirSync(assets)
     .filter((f) => f.endsWith('.bin'))
     .reduce((sum, f) => sum + brotliCompressSync(readFileSync(join(assets, f))).length, 0);
-}
+};
 
 /**
  * Everything one Precrease post can run: the scripts its page references, what they import, and
@@ -148,7 +162,7 @@ export function measureSceneData(dist: string): number {
  * presses Run downloads them. Pages missing from `dist` (drafts in a production build) are
  * skipped, so a production build measures only the posts that are out.
  */
-export function measurePosts(dist: string, paths: string[]): { path: string; bytes: number }[] {
+export const measurePosts = (dist: string, paths: string[]): { path: string; bytes: number }[] => {
   const assets = join(dist, '_astro');
   const read = (file: string): string => readFileSync(join(assets, file), 'utf8');
   const size = (file: string): number => brotliCompressSync(readFileSync(join(assets, file))).length;
@@ -177,4 +191,4 @@ export function measurePosts(dist: string, paths: string[]): { path: string; byt
     }
     return [{ path, bytes: [...seen].reduce((sum, f) => sum + size(f), 0) }];
   });
-}
+};

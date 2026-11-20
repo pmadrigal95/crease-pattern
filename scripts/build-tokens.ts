@@ -16,7 +16,7 @@ type Vars = Record<string, string>;
 const read = (p: string): TokenGroup => JSON.parse(readFileSync(join(root, p), 'utf8')) as TokenGroup;
 const kebab = (s: string): string => s.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
 
-function flatten(group: TokenGroup, prefix = ''): Vars {
+const flatten = (group: TokenGroup, prefix = ''): Vars => {
   const out: Vars = {};
   for (const [key, node] of Object.entries(group)) {
     if (key.startsWith('$')) continue;
@@ -26,7 +26,7 @@ function flatten(group: TokenGroup, prefix = ''): Vars {
     else Object.assign(out, flatten(node, name));
   }
   return out;
-}
+};
 
 const decl = (vars: Vars, prefix: string): string =>
   Object.entries(vars)

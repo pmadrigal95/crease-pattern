@@ -20,7 +20,7 @@ export const ESSAY_BOARD = [
 ] as const;
 export const ESSAY_PIECES: readonly PieceName[] = ['T', 'I', 'S', 'L', 'O', 'Z', 'J'];
 
-export function essayProblem(depth: number): Problem {
+export const essayProblem = (depth: number): Problem => {
   const board = boardFromText(ESSAY_BOARD, 20);
   return {
     width: board.width,
@@ -29,14 +29,14 @@ export function essayProblem(depth: number): Problem {
     pieces: [...ESSAY_PIECES],
     depth,
   };
-}
+};
 
-export function median(values: readonly number[]): number {
+export const median = (values: readonly number[]): number => {
   if (values.length === 0) throw new Error('median() needs at least one value');
-  const sorted = [...values].sort((a, b) => a - b);
+  const sorted = values.toSorted((a, b) => a - b);
   const mid = Math.floor(sorted.length / 2);
   return sorted.length % 2 ? sorted[mid]! : (sorted[mid - 1]! + sorted[mid]!) / 2;
-}
+};
 
 /** How many times faster than the baseline; 1 means the same. */
 export const speedup = (baselineMs: number, ms: number): number => (ms > 0 ? baselineMs / ms : 0);
@@ -57,13 +57,13 @@ export interface CostPoint {
  * With little work and a real per-thread cost, the curve peaks early and then falls below 1:
  * exactly what happened in 2022.
  */
-export function costCurve(workMs: number, perThreadMs: number, maxThreads: number): CostPoint[] {
+export const costCurve = (workMs: number, perThreadMs: number, maxThreads: number): CostPoint[] => {
   return Array.from({ length: maxThreads }, (_, i) => {
     const threads = i + 1;
     const ms = threads === 1 ? workMs : workMs / threads + perThreadMs * threads;
     return { threads, ms, speedup: speedup(workMs, ms) };
   });
-}
+};
 
 export const bestPoint = (points: readonly CostPoint[]): CostPoint =>
   points.reduce((best, p) => (p.speedup > best.speedup ? p : best));
@@ -72,13 +72,13 @@ export const bestPoint = (points: readonly CostPoint[]): CostPoint =>
  * How 2022's solver split its work: one unit per board column, dealt round-robin
  * (`for col = thread; col < columns; col += threads`). Returns each thread's columns.
  */
-export function cyclicColumns(columns: number, threads: number): number[][] {
+export const cyclicColumns = (columns: number, threads: number): number[][] => {
   return Array.from({ length: threads }, (_, t) => {
     const mine: number[] = [];
     for (let c = t; c < columns; c += threads) mine.push(c);
     return mine;
   });
-}
+};
 
 /** The measured 2022 results (Tarea03 and Tarea04 reports): one run per case, the original numbers. */
 export const RESULTS_2022 = [
@@ -101,17 +101,17 @@ export interface ChartFrame {
 }
 
 /** The speedup curve as SVG path data, threads on x (from 1) and speedup on y (from 0). */
-export function speedupPath(
+export const speedupPath = (
   points: readonly CostPoint[],
   f: ChartFrame,
-): { d: string; x: (n: number) => number; y: (s: number) => number } {
+): { d: string; x: (n: number) => number; y: (s: number) => number } => {
   const x = (n: number) => f.pad + ((n - 1) / (f.maxX - 1)) * (f.width - 2 * f.pad);
   const y = (s: number) => f.height - f.pad - (Math.min(s, f.maxY) / f.maxY) * (f.height - 2 * f.pad);
   const d = points
     .map((p, i) => `${i ? 'L' : 'M'}${x(p.threads).toFixed(1)},${y(p.speedup).toFixed(1)}`)
     .join('');
   return { d, x, y };
-}
+};
 
 /**
  * What the opening demo shows before anyone presses Run (and all that readers without JavaScript
@@ -119,7 +119,10 @@ export function speedupPath(
  * Measured 2026-11-13 on a Cloudflare preview of the production build.
  */
 export const MEASURED = {
-  device: 'an Intel Core i7-12700K (12 cores, 20 threads)',
+  // The words around these ("an", "cores") come from each language's copy (measuredNote).
+  device: 'Intel Core i7-12700K',
+  cores: 12,
+  threads: 20,
   browser: 'Chrome',
   workers: 16,
   depth: 4,

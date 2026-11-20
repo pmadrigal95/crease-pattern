@@ -14,7 +14,7 @@ import { features, pickBest, play, rootTasks, search, solveTask } from '../../sr
 // seeded random boards: the parallel split and the memo must never change the answer.
 
 /** Small seeded PRNG (mulberry32), so random cases are the same on every run. */
-function prng(seed: number) {
+const prng = (seed: number) => {
   let a = seed >>> 0;
   return () => {
     a = (a + 0x6d2b79f5) >>> 0;
@@ -23,10 +23,10 @@ function prng(seed: number) {
     t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
-}
+};
 
 /** A messy but legal board: random stacks up to `maxHeight`, with holes, and no full rows. */
-function randomBoard(seed: number, maxHeight = 8): Board {
+const randomBoard = (seed: number, maxHeight = 8): Board => {
   const rand = prng(seed);
   const board = emptyBoard();
   for (let x = 0; x < board.width; x++) {
@@ -37,7 +37,7 @@ function randomBoard(seed: number, maxHeight = 8): Board {
   for (let y = 0; y < board.height; y++)
     if (board.rows[y] === full) board.rows[y]! &= ~(1 << (y % board.width));
   return board;
-}
+};
 const randomPieces = (seed: number, n: number): PieceName[] => {
   const rand = prng(seed * 31 + 7);
   return Array.from({ length: n }, () => PIECE_NAMES[Math.floor(rand() * PIECE_NAMES.length)]!);

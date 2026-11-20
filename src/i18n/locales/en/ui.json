@@ -20,7 +20,17 @@
         "unfolded": "Unfolded: the crease pattern",
         "mountain": "mountain",
         "valley": "valley",
-        "caption": "The figure is what you see on screen: the interface. Unfold it and you get the folds that shape it, the architecture. Each identity folds its own: a crane, a blue morpho by day and a red-eyed tree frog by night, an arctic fox. \"See how this page is built\" opens any page here the same way."
+        "caption": "The figure is what you see on screen: the interface. Unfold it and you get the folds that shape it, the architecture. Each identity folds its own: a crane, a blue morpho by day and a red-eyed tree frog by night, an arctic fox. \"See how this page is built\" opens any page here the same way.",
+        "figures": {
+          "crane": "The crane",
+          "morpho": "The blue morpho",
+          "frog": "The red-eyed tree frog",
+          "fox": "The arctic fox"
+        },
+        "facets": "facets",
+        "hinges": "hinges",
+        "sheet": "sheet",
+        "drag": "Drag to turn it"
       },
       "who": "{name} · {role} · {location}"
     },
@@ -92,7 +102,8 @@
       "heading": "Contact",
       "intro": "Email reaches me fastest.",
       "copy": "Copy email address",
-      "copied": "Email address copied"
+      "copied": "Email address copied",
+      "copyFailed": "Couldn't copy it. The address is selected, so you can copy it yourself."
     }
   },
   "footer": {
@@ -164,6 +175,18 @@
     "title": "Inspector",
     "close": "Close the inspector",
     "intro": "Hover a block · Click to pin · Esc to leave",
+    "view": "View",
+    "views": { "layers": "Layers", "fold": "Fold", "pattern": "Pattern" },
+    "tour": "Walk through",
+    "tourStop": "Stop the tour",
+    "openCrease": "Open this crease",
+    "closeCrease": "Close this crease",
+    "mountainFold": "mountain fold",
+    "valleyFold": "valley fold",
+    "linesUnit": "lines",
+    "tokensUnit": "tokens",
+    "downloadPattern": "Download the pattern (SVG)",
+    "foldHint": "Drag up or down to fold the page tighter or open it, and sideways to turn it. Click the circle on a crease to open or close it. Keyboard: arrows, and R to start over.",
     "layers": "Layers",
     "selected": "Selected",
     "nothingSelected": "Hover or pick a layer to see where it comes from.",
@@ -237,6 +260,9 @@
     "chapter": "Chapter: {chapter}",
     "draft": "Draft: only visible in development",
     "scheduled": "Scheduled for {date}: only visible in development",
+    "untranslated": "Not in English yet",
+    "edition": "English edition. The original came out on {date}.",
+    "original": "Read the original",
     "search": {
       "label": "Search Precrease",
       "placeholder": "Search posts",
@@ -263,6 +289,7 @@
       },
       "copy": "Copy feed address",
       "copied": "Feed address copied",
+      "copyFailed": "Couldn't copy it. The address is selected, so you can copy it yourself.",
       "topicsTitle": "Only some topics?",
       "topics": "Every topic has its own feed. Open a topic from the {map} and use its RSS feed link.",
       "mapLink": "topic map",
@@ -326,7 +353,7 @@
       "bestMove": "The move the solver chose",
       "measuredResult": "On my desktop: {model}, {times}× faster than one worker.",
       "batteryNote": "A run keeps your processor's cores busy for about a second, so it uses a little battery.",
-      "measuredNote": "Measured on {device} in {browser}, with {workers} workers, four pieces ahead. Press Run to time your own device.",
+      "measuredNote": "Measured on an {device} ({cores} cores, {threads} threads) in {browser}, with {workers} workers, four pieces ahead. Press Run to time your own device.",
       "modelLabel": "Model",
       "summary": "{model}: {ms} ms · {tasks} tasks per worker",
       "legendWork": "Searching a task",

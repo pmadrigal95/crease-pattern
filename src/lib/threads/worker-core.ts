@@ -22,7 +22,7 @@ export type Clock = () => number;
 
 const toBoard = (p: Problem): Board => ({ width: p.width, height: p.height, rows: Uint16Array.from(p.rows) });
 
-export function handle(message: ToWorker, now: Clock): FromWorker {
+export const handle = (message: ToWorker, now: Clock): FromWorker => {
   const received = now();
   const spans: Span[] = [{ kind: 'start', from: message.sentAt, to: received }];
   const results: TaskResult[] = [];
@@ -72,4 +72,4 @@ export function handle(message: ToWorker, now: Clock): FromWorker {
     }
   }
   return { type: 'done', run: message.run, worker: message.worker, results, spans };
-}
+};

@@ -79,11 +79,11 @@ export const textWidth = (text: string, size: number): number => text.length * s
  * The elevation chart: time left to right, altitude up. Each release rises to its peak and
  * eases to a saddle before the next; the last ends on its summit, where "you are here" goes.
  */
-export function profile(climbs: readonly Climb[], frame: Frame): Profile {
+export const profile = (climbs: readonly Climb[], frame: Frame): Profile => {
   if (climbs.length === 0) throw new Error('profile() needs at least one release');
-  const sorted = [...climbs].sort((a, b) => a.start - b.start);
+  const sorted = climbs.toSorted((a, b) => a.start - b.start);
   const from = sorted[0]!.start;
-  const to = sorted[sorted.length - 1]!.end;
+  const to = sorted.at(-1)!.end;
   const baseline = frame.height - frame.bottom;
   const plotRight = frame.width - frame.right;
   const x = (t: number) => ((t - from) / (to - from)) * plotRight;
@@ -119,7 +119,7 @@ export function profile(climbs: readonly Climb[], frame: Frame): Profile {
   const xy = points.map(([t, m]) => [x(t), y(m)] as [number, number]);
   const line = smoothPath(xy);
   const first = xy[0]!;
-  const end = xy[xy.length - 1]!;
+  const end = xy.at(-1)!;
   const area = `${line} L${round(end[0])},${baseline} L${round(first[0])},${baseline} Z`;
 
   const guides: Profile['guides'] = [];
@@ -127,10 +127,10 @@ export function profile(climbs: readonly Climb[], frame: Frame): Profile {
     if (m > frame.floorM) guides.push({ y: round(y(m)), m });
 
   return { line, area, baseline, plotRight, guides, stretches, here: { x: round(end[0]), y: round(end[1]) } };
-}
+};
 
 /** A smooth path through the points (Catmull-Rom as cubic Béziers). */
-export function smoothPath(points: [number, number][]): string {
+export const smoothPath = (points: [number, number][]): string => {
   const [first] = points;
   if (!first) return '';
   let d = `M${round(first[0])},${round(first[1])}`;
@@ -144,6 +144,6 @@ export function smoothPath(points: [number, number][]): string {
     d += ` C${round(c1[0]!)},${round(c1[1]!)} ${round(c2[0]!)},${round(c2[1]!)} ${round(p2[0])},${round(p2[1])}`;
   }
   return d;
-}
+};
 
 const round = (n: number) => Math.round(n * 10) / 10;

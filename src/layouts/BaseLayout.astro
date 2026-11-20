@@ -15,6 +15,7 @@ import WebAnalytics from '../components/site/WebAnalytics.astro';
 import restoreIdentitySource from '../scripts/restore-identity.ts?raw';
 import pageRevealSource from '../scripts/page-reveal.ts?raw';
 import { toInlineScript } from '../../scripts/inline-script.ts';
+import { speculationRules } from '../scripts/speculation-rules';
 // Preloaded so text renders in its final font on first paint (no layout shift on swap).
 import sansLatin from '@fontsource-variable/schibsted-grotesk/files/schibsted-grotesk-latin-wght-normal.woff2?url';
 import monoLatin from '@fontsource-variable/jetbrains-mono/files/jetbrains-mono-latin-wght-normal.woff2?url';
@@ -49,6 +50,8 @@ const profile = await getProfile(Astro.currentLocale);
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    {/* Light and dark from the first paint, before any stylesheet: no white flash on a dark system. */}
+    <meta name="color-scheme" content="light dark" />
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
@@ -60,6 +63,9 @@ const profile = await getProfile(Astro.currentLocale);
       <link rel="alternate" hreflang="x-default" href={new URL(translations[DEFAULT_LANG], site.url)} />
     )}
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    {/* The page-to-page fold waits until the main content is parsed, so it never unfolds onto a
+         half-built page (no effect where cross-document view transitions aren't supported). */}
+    <link rel="expect" href="#main" blocking="render" />
     <link rel="preload" href={sansLatin} as="font" type="font/woff2" crossorigin />
     <link rel="preload" href={monoLatin} as="font" type="font/woff2" crossorigin />
     <meta name="author" content={profile.name} />
@@ -72,18 +78,20 @@ const profile = await getProfile(Astro.currentLocale);
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
-    <!-- Page-specific hints, such as a preload for the page's first image. -->
+    {/* The next page prerenders when a link shows intent (src/scripts/speculation-rules.ts). */}
+    <script type="speculationrules" is:inline set:html={speculationRules} />
+    {/* Page-specific hints, such as a preload for the page's first image. */}
     <slot name="head" />
   </head>
   <body>
-    <!--
+    {/*
       First thing in <body>, not in <head>: Astro appends the CSP meta tag at the end of
       <head>, and a script placed before it would run unprotected. It still runs before
       any content is parsed, so there is no flash of the default identity.
-    -->
-    <!-- Restores the visitor's identity and theme. Its CSP hash comes from scripts/csp-hashes.ts. -->
+    */}
+    {/* Restores the visitor's identity and theme. Its CSP hash comes from scripts/csp-hashes.ts. */}
     <script is:inline set:html={restoreIdentityScript} />
-    <!-- Runs before first render: the page-to-page fold or the first-load entrance (decision 42). -->
+    {/* Runs before first render: the page-to-page fold or the first-load entrance (decision 42). */}
     <script is:inline set:html={pageRevealScript} />
     <a class="skip-link" href="#main">
       {copyFor(lang).nav.skip}

@@ -18,27 +18,27 @@ import { describe, expect, test } from 'vitest';
 const SRC = join(import.meta.dirname, '..', '..', 'src');
 const SOURCE = /\.(ts|astro|vue)$/;
 
-function* files(dir: string): Generator<string> {
+const files = function* (dir: string): Generator<string> {
   for (const name of readdirSync(dir)) {
     const path = join(dir, name);
     if (name === 'generated') continue;
     if (statSync(path).isDirectory()) yield* files(path);
     else if (SOURCE.test(name)) yield path;
   }
-}
+};
 const sources = [...files(SRC)].map((path) => ({
   file: relative(SRC, path).split(sep).join('/'),
   lines: readFileSync(path, 'utf8').split('\n'),
 }));
 
 /** Lines matching `pattern` outside the allowed files, as "file:line". */
-function offenders(pattern: RegExp, allowed: Record<string, string>) {
+const offenders = (pattern: RegExp, allowed: Record<string, string>) => {
   return sources
     .filter(({ file }) => !(file in allowed))
     .flatMap(({ file, lines }) =>
       lines.flatMap((line, i) => (pattern.test(line) ? [`${file}:${i + 1}  ${line.trim()}`] : [])),
     );
-}
+};
 
 describe('guards', () => {
   test('values are formatted only in lib/format.ts', () => {
@@ -72,7 +72,9 @@ describe('cross-origin isolation', () => {
     return lines.slice(start + 1, end < 0 ? undefined : end).join('\n');
   };
   const postsDir = join(SRC, 'content', 'precrease');
-  const isolated = readdirSync(postsDir)
+  // Editions in other languages sit in a folder per language (es/…) and live under /es/precrease/.
+  const isolated = readdirSync(postsDir, { recursive: true, encoding: 'utf8' })
+    .map((f) => f.replaceAll('\\', '/'))
     .filter((f) => /\.mdx?$/.test(f))
     .filter((f) =>
       /^isolated:\s*true\b/m.test(readFileSync(join(postsDir, f), 'utf8').split(/^---\s*$/m)[1] ?? ''),
@@ -81,8 +83,10 @@ describe('cross-origin isolation', () => {
 
   test.each(isolated.length ? isolated : ['(none yet)'])('%s is served cross-origin isolated', (slug) => {
     if (slug === '(none yet)') return;
-    const block = blockFor(`/precrease/${slug}`);
-    expect(block, `Add a /precrease/${slug} block to public/_headers`).toMatch(
+    const [lang, name] = slug.includes('/') ? slug.split('/') : [undefined, slug];
+    const path = lang ? `/${lang}/precrease/${name}` : `/precrease/${name}`;
+    const block = blockFor(path);
+    expect(block, `Add a ${path} block to public/_headers`).toMatch(
       /Cross-Origin-Opener-Policy: same-origin/,
     );
     expect(block).toMatch(/Cross-Origin-Embedder-Policy: credentialless/);

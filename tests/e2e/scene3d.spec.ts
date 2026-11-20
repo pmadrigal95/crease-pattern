@@ -1,8 +1,9 @@
 import { expect, test, type Page } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 
-// M4's 3D fox (src/components/inspector/scene3d.ts): opening the Inspector on the home page hands
-// the hero's square to a WebGL scene on devices that can run it, and back to the SVG on close.
+// The hero's 3D figure (src/scripts/hero3d.ts, src/components/inspector/scene3d.ts): on devices
+// that can run it, the hero's square turns 3D at the visitor's first move; the Inspector takes the
+// same scene apart.
 const panel = '#inspector';
 const canvas = '[data-hero-fold] [data-stage] canvas';
 // SwiftShader renders on the CPU, so on a busy runner the scene's first frame, and the pages
@@ -29,9 +30,61 @@ const allowSoftwareGl = (page: Page) =>
     } as typeof getContext;
   });
 
-test('inspecting on a capable device hands the hero to the 3D fox, and closing hands it back', async ({
-  page,
-}) => {
+const sceneRequests = (urls: string[]) => urls.filter((url) => /\/_astro\/(scene3d|irazu-dem)\./.test(url));
+
+test('the hero stays an SVG until the visitor moves, then turns 3D', async ({ page }) => {
+  await allowSoftwareGl(page);
+  const requested: string[] = [];
+  page.on('request', (r) => requested.push(r.url()));
+  await page.goto('/');
+  await page.waitForLoadState('networkidle');
+  expect(sceneRequests(requested)).toEqual([]);
+  await expect(page.locator(canvas)).toHaveCount(0);
+  await expect(page.getByText('Drag to turn it')).toBeHidden();
+
+  await page.mouse.move(200, 200);
+  await page.mouse.move(240, 260);
+  await expect(page.locator('[data-hero-fold]')).toHaveClass(/scene-3d/, sceneReady);
+  await expect(page.locator(canvas)).toHaveCount(1);
+  await expect(page.getByText('Drag to turn it')).toBeVisible();
+});
+
+test('the slider folds the 3D figure, from the keyboard too', async ({ page }) => {
+  await allowSoftwareGl(page);
+  const errors: string[] = [];
+  page.on('pageerror', (e) => errors.push(e.message));
+  await page.goto('/');
+  await page.mouse.move(200, 200);
+  await expect(page.locator('[data-hero-fold]')).toHaveClass(/scene-3d/, sceneReady);
+  const slider = page.getByRole('slider', { name: 'Unfold the figure into its crease pattern' });
+  await slider.focus();
+  await page.keyboard.press('End');
+  await expect(slider).toHaveAttribute('aria-valuenow', '100');
+  const fold = () =>
+    page.locator('[data-hero-fold]').evaluate((el) => (el as HTMLElement).style.getPropertyValue('--fold'));
+  await expect.poll(fold).toBe('1.000');
+  await page.keyboard.press('Home');
+  await expect(slider).toHaveAttribute('aria-valuenow', '0');
+  await expect(page.locator('[data-hero-fold]')).toHaveClass(/scene-3d/);
+  expect(errors).toEqual([]);
+});
+
+test('with data saver on, the hero keeps the SVG and never downloads the scene', async ({ page }) => {
+  await allowSoftwareGl(page);
+  await page.addInitScript(() =>
+    Object.defineProperty(navigator, 'connection', { value: { saveData: true }, configurable: true }),
+  );
+  const requested: string[] = [];
+  page.on('request', (r) => requested.push(r.url()));
+  await page.goto('/');
+  await page.mouse.move(200, 200);
+  await page.mouse.wheel(0, 200);
+  await page.waitForLoadState('networkidle');
+  await expect(page.locator(canvas)).toHaveCount(0);
+  expect(sceneRequests(requested)).toEqual([]);
+});
+
+test("inspecting takes the hero's 3D figure apart, and closing puts it back together", async ({ page }) => {
   await allowSoftwareGl(page);
   await page.goto('/');
   await page.locator('[data-inspector-toggle]').click();
@@ -41,8 +94,10 @@ test('inspecting on a capable device hands the hero to the 3D fox, and closing h
   await expect(page.locator(canvas)).toHaveAttribute('aria-hidden', 'true');
 
   await page.keyboard.press('Escape');
-  await expect(page.locator('[data-hero-fold]')).not.toHaveClass(/scene-3d/, sceneReady);
-  await expect(page.locator(canvas)).toHaveCount(0);
+  await expect(page.locator('html')).not.toHaveClass(/inspecting/);
+  // The figure stays 3D in the hero: one scene per page, never rebuilt.
+  await expect(page.locator('[data-hero-fold]')).toHaveClass(/scene-3d/);
+  await expect(page.locator(canvas)).toHaveCount(1);
 });
 
 test('changing identity while inspecting exchanges the scene in the same canvas', async ({ page }) => {
@@ -64,7 +119,7 @@ test('changing identity while inspecting exchanges the scene in the same canvas'
   expect(errors).toEqual([]);
 });
 
-test('reduced motion keeps the SVG fox and never downloads the scene', async ({ browser }) => {
+test('reduced motion keeps the SVG figure and never downloads the scene', async ({ browser }) => {
   const context = await browser.newContext({ reducedMotion: 'reduce' });
   const page = await context.newPage();
   await allowSoftwareGl(page);
@@ -72,20 +127,22 @@ test('reduced motion keeps the SVG fox and never downloads the scene', async ({ 
   page.on('request', (r) => requested.push(r.url()));
   await page.goto('/?inspect');
   await expect(page.locator(panel)).toBeVisible(sceneReady);
+  await page.mouse.move(200, 200);
   await page.waitForLoadState('networkidle');
   await expect(page.locator(canvas)).toHaveCount(0);
-  expect(requested.filter((url) => /\/_astro\/(scene3d|irazu-dem)\./.test(url))).toEqual([]);
+  expect(sceneRequests(requested)).toEqual([]);
   await context.close();
 });
 
-test('a page without the hero fox never downloads the scene', async ({ page }) => {
+test('a page without the hero figure never downloads the scene', async ({ page }) => {
   await allowSoftwareGl(page);
   const requested: string[] = [];
   page.on('request', (r) => requested.push(r.url()));
   await page.goto('/about?inspect');
   await expect(page.locator(panel)).toBeVisible(sceneReady);
+  await page.mouse.move(200, 200);
   await page.waitForLoadState('networkidle');
-  expect(requested.filter((url) => /\/_astro\/(scene3d|irazu-dem)\./.test(url))).toEqual([]);
+  expect(sceneRequests(requested)).toEqual([]);
 });
 
 test('Contour lines draws the Irazú from its real height grid', async ({ page }) => {
@@ -122,7 +179,7 @@ test('the 3D scene raises no Content Security Policy violations', async ({ page 
 });
 
 for (const theme of ['light', 'dark'] as const) {
-  test(`the home page with the 3D fox has no axe violations · ${theme}`, async ({ page }) => {
+  test(`the home page with the 3D figure has no axe violations · ${theme}`, async ({ page }) => {
     await allowSoftwareGl(page);
     await page.addInitScript((t) => localStorage.setItem('pm.theme', t), theme);
     await page.goto('/?inspect');

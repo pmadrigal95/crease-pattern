@@ -102,6 +102,8 @@ const cells = Array.from({ length: ROWS }, (_, row) => {
     <p class="note" data-note>
       {fill(t.measuredNote, {
         device: MEASURED.device,
+        cores: MEASURED.cores,
+        threads: MEASURED.threads,
         browser: MEASURED.browser,
         workers: MEASURED.workers,
       })}

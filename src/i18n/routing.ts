@@ -20,17 +20,17 @@ export const langOf = (locale: string | undefined | null): Lang => (isLang(local
 export const langOfPath = (path: string): Lang => langOf(PREFIX.exec(path)?.[1]);
 
 /** A site path without its language prefix: "/es/about" → "/about", "/es" → "/". */
-export function unlocalize(path: string): string {
+export const unlocalize = (path: string): string => {
   const stripped = path.replace(PREFIX, '');
   return stripped === '' ? '/' : stripped;
-}
+};
 
 /** The same site path in `lang`: ("/about", "es") → "/es/about"; ("/", "es") → "/es". */
-export function localize(path: string, lang: Lang): string {
+export const localize = (path: string, lang: Lang): string => {
   const base = unlocalize(path);
   if (lang === DEFAULT_LANG) return base;
   return base === '/' ? `/${lang}` : `/${lang}${base}`;
-}
+};
 
 /**
  * getStaticPaths for a page that exists in every language: `[...locale]` is empty for the default
@@ -47,31 +47,31 @@ export type Translations = Partial<Record<Lang, string>>;
  * same path; any other page only in its own, unless it names its pairs (`own`), as a translated
  * post does.
  */
-export function translationsOf(path: string, routePattern: string, own?: Translations): Translations {
+export const translationsOf = (path: string, routePattern: string, own?: Translations): Translations => {
   if (own) return own;
   if (routePattern.includes('[...locale]'))
     return Object.fromEntries(LANGS.map((lang) => [lang, localize(path, lang)])) as Translations;
   return { [langOfPath(path)]: path };
-}
+};
 
 /**
  * Where the language switch leads from a page: its pair, or, when it has none, the closest page
  * that has one (Precrease's index for a post, the home page otherwise).
  */
-export function switchTarget(path: string, translations: Translations, lang: Lang): string {
+export const switchTarget = (path: string, translations: Translations, lang: Lang): string => {
   const pair = translations[lang];
   if (pair) return pair;
   return localize(unlocalize(path).startsWith('/precrease') ? '/precrease' : '/', lang);
-}
+};
 
 /** The first of the visitor's languages (navigator.languages) the site has, or null. */
-export function preferredLang(languages: readonly string[]): Lang | null {
+export const preferredLang = (languages: readonly string[]): Lang | null => {
   for (const tag of languages) {
     const base = tag.toLowerCase().split('-')[0];
     if (isLang(base)) return base;
   }
   return null;
-}
+};
 
 /** One entry per language for a page's language switch: where it leads, and whether it's this page. */
 export interface LanguageLink {

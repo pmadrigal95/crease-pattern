@@ -27,7 +27,14 @@
   }
 }
 
+/* Scrolling the list or the backdrop never scrolls the page behind the menu. */
+.cmdk:modal {
+  overscroll-behavior: contain;
+}
+
 .cmdk::backdrop {
+  overflow: hidden;
+  overscroll-behavior: contain;
   background: color-mix(in oklab, var(--color-ink) 28%, transparent);
 }
 

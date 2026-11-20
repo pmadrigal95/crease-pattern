@@ -16,7 +16,7 @@ export const layersEnabled = () =>
  * Tilts the page and lifts its parts. Returns the function that puts everything back; the CSS
  * transitions run both ways, so closing settles the layers instead of snapping them.
  */
-export function explode(parts: HTMLElement[]): () => void {
+export const explode = (parts: HTMLElement[]): (() => void) => {
   const main = document.querySelector<HTMLElement>('main');
   if (!main) return () => {};
   const root = document.documentElement;
@@ -55,9 +55,9 @@ export function explode(parts: HTMLElement[]): () => void {
     lifted.forEach((el) => el.classList.remove(CURRENT));
     // Leave --layer-depth and --tilt-origin in place: the closing transition still reads them.
   };
-}
+};
 
 /** Raises the hovered or pinned part above the others, so the panel and the model agree. */
-export function markCurrent(parts: HTMLElement[], current: HTMLElement | null) {
+export const markCurrent = (parts: HTMLElement[], current: HTMLElement | null) => {
   for (const el of parts) el.classList.toggle(CURRENT, el === current);
-}
+};
