@@ -9,6 +9,7 @@
  * runs, and a note says so.
  */
 import { copyFor } from '../../i18n/dictionary';
+import { langOf } from '../../i18n/routing';
 import { THREADS_2022 } from '../../lib/threads/solver-2022';
 const copy = copyFor(Astro.currentLocale);
 
@@ -21,7 +22,13 @@ const DEFAULT_THREADS = 4;
 Astro.csp?.insertScriptResource("'wasm-unsafe-eval'");
 ---
 
-<figure class="replay-2022" data-replay-2022 data-strings={JSON.stringify(r)} data-inspect="Replay2022">
+<figure
+  class="replay-2022"
+  data-replay-2022
+  data-lang={langOf(Astro.currentLocale)}
+  data-strings={JSON.stringify(r)}
+  data-inspect="Replay2022"
+>
   <p class="readout" data-readout aria-live="polite">
     {r.intro}
   </p>
@@ -240,7 +247,7 @@ Astro.csp?.insertScriptResource("'wasm-unsafe-eval'");
 <script>
   import { fill } from '../../lib/template';
   import { formatDecimal } from '../../lib/format';
-  import { langOfPath } from '../../i18n/routing';
+  import type { Lang } from '../../i18n/routing';
   import { canRun2022, time2022, type Timed2022 } from '../../lib/threads/solver-2022';
 
   interface Strings {
@@ -256,7 +263,9 @@ Astro.csp?.insertScriptResource("'wasm-unsafe-eval'");
   const root = document.querySelector<HTMLElement>('[data-replay-2022]');
   if (root) {
     const t = JSON.parse(root.dataset.strings ?? '{}') as Strings;
-    const lang = langOfPath(location.pathname);
+    // From the page, not from i18n/routing: importing it here split it into a chunk of its own,
+    // which every page's on-demand budget then paid for.
+    const lang = (root.dataset.lang ?? 'en') as Lang;
     const controls = root.querySelector<HTMLFieldSetElement>('[data-controls]')!;
     const button = root.querySelector<HTMLButtonElement>('[data-run]')!;
     const readout = root.querySelector<HTMLElement>('[data-readout]')!;
