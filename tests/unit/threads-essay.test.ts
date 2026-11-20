@@ -74,3 +74,14 @@ describe('essay helpers', () => {
     );
   });
 });
+
+describe('the 2022 replay (M7)', () => {
+  test('the input file is the 2022 format: id, levels, size, rows top to bottom, then the pieces', async () => {
+    const { input2022, PIECES_2022, MAX_THREADS_2022 } = await import('../../src/lib/threads/solver-2022');
+    const text = input2022(['..#', '###'], ['T', 'I'], 4);
+    expect(text).toBe('1\n1\n4\n3\n000\n000\n001\n111\n2\nT\nI\n');
+    expect(PIECES_2022).toHaveLength(14);
+    // The 2022 code exits when threads >= columns; the essay's board has ten.
+    expect(MAX_THREADS_2022).toBeLessThan(10);
+  });
+});

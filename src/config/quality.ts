@@ -69,6 +69,12 @@ export const jsBudgetKb = {
    */
   sceneData: 150,
   /**
+   * Pablo's 2022 solver compiled to WebAssembly (public/wasm/solver-2022, M7), fetched in Crease
+   * No. 002 when a reader runs it: the larger of its two builds, module and glue together. The
+   * pthreads build was 34.5 KB when it joined.
+   */
+  solver2022: 40,
+  /**
    * Everything one Precrease post can run, Web Workers included, checked for every post in the
    * build (drafts only exist in preview builds). Set at 45 KB for Crease No. 002, the heaviest
    * (42 KB); widened from interactive essays to every post when No. 003 brought its own demos.

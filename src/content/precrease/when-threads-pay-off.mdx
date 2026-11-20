@@ -54,6 +54,7 @@ import ThreadsTimeline from '../../components/threads/ThreadsTimeline.astro';
 import AmdahlDemo from '../../components/threads/AmdahlDemo.astro';
 import GranularityDemo from '../../components/threads/GranularityDemo.astro';
 import GustafsonDemo from '../../components/threads/GustafsonDemo.astro';
+import Replay2022 from '../../components/threads/Replay2022.astro';
 
 <ThreadsRun />
 
@@ -111,6 +112,8 @@ then three that split the work. These are the times I measured, one run each:
 | MPI      | 3       | 0.933 s | 0.04    |
 | MPI      | 5       | 0.028 s | 1.30    |
 | MPI      | 10      | 0.374 s | 0.10    |
+
+<Replay2022 />
 
 A speedup below 1 means slower than the plain version.<MarginNote>**Speedup** is how many times faster something got: plain time divided by new time. 2 means twice as fast; 0.5 means twice as slow.</MarginNote>
 Almost every split was slower. The one exception, MPI with five, is a single run between two much slower ones, so

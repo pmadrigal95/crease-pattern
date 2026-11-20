@@ -14,6 +14,7 @@ import { execFileSync } from 'node:child_process';
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, relative, sep } from 'node:path';
 import { describe, expect, test } from 'vitest';
+import { GENERATED_JS } from './generated-js';
 
 const SRC = join(import.meta.dirname, '..', '..', 'src');
 const SOURCE = /\.(ts|astro|vue)$/;
@@ -99,5 +100,6 @@ describe('cross-origin isolation', () => {
 
 test('the repository has no JavaScript sources: write .ts (Node runs it directly)', () => {
   const tracked = execFileSync('git', ['ls-files'], { encoding: 'utf8' }).split('\n');
-  expect(tracked.filter((file) => /\.(js|mjs|cjs|jsx)$/.test(file))).toEqual([]);
+  const js = tracked.filter((file) => /\.(js|mjs|cjs|jsx)$/.test(file));
+  expect(js.filter((file) => !GENERATED_JS.some((dir) => file.startsWith(dir)))).toEqual([]);
 });

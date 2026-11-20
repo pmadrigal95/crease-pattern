@@ -1,0 +1,316 @@
+---
+/**
+ * The 2022 replay of the Threads essay (Crease No. 002, M7): the reader runs Pablo's 2022 C code,
+ * plain and pthreads, compiled to WebAssembly (src/lib/threads/solver-2022.ts), and sees the
+ * threaded version lose on their own device, or win, if it does: the readout says what happened.
+ *
+ * Without JavaScript the table above it is the record; the panel says the demo needs JavaScript.
+ * Without shared memory (Safari, or a page that isn't cross-origin isolated) only the plain version
+ * runs, and a note says so.
+ */
+import { copyFor } from '../../i18n/dictionary';
+import { THREADS_2022 } from '../../lib/threads/solver-2022';
+const copy = copyFor(Astro.currentLocale);
+
+const t = copy.precrease.threads;
+const r = t.replay2022;
+const DEFAULT_THREADS = 4;
+
+// The 2022 code compiles to WebAssembly. 'wasm-unsafe-eval' allows that and nothing else (eval()
+// stays blocked), and only on the page that carries this demo.
+Astro.csp?.insertScriptResource("'wasm-unsafe-eval'");
+---
+
+<figure class="replay-2022" data-replay-2022 data-strings={JSON.stringify(r)} data-inspect="Replay2022">
+  <p class="readout" data-readout aria-live="polite">
+    {r.intro}
+  </p>
+
+  <fieldset class="threads" data-controls disabled>
+    <legend>{r.threadsLabel}</legend>
+    {THREADS_2022.map((n) => (
+      <label>
+        <input type="radio" name="replay-2022-threads" value={n} checked={n === DEFAULT_THREADS} />
+        <span>{n}</span>
+      </label>
+    ))}
+  </fieldset>
+
+  <ol class="results">
+    <li data-row="serial">
+      <span class="name">
+        {r.plain}
+        <small>{r.threadOne}</small>
+      </span>
+      <svg class="bar" viewBox="0 0 100 8" preserveAspectRatio="none" aria-hidden="true">
+        <rect class="track" width="100" height="8" rx="4" />
+        <rect class="fill" width="0" height="8" rx="4" data-fill />
+      </svg>
+      <span class="time" data-time>
+        –
+      </span>
+      <span class="speed" data-speed></span>
+    </li>
+    <li data-row="pthreads">
+      <span class="name">
+        {r.pthreads}
+        <small data-threads-note>{r.threadMany.replace('{n}', String(DEFAULT_THREADS))}</small>
+      </span>
+      <svg class="bar" viewBox="0 0 100 8" preserveAspectRatio="none" aria-hidden="true">
+        <rect class="track" width="100" height="8" rx="4" />
+        <rect class="fill" width="0" height="8" rx="4" data-fill />
+      </svg>
+      <span class="time" data-time>
+        –
+      </span>
+      <span class="speed" data-speed></span>
+    </li>
+  </ol>
+
+  <button type="button" class="run" data-run disabled>
+    {r.run}
+  </button>
+  <p class="note" data-board-note hidden>
+    {r.differentBoard}
+  </p>
+  <p class="note" data-shared-note hidden>
+    {r.noSharedMemory}
+  </p>
+  <p class="note">{r.changes}</p>
+  <noscript>
+    <p class="note">{t.needsJs}</p>
+  </noscript>
+</figure>
+
+<style>
+  .replay-2022 {
+    display: grid;
+    gap: var(--space-4);
+    margin: var(--space-8) 0;
+    padding: var(--space-6);
+    border-radius: 20px;
+    background: var(--color-surface);
+    box-shadow: inset 0 0 0 1px var(--color-rule);
+    font-family: var(--font-sans);
+  }
+  .readout {
+    margin: 0;
+    font-size: var(--size-lg);
+    line-height: 1.4;
+    color: var(--color-ink);
+    text-wrap: pretty;
+  }
+  .threads {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+  .threads legend {
+    float: left;
+    margin-right: var(--space-3);
+    padding: 0;
+    font: var(--type-caption);
+    color: var(--color-mute);
+  }
+  .threads label {
+    position: relative;
+  }
+  .threads input {
+    position: absolute;
+    inset: 0;
+    margin: 0;
+    opacity: 0;
+    cursor: pointer;
+  }
+  /* 44px targets: the reader picks with a thumb as often as a mouse. */
+  .threads span {
+    display: inline-grid;
+    place-items: center;
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0 var(--space-3);
+    border-radius: 999px;
+    box-shadow: inset 0 0 0 1px var(--color-rule);
+    font: 600 var(--size-base) var(--font-mono);
+    color: var(--color-ink);
+  }
+  .threads input:checked + span {
+    background: var(--color-ink);
+    color: var(--color-bg);
+    box-shadow: none;
+  }
+  .threads input:focus-visible + span {
+    outline: 2px solid var(--color-accent-ui);
+    outline-offset: 2px;
+  }
+  .threads:disabled span {
+    opacity: 0.5;
+  }
+  .results {
+    display: grid;
+    gap: var(--space-3);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .results li {
+    display: grid;
+    grid-template-columns: minmax(0, 9rem) minmax(0, 1fr) 5.5rem 3.5rem;
+    align-items: center;
+    gap: var(--space-3);
+  }
+  .name {
+    display: grid;
+    font-weight: 600;
+  }
+  .name small {
+    font-weight: 400;
+    font: var(--type-caption);
+    color: var(--color-mute);
+  }
+  .bar {
+    width: 100%;
+    height: 8px;
+  }
+  .track {
+    fill: var(--color-rule);
+  }
+  .fill {
+    fill: var(--color-mute);
+    transition: width 400ms var(--ease-out, ease-out);
+  }
+  [data-row='pthreads'] .fill {
+    fill: var(--color-accent-ui);
+  }
+  .time,
+  .speed {
+    font: var(--type-caption);
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+    color: var(--color-ink);
+  }
+  .speed.slower {
+    color: var(--color-accent-ui);
+  }
+  .run {
+    justify-self: start;
+    min-height: 44px;
+    padding: 0 var(--space-6);
+    border: 0;
+    border-radius: 999px;
+    background: var(--color-ink);
+    color: var(--color-bg);
+    font: 600 var(--size-base) var(--font-sans);
+    cursor: pointer;
+  }
+  .run:disabled {
+    opacity: 0.6;
+    cursor: progress;
+  }
+  .run:focus-visible {
+    outline: 2px solid var(--color-accent-ui);
+    outline-offset: 2px;
+  }
+  .note {
+    margin: 0;
+    font: var(--type-caption);
+    line-height: 1.5;
+    color: var(--color-mute);
+  }
+  @media (max-width: 560px) {
+    .results li {
+      grid-template-columns: minmax(0, 1fr) 5rem 3.5rem;
+    }
+    .bar {
+      grid-column: 1 / -1;
+      grid-row: 2;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .fill {
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  import { fill } from '../../lib/template';
+  import { formatDecimal } from '../../lib/format';
+  import { langOfPath } from '../../i18n/routing';
+  import { canRun2022, time2022, type Timed2022 } from '../../lib/threads/solver-2022';
+
+  interface Strings {
+    run: string;
+    running: string;
+    threadOne: string;
+    threadMany: string;
+    slower: string;
+    faster: string;
+    failed: string;
+  }
+
+  const root = document.querySelector<HTMLElement>('[data-replay-2022]');
+  if (root) {
+    const t = JSON.parse(root.dataset.strings ?? '{}') as Strings;
+    const lang = langOfPath(location.pathname);
+    const controls = root.querySelector<HTMLFieldSetElement>('[data-controls]')!;
+    const button = root.querySelector<HTMLButtonElement>('[data-run]')!;
+    const readout = root.querySelector<HTMLElement>('[data-readout]')!;
+    const boardNote = root.querySelector<HTMLElement>('[data-board-note]')!;
+    const sharedNote = root.querySelector<HTMLElement>('[data-shared-note]')!;
+    const threadsNote = root.querySelector<HTMLElement>('[data-threads-note]')!;
+    const row = (name: string) => root.querySelector<HTMLElement>(`[data-row="${name}"]`)!;
+    const threaded = canRun2022('pthreads');
+    const count = (n: number) => (n === 1 ? t.threadOne : fill(t.threadMany, { n }));
+    const picked = () => Number(root.querySelector<HTMLInputElement>('input:checked')?.value ?? 4);
+
+    sharedNote.hidden = threaded;
+    controls.disabled = !threaded;
+    button.disabled = false;
+    controls.addEventListener('change', () => (threadsNote.textContent = count(picked())));
+
+    const show = (results: Timed2022[]) => {
+      const slowest = Math.max(...results.map((x) => x.ms));
+      const serial = results.find((x) => x.version === 'serial');
+      for (const x of results) {
+        const li = row(x.version);
+        li.querySelector('[data-fill]')!.setAttribute('width', ((x.ms / slowest) * 100).toFixed(1));
+        li.querySelector('[data-time]')!.textContent = `${formatDecimal(x.ms, lang)} ms`;
+        const speed = li.querySelector<HTMLElement>('[data-speed]')!;
+        if (x.version === 'pthreads' && serial) {
+          const times = serial.ms / x.ms;
+          speed.textContent = `${formatDecimal(times, lang)}×`;
+          speed.classList.toggle('slower', times < 1);
+          readout.textContent = fill(times < 1 ? t.slower : t.faster, {
+            count: count(x.threads),
+            times: formatDecimal(times, lang),
+          });
+          boardNote.hidden = x.board === serial.board;
+        }
+      }
+    };
+
+    button.addEventListener('click', async () => {
+      button.disabled = true;
+      controls.disabled = true;
+      button.textContent = t.running;
+      boardNote.hidden = true;
+      try {
+        const results = [await time2022('serial', 1)];
+        if (threaded) results.push(await time2022('pthreads', picked()));
+        show(results);
+      } catch (error) {
+        console.warn('The 2022 solver could not run', error);
+        readout.textContent = t.failed;
+      } finally {
+        button.disabled = false;
+        controls.disabled = !threaded;
+        button.textContent = t.run;
+      }
+    });
+  }
+</script>

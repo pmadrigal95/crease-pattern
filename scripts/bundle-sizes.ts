@@ -160,6 +160,20 @@ export const measureSceneData = (dist: string): number => {
 };
 
 /**
+ * Pablo's 2022 solver (public/wasm/solver-2022, M7), Brotli: each build is a module and its
+ * generated glue, and a reader downloads one of them per run, so the budget holds the larger.
+ */
+export const measureSolver2022 = (dist: string): number => {
+  const dir = join(dist, 'wasm', 'solver-2022');
+  const build = (name: string) =>
+    [`${name}.mjs`, `${name}.wasm`].reduce(
+      (sum, f) => sum + brotliCompressSync(readFileSync(join(dir, f))).length,
+      0,
+    );
+  return Math.max(build('serial'), build('pthreads'));
+};
+
+/**
  * Everything one Precrease post can run: the scripts its page references, what they import, and
  * the Web Workers they start, with the workers' own imports. Workers count because a reader who
  * presses Run downloads them. Pages missing from `dist` (drafts in a production build) are
