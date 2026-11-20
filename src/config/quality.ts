@@ -60,7 +60,8 @@ export const jsBudgetKb = {
   /**
    * M4's 3D scenes, the hero's fox and the Work star, which share one three.js. They load only on
    * the home page, on a device that can run them (src/lib/scene3d-support.ts). Set at 180 KB in
-   * the M4 plan; about 100 KB at M4.1.
+   * the M4 plan; about 100 KB at M4.1. Their loader (hero3d.ts and its device check) counts here
+   * too since 2026-11-20; it used to be measured with the Inspector's onDemand.
    */
   scene3d: 180,
   /**
