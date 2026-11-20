@@ -10,7 +10,10 @@
         "http://localhost/privacy.html",
         "http://localhost/precrease.html",
         "http://localhost/precrease/map.html",
-        "http://localhost/precrease/the-work-before-the-shape.html"
+        "http://localhost/precrease/the-work-before-the-shape.html",
+        "http://localhost/es.html",
+        "http://localhost/es/about.html",
+        "http://localhost/es/precrease/el-trabajo-antes-de-la-forma.html"
       ],
       "numberOfRuns": 3,
       "settings": {

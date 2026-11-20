@@ -128,6 +128,5 @@ export const mask = (canvas: HTMLCanvasElement, q: number) => {
       : `radial-gradient(closest-side, #000 ${mix(150, 70, k)}%, transparent ${mix(180, 100, k)}%)`;
   if (canvas.style.maskImage !== edge) {
     canvas.style.maskImage = edge;
-    canvas.style.webkitMaskImage = edge;
   }
 };

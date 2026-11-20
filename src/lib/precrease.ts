@@ -13,7 +13,7 @@ import { DEFAULT_LANG, localize, type Lang, type Translations } from '../i18n/ro
 import { formatsFor } from './taxonomy';
 import { padNumber } from './format';
 import { fill } from './template';
-import { checkEditions, checkNumbers, isLive } from './precrease-tree';
+import { checkEditions, checkNumbers, isLive, staleEditions } from './precrease-tree';
 
 export type Post = CollectionEntry<'precrease'>;
 
@@ -49,8 +49,7 @@ const buildTime = new Date();
 
 const editionPath = (slug: string, lang: Lang) => localize(`/precrease/${slug}`, lang);
 
-/** Every edition of every post in this build, in every language. */
-export const getEditions = async (): Promise<PostSummary[]> => {
+const readEditions = async (): Promise<PostSummary[]> => {
   const entries = await getCollection('precrease');
   const files = entries.map((entry) => {
     const parts = entry.id.split('/');
@@ -60,6 +59,13 @@ export const getEditions = async (): Promise<PostSummary[]> => {
     files.map(({ entry, id, folder }) => ({ id, folder, ...entry.data })),
     DEFAULT_LANG,
   );
+  for (const { edition, original } of staleEditions(
+    files.map(({ entry, id }) => ({ id, ...entry.data })),
+    DEFAULT_LANG,
+  ))
+    console.warn(
+      `Precrease: "${original}" was updated after its edition "${edition}"; the edition may need the same change (then set its \`updated\`).`,
+    );
   const originalLive = new Map(
     files
       .filter((f) => f.entry.data.lang === DEFAULT_LANG)
@@ -89,6 +95,15 @@ export const getEditions = async (): Promise<PostSummary[]> => {
   }
   return editions;
 };
+
+let built: Promise<PostSummary[]> | undefined;
+
+/**
+ * Every edition of every post in this build, in every language. Read once per build, since every
+ * page asks; `astro dev` reads it each time so edits show up.
+ */
+export const getEditions = (): Promise<PostSummary[]> =>
+  import.meta.env.DEV ? readEditions() : (built ??= readEditions());
 
 /** One entry per post, newest first: its edition in `lang`, or the original while it has none. */
 export const getPosts = async (lang: Lang = DEFAULT_LANG): Promise<PostSummary[]> => {

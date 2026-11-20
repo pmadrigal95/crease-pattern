@@ -32,6 +32,9 @@ export const localize = (path: string, lang: Lang): string => {
   return base === '/' ? `/${lang}` : `/${lang}${base}`;
 };
 
+/** The Inspector's words in `lang` (src/pages/[...locale]/inspector-strings.json.ts). */
+export const inspectorStringsPath = (lang: Lang): string => localize('/inspector-strings.json', lang);
+
 /**
  * getStaticPaths for a page that exists in every language: `[...locale]` is empty for the default
  * language (the root) and the language's code for the others.
