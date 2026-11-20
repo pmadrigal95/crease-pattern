@@ -33,3 +33,10 @@ export const LANGS = Object.keys(LOCALES) as [Lang, ...Lang[]];
 
 export const isLang = (value: unknown): value is Lang =>
   typeof value === 'string' && Object.hasOwn(LOCALES, value);
+
+/**
+ * Where the ⌘K index for a language lives (scripts/build-command-index.ts): /commands.json,
+ * /es/commands.json. Here rather than in ./routing so build scripts can import it too.
+ */
+export const commandIndexPath = (lang: Lang): string =>
+  lang === DEFAULT_LANG ? '/commands.json' : `/${lang}/commands.json`;

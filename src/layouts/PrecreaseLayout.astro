@@ -10,7 +10,8 @@ import newsreaderItalic from '@fontsource-variable/newsreader/files/newsreader-l
 import PageLayout from './PageLayout.astro';
 import PrecreaseMast from '../components/precrease/PrecreaseMast.astro';
 import { copyFor } from '../i18n/dictionary';
-import type { Translations } from '../i18n/routing';
+import { langOf, type Translations } from '../i18n/routing';
+import { feedHref } from '../lib/precrease-feed';
 const copy = copyFor(Astro.currentLocale);
 
 interface Props {
@@ -36,7 +37,12 @@ const { title, description, image, type, noindex = false, feed, home = false, tr
          lets font-display: optional use Newsreader on a first visit instead of keeping the fallback. */}
     <link rel="preload" href={newsreaderNormal} as="font" type="font/woff2" crossorigin />
     <link rel="preload" href={newsreaderItalic} as="font" type="font/woff2" crossorigin />
-    <link rel="alternate" type="application/rss+xml" title={copy.precrease.name} href="/precrease/rss.xml" />
+    <link
+      rel="alternate"
+      type="application/rss+xml"
+      title={copy.precrease.name}
+      href={feedHref(langOf(Astro.currentLocale))}
+    />
     {feed && <link rel="alternate" type="application/rss+xml" title={feed.title} href={feed.href} />}
     {noindex && <meta name="robots" content="noindex, follow" />}
     <slot name="head" />
