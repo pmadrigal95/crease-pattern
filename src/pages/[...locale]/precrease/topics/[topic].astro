@@ -8,6 +8,7 @@ import { copyFor, fill } from '../../../../i18n/dictionary';
 import { getPosts, topicHref, type PostSummary } from '../../../../lib/precrease';
 import { childrenOf, pathTo, postsUnder } from '../../../../lib/precrease-tree';
 import { langOf, localeStaticPaths, localize } from '../../../../i18n/routing';
+import { feedHref } from '../../../../lib/precrease-feed';
 const lang = langOf(Astro.currentLocale);
 const copy = copyFor(lang);
 const topics = topicsFor(lang);
@@ -35,14 +36,14 @@ const children = childrenOf(topics, topic.id).map((c) => ({
   ...c,
   count: postsUnder(topics, posts, c.id).length,
 }));
-const feedHref = `/precrease/topics/${topic.id}/rss.xml`;
+const topicFeed = feedHref(lang, topic.id);
 ---
 
 <PrecreaseLayout
   title={fill(t.topic.title, { topic: topic.label })}
   description={topic.intro}
   noindex={here.length < MIN_POSTS_TO_INDEX}
-  feed={{ href: feedHref, title: `${t.name}: ${topic.label}` }}
+  feed={{ href: topicFeed, title: `${t.name}: ${topic.label}` }}
 >
   <div class="wrap">
     <div class="filters">
@@ -64,7 +65,7 @@ const feedHref = `/precrease/topics/${topic.id}/rss.xml`;
       <h1>{fill(t.topic.heading, { topic: topic.label })}</h1>
       <p class="intro">{topic.intro}</p>
       <p class="feed">
-        <a href={feedHref}>{t.topic.feed}</a>
+        <a href={topicFeed}>{t.topic.feed}</a>
       </p>
     </header>
 

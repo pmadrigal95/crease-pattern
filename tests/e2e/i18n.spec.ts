@@ -172,3 +172,55 @@ test('the Spanish essay’s demos speak Spanish', async ({ page }) => {
     'Medido en un Intel Core i7-12700K (12 núcleos, 20 hilos)',
   );
 });
+
+// Discovery per language (M5.5): each language finds only its own posts.
+test('each language has its own feed, with only its own posts', async ({ request }) => {
+  const es = await (await request.get('/es/precrease/rss.xml')).text();
+  expect(es).toContain('<language>es</language>');
+  expect(es).toContain('/es/precrease/el-trabajo-antes-de-la-forma</link>');
+  expect(es).not.toContain('/precrease/the-work-before-the-shape');
+  const en = await (await request.get('/precrease/rss.xml')).text();
+  expect(en).toContain('<language>en</language>');
+  expect(en).not.toContain('/es/precrease/');
+  const topic = await (await request.get('/es/precrease/topics/concurrency/rss.xml')).text();
+  expect(topic).toContain('/es/precrease/cuando-los-hilos-valen-la-pena</link>');
+});
+
+test('the Spanish pages point to the Spanish feed', async ({ page }) => {
+  await page.goto('/es/precrease/subscribe');
+  await expect(page.locator('link[type="application/rss+xml"]').first()).toHaveAttribute(
+    'href',
+    '/es/precrease/rss.xml',
+  );
+  await expect(page.locator('main')).toContainText('/es/precrease/rss.xml');
+});
+
+test('the sitemap pairs each post with its edition and leaves out noindex pages', async ({ request }) => {
+  const xml = await (await request.get('/sitemap.xml')).text();
+  const entry =
+    xml.match(/<url><loc>[^<]*\/es\/precrease\/el-trabajo-antes-de-la-forma<\/loc>.*?<\/url>/)?.[0] ?? '';
+  expect(entry).toContain('hreflang="en" href="https://');
+  expect(entry).toContain('/precrease/the-work-before-the-shape"');
+  expect(xml).not.toContain('/precrease/topics/');
+  expect(await (await request.get('/robots.txt')).text()).toMatch(/^Sitemap: https:\/\/.+\/sitemap\.xml$/m);
+});
+
+test('⌘K on a Spanish page offers the Spanish pages and posts', async ({ page }) => {
+  await page.goto('/es/about');
+  await page.keyboard.press('Control+K');
+  const input = page.locator('dialog.cmdk input[role="combobox"]');
+  await input.fill('hilos');
+  const options = page.locator('dialog.cmdk [role="option"]');
+  await expect(options.first()).toContainText('Cuando los hilos valen la pena');
+  await input.fill('threads pay off');
+  await expect(page.locator('dialog.cmdk')).not.toContainText('When threads pay off');
+});
+
+test('Precrease search in Spanish finds the Spanish editions', async ({ page }) => {
+  await page.goto('/es/precrease');
+  await page.getByRole('searchbox').first().fill('hilos');
+  const first = page.locator('[data-results] a, .results a').first();
+  await expect(first).toHaveAttribute('href', '/es/precrease/cuando-los-hilos-valen-la-pena', {
+    timeout: 10_000,
+  });
+});

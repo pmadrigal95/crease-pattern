@@ -15,7 +15,7 @@ import { setDirection, setTheme, type Theme } from '../inspector/identity';
 import { allVisualDirections, type VisualDirection } from '../../config/visual-direction';
 import { fill } from '../../lib/template';
 import { padNumber } from '../../lib/format';
-import { langOfPath, localize } from '../../i18n/routing';
+import { commandIndexPath, langOfPath, localize } from '../../i18n/routing';
 
 export interface CommandStrings {
   label: string;
@@ -58,7 +58,7 @@ interface Command extends Searchable {
 let index: Promise<Index> | null = null;
 /** Starts (or reuses) the index's download; a failed one is forgotten, so the next open retries. */
 const loadIndex = (): Promise<Index> => {
-  index ??= fetch('/commands.json')
+  index ??= fetch(commandIndexPath(langOfPath(location.pathname)))
     .then((r) => (r.ok ? (r.json() as Promise<Index>) : Promise.reject(new Error(`commands: ${r.status}`))))
     .catch((error: unknown) => {
       index = null;

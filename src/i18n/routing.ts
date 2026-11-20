@@ -8,7 +8,7 @@
  */
 import { DEFAULT_LANG, LANGS, isLang, type Lang } from './config';
 
-export { DEFAULT_LANG, LANGS, LOCALES, isLang, type Lang } from './config';
+export { DEFAULT_LANG, LANGS, LOCALES, commandIndexPath, isLang, type Lang } from './config';
 
 /** The prefixed languages, as a pattern: /^\/(es)(?=\/|$)/. */
 const PREFIX = new RegExp(`^/(${LANGS.filter((l) => l !== DEFAULT_LANG).join('|')})(?=/|$)`);

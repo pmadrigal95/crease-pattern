@@ -8,10 +8,11 @@ import PrecreaseLayout from '../../../layouts/PrecreaseLayout.astro';
 import CopyText from '../../../components/site/CopyText.astro';
 import { copyFor, fill } from '../../../i18n/dictionary';
 import { langOf, localeStaticPaths, localize } from '../../../i18n/routing';
+import { feedHref } from '../../../lib/precrease-feed';
 const copy = copyFor(Astro.currentLocale);
 
 const t = copy.precrease.subscribe;
-const feed = new URL('/precrease/rss.xml', Astro.site).href;
+const feed = new URL(feedHref(langOf(Astro.currentLocale)), Astro.site).href;
 const [before, after] = fill(t.topics, { map: '\u0000' }).split('\u0000');
 
 /** This page in every language (src/i18n/routing.ts). */

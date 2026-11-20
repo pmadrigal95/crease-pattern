@@ -458,6 +458,7 @@
   "commands": {
     "open": "Buscar y comandos",
     "label": "Buscar y comandos",
+    "home": "Inicio",
     "placeholder": "Busca páginas, secciones y entradas, o escribe un comando",
     "shortcut": "Ctrl K",
     "groups": {
