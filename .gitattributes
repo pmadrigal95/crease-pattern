@@ -4,3 +4,5 @@
 *.jpg binary
 *.avif binary
 *.wasm binary
+# Generated artifacts (public/wasm/*/SOURCE.md): stored byte for byte, so their SHA-256 holds on every checkout.
+public/wasm/** -text
