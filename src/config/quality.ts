@@ -9,6 +9,7 @@ export const auditedPages = [
   '/',
   '/work',
   '/work/buo',
+  '/work/crease-pattern',
   '/changelog',
   '/about',
   '/colophon',

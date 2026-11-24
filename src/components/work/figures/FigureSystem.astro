@@ -1,0 +1,75 @@
+---
+/** Case figure "system" (CaseFigure.astro): one set of primitive colors per identity, the same semantic tokens for all three, then the components. Wide and tall drawings. */
+interface Props {
+  labels: Record<string, string>;
+  description: string;
+}
+const { labels, description } = Astro.props;
+const l = (key: string): string => {
+  const text = labels[key];
+  if (text === undefined) throw new Error(`Case figure "system" needs the label "${key}"`);
+  return text;
+};
+const identities = ['idA', 'idB', 'idC'].map(l);
+---
+
+<svg class="dg wide" viewBox="0 0 480 300" role="img" aria-label={description}>
+  <text class="dimt" x="240" y="14" text-anchor="middle">
+    {l('primitives')}
+  </text>
+  {[10, 170, 330].map((x, i) => (
+    <>
+      <rect class="box" x={x} y="24" width="140" height="44" rx="6" />
+      <text x={x + 70} y="51" text-anchor="middle">
+        {identities[i]}
+      </text>
+    </>
+  ))}
+  <path class="ln key" d="M80 68 L232 110 M240 68 V110 M400 68 L248 110 M234 102 L240 110 L246 102" />
+  <rect class="box key fillkey" x="110" y="116" width="260" height="60" rx="6" />
+  <text class="lbl" x="240" y="142" text-anchor="middle">
+    {l('semantic')}
+  </text>
+  <text class="small" x="240" y="161" text-anchor="middle">
+    {l('same')}
+  </text>
+  <path class="ln key" d="M240 176 V204 M234 198 L240 204 L246 198" />
+  <rect class="box" x="150" y="210" width="180" height="44" rx="6" />
+  <text class="lbl" x="240" y="237" text-anchor="middle">
+    {l('components')}
+  </text>
+  <circle class="dot" cx="176" cy="282" r="5" />
+  <text class="small" x="188" y="286">
+    {l('contrast')}
+  </text>
+</svg>
+<svg class="dg tall" viewBox="0 0 320 380" role="img" aria-label={description}>
+  <text class="dimt" x="160" y="14" text-anchor="middle">
+    {l('primitives')}
+  </text>
+  {[24, 62, 100].map((y, i) => (
+    <>
+      <rect class="box" x="50" y={y} width="220" height="32" rx="6" />
+      <text x="160" y={y + 21} text-anchor="middle">
+        {identities[i]}
+      </text>
+    </>
+  ))}
+  <path class="ln key" d="M160 132 V160 M154 154 L160 160 L166 154" />
+  <rect class="box key fillkey" x="40" y="166" width="240" height="60" rx="6" />
+  <text class="lbl" x="160" y="192" text-anchor="middle">
+    {l('semantic')}
+  </text>
+  <text class="small" x="160" y="211" text-anchor="middle">
+    {l('same')}
+  </text>
+  <path class="ln key" d="M160 226 V254 M154 248 L160 254 L166 248" />
+  <rect class="box" x="70" y="260" width="180" height="44" rx="6" />
+  <text class="lbl" x="160" y="287" text-anchor="middle">
+    {l('components')}
+  </text>
+  <circle class="dot" cx="86" cy="346" r="5" />
+  <text class="small" x="98" y="350">
+    {l('contrast')}
+  </text>
+</svg>

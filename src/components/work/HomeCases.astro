@@ -4,9 +4,9 @@
  * itself. One card per case in the page's language; the label links to /work.
  */
 import CaseCard from './CaseCard.astro';
-import { copyFor, fill } from '../../i18n/dictionary';
+import { copyFor } from '../../i18n/dictionary';
 import { langOf, localize } from '../../i18n/routing';
-import { caseHref, caseSlug, getCases } from '../../lib/cases';
+import { caseHref, caseMeta, caseSlug, getCases } from '../../lib/cases';
 const lang = langOf(Astro.currentLocale);
 const t = copyFor(lang).cases.index;
 const cases = await getCases(lang);
@@ -20,11 +20,11 @@ const cases = await getCases(lang);
     {cases.map((c) => (
       <CaseCard
         href={caseHref(caseSlug(c), lang)}
-        meta={`${c.data.role} · ${fill(t.since, { year: c.data.start.getUTCFullYear() })}`}
+        meta={caseMeta(c, t)}
         title={c.data.company}
         summary={c.data.summary}
         link={t.read}
-        plates={c.data.plates.length + 1}
+        plates={c.data.kind === 'project' ? 0 : c.data.plates.length + 1}
         headingLevel="h3"
       />
     ))}
