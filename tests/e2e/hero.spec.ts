@@ -41,7 +41,7 @@ test("the byline names the country and links the city's coordinates to a map", a
     /^https:\/\/www\.openstreetmap\.org\/\?mlat=9\.86&mlon=-83\.92#/,
   );
   await expect(city).toHaveAttribute('rel', 'noopener noreferrer');
-  expect((await city.boundingBox())?.height).toBeGreaterThanOrEqual(24);
+  await expect.poll(async () => (await city.boundingBox())?.height ?? 0).toBeGreaterThanOrEqual(24);
 });
 
 test('"See how this page is built" opens the Inspector, which unfolds the figure', async ({ page }) => {
