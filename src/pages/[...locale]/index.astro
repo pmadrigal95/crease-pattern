@@ -14,6 +14,7 @@ import { auditedPages, jsBudgetKb, themes } from '../../config/quality';
 import { allVisualDirections } from '../../config/visual-direction';
 import manifest from '../../generated/inspector.json';
 import { langOf, localeStaticPaths, localize } from '../../i18n/routing';
+import '../../styles/buttons-quiet.css';
 const lang = langOf(Astro.currentLocale);
 const copy = copyFor(lang);
 
@@ -62,11 +63,21 @@ export const getStaticPaths = localeStaticPaths;
         <h1 id="hero-title">{home.hero.title}</h1>
         <p class="sub">{profile.summary}</p>
         <p class="cta">
-          <button class="inspect" type="button" data-inspector-open>
+          <button
+            class="inspect btn-primary"
+            type="button"
+            aria-keyshortcuts="Shift+I"
+            title={`${home.hero.inspect} (${copy.inspector.shortcut})`}
+            data-inspector-open
+          >
             {home.hero.inspect}
-            <kbd aria-hidden="true">{copy.inspector.shortcut}</kbd>
           </button>
-          <a href={localize('/changelog', lang)}>{home.hero.releases}</a>
+          <a class="action" href={localize('/changelog', lang)}>
+            {home.hero.releases}
+            <span class="arrow" aria-hidden="true">
+              →
+            </span>
+          </a>
         </p>
       </div>
       <HeroFold />
@@ -100,8 +111,18 @@ export const getStaticPaths = localeStaticPaths;
       <div class="source">
         <p>{fill(work.source, { commit })}</p>
         <p class="actions">
-          <a href={localize('/colophon', lang)}>{work.links.colophon}</a>
-          <a href={site.repository}>{work.links.repo}</a>
+          <a class="action" href={localize('/colophon', lang)}>
+            {work.links.colophon}
+            <span class="arrow" aria-hidden="true">
+              →
+            </span>
+          </a>
+          <a class="action" href={site.repository}>
+            {work.links.repo}
+            <span class="arrow" aria-hidden="true">
+              →
+            </span>
+          </a>
         </p>
       </div>
       <HomeCases />
@@ -114,7 +135,12 @@ export const getStaticPaths = localeStaticPaths;
       <p class="lead">{home.changelog.intro}</p>
       <AltitudeProfile />
       <p class="actions">
-        <a href={localize('/changelog', lang)}>{home.changelog.full}</a>
+        <a class="action" href={localize('/changelog', lang)}>
+          {home.changelog.full}
+          <span class="arrow" aria-hidden="true">
+            →
+          </span>
+        </a>
       </p>
     </div>
   </section>
@@ -225,36 +251,10 @@ export const getStaticPaths = localeStaticPaths;
     gap: var(--space-4) var(--space-8);
     margin: var(--space-8) 0 0;
   }
-  .cta a {
-    font-weight: 500;
-  }
   .inspect {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-3);
-    min-height: 48px;
+    min-height: 50px;
     padding: 0 var(--space-6);
-    border: 0;
-    border-radius: var(--radius-control);
-    background: var(--color-accent);
-    color: var(--color-bg);
-    font: 600 var(--size-md) var(--font-sans);
-    cursor: pointer;
-    transition: transform var(--motion-fast) var(--motion-ease-out);
-  }
-  .inspect:active {
-    transform: scale(0.97);
-  }
-  .inspect kbd {
-    padding: 1px var(--space-2);
-    border: 1px solid color-mix(in oklab, var(--color-bg) 45%, transparent);
-    border-radius: var(--radius-control);
-    font: 500 var(--type-caption);
-  }
-  @media (hover: none) {
-    .inspect kbd {
-      display: none;
-    }
+    font-size: var(--size-md);
   }
 
   .sec {
@@ -281,13 +281,6 @@ export const getStaticPaths = localeStaticPaths;
     flex-wrap: wrap;
     gap: var(--space-2) var(--space-6);
     margin: var(--space-6) 0 0;
-  }
-  .actions a {
-    font-weight: 600;
-    color: var(--color-accent);
-    min-height: 44px;
-    display: inline-flex;
-    align-items: center;
   }
 
   /* Work: this site as a measured exhibit. */

@@ -123,25 +123,15 @@
   stroke-width: 1.75;
   stroke-linecap: round;
 }
-/* The same colors as the hero's main button, tested for contrast in every identity and theme. */
+/* Inspect is the bar's .btn-primary (src/styles/buttons.css): the identity's material, at the bar's size. */
 .mast .inspect {
   flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
   min-height: 36px;
   margin-left: 4px;
   padding: 0 14px 0 12px;
-  border: 0;
-  border-radius: var(--radius-pill);
-  background: var(--color-accent);
-  color: var(--color-bg);
-  font: 600 var(--size-sm) var(--font-sans);
-  cursor: pointer;
-  transition: filter var(--motion-fast) var(--motion-ease-out);
 }
-.mast .inspect:hover {
-  filter: brightness(1.08);
+:root[data-direction='washi-asagi'] .mast .inspect::after {
+  inset: auto 14px 6px 12px;
 }
 .mast .inspect .icon {
   width: 16px;
@@ -281,6 +271,9 @@
     margin-left: 0;
     padding: 0;
     border-radius: 50%;
+  }
+  .mast .inspect::after {
+    display: none;
   }
   .mast .inspect .label {
     position: absolute;

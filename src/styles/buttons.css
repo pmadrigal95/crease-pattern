@@ -1,0 +1,149 @@
+/*
+ * Buttons and text actions (portfolio-discovery/28-buttons-plan.md). Three roles, one structure;
+ * the identity picks the material, as the masthead does (src/styles/masthead.css):
+ * - .btn-primary   the one filled action on a screen (Inspect, in the hero and the masthead);
+ * - .btn-secondary a quiet action (copy the email, "This helped", Share);
+ * - .action        an action written as a link, with an arrow (<span class="arrow" aria-hidden>).
+ * The materials:
+ * - Basalt & glacier, and the default: a plate with a hairline of light on top; it lifts on hover
+ *   and sinks when pressed;
+ * - Washi & asagi: paper capsules that take the site's dashed valley crease on hover and focus;
+ * - Contour lines: a contour ring around the button, with a second one spreading on hover.
+ * Matte only, never blur (decision 50). Components set size and layout; color, shape, depth and
+ * motion live here. Only transform and shadows move, never layout.
+ *
+ * This file is in every page's shared stylesheet, which blocks the first paint, so it holds only
+ * what every page uses: the structure and the primary button (the masthead's Inspect). The
+ * secondary button and the text action are in buttons-quiet.css, imported by the components that
+ * use them (About's LCP budget has no room for them, and About has neither).
+ */
+:root {
+  --btn-radius: 10px;
+  --btn-lift: translateY(-1px);
+  --btn-press: translateY(1px);
+}
+:root[data-direction='washi-asagi'],
+:root[data-direction='contour-lines'] {
+  --btn-radius: var(--radius-pill);
+  --btn-lift: none;
+  --btn-press: scale(0.98);
+}
+
+.btn-primary,
+.btn-secondary {
+  position: relative;
+  isolation: isolate;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  padding: 0 20px;
+  border: 0;
+  border-radius: var(--btn-radius);
+  font: 600 var(--size-sm) var(--font-sans);
+  letter-spacing: -0.005em;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    transform var(--motion-fast) var(--motion-ease-out),
+    box-shadow var(--motion-base) var(--motion-ease-out),
+    background-color var(--motion-base) var(--motion-ease-out),
+    color var(--motion-base) var(--motion-ease-out);
+}
+.btn-primary:active,
+.btn-secondary:active {
+  transform: var(--btn-press);
+}
+.btn-primary:focus-visible,
+.btn-secondary:focus-visible {
+  outline: 2px solid var(--color-accent-ui);
+  outline-offset: 3px;
+}
+@media (hover: hover) {
+  .btn-primary:hover,
+  .btn-secondary:hover {
+    transform: var(--btn-lift);
+  }
+}
+
+/* ---------- Basalt & glacier, and the default: a plate ---------- */
+.btn-primary {
+  background: var(--color-accent);
+  color: var(--color-bg);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.22),
+    inset 0 -1px 0 rgb(0 0 0 / 0.22),
+    0 1px 2px rgb(0 0 0 / 0.22),
+    0 10px 22px -12px color-mix(in oklab, var(--color-accent) 80%, #000);
+}
+@media (hover: hover) {
+  .btn-primary:hover {
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.26),
+      inset 0 -1px 0 rgb(0 0 0 / 0.22),
+      0 2px 4px rgb(0 0 0 / 0.2),
+      0 16px 28px -14px color-mix(in oklab, var(--color-accent) 85%, #000);
+  }
+}
+.btn-primary:active {
+  box-shadow: inset 0 1px 2px rgb(0 0 0 / 0.3);
+}
+
+/* ---------- Washi & asagi: paper, and the valley crease ---------- */
+:root[data-direction='washi-asagi'] .btn-primary {
+  box-shadow:
+    0 1px 1px rgb(0 0 0 / 0.08),
+    0 10px 24px -16px color-mix(in oklab, var(--color-ink) 60%, transparent);
+}
+:root[data-direction='washi-asagi'] :is(.btn-primary, .btn-secondary)::after {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: auto 18px 8px;
+  height: 1px;
+  background: repeating-linear-gradient(90deg, currentColor 0 4px, transparent 4px 7px);
+  opacity: 0.55;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--motion-base) var(--motion-ease-out);
+}
+:root[data-direction='washi-asagi'] :is(.btn-primary, .btn-secondary):focus-visible::after {
+  transform: scaleX(1);
+}
+@media (hover: hover) {
+  :root[data-direction='washi-asagi'] :is(.btn-primary, .btn-secondary):hover::after {
+    transform: scaleX(1);
+  }
+}
+
+/* ---------- Contour lines: rings ---------- */
+:root[data-direction='contour-lines'] .btn-primary {
+  box-shadow:
+    0 0 0 3px var(--color-bg),
+    0 0 0 4px color-mix(in oklab, var(--color-accent-ui) 45%, transparent);
+}
+@media (hover: hover) {
+  :root[data-direction='contour-lines'] .btn-primary:hover {
+    box-shadow:
+      0 0 0 4px var(--color-bg),
+      0 0 0 5px color-mix(in oklab, var(--color-accent-ui) 70%, transparent),
+      0 0 0 9px var(--color-bg),
+      0 0 0 10px color-mix(in oklab, var(--color-accent-ui) 30%, transparent);
+  }
+}
+:root[data-direction='contour-lines'] .btn-primary:active {
+  box-shadow: 0 0 0 2px var(--color-bg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn-primary,
+  .btn-secondary,
+  .btn-primary::after,
+  .btn-secondary::after {
+    transition: none;
+  }
+  :is(.btn-primary, .btn-secondary):is(:hover, :active) {
+    transform: none;
+  }
+}
