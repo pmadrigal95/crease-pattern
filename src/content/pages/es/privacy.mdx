@@ -68,11 +68,10 @@ de su propio marco de comentarios, no en este sitio. Tu comentario es público, 
 GitHub. Algunas entradas interactivas que ejecutan código en varios hilos no pueden incrustar ese marco; ahí,
 "Comentarios" es un enlace simple al hilo en GitHub.
 
-**Preferencias.** El sitio lee seis valores del almacenamiento local de tu navegador: `pm.direction` y `pm.theme`, para mostrar la identidad visual y el tema que elegiste; `pm.pointer`, el efecto del puntero que elegiste en el Inspector; `pm.lang`, el idioma que elegiste con el
+**Preferencias.** El sitio lee siete valores del almacenamiento local de tu navegador: `pm.direction` y `pm.theme`, para mostrar la identidad visual y el tema que elegiste; `pm.pointer`, el efecto del puntero que elegiste en el Inspector; `pm.lang`, el idioma que elegiste con el
 selector de idioma, para que el inicio se abra en ese idioma; `pm.langHint`, para que la sugerencia de leer una
 página en el idioma de tu navegador no vuelva a aparecer después de cerrarla; y `pm.helped`, las entradas en las
-que pulsaste "Me sirvió", para que el botón no te cuente dos veces. Solo se escriben cuando haces esas cosas,
-nunca salen de tu dispositivo y se borran cuando borras los datos del sitio. Para hacer esa sugerencia, la
+que pulsaste "Me sirvió", para que el botón no te cuente dos veces; y `pm.tips`, para que la sugerencia de hacer el recorrido aparezca una sola vez. Solo se escriben cuando haces esas cosas, nunca salen de tu dispositivo y se borran cuando borras los datos del sitio. Mientras haces el recorrido, `pm.walkthrough` en el almacenamiento de sesión recuerda en qué parada vas de una página a otra; desaparece cuando el recorrido termina o cierras la pestaña. Para hacer esa sugerencia, la
 página compara su idioma con la configuración de idioma de tu navegador en tu dispositivo; nada de eso se envía
 a ningún lado.
 
@@ -94,7 +93,7 @@ de tu país.
 Abre las herramientas de desarrollo de tu navegador en cualquier página:
 
 - **Application → Cookies:** vacío.
-- **Application → Local storage:** vacío, o solo `pm.direction`, `pm.theme`, `pm.pointer`, `pm.lang`, `pm.langHint` y `pm.helped` si los usaste.
+- **Application → Local storage:** vacío, o solo `pm.direction`, `pm.theme`, `pm.pointer`, `pm.lang`, `pm.langHint`, `pm.helped` y `pm.tips` si los usaste.
 - **Network:** solicitudes a este sitio, incluida `/api/stats` en las entradas, más
   `static.cloudflareinsights.com` y `cloudflareinsights.com` salvo que tu navegador envíe una señal de
   privacidad.

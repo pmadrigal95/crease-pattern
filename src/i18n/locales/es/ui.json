@@ -175,6 +175,8 @@
     "title": "Inspector",
     "close": "Cerrar el inspector",
     "intro": "Pasa el cursor por un bloque · Haz clic para fijarlo · Esc para salir",
+    "walkthrough": "Hacer el recorrido",
+    "walkthroughInvite": "¿Primera vez? Haz el recorrido de un minuto",
     "view": "Vista",
     "views": {
       "layers": "Capas",
@@ -229,6 +231,7 @@
       "ink": "Tinta"
     },
     "pointerNote": "Se mueve detrás de la figura del inicio cuando pasa el puntero.",
+    "watchFold": "Mira la figura doblarse en el inicio →",
     "sheetExpand": "Ver más del panel",
     "sheetShrink": "Ver más de la página"
   },
@@ -531,6 +534,7 @@
     },
     "actions": {
       "inspect": "Inspeccionar esta página",
+      "walkthrough": "Hacer el recorrido",
       "light": "Usar el tema claro",
       "dark": "Usar el tema oscuro",
       "system": "Seguir el tema del sistema",
@@ -555,5 +559,51 @@
     "basalt-glacier": "Basalto y glaciar",
     "washi-asagi": "Washi y asagi",
     "contour-lines": "Curvas de nivel"
+  },
+  "walkthrough": {
+    "label": "Recorrido",
+    "count": "{n} de {total}",
+    "back": "Atrás",
+    "next": "Siguiente",
+    "skip": "Omitir",
+    "finish": "Terminar",
+    "close": "Cerrar el recorrido",
+    "stops": {
+      "figure": {
+        "title": "La figura es la interfaz",
+        "body": "Desdóblala, con el control o arrastrando, y verás su patrón de pliegues: la arquitectura."
+      },
+      "inspect": {
+        "title": "Cada página, en capas",
+        "body": "Inspeccionar abre cualquier página en sus capas, con el componente detrás de cada parte y sus métricas reales."
+      },
+      "measured": {
+        "title": "Medido, no escrito",
+        "body": "Cada cifra de esta sección sale de la última compilación, no de una frase que escribí."
+      },
+      "case": {
+        "title": "Trabajo real",
+        "body": "Cada caso muestra qué había que lograr, qué decidí y qué resultó, solo con lo que la empresa aprobó publicar."
+      },
+      "career": {
+        "title": "Una carrera, versión por versión",
+        "body": "Cada versión mayor es un paso más en responsabilidad y lleva el nombre de un volcán de Costa Rica."
+      },
+      "precrease": {
+        "title": "Precrease",
+        "body": "Donde escribo sobre el trabajo antes de la forma, desde la arquitectura hasta la IA."
+      },
+      "commands": {
+        "title": "Todo, a un atajo",
+        "body": "Ctrl K (⌘ K en Mac) encuentra cualquier página, sección o entrada, y cambia la identidad o el tema."
+      }
+    },
+    "tip": {
+      "title": "Mira cómo está hecho este sitio",
+      "keys": "Haz un recorrido de un minuto, o pulsa Mayús I cuando quieras para abrir el Inspector.",
+      "touch": "Haz un recorrido de un minuto, o toca Inspeccionar cuando quieras para abrir el Inspector.",
+      "start": "Hacer el recorrido",
+      "later": "Ahora no"
+    }
   }
 }

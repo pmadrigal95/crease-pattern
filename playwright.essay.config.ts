@@ -1,4 +1,5 @@
 import { defineConfig, devices } from '@playwright/test';
+import { tipSeen } from './tests/tip-seen';
 
 // End-to-end tests for interactive essays (tests/essay). They need two things the main suite's
 // server lacks: drafts (a preview build, PRECREASE_PREVIEW=1) and public/_headers applied, so the
@@ -11,7 +12,7 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? 'github' : 'list',
-  use: { baseURL: 'http://127.0.0.1:4410' },
+  use: { baseURL: 'http://127.0.0.1:4410', storageState: tipSeen('http://127.0.0.1:4410') },
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
   webServer: {
     // npm, not pnpm, as in playwright.config.ts.
