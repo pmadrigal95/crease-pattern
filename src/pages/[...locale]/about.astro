@@ -8,7 +8,7 @@ import { copyFor, fill } from '../../i18n/dictionary';
 import { formatList } from '../../lib/format';
 import FoldedPortrait from '../../components/site/FoldedPortrait.astro';
 import { getImage } from 'astro:assets';
-import silhouette from '../../assets/portrait/silhouette.png?url';
+import silhouette from '../../assets/portrait/silhouette.webp?url&no-inline';
 import portrait from '../../assets/portrait/portrait.jpg';
 import { langOf, localeStaticPaths } from '../../i18n/routing';
 const lang = langOf(Astro.currentLocale);
@@ -42,7 +42,7 @@ export const getStaticPaths = localeStaticPaths;
     rel="preload"
     as="image"
     href={silhouette}
-    type="image/png"
+    type="image/webp"
     media="(prefers-color-scheme: dark)"
   />
   <link

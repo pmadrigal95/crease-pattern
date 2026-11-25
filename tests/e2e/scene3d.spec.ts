@@ -49,12 +49,26 @@ test('the hero stays an SVG until the visitor moves, then turns 3D', async ({ pa
   await expect(page.getByText('Drag to turn it')).toBeVisible();
 });
 
+test('a pointermove without movement is not the visitor moving', async ({ page }) => {
+  // What the browser sends when the page changes under a resting pointer (it made CI flaky).
+  await allowSoftwareGl(page);
+  const requested: string[] = [];
+  page.on('request', (r) => requested.push(r.url()));
+  await page.goto('/');
+  await page.waitForLoadState('networkidle');
+  await page.evaluate(() => dispatchEvent(new PointerEvent('pointermove', { clientX: 10, clientY: 10 })));
+  await page.waitForTimeout(500);
+  expect(sceneRequests(requested)).toEqual([]);
+});
+
 test('the slider folds the 3D figure, from the keyboard too', async ({ page }) => {
   await allowSoftwareGl(page);
   const errors: string[] = [];
   page.on('pageerror', (e) => errors.push(e.message));
   await page.goto('/');
+  // Two moves: a page's first pointermove reports no movement, so it doesn't count as moving.
   await page.mouse.move(200, 200);
+  await page.mouse.move(240, 260);
   await expect(page.locator('[data-hero-fold]')).toHaveClass(/scene-3d/, sceneReady);
   const slider = page.getByRole('slider', { name: 'Unfold the figure into its crease pattern' });
   await slider.focus();
