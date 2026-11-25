@@ -130,3 +130,17 @@ test('the effects raise no Content Security Policy or script errors', async ({ b
     await context.close();
   }
 });
+
+test('the Inspector shows the control only on the home page, where it acts', async ({ page }) => {
+  for (const [path, count] of [
+    ['/', 1],
+    ['/es', 1],
+    ['/about', 0],
+    ['/work', 0],
+  ] as const) {
+    await page.goto(path);
+    await page.locator('[data-inspector-toggle]').click();
+    await expect(page.locator('#inspector')).toBeVisible(ready);
+    await expect(page.locator('input[name="inspector-pointer"]')).toHaveCount(count * 3);
+  }
+});
