@@ -18,7 +18,7 @@ import { currentDirection, currentTheme, setDirection, setTheme, THEMES, type Th
 import { allVisualDirections, type VisualDirection } from '../../config/visual-direction';
 import { useViews } from './use-views';
 import InspectorViews from './InspectorViews.vue';
-import InspectorPointer from './InspectorPointer.vue';
+import InspectorHero from './InspectorHero.vue';
 import { fill } from '../../lib/template';
 import type { Copy } from '../../i18n/dictionary';
 
@@ -301,7 +301,7 @@ const metrics = computed(() => [
             {{ t.themes[value] }}
           </label>
         </fieldset>
-        <InspectorPointer :t="t" />
+        <InspectorHero :t="t" />
       </section>
 
       <InspectorViews

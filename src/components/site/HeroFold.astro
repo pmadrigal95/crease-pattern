@@ -352,6 +352,19 @@ const card = MODEL_IDS.map((id) => ({ id, facets: models[id].fold.faces.length }
     stage.addEventListener('pointerleave', (e) => {
       if (e.pointerType === 'mouse' && !e.buttons && !in3d()) set(0);
     });
+    // Arriving from the Inspector's "See the figure fold" link (?fold): the figure starts flat, as its
+    // crease pattern, and folds itself. Under reduced motion it simply stays folded.
+    if (
+      new URLSearchParams(location.search).has('fold') &&
+      !matchMedia('(prefers-reduced-motion: reduce)').matches
+    ) {
+      figure.classList.add('scrubbing');
+      set(1);
+      requestAnimationFrame(() => {
+        figure.classList.remove('scrubbing');
+        setTimeout(() => set(0), 600);
+      });
+    }
     track.addEventListener('keydown', (e) => {
       const step = { ArrowRight: 0.1, ArrowUp: 0.1, ArrowLeft: -0.1, ArrowDown: -0.1, Home: -1, End: 1 }[
         e.key

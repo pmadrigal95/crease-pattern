@@ -229,6 +229,7 @@
       "ink": "Ink"
     },
     "pointerNote": "Moves behind the home page's figure when the pointer crosses it.",
+    "watchFold": "See the figure fold on the home page →",
     "sheetExpand": "Show more of the panel",
     "sheetShrink": "Show more of the page"
   },
