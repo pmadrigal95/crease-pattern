@@ -1,0 +1,66 @@
+---
+/** Case figure "layers" (CaseFigure.astro): a page taken apart into its layers, the interface on top and the real metrics underneath; the panel loads when someone opens it. Wide and tall drawings. */
+interface Props {
+  labels: Record<string, string>;
+  description: string;
+}
+const { labels, description } = Astro.props;
+const l = (key: string): string => {
+  const text = labels[key];
+  if (text === undefined) throw new Error(`Case figure "layers" needs the label "${key}"`);
+  return text;
+};
+const sheets = ['interface', 'components', 'metrics'].map(l);
+---
+
+<svg class="dg wide" viewBox="0 0 480 300" role="img" aria-label={description}>
+  <rect class="box" x="10" y="112" width="100" height="56" rx="6" />
+  <text class="lbl" x="60" y="145" text-anchor="middle">
+    {l('page')}
+  </text>
+  <path class="ln key" d="M110 140 H160 M154 134 L160 140 L154 146" />
+  <path class="ln soft valley" d="M190 40 V180 M330 40 V180 M370 80 V220" />
+  {[40, 110, 180].map((y, i) => (
+    <>
+      <path
+        class:list={['box', { key: i === 0, fillkey: i === 0 }]}
+        d={`M190 ${y} H330 L370 ${y + 40} H230 Z`}
+      />
+      <text class:list={{ lbl: i === 0 }} x="280" y={y + 25} text-anchor="middle">
+        {sheets[i]}
+      </text>
+    </>
+  ))}
+  <path class="dim" d="M392 40 V220 M387 40 H397 M387 220 H397" />
+  <text class="dimt" x="404" y="134">
+    {l('layers')}
+  </text>
+  <text class="small" x="280" y="270" text-anchor="middle">
+    {l('onDemand')}
+  </text>
+</svg>
+<svg class="dg tall" viewBox="0 0 320 380" role="img" aria-label={description}>
+  <rect class="box" x="100" y="10" width="120" height="44" rx="6" />
+  <text class="lbl" x="160" y="37" text-anchor="middle">
+    {l('page')}
+  </text>
+  <path class="ln key" d="M160 54 V86 M154 80 L160 86 L166 80" />
+  <path class="ln soft valley" d="M50 92 V224 M210 92 V224 M250 128 V260" />
+  {[92, 158, 224].map((y, i) => (
+    <>
+      <path
+        class:list={['box', { key: i === 0, fillkey: i === 0 }]}
+        d={`M50 ${y} H210 L250 ${y + 36} H90 Z`}
+      />
+      <text class:list={{ lbl: i === 0 }} x="150" y={y + 23} text-anchor="middle">
+        {sheets[i]}
+      </text>
+    </>
+  ))}
+  <text class="dimt" x="160" y="306" text-anchor="middle">
+    {l('layers')}
+  </text>
+  <text class="small" x="160" y="346" text-anchor="middle">
+    {l('onDemand')}
+  </text>
+</svg>

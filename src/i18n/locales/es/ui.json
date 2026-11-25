@@ -176,7 +176,11 @@
     "close": "Cerrar el inspector",
     "intro": "Pasa el cursor por un bloque · Haz clic para fijarlo · Esc para salir",
     "view": "Vista",
-    "views": { "layers": "Capas", "fold": "Plegar", "pattern": "Patrón" },
+    "views": {
+      "layers": "Capas",
+      "fold": "Plegar",
+      "pattern": "Patrón"
+    },
     "tour": "Recorrer",
     "tourStop": "Detener el recorrido",
     "openCrease": "Abrir este pliegue",
@@ -480,11 +484,10 @@
       "intro": "Cómo resolví trabajo real: qué había que lograr, qué decidí y qué resultó. Cada caso incluye solo lo que la empresa aprobó publicar.",
       "read": "Leer el caso",
       "since": "desde {year}",
-      "site": {
-        "meta": "Proyecto propio · 2026",
-        "title": "Este sitio",
-        "summary": "Un portafolio que se puede inspeccionar: cada número se mide al publicar.",
-        "link": "Ver cómo está hecho"
+      "project": "Proyecto propio · {year}",
+      "earlier": {
+        "title": "Trabajo anterior",
+        "intro": "Mis roles anteriores, en pocas líneas. Cada uno completo está en Versiones."
       }
     },
     "case": {
@@ -502,7 +505,8 @@
       "mountain": "montaña",
       "built": "lo que construí",
       "back": "Volver a los casos",
-      "career": "Ver mi trayectoria, versión por versión"
+      "career": "Ver mi trayectoria, versión por versión",
+      "colophon": "Ver cómo está hecho, en el colofón"
     }
   },
   "commands": {

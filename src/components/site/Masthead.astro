@@ -106,93 +106,8 @@ const here = unlocalize(path);
 </header>
 
 <script>
-  // The language switch, here and in the footer, and the suggestion to read in the other
-  // language (M5). Imported only here, so it joins this script instead of adding a request.
-  import { initLanguage } from '../../scripts/lang';
-  initLanguage();
-  // The next page loads when a link shows intent (src/scripts/prefetch.ts), in this same script.
-  import { initPrefetch } from '../../scripts/prefetch';
-  initPrefetch();
-  // Opens the Inspector (decision 44): the button, any [data-inspector-open], Shift+I or ?inspect. Vue and the
-  // panel download only now, on first use; hovering the button starts that download early.
-  type Handle = { close(): void };
-  // Same rule as isTypingTarget in src/lib/keyboard.ts, kept local: this script runs on every page,
-  // and importing a helper shared with Precrease search would add a chained request to each one.
-  const isTypingTarget = (el: EventTarget | null) =>
-    el instanceof HTMLElement &&
-    (el.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(el.tagName));
-  const button = document.querySelector<HTMLButtonElement>('[data-inspector-toggle]');
-  let handle: Handle | null = null;
-  let loading = false;
-  const load = () => import('../inspector/mount');
-
-  const open = async (trigger: HTMLElement | null) => {
-    if (handle || loading) return;
-    loading = true;
-    try {
-      const { openInspector } = await load();
-      handle = await openInspector(trigger, () => {
-        handle = null;
-        button?.setAttribute('aria-expanded', 'false');
-      });
-      button?.setAttribute('aria-expanded', 'true');
-    } catch (error) {
-      // Offline, or the manifest didn't arrive: the page stays as it was, and the next try retries.
-      console.warn('Inspector could not open', error);
-    } finally {
-      loading = false;
-    }
-  };
-  const toggle = (trigger: HTMLElement | null) => (handle ? handle.close() : open(trigger));
-
-  button?.addEventListener('click', () => toggle(button));
-  // Other openers on the page (the home hero's "See how this page is built") share the same panel.
-  for (const opener of document.querySelectorAll<HTMLElement>('[data-inspector-open]')) {
-    opener.addEventListener('click', () => toggle(opener));
-    opener.addEventListener('pointerenter', () => void load(), { once: true });
-  }
-  button?.addEventListener('pointerenter', () => void load(), { once: true });
-  // A pointer resting on the hero's figure preloads too: loading the Inspector also starts the 3D
-  // scene on devices that can run it (decision 50), so it's ready if the visitor opens it.
-  document
-    .querySelector('[data-hero-fold] [data-stage]')
-    ?.addEventListener('pointerenter', () => void load(), { once: true });
-  // The command menu (M4.7): one menu for every page, loaded on first use; hovering its button
-  // starts the download early. Ctrl+K everywhere, Cmd+K on Apple devices.
-  const commandButton = document.querySelector<HTMLButtonElement>('[data-command-open]');
-  const commandMenu = () => import('./command-menu');
-  const openCommands = () => {
-    const strings = commandButton?.dataset.strings;
-    if (!strings) return;
-    void commandMenu()
-      .then((m) => m.openCommandMenu(JSON.parse(strings) as Parameters<typeof m.openCommandMenu>[0]))
-      .catch((error: unknown) => console.warn('Commands could not open', error));
-  };
-  commandButton?.addEventListener('click', () => openCommands());
-  commandButton?.addEventListener('pointerenter', () => void commandMenu(), { once: true });
-  const shortcut = commandButton?.querySelector('[data-shortcut]');
-  if (shortcut && /Mac|iPhone|iPad/.test(navigator.platform)) shortcut.textContent = '⌘ K';
-  addEventListener('keydown', (e) => {
-    if (e.key.toLowerCase() !== 'k' || !(e.ctrlKey || e.metaKey) || e.altKey || e.shiftKey) return;
-    e.preventDefault();
-    openCommands();
-  });
-  addEventListener('keydown', (e) => {
-    if (
-      !e.shiftKey ||
-      e.ctrlKey ||
-      e.metaKey ||
-      e.altKey ||
-      e.key.toLowerCase() !== 'i' ||
-      isTypingTarget(e.target)
-    )
-      return;
-    e.preventDefault();
-    // Focus goes back where it was on close; with nothing focused, to the Inspect button.
-    const active = document.activeElement;
-    toggle(active instanceof HTMLElement && active !== document.body ? active : button);
-  });
-  if (new URLSearchParams(location.search).has('inspect')) void open(button);
+  // Language, prefetch, the Inspector and the command menu: src/scripts/masthead.ts.
+  import '../../scripts/masthead';
 </script>
 
 <style>
@@ -220,13 +135,23 @@ const here = unlocalize(path);
     white-space: nowrap;
     min-height: 44px;
   }
+  /* The menu may shrink and scroll sideways, so the row never pushes the page wider: by design
+     below 375 px, and as a safety net above it, where every width leaves some room (fonts render a
+     few pixels wider on some systems). The focus ring is drawn inside each link so the scroll box
+     doesn't clip it. */
   nav {
     margin-left: auto;
     display: flex;
     gap: var(--space-1);
+    min-width: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
   }
   nav a {
+    flex-shrink: 0;
+    outline-offset: -2px;
     font-size: var(--size-sm);
+    white-space: nowrap;
     color: var(--color-mute);
     text-decoration: none;
     padding: 0 var(--space-2);
@@ -262,6 +187,7 @@ const here = unlocalize(path);
     color: var(--color-ink);
   }
   .inspect {
+    flex-shrink: 0;
     display: inline-flex;
     align-items: center;
     gap: var(--space-2);
@@ -299,6 +225,7 @@ const here = unlocalize(path);
     }
   }
   .commands {
+    flex-shrink: 0;
     display: inline-flex;
     align-items: center;
     gap: var(--space-2);
@@ -354,7 +281,7 @@ const here = unlocalize(path);
     }
   }
   /* Narrow screens: the button keeps its name for assistive tech but shows only the layers icon. */
-  @media (max-width: 560px) {
+  @media (max-width: 585px) {
     .inspect {
       flex-shrink: 0;
       width: 40px;
@@ -377,21 +304,48 @@ const here = unlocalize(path);
       display: none;
     }
   }
-  @media (max-width: 560px) {
+  /* Each width drops what the row can't hold, measured in Spanish, the longer menu: Inspect's
+     shortcut below 920 px, the command menu's below 860 px (its magnifier stays), the menu's padding
+     below 805 px and the name beside the logo below 775 px. Each cut leaves a few pixels to spare. */
+  @media (max-width: 920px) {
+    .inspect kbd {
+      display: none;
+    }
+  }
+  @media (max-width: 860px) {
+    .commands kbd {
+      display: none;
+    }
+  }
+  @media (max-width: 775px) {
     .me span {
       display: none;
     }
+  }
+  @media (max-width: 805px) {
     nav a {
       padding: 0 var(--space-1);
     }
   }
-  /* The narrowest phones (320 px): smaller links so the logo, the menu and Inspect share one row. */
-  @media (max-width: 380px) {
+  /* Phones up to 505 px (375–430 is most of them): smaller links and tighter spacing so the logo,
+     the menu, the language and Inspect share one row inside the page's margins. */
+  @media (max-width: 505px) {
     .mast .wrap {
-      gap: var(--space-2);
+      gap: 6px;
+    }
+    nav {
+      gap: 0;
     }
     nav a {
+      padding: 0 2px;
       font-size: var(--size-xs);
+    }
+    .lang {
+      min-width: 24px;
+    }
+    .inspect {
+      width: 36px;
+      margin-left: 0;
     }
   }
 </style>

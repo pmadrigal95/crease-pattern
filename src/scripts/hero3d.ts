@@ -55,9 +55,14 @@ export const heroScene = (): Promise<FigureScene | null> => {
 /** Mounts the hero's scene at the visitor's first move, on pages that have the hero. */
 export const initHero3d = (): void => {
   if (!stage()) return;
-  const go = () => {
+  const go = (event: Event) => {
+    // The browser sends a pointermove with no movement when the page changes under a pointer that
+    // is resting on it; that isn't the visitor moving. (A page's very first pointermove also reports
+    // none; the next one, a few milliseconds later, counts.)
+    if (event instanceof PointerEvent && event.type === 'pointermove' && !event.movementX && !event.movementY)
+      return;
     for (const type of FIRST_MOVES) removeEventListener(type, go);
     void heroScene();
   };
-  for (const type of FIRST_MOVES) addEventListener(type, go, { passive: true, once: true });
+  for (const type of FIRST_MOVES) addEventListener(type, go, { passive: true });
 };

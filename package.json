@@ -37,15 +37,15 @@
   },
   "packageManager": "pnpm@12.14.0+sha512.c18ba6d87993d3d164cb5e8948f32b2c06ee854487e06cd8d86781342fb3e5bb4634367034711e86802baa9c37bea906ce1929ad08d70884c97d801df13389a6",
   "dependencies": {
-    "@astrojs/mdx": "^8.1.5",
+    "@astrojs/mdx": "^8.1.6",
     "@astrojs/rss": "^4.0.19",
-    "@astrojs/vue": "^7.1.5",
+    "@astrojs/vue": "^7.1.6",
     "@fontsource-variable/jetbrains-mono": "^5.3.0",
     "@fontsource-variable/newsreader": "^5.3.0",
     "@fontsource-variable/schibsted-grotesk": "^5.3.0",
-    "astro": "^7.4.11",
-    "three": "0.170.0",
-    "vue": "^3.5.45"
+    "astro": "^7.4.13",
+    "three": "0.187.0",
+    "vue": "^3.5.46"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.12",
@@ -55,10 +55,10 @@
     "@fontsource/newsreader": "^5.3.0",
     "@fontsource/schibsted-grotesk": "^5.3.0",
     "@lhci/cli": "^0.16.1",
-    "@playwright/test": "^1.65.0",
+    "@playwright/test": "^1.65.1",
     "@resvg/resvg-js": "^2.6.2",
-    "@types/three": "0.170.0",
-    "eslint": "^10.14.0",
+    "@types/three": "0.187.0",
+    "eslint": "^10.15.0",
     "eslint-plugin-astro": "^3.2.1",
     "eslint-plugin-jsx-a11y": "^6.10.2",
     "eslint-plugin-vue": "^10.12.1",
@@ -68,8 +68,8 @@
     "prettier-plugin-astro": "^1.1.2",
     "satori": "^0.63.2",
     "typescript": "^6.0.3",
-    "typescript-eslint": "^8.72.2",
-    "vitest": "^5.1.0",
-    "wrangler": "^4.161.0"
+    "typescript-eslint": "^8.73.0",
+    "vitest": "^5.1.1",
+    "wrangler": "^4.165.0"
   }
 }

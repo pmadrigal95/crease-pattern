@@ -121,8 +121,11 @@ const pages = defineCollection({
  * practices and outcomes, never tools, stack, implementation, past problems or security detail.
  * The editorial rule is four plates and a short closing one; the schema holds it.
  */
+/** The figures a plate can draw (src/components/work/figures). */
+const figureKinds = ['arch', 'deploy', 'review', 'decisions', 'system', 'gates', 'layers', 'port'] as const;
+
 const plate = z.strictObject({
-  /** Anchor id, also the figure's key: arch, deploy, review or decisions. */
+  /** Anchor id, unique within its case. */
   id: z.string().regex(/^[a-z-]+$/),
   /** The local index's label. */
   short: z.string().max(24),
@@ -132,7 +135,7 @@ const plate = z.strictObject({
   result: z.string().max(260),
   /** The practice it shows, in the title block (never a tool). */
   practice: z.string().max(48),
-  figure: z.enum(['arch', 'deploy', 'review', 'decisions']),
+  figure: z.enum(figureKinds),
   /** The figure's words, in this language. */
   labels: z.record(z.string(), z.string().max(48)),
   /** The case's lead plate: first, drawn larger. */
@@ -144,6 +147,8 @@ const cases = defineCollection({
   schema: z.strictObject({
     company: z.string().min(1),
     role: z.string().min(1),
+    /** A job, or a project of Pablo's own; jobs are listed first. */
+    kind: z.enum(['role', 'project']).default('role'),
     /** When the work started; a case with an end date is a past job. */
     start: z.coerce.date(),
     end: z.coerce.date().optional(),

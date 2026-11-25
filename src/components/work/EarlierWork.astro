@@ -1,0 +1,125 @@
+---
+/**
+ * Earlier work (M6): the roles before the case studies, in a few lines each, at the end of /work.
+ * Read from the career changelog (src/lib/career.ts), never written again here, so it only says
+ * what the Changelog already publishes: every finished job or assignment at a company that has no
+ * case of its own, newest first, linking to the full log.
+ */
+import { copyFor } from '../../i18n/dictionary';
+import { langOf, localize } from '../../i18n/routing';
+import { careerFor } from '../../lib/career';
+
+interface Props {
+  /** Companies with a case study of their own, left out here. */
+  exclude: string[];
+}
+const { exclude } = Astro.props;
+const lang = langOf(Astro.currentLocale);
+const copy = copyFor(lang);
+const t = copy.cases.index.earlier;
+const year = (yearMonth: string) => yearMonth.slice(0, 4);
+const roles = careerFor(lang)
+  .entries.filter(
+    (e) => ['role', 'assignment', 'contract'].includes(e.kind) && e.end && !exclude.includes(e.org),
+  )
+  .toSorted((a, b) => b.start.localeCompare(a.start));
+const period = (start: string, end: string) =>
+  year(start) === year(end) ? year(start) : `${year(start)}–${year(end)}`;
+---
+
+<section class="earlier" aria-labelledby="t-earlier" data-inspect="EarlierWork">
+  <h2 id="t-earlier">{t.title}</h2>
+  <p class="intro">{t.intro}</p>
+  <ol class="roles">
+    {roles.map((r) => (
+      <li>
+        <p class="when">
+          <span>{period(r.start, r.end ?? r.start)}</span>
+          <span class="v">v{r.version}</span>
+        </p>
+        <div>
+          <h3>{r.title}</h3>
+          <p class="org">{r.org}</p>
+          {r.added?.map((line) => (
+            <p class="line">{line}</p>
+          ))}
+        </div>
+      </li>
+    ))}
+  </ol>
+  <a class="more" href={localize('/changelog', lang)}>
+    {copy.cases.case.career} →
+  </a>
+</section>
+
+<style>
+  .earlier {
+    padding-bottom: var(--space-24);
+  }
+  h2 {
+    margin: 0 0 var(--space-2);
+    font-size: var(--size-xl);
+    letter-spacing: -0.01em;
+  }
+  .intro {
+    margin: 0 0 var(--space-6);
+    color: var(--color-mute);
+  }
+  .roles {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--color-rule);
+  }
+  .roles li {
+    display: grid;
+    grid-template-columns: 10rem minmax(0, 1fr);
+    gap: var(--space-6);
+    padding-block: var(--space-6);
+    border-bottom: 1px solid var(--color-rule);
+  }
+  .when {
+    display: grid;
+    align-content: start;
+    gap: var(--space-1);
+    margin: 0;
+    font: var(--type-caption);
+    font-family: var(--font-mono);
+    color: var(--color-mute);
+  }
+  .v {
+    color: var(--color-accent);
+  }
+  h3 {
+    margin: 0;
+    font-size: var(--size-lg);
+    line-height: 1.25;
+  }
+  .org {
+    margin: var(--space-1) 0 0;
+    color: var(--color-mute);
+  }
+  .line {
+    margin: var(--space-3) 0 0;
+    max-width: 68ch;
+  }
+  .more {
+    display: inline-flex;
+    align-items: center;
+    min-height: 24px;
+    margin-top: var(--space-6);
+    font-weight: 600;
+    color: var(--color-accent);
+  }
+  @media (max-width: 640px) {
+    .roles li {
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--space-2);
+    }
+    .when {
+      grid-auto-flow: column;
+      justify-content: start;
+      gap: var(--space-3);
+    }
+  }
+</style>

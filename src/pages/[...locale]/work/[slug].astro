@@ -106,7 +106,11 @@ const plates = data.plates.toSorted((a, b) => Number(b.lead) - Number(a.lead));
 
   <div class="wrap foot">
     <a href={localize('/work', lang)}>← {t.back}</a>
-    <a href={localize('/changelog', lang)}>{t.career} →</a>
+    {data.kind === 'project' ? (
+      <a href={localize('/colophon', lang)}>{t.colophon} →</a>
+    ) : (
+      <a href={localize('/changelog', lang)}>{t.career} →</a>
+    )}
   </div>
 </PageLayout>
 
