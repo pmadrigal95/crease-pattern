@@ -222,6 +222,13 @@
       "light": "Light",
       "dark": "Dark"
     },
+    "pointer": "Pointer effect",
+    "pointers": {
+      "off": "Off",
+      "surface": "Surface",
+      "ink": "Ink"
+    },
+    "pointerNote": "Moves behind the home page's figure when the pointer crosses it.",
     "sheetExpand": "Show more of the panel",
     "sheetShrink": "Show more of the page"
   },

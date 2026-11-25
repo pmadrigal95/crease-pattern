@@ -9,6 +9,7 @@
 import { allVisualDirections, type VisualDirection } from '../../config/visual-direction';
 
 export type Theme = 'system' | 'light' | 'dark';
+export const THEMES: Theme[] = ['system', 'light', 'dark'];
 
 const root = document.documentElement;
 

@@ -64,8 +64,7 @@ comment frame, not on this site. Your comment is public, on GitHub, under your G
 code on several threads can't embed that frame; there, "Comments" is a plain link to the thread on
 GitHub.
 
-**Preferences.** The site reads five values from your browser's local storage: `pm.direction` and
-`pm.theme`, to show the visual identity and theme you picked; `pm.lang`, the language you chose with the
+**Preferences.** The site reads six values from your browser's local storage: `pm.direction` and `pm.theme`, to show the visual identity and theme you picked; `pm.pointer`, the pointer effect you picked in the Inspector; `pm.lang`, the language you chose with the
 language switch, so the home page opens in it; `pm.langHint`, so the suggestion to read a page in your
 browser's language stays closed once you close it; and `pm.helped`, the posts where you pressed "This helped",
 so the button doesn't count you twice. They are written only when you do those things, they never leave your
@@ -89,8 +88,7 @@ also complain to your data protection authority: in Costa Rica, the
 Open your browser's developer tools on any page:
 
 - **Application → Cookies:** empty.
-- **Application → Local storage:** empty, or only `pm.direction`, `pm.theme`, `pm.lang`, `pm.langHint` and
-  `pm.helped` if you used them.
+- **Application → Local storage:** empty, or only `pm.direction`, `pm.theme`, `pm.pointer`, `pm.lang`, `pm.langHint` and `pm.helped` if you used them.
 - **Network:** requests to this site, including `/api/stats` on posts, plus `static.cloudflareinsights.com`
   and `cloudflareinsights.com` unless your browser sends a privacy signal.
 

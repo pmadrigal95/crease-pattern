@@ -14,10 +14,11 @@ import {
   type Vitals,
 } from './measure';
 import { explode, layersEnabled, markCurrent } from './layers';
-import { currentDirection, currentTheme, setDirection, setTheme, type Theme } from './identity';
+import { currentDirection, currentTheme, setDirection, setTheme, THEMES, type Theme } from './identity';
 import { allVisualDirections, type VisualDirection } from '../../config/visual-direction';
 import { useViews } from './use-views';
 import InspectorViews from './InspectorViews.vue';
+import InspectorPointer from './InspectorPointer.vue';
 import { fill } from '../../lib/template';
 import type { Copy } from '../../i18n/dictionary';
 
@@ -56,7 +57,6 @@ const box = ref<DOMRect | null>(null);
 const threeD = layersEnabled();
 const direction = ref<VisualDirection>(currentDirection());
 const theme = ref<Theme>(currentTheme());
-const themes: Theme[] = ['system', 'light', 'dark'];
 const dark = () =>
   theme.value === 'dark' || (theme.value === 'system' && matchMedia('(prefers-color-scheme: dark)').matches);
 // The point the contour transition rises from: the control the visitor used.
@@ -290,7 +290,7 @@ const metrics = computed(() => [
         <p class="muted">{{ fill(t.identityNote, { count: manifest.identities.tokenCount }) }}</p>
         <fieldset class="choices themes">
           <legend>{{ t.theme }}</legend>
-          <label v-for="value in themes" :key="value" class="choice">
+          <label v-for="value in THEMES" :key="value" class="choice">
             <input
               type="radio"
               name="inspector-theme"
@@ -301,6 +301,7 @@ const metrics = computed(() => [
             {{ t.themes[value] }}
           </label>
         </fieldset>
+        <InspectorPointer :t="t" />
       </section>
 
       <InspectorViews
