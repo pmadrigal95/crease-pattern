@@ -12,6 +12,7 @@ import { padNumber } from '../../../lib/format';
 import { getProfile } from '../../../lib/profile';
 import { LANGS, DEFAULT_LANG, langOf, localize } from '../../../i18n/routing';
 import { caseSlug, getCases, type Case } from '../../../lib/cases';
+import '../../../styles/buttons-quiet.css';
 
 export const getStaticPaths = async () => {
   const perLang = await Promise.all(
