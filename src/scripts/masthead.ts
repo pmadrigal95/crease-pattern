@@ -90,8 +90,9 @@ const openCommands = () => {
 };
 commandButton?.addEventListener('click', () => openCommands());
 commandButton?.addEventListener('pointerenter', () => void commandMenu(), { once: true });
-const shortcut = commandButton?.querySelector('[data-shortcut]');
-if (shortcut && /Mac|iPhone|iPad/.test(navigator.platform)) shortcut.textContent = '⌘ K';
+// The tooltip names the shortcut the visitor's keyboard has.
+if (commandButton && /Mac|iPhone|iPad/.test(navigator.platform))
+  commandButton.title = commandButton.title.replace('Ctrl K', '⌘ K');
 addEventListener('keydown', (e) => {
   if (e.key.toLowerCase() !== 'k' || !(e.ctrlKey || e.metaKey) || e.altKey || e.shiftKey) return;
   e.preventDefault();
@@ -113,3 +114,17 @@ addEventListener('keydown', (e) => {
   toggle(active instanceof HTMLElement && active !== document.body ? active : button);
 });
 if (new URLSearchParams(location.search).has('inspect')) void open(button);
+// The bar's material answers the scroll (src/styles/masthead.css): data-scrolled once the page has
+// moved, and --lift over the first 120 px, which Basalt & glacier's shadow grows with. One update per
+// frame at most.
+const mast = document.querySelector<HTMLElement>('.mast');
+if (mast) {
+  let frame = 0;
+  const update = () => {
+    frame = 0;
+    mast.toggleAttribute('data-scrolled', scrollY > 8);
+    mast.style.setProperty('--lift', Math.min(1, scrollY / 120).toFixed(2));
+  };
+  addEventListener('scroll', () => (frame ||= requestAnimationFrame(update)), { passive: true });
+  update();
+}
