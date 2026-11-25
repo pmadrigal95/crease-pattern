@@ -9,6 +9,7 @@ export interface WalkthroughStrings {
   count: string;
   back: string;
   next: string;
+  skip: string;
   finish: string;
   close: string;
   stops: Record<StopKey, { title: string; body: string }>;

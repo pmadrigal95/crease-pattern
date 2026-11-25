@@ -176,6 +176,7 @@
     "close": "Cerrar el inspector",
     "intro": "Pasa el cursor por un bloque · Haz clic para fijarlo · Esc para salir",
     "walkthrough": "Hacer el recorrido",
+    "walkthroughInvite": "¿Primera vez? Haz el recorrido de un minuto",
     "view": "Vista",
     "views": {
       "layers": "Capas",
@@ -564,6 +565,7 @@
     "count": "{n} de {total}",
     "back": "Atrás",
     "next": "Siguiente",
+    "skip": "Omitir",
     "finish": "Terminar",
     "close": "Cerrar el recorrido",
     "stops": {

@@ -1,8 +1,10 @@
 /**
  * The walkthrough: seven stops that tell the site's thesis across its pages
  * (src/config/walkthrough.ts), each a coach mark (coachmark.ts) beside the part it explains.
- * Started by the visitor (the Inspector, the command menu or the first-visit tip). The arrow keys
- * or Enter move on, Escape leaves, and focus goes back where it was.
+ * Started by the visitor (the Inspector, the command menu, the first-visit tip), or once on its own
+ * on a first visit to the home page (first-tip.ts): then its first stop takes no focus, moves
+ * nothing and offers to skip it. The arrow keys or Enter move on, Escape leaves, and focus goes
+ * back where it was.
  *
  * Between pages the stop rides in sessionStorage (pm.walkthrough, /privacy); the masthead's script
  * resumes it on the next page, and it's gone when the walkthrough ends or the tab closes. Its words
@@ -37,6 +39,8 @@ const visible = (el: Element | null): el is Element => el !== null && el.getClie
 
 let mark: Coachmark | null = null;
 let returnFocus: HTMLElement | null = null;
+/** Started on its own: the first stop stays quiet until the visitor moves on. */
+let auto = false;
 let keys: ((e: KeyboardEvent) => void) | null = null;
 
 const end = () => {
@@ -45,6 +49,7 @@ const end = () => {
   if (keys) removeEventListener('keydown', keys);
   keys = null;
   save(null);
+  auto = false;
   returnFocus?.focus();
   returnFocus = null;
 };
@@ -57,18 +62,24 @@ const show = (i: number, t: WalkthroughStrings, go: (i: number) => void) => {
   if (!visible(target)) return go(i + 1);
   mark ??= openCoachmark({ closeLabel: t.close, dim: true, onClose: end });
   const last = i === STOPS.length - 1;
-  mark.show(target, {
-    ...t.stops[stop.key],
-    progress: {
-      at: i,
-      total: STOPS.length,
-      text: `${t.label}, ${fill(t.count, { n: i + 1, total: STOPS.length })}`,
+  const quiet = auto && i === 0;
+  mark.show(
+    target,
+    {
+      ...t.stops[stop.key],
+      progress: {
+        at: i,
+        total: STOPS.length,
+        text: `${t.label}, ${fill(t.count, { n: i + 1, total: STOPS.length })}`,
+      },
+      actions: [
+        ...(i > 0 ? [{ label: t.back, run: () => go(i - 1) }] : []),
+        ...(quiet ? [{ label: t.skip, run: end }] : []),
+        { label: last ? t.finish : t.next, primary: true, run: () => (last ? end() : go(i + 1)) },
+      ],
     },
-    actions: [
-      ...(i > 0 ? [{ label: t.back, run: () => go(i - 1) }] : []),
-      { label: last ? t.finish : t.next, primary: true, run: () => (last ? end() : go(i + 1)) },
-    ],
-  });
+    quiet,
+  );
   if (keys) removeEventListener('keydown', keys);
   keys = (e: KeyboardEvent) => {
     if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
@@ -81,6 +92,7 @@ const show = (i: number, t: WalkthroughStrings, go: (i: number) => void) => {
 const go = (i: number): void => {
   const stop = STOPS[i];
   if (!stop) return end();
+  if (i > 0) auto = false;
   save(i);
   if (stop.page !== null && here() !== stop.page) {
     location.assign(`${prefix()}${stop.page === '/' ? '' : stop.page}` || '/');
@@ -89,9 +101,10 @@ const go = (i: number): void => {
   void walkthroughStrings().then((t) => show(i, t, go));
 };
 
-/** Starts at the first stop. */
-export const startWalkthrough = (): void => {
-  returnFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+/** Starts at the first stop; `auto` when the site starts it, on a first visit. */
+export const startWalkthrough = (options: { auto?: boolean } = {}): void => {
+  auto = options.auto ?? false;
+  returnFocus = auto || !(document.activeElement instanceof HTMLElement) ? null : document.activeElement;
   go(0);
 };
 

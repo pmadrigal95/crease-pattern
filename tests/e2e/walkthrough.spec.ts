@@ -9,7 +9,7 @@ const card = '.cm-card';
 
 const start = async (page: Page) => {
   await page.locator('[data-inspector-toggle]').click();
-  await page.locator('#inspector .walk').click();
+  await page.locator('#inspector .help').click();
   await expect(page.locator(card)).toBeVisible(ready);
 };
 const stored = (page: Page) => page.evaluate(() => sessionStorage.getItem('pm.walkthrough'));
@@ -80,3 +80,13 @@ for (const theme of ['light', 'dark'] as const) {
     expect(results.violations).toEqual([]);
   });
 }
+
+test('the Inspector offers it to first-time users, and any time behind its "?"', async ({ page }) => {
+  await page.goto('/about');
+  await page.locator('[data-inspector-toggle]').click();
+  const panel = page.locator('#inspector');
+  await expect(panel.getByRole('button', { name: /New here\? Take the one-minute walkthrough/ })).toBeVisible(
+    ready,
+  );
+  await expect(panel.getByRole('button', { name: 'Take the walkthrough' })).toHaveText('?');
+});

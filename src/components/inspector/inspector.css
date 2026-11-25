@@ -108,6 +108,12 @@
   font-size: var(--size-sm);
 }
 
+.inspector-panel .top-actions {
+  display: flex;
+  gap: var(--space-2);
+}
+/* The walkthrough, any time: a quiet "?" beside close. */
+.inspector-panel .help,
 .inspector-panel .close {
   min-width: 44px;
   min-height: 44px;
@@ -119,13 +125,35 @@
   cursor: pointer;
 }
 
+/* The first-use tip: how the panel works in a quiet line, and the walkthrough as its one action. */
 .inspector-panel .intro {
-  margin: var(--space-3) 0 0;
-  padding: var(--space-2) var(--space-3);
+  display: grid;
+  gap: var(--space-2);
+  margin: var(--space-4) 0 0;
+  padding: var(--space-3) var(--space-4);
   border-radius: var(--radius-panel);
-  background: color-mix(in srgb, var(--color-accent-ui) 14%, transparent);
-  font-family: var(--font-mono);
-  font-size: var(--size-xs);
+  background: color-mix(in oklab, var(--color-accent-ui) 10%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--color-accent-ui) 28%, transparent);
+}
+.inspector-panel .intro p {
+  margin: 0;
+  font-size: var(--size-sm);
+  color: var(--color-mute);
+}
+.inspector-panel .intro-walk {
+  justify-self: start;
+  min-height: 32px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-accent);
+  font: 600 var(--size-sm) var(--font-sans);
+  text-align: left;
+  cursor: pointer;
+}
+.inspector-panel .intro-walk:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 .inspector-panel .muted {
@@ -958,17 +986,6 @@ main [data-inspect] {
   border-color: var(--color-accent-ui);
   background: color-mix(in oklab, var(--color-accent-ui) 14%, transparent);
 }
-
-/* Starts the walkthrough (src/components/site/walkthrough.ts). */
-.inspector-panel .walk {
-  align-self: start;
-  min-height: 32px;
-  padding: 0 var(--space-3);
-  border: 1px solid var(--color-accent-ui);
-  border-radius: var(--radius-pill);
-  background: transparent;
-  color: var(--color-ink);
-  font: inherit;
-  font-size: var(--size-sm);
-  cursor: pointer;
+.inspector-panel .help {
+  font: 600 var(--size-md) var(--font-sans);
 }

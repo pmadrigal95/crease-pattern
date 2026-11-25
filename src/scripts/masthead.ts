@@ -8,8 +8,9 @@ initLanguage();
 import { initPrefetch } from './prefetch';
 initPrefetch();
 // A walkthrough under way continues on this page (src/components/site/walkthrough.ts). Otherwise,
-// on a first visit, a tip points at Inspect shortly after the visitor's first interaction
-// (src/components/site/first-tip.ts): never before it, and never again once it has shown.
+// on a first visit, help shows shortly after the visitor's first interaction: the walkthrough on
+// the home page, a tip beside Inspect elsewhere (src/components/site/first-tip.ts). Never before
+// that interaction, and never again once it has shown.
 try {
   if (sessionStorage.getItem('pm.walkthrough') !== null)
     void import('../components/site/walkthrough').then((m) => m.resumeWalkthrough());
@@ -17,7 +18,7 @@ try {
     const firsts = ['scroll', 'pointerdown', 'keydown'] as const;
     const arm = () => {
       for (const type of firsts) removeEventListener(type, arm);
-      setTimeout(() => void import('../components/site/first-tip').then((m) => m.showFirstTip()), 1800);
+      setTimeout(() => void import('../components/site/first-tip').then((m) => m.showFirstHelp()), 1800);
     };
     for (const type of firsts) addEventListener(type, arm, { passive: true });
   }

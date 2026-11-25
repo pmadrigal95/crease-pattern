@@ -1,8 +1,9 @@
 import { expect, test } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 
-// The first-visit tip (src/components/site/first-tip.ts): once per visitor, after their first
-// interaction, beside Inspect; it takes no focus and offers the walkthrough.
+// First-visit help (src/components/site/first-tip.ts): once per visitor, after their first
+// interaction. On the home page the walkthrough starts on its own, quietly; anywhere else a tip
+// beside Inspect offers it. Neither takes focus.
 const ready = { timeout: 15_000 };
 const tip = '.cm-card';
 // A first visit: nothing remembered (the suite's other files start with the tip already seen).
@@ -33,8 +34,20 @@ test('after the first interaction it points at Inspect, without taking focus, an
   await expect(page.locator(tip)).toHaveCount(0);
 });
 
-test('"Take the walkthrough" starts it at its first stop', async ({ page }) => {
+test('on the home page the walkthrough starts on its own, quietly, and can be skipped', async ({ page }) => {
   await page.goto('/');
+  await page.mouse.wheel(0, 120);
+  await expect(page.locator(tip)).toContainText('1 of 7', ready);
+  await expect(page.locator('.cm-ring')).toHaveCount(1);
+  await expect(page.locator(`${tip} h2`)).not.toBeFocused();
+  expect(await page.evaluate(() => localStorage.getItem('pm.tips'))).toBe('1');
+  await page.getByRole('button', { name: 'Skip' }).click();
+  await expect(page.locator(tip)).toHaveCount(0);
+  expect(await page.evaluate(() => sessionStorage.getItem('pm.walkthrough'))).toBeNull();
+});
+
+test('"Take the walkthrough" starts it at its first stop', async ({ page }) => {
+  await page.goto('/work');
   await page.keyboard.press('Tab');
   await page.getByRole('button', { name: 'Take the walkthrough' }).click(ready);
   await expect(page.locator(tip)).toContainText('1 of 7', ready);
@@ -42,7 +55,7 @@ test('"Take the walkthrough" starts it at its first stop', async ({ page }) => {
 });
 
 test('the tip has no axe violations, in Spanish too', async ({ page }) => {
-  await page.goto('/es');
+  await page.goto('/es/about');
   await page.mouse.wheel(0, 200);
   await expect(page.locator(tip)).toContainText('Mira cómo está hecho este sitio', ready);
   // Measure the card as it rests, not while it unfolds in.

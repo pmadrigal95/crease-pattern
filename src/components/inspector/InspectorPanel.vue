@@ -244,10 +244,20 @@ const metrics = computed(() => [
       ></button>
       <header class="top">
         <h2 ref="heading" tabindex="-1">{{ t.title }}</h2>
-        <button type="button" class="close" :aria-label="t.close" @click="emit('close')">×</button>
+        <div class="top-actions">
+          <button type="button" class="help" :aria-label="t.walkthrough" :title="t.walkthrough" @click="walk">
+            ?
+          </button>
+          <button type="button" class="close" :aria-label="t.close" @click="emit('close')">×</button>
+        </div>
       </header>
-      <p v-if="firstRun" class="intro">{{ t.intro }}</p>
-      <button type="button" class="walk" @click="walk">{{ t.walkthrough }} →</button>
+      <!-- First use: how the panel works, and the walkthrough for anyone new to inspecting. -->
+      <div v-if="firstRun" class="intro">
+        <p>{{ t.intro }}</p>
+        <button type="button" class="intro-walk" @click="walk">
+          {{ t.walkthroughInvite }} <span aria-hidden="true">→</span>
+        </button>
+      </div>
       <p class="sr-only" role="status" aria-live="polite">{{ announce }}</p>
 
       <InspectorIdentity :t="t" :identities="manifest.identities" />

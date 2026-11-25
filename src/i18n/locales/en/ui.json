@@ -176,6 +176,7 @@
     "close": "Close the inspector",
     "intro": "Hover a block · Click to pin · Esc to leave",
     "walkthrough": "Take the walkthrough",
+    "walkthroughInvite": "New here? Take the one-minute walkthrough",
     "view": "View",
     "views": {
       "layers": "Layers",
@@ -564,6 +565,7 @@
     "count": "{n} of {total}",
     "back": "Back",
     "next": "Next",
+    "skip": "Skip",
     "finish": "Finish",
     "close": "Close the walkthrough",
     "stops": {
