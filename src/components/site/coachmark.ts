@@ -7,8 +7,12 @@
  * Accessibility: a non-modal dialog labelled by its title, focus on the title at each stop, Escape
  * closes, and the progress dots have a text twin for screen readers. Built with the DOM API only
  * (no HTML strings), so Trusted Types has nothing to guard.
+ *
+ * The styles are a file of their own, fetched with the first coach mark and adopted as a
+ * constructed stylesheet, like the Inspector's: a CSS import would put them in every page's HTML
+ * (it once pushed About's out of the first TCP window). Budget: quality.ts, coachmarkStyles.
  */
-import './coachmark.css';
+import stylesUrl from './coachmark.css?url';
 import { placeCoachmark } from '../../lib/coachmark-position';
 
 export interface CoachmarkAction {
@@ -39,6 +43,21 @@ const node = <K extends keyof HTMLElementTagNameMap>(tag: K, className: string, 
   return el;
 };
 const reduced = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+let styles: Promise<void> | null = null;
+/** Fetches and adopts the coach marks' styles once; a failed download is retried next time. */
+export const coachmarkStyles = (): Promise<void> =>
+  (styles ??= fetch(stylesUrl)
+    .then((r) => (r.ok ? r.text() : Promise.reject(new Error(`${stylesUrl}: ${r.status}`))))
+    .then((css) => {
+      const sheet = new CSSStyleSheet();
+      sheet.replaceSync(css);
+      document.adoptedStyleSheets = [...document.adoptedStyleSheets, sheet];
+    })
+    .catch((error: unknown) => {
+      styles = null;
+      throw error;
+    }));
 /** What the sticky masthead covers at the top of the screen. */
 const mastheadBottom = () => document.querySelector('.mast')?.getBoundingClientRect().bottom ?? 0;
 

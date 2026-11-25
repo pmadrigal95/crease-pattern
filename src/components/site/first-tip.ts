@@ -6,10 +6,11 @@
  * - anywhere else, or once they've scrolled past the figure: a quiet tip (coachmark.ts) beside the
  *   Inspect button, which glows twice, offering the walkthrough. Visitors who arrived for a post or
  *   a case are never taken elsewhere unasked.
- * Either way it's remembered in localStorage (pm.tips, /privacy) the moment it shows, so it never
- * comes back; the walkthrough stays a click away in the Inspector and the command menu.
+ * Either way it's remembered in localStorage (pm.tips, /privacy) once it has actually shown, never
+ * before (a visit cut short must not lose it), and then it never comes back; the walkthrough stays
+ * a click away in the Inspector and the command menu.
  */
-import { openCoachmark } from './coachmark';
+import { coachmarkStyles, openCoachmark } from './coachmark';
 import { walkthroughStrings } from './walkthrough-strings';
 
 export const TIP_SEEN = 'pm.tips';
@@ -19,23 +20,27 @@ const figureInView = () => {
   const box = document.querySelector('.hero [data-hero-fold] [data-stage]')?.getBoundingClientRect();
   return box !== undefined && box.top + box.height / 2 > 0 && box.top + box.height / 2 < innerHeight;
 };
+const remember = () => {
+  try {
+    localStorage.setItem(TIP_SEEN, '1');
+  } catch {
+    // Storage blocked: it may show again on another page, which is the lesser harm.
+  }
+};
 const busy = () =>
   document.documentElement.classList.contains('inspecting') || document.querySelector('.cm-card');
 
 export const showFirstHelp = async (): Promise<void> => {
   const button = document.querySelector<HTMLElement>('[data-inspector-toggle]');
   if (!button || !button.getClientRects().length || busy()) return;
-  try {
-    localStorage.setItem(TIP_SEEN, '1');
-  } catch {
-    // Storage blocked: it may show again on another page, which is the lesser harm.
-  }
   if (figureInView()) {
     const { startWalkthrough } = await import('./walkthrough');
-    if (!busy()) startWalkthrough({ auto: true });
+    if (busy()) return;
+    startWalkthrough({ auto: true });
+    remember();
     return;
   }
-  const t = await walkthroughStrings();
+  const [t] = await Promise.all([walkthroughStrings(), coachmarkStyles()]);
   // The visitor may have opened the Inspector or the walkthrough while the words loaded.
   if (busy()) return;
   button.classList.add('cm-pulse');
@@ -60,6 +65,7 @@ export const showFirstHelp = async (): Promise<void> => {
     },
     true,
   );
+  remember();
   // Opening the Inspector answers the tip too.
   button.addEventListener('click', () => mark.close(), { once: true });
 };

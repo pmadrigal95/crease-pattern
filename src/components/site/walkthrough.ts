@@ -12,7 +12,7 @@
  */
 import { STOPS } from '../../config/walkthrough';
 import { fill } from '../../lib/template';
-import { openCoachmark, type Coachmark } from './coachmark';
+import { coachmarkStyles, openCoachmark, type Coachmark } from './coachmark';
 import { walkthroughStrings, prefix, type WalkthroughStrings } from './walkthrough-strings';
 
 const KEY = 'pm.walkthrough';
@@ -98,7 +98,7 @@ const go = (i: number): void => {
     location.assign(`${prefix()}${stop.page === '/' ? '' : stop.page}` || '/');
     return;
   }
-  void walkthroughStrings().then((t) => show(i, t, go));
+  void Promise.all([walkthroughStrings(), coachmarkStyles()]).then(([t]) => show(i, t, go));
 };
 
 /** Starts at the first stop; `auto` when the site starts it, on a first visit. */

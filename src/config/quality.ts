@@ -83,6 +83,11 @@ export const jsBudgetKb = {
    */
   walkthrough: 6,
   /**
+   * The coach marks' styles (src/components/site/coachmark.css), fetched with the first walkthrough
+   * stop or first-visit tip: kept out of the pages' HTML, where an import would put them.
+   */
+  coachmarkStyles: 2,
+  /**
    * The 3D scenes' data, fetched with the scene: today the Irazú's height grid from Copernicus
    * GLO-30 (src/assets/scenes/irazu-dem.bin), 28.5 KB. The M4 plan capped it at 150 KB.
    */

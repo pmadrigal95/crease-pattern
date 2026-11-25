@@ -9,10 +9,26 @@ const tip = '.cm-card';
 // A first visit: nothing remembered (the suite's other files start with the tip already seen).
 test.use({ storageState: { cookies: [], origins: [] } });
 
-test('nothing shows before the visitor does anything', async ({ page }) => {
-  await page.goto('/');
-  await page.waitForTimeout(3000);
+test('it shows on its own a few seconds after the page loads, even without an interaction', async ({
+  page,
+}) => {
+  await page.goto('/about');
+  await page.waitForLoadState('load');
+  // Nothing during the load itself.
   await expect(page.locator(tip)).toHaveCount(0);
+  await expect(page.locator(tip)).toContainText('See how this site is built', ready);
+});
+
+test('a resting pointer is not an interaction, a real move is', async ({ page }) => {
+  await page.goto('/work');
+  await page.evaluate(() =>
+    document.body.dispatchEvent(new PointerEvent('pointermove', { bubbles: true, clientX: 5, clientY: 5 })),
+  );
+  await page.waitForTimeout(1600);
+  await expect(page.locator(tip)).toHaveCount(0);
+  await page.mouse.move(200, 200);
+  await page.mouse.move(260, 240);
+  await expect(page.locator(tip)).toBeVisible({ timeout: 3000 });
 });
 
 test('after the first interaction it points at Inspect, without taking focus, and only once', async ({

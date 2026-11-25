@@ -90,3 +90,10 @@ test('the Inspector offers it to first-time users, and any time behind its "?"',
   );
   await expect(panel.getByRole('button', { name: 'Take the walkthrough' })).toHaveText('?');
 });
+
+test("the coach marks' styles stay out of the pages' HTML", async ({ request }) => {
+  // They load with the first coach mark (coachmark.ts); in the HTML they cost every page its first round trip.
+  for (const path of ['/', '/about', '/es/about', '/precrease']) {
+    expect(await (await request.get(path)).text(), path).not.toContain('.cm-ring');
+  }
+});

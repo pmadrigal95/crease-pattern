@@ -167,6 +167,14 @@ export const measureInspectorStyles = (dist: string): number => {
     .reduce((sum, f) => sum + brotliCompressSync(readFileSync(join(assets, f))).length, 0);
 };
 
+/** The coach marks' styles (src/components/site/coachmark.css), fetched with the first one. */
+export const measureCoachmarkStyles = (dist: string): number => {
+  const assets = join(dist, '_astro');
+  return readdirSync(assets)
+    .filter((f) => /^coachmark\.[\w-]+\.css$/.test(f))
+    .reduce((sum, f) => sum + brotliCompressSync(readFileSync(join(assets, f))).length, 0);
+};
+
 /**
  * The command menu's index (/commands.json, /es/commands.json…: scripts/build-command-index.ts),
  * Brotli: fetched the first time the menu opens. A page loads only its language's, so the budget
