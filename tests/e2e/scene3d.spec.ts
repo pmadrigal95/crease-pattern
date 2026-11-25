@@ -64,6 +64,10 @@ test('a pointermove without movement is not the visitor moving', async ({ page }
 
 test('the slider folds the 3D figure, from the keyboard too', async ({ page }) => {
   await allowSoftwareGl(page);
+  // The fold's frames are timed (FrameProbe, src/components/inspector/hero-motion.ts): on a busy
+  // machine software WebGL falls under 30 frames a second and the SVG rightly takes the square
+  // back. A paused clock steps the frames at 16 ms each, so the probe judges this test, not the load.
+  await page.clock.install();
   const errors: string[] = [];
   page.on('pageerror', (e) => errors.push(e.message));
   await page.goto('/');
@@ -71,14 +75,17 @@ test('the slider folds the 3D figure, from the keyboard too', async ({ page }) =
   await page.mouse.move(200, 200);
   await page.mouse.move(240, 260);
   await expect(page.locator('[data-hero-fold]')).toHaveClass(/scene-3d/, sceneReady);
+  await page.clock.pauseAt((await page.evaluate(() => Date.now())) + 1_000);
   const slider = page.getByRole('slider', { name: 'Unfold the figure into its crease pattern' });
   await slider.focus();
   await page.keyboard.press('End');
+  await page.clock.runFor(2_000);
   await expect(slider).toHaveAttribute('aria-valuenow', '100');
   const fold = () =>
     page.locator('[data-hero-fold]').evaluate((el) => (el as HTMLElement).style.getPropertyValue('--fold'));
   await expect.poll(fold).toBe('1.000');
   await page.keyboard.press('Home');
+  await page.clock.runFor(2_000);
   await expect(slider).toHaveAttribute('aria-valuenow', '0');
   await expect(page.locator('[data-hero-fold]')).toHaveClass(/scene-3d/);
   expect(errors).toEqual([]);
