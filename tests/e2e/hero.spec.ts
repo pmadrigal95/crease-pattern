@@ -16,6 +16,34 @@ test('the fold slider moves with the keyboard and says which side it is on', asy
   await expect(slider).toHaveAttribute('aria-valuetext', 'Folded: the interface');
 });
 
+test('the caption says what the end the figure is at means, and switches with the fold', async ({ page }) => {
+  await page.goto('/');
+  const folded = page.locator('[data-hero-fold] figcaption .folded-say');
+  const unfolded = page.locator('[data-hero-fold] figcaption .unfolded-say');
+  await expect(folded).toHaveText('What you see on screen.');
+  await expect(folded).toHaveCSS('opacity', '1');
+  await expect(unfolded).toHaveCSS('opacity', '0');
+  await page.getByRole('slider', { name: 'Unfold the figure into its crease pattern' }).focus();
+  await page.keyboard.press('End');
+  await expect(unfolded).toHaveText('The folds that shape it.');
+  await expect(unfolded).toHaveCSS('opacity', '1');
+  await expect(folded).toHaveCSS('opacity', '0');
+});
+
+test("the byline names the country and links the city's coordinates to a map", async ({ page }) => {
+  await page.goto('/es');
+  const who = page.locator('.hero .who');
+  await expect(who.locator('.name')).toHaveText('Pablo Madrigal');
+  await expect(who).toContainText('Costa Rica');
+  const city = who.getByRole('link', { name: 'Ver 9.86° N · 83.92° O en un mapa' });
+  await expect(city).toHaveAttribute(
+    'href',
+    /^https:\/\/www\.openstreetmap\.org\/\?mlat=9\.86&mlon=-83\.92#/,
+  );
+  await expect(city).toHaveAttribute('rel', 'noopener noreferrer');
+  expect((await city.boundingBox())?.height).toBeGreaterThanOrEqual(24);
+});
+
 test('"See how this page is built" opens the Inspector, which unfolds the figure', async ({ page }) => {
   await page.goto('/');
   await page.getByRole('button', { name: 'See how this page is built' }).click();

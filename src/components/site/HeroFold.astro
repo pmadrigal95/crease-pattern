@@ -88,7 +88,12 @@ const card = MODEL_IDS.map((id) => ({ id, facets: models[id].fold.faces.length }
       {t.architecture}
     </span>
   </div>
-  <figcaption>{t.caption}</figcaption>
+  {/* The slider's own words: what each end means, under that end, crossfading as the figure folds.
+       Without JavaScript the figure stays folded, and so does the phrase. */}
+  <figcaption>
+    <span class="folded-say">{t.say.folded}</span>
+    <span class="unfolded-say">{t.say.unfolded}</span>
+  </figcaption>
 </figure>
 
 <style>
@@ -266,10 +271,31 @@ const card = MODEL_IDS.map((id) => ({ id, facets: models[id].fold.faces.length }
     border: var(--stroke-crease) solid var(--color-accent-ui);
   }
   figcaption {
-    max-width: 44ch;
+    display: grid;
     margin: var(--space-3) 0 0;
-    font: var(--type-caption);
-    color: var(--color-mute);
+    font: 400 var(--size-sm) / 1.4 var(--font-sans);
+    color: var(--color-ink);
+  }
+  figcaption span {
+    grid-area: 1 / 1;
+    max-width: 70%;
+    transition:
+      opacity var(--motion-base) var(--motion-ease-out),
+      translate var(--motion-base) var(--motion-ease-out);
+  }
+  .folded-say {
+    justify-self: start;
+    opacity: max(0, 1 - var(--t) * 2);
+    translate: calc(var(--t) * -6px) 0;
+  }
+  .unfolded-say {
+    justify-self: end;
+    text-align: right;
+    opacity: max(0, var(--t) * 2 - 1);
+    translate: calc((1 - var(--t)) * 6px) 0;
+  }
+  .scrubbing figcaption span {
+    transition: none;
   }
 
   /* First visit: the flat sheet folds into the figure once. */
@@ -285,8 +311,10 @@ const card = MODEL_IDS.map((id) => ({ id, facets: models[id].fold.faces.length }
   @media (prefers-reduced-motion: reduce) {
     .flat,
     .folded,
-    .knob {
+    .knob,
+    figcaption span {
       transition: none;
+      translate: none;
     }
     :global(.intro) .hero-fold {
       animation: none;

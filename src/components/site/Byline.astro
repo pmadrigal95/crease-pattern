@@ -1,0 +1,83 @@
+---
+/**
+ * The home hero's byline: the owner's name in ink, then role and country, then their city as
+ * coordinates only, unnamed, a link to the spot on OpenStreetMap for the curious. Everything comes
+ * from the profile (src/lib/profile.ts); the city is limited to two decimals by its schema.
+ */
+import { getProfile } from '../../lib/profile';
+import { copyFor, fill } from '../../i18n/dictionary';
+
+const profile = await getProfile(Astro.currentLocale);
+const c = copyFor(Astro.currentLocale).home.hero.coords;
+const { lat, lon } = profile.city;
+const degrees = (v: number, plus: string, minus: string) =>
+  `${Math.abs(v).toFixed(2)}° ${v < 0 ? minus : plus}`;
+const coords = `${degrees(lat, c.north, c.south)} · ${degrees(lon, c.east, c.west)}`;
+const map = `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lon}#map=13/${lat}/${lon}`;
+---
+
+<p class="who">
+  <span class="name">{profile.name}</span>
+  <span class="sr-only">, </span>
+  <span>
+    {profile.role}
+    <span class="dot" aria-hidden="true">
+      ·
+    </span>
+    {profile.location}
+  </span>
+  <a class="city" href={map} target="_blank" rel="noopener noreferrer" aria-label={fill(c.map, { coords })}>
+    <svg viewBox="0 0 14 14" aria-hidden="true">
+      <circle cx="7" cy="7" r="6"></circle>
+      <circle cx="7" cy="7" r="3.4"></circle>
+      <circle class="peak" cx="7" cy="7" r="1.1"></circle>
+    </svg>
+    {coords}
+  </a>
+</p>
+
+<style>
+  .who {
+    display: grid;
+    justify-items: start;
+    gap: var(--space-1);
+    margin: 0 0 var(--space-8);
+    font: 400 var(--size-sm) / 1.35 var(--font-sans);
+    color: var(--color-mute);
+  }
+  .who .name {
+    font: 600 var(--size-md) / 1.2 var(--font-sans);
+    letter-spacing: -0.01em;
+    color: var(--color-ink);
+  }
+  .who .dot {
+    margin-inline: 0.45em;
+  }
+  .city {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: 24px;
+    font: 500 var(--size-xs) / 1 var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.02em;
+    color: var(--color-mute);
+    text-decoration: none;
+    transition: color var(--motion-fast) var(--motion-ease-out);
+  }
+  .city:hover {
+    color: var(--color-ink);
+  }
+  .city svg {
+    flex: none;
+    width: 13px;
+    height: 13px;
+    fill: none;
+    stroke: var(--color-accent-ui);
+    stroke-width: 1;
+  }
+  .city .peak {
+    fill: var(--color-accent-ui);
+    stroke: none;
+  }
+</style>
