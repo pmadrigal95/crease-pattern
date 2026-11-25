@@ -7,6 +7,13 @@ initLanguage();
 // The next page loads when a link shows intent (src/scripts/prefetch.ts), in this same script.
 import { initPrefetch } from './prefetch';
 initPrefetch();
+// A walkthrough under way continues on this page (src/components/site/walkthrough.ts).
+try {
+  if (sessionStorage.getItem('pm.walkthrough') !== null)
+    void import('../components/site/walkthrough').then((m) => m.resumeWalkthrough());
+} catch {
+  // Storage blocked: no walkthrough to resume.
+}
 // Opens the Inspector (decision 44): the button, any [data-inspector-open], Shift+I or ?inspect. Vue and the
 // panel download only now, on first use; hovering the button starts that download early.
 type Handle = { close(): void };

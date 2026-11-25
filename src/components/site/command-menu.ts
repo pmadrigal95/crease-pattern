@@ -23,6 +23,7 @@ export interface CommandStrings {
   groups: { actions: string; pages: string; sections: string; posts: string };
   actions: {
     inspect: string;
+    walkthrough: string;
     light: string;
     dark: string;
     system: string;
@@ -121,6 +122,12 @@ const actionCommands = (t: CommandStrings, status: HTMLElement): Command[] => {
       label: t.actions.inspect,
       aside: 'Shift I',
       run: () => document.querySelector<HTMLButtonElement>('[data-inspector-toggle]')?.click(),
+    },
+    {
+      group: 'actions',
+      label: t.actions.walkthrough,
+      context: 'tour recorrido',
+      run: () => void import('./walkthrough').then((m) => m.startWalkthrough()),
     },
     ...(['light', 'dark', 'system'] as Theme[]).map((theme) => ({
       group: 'actions' as const,

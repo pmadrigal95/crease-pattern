@@ -16,6 +16,8 @@
 //  - heroPointer: the hero's pointer effects (src/components/site/pointer-*.ts) and their loader
 //    (src/scripts/hero-pointer.ts), fetched on the home page at the first real move of a mouse over
 //    the hero: the surface and the ink, both counted.
+//  - walkthrough: the walkthrough (src/components/site/walkthrough.ts), loaded when a visitor
+//    starts it from the Inspector or the command menu, or resumes it on the next page.
 //  These have budgets of their own, and the other groups stop at them.
 import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -41,13 +43,16 @@ const isInspectorViews = (file: string): boolean => /^fold\.[\w-]+\.js$/.test(fi
 /** The hero's pointer effects and what they share. */
 const isHeroPointer = (file: string): boolean =>
   /^(hero-pointer|pointer-(layer|surface|ink))\.[\w-]+\.js$/.test(file);
+/** The walkthrough's entry chunk. */
+const isWalkthrough = (file: string): boolean => /^walkthrough\.[\w-]+\.js$/.test(file);
 /** Where the page and on-demand groups stop: code with budgets of its own. */
 const isOwnBudget = (file: string): boolean =>
   isScene3d(file) ||
   isWorkModel(file) ||
   isCommandMenu(file) ||
   isInspectorViews(file) ||
-  isHeroPointer(file);
+  isHeroPointer(file) ||
+  isWalkthrough(file);
 
 /** Bytes, Brotli, per group. */
 export const measureBundles = (
@@ -60,6 +65,7 @@ export const measureBundles = (
   commandMenu: number;
   inspectorViews: number;
   heroPointer: number;
+  walkthrough: number;
 } => {
   const assets = join(dist, '_astro');
   const read = (file: string): string => readFileSync(join(assets, file), 'utf8');
@@ -104,6 +110,7 @@ export const measureBundles = (
     isScene3d,
   );
   const heroPointer = closure(scripts.filter(isHeroPointer), new Set([...page, ...onDemand]), isScene3d);
+  const walkthrough = closure(scripts.filter(isWalkthrough), new Set([...page, ...onDemand]), isScene3d);
   return {
     page: sum(page),
     onDemand: sum(onDemand),
@@ -112,6 +119,7 @@ export const measureBundles = (
     commandMenu: sum(commandMenu),
     inspectorViews: sum(inspectorViews),
     heroPointer: sum(heroPointer),
+    walkthrough: sum(walkthrough),
   };
 };
 

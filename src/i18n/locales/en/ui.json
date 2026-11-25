@@ -175,6 +175,7 @@
     "title": "Inspector",
     "close": "Close the inspector",
     "intro": "Hover a block · Click to pin · Esc to leave",
+    "walkthrough": "Take the walkthrough",
     "view": "View",
     "views": {
       "layers": "Layers",
@@ -532,6 +533,7 @@
     },
     "actions": {
       "inspect": "Inspect this page",
+      "walkthrough": "Take the walkthrough",
       "light": "Use the light theme",
       "dark": "Use the dark theme",
       "system": "Follow the system theme",
@@ -556,5 +558,43 @@
     "basalt-glacier": "Basalt & glacier",
     "washi-asagi": "Washi & asagi",
     "contour-lines": "Contour lines"
+  },
+  "walkthrough": {
+    "label": "Walkthrough",
+    "count": "{n} of {total}",
+    "back": "Back",
+    "next": "Next",
+    "finish": "Finish",
+    "close": "Close the walkthrough",
+    "stops": {
+      "figure": {
+        "title": "The figure is the interface",
+        "body": "Unfold it, with the slider or by dragging, and you see its crease pattern: the architecture."
+      },
+      "inspect": {
+        "title": "Every page, in layers",
+        "body": "Inspect opens any page into its layers, with the component behind each part and its real metrics."
+      },
+      "measured": {
+        "title": "Measured, not written",
+        "body": "Every number in this section comes from the last build, not from a sentence I typed."
+      },
+      "case": {
+        "title": "Real work",
+        "body": "Each case shows what had to be achieved, what I decided and what came of it, with only what the company approved."
+      },
+      "career": {
+        "title": "A career, version by version",
+        "body": "Each major version is a step up in responsibility, named after a Costa Rican volcano."
+      },
+      "precrease": {
+        "title": "Precrease",
+        "body": "Where I write about the work before the shape, from architecture to AI."
+      },
+      "commands": {
+        "title": "Everything, one shortcut away",
+        "body": "Ctrl K (⌘ K on a Mac) finds any page, section or post, and changes the identity or the theme."
+      }
+    }
   }
 }
