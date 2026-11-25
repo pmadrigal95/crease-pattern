@@ -2,6 +2,7 @@
 import site from '../../../site.config';
 import PageLayout from '../../layouts/PageLayout.astro';
 import AltitudeProfile from '../../components/site/AltitudeProfile.astro';
+import Byline from '../../components/site/Byline.astro';
 import CopyText from '../../components/site/CopyText.astro';
 import HeroFold from '../../components/site/HeroFold.astro';
 import HomePrecrease from '../../components/site/HomePrecrease.astro';
@@ -57,9 +58,7 @@ export const getStaticPaths = localeStaticPaths;
   <section class="hero" aria-labelledby="hero-title" data-inspect="index#hero">
     <div class="wrap hero-grid">
       <div class="hero-text">
-        <p class="who">
-          {fill(home.hero.who, { name: profile.name, role: profile.role, location: profile.location })}
-        </p>
+        <Byline />
         <h1 id="hero-title">{home.hero.title}</h1>
         <p class="sub">{profile.summary}</p>
         <p class="cta">
@@ -203,11 +202,6 @@ export const getStaticPaths = localeStaticPaths;
     gap: var(--space-12);
     align-items: center;
     padding-block: var(--space-16);
-  }
-  .who {
-    margin: 0 0 var(--space-6);
-    font: 500 var(--type-caption);
-    color: var(--color-mute);
   }
   h1 {
     margin: 0;

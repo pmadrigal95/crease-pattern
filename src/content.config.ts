@@ -90,6 +90,12 @@ const precrease = defineCollection({
  * src/i18n/locales/<lang>/profile.json; src/lib/profile.ts joins the two. The schema is strict on purpose: an unexpected field (a phone number,
  * an address) fails the build instead of being published.
  */
+const cityDegrees = (limit: number) =>
+  z
+    .number()
+    .min(-limit)
+    .max(limit)
+    .refine((v) => Math.round(v * 100) / 100 === v, 'Two decimals at most: a city, never an address.');
 const profile = defineCollection({
   loader: file('./src/content/profile.json'),
   schema: z.strictObject({
@@ -99,6 +105,9 @@ const profile = defineCollection({
       linkedin: z.url().startsWith('https://www.linkedin.com/in/'),
       github: z.url().startsWith('https://github.com/'),
     }),
+    // The owner's city, shown as coordinates under the home page's byline. Two decimals at most
+    // (about a kilometre), so it can only ever name a city, never an address.
+    city: z.strictObject({ lat: cityDegrees(90), lon: cityDegrees(180) }),
   }),
 });
 
