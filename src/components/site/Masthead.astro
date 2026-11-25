@@ -1,5 +1,7 @@
 ---
 import OrigamiMark from './OrigamiMark.astro';
+// The bar's styles, one structure in each identity's material (see the file's header).
+import '../../styles/masthead.css';
 import { copyFor, fill } from '../../i18n/dictionary';
 import { publicPath } from '../../lib/url';
 import {
@@ -62,46 +64,53 @@ const here = unlocalize(path);
         </a>
       ))}
     </nav>
-    <!-- The language switch (M5): each other language's code; its name, in that language, for
-         screen readers. Choosing one is remembered (src/scripts/lang.ts). -->
-    {otherLanguages.map((l) => (
-      <a class="lang" href={l.href} hreflang={l.lang} lang={l.lang} data-lang-switch={l.lang}>
-        {LOCALES[l.lang].code}
-        <span class="sr-only"> · {LOCALES[l.lang].name}</span>
-      </a>
-    ))}
-    <button
-      type="button"
-      class="inspect"
-      aria-expanded="false"
-      aria-keyshortcuts="Shift+I"
-      data-inspector-toggle
-      data-strings-url={inspectorStringsPath(langOf(Astro.currentLocale))}
-    >
-      <svg class="icon" viewBox="0 0 20 20" aria-hidden="true" focusable="false">
-        <path d="M3 7h10v10H3z" />
-        <path d="M7 3h10v10" />
-      </svg>
-      <span class="label">{copy.inspector.open}</span>
-      <kbd aria-hidden="true">{copy.inspector.shortcut}</kbd>
-    </button>
-    <!-- The command menu (M4.7). Phones: the same button, floating in the bottom corner. -->
-    <button
-      type="button"
-      class="commands"
-      aria-label={copy.commands.open}
-      aria-keyshortcuts="Control+K Meta+K"
-      data-command-open
-      data-strings={commandStrings}
-    >
-      <svg class="glass" viewBox="0 0 20 20" aria-hidden="true" focusable="false">
-        <circle cx="8.5" cy="8.5" r="5.5"></circle>
-        <path d="m13 13 4.5 4.5"></path>
-      </svg>
-      <kbd aria-hidden="true" data-shortcut>
-        {copy.commands.shortcut}
-      </kbd>
-    </button>
+    <div class="acts">
+      <!-- The command menu (M4.7). Phones: the same button, floating in the bottom corner. -->
+      <button
+        type="button"
+        class="commands"
+        aria-label={copy.commands.open}
+        title={`${copy.commands.open} (${copy.commands.shortcut})`}
+        aria-keyshortcuts="Control+K Meta+K"
+        data-command-open
+        data-strings={commandStrings}
+      >
+        <svg class="glass" viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+          <circle cx="8.5" cy="8.5" r="5.5"></circle>
+          <path d="m13 13 4.5 4.5"></path>
+        </svg>
+      </button>
+      <!-- The language switch (M5): each other language's code; its name, in that language, for
+           screen readers. Choosing one is remembered (src/scripts/lang.ts). -->
+      {otherLanguages.map((l) => (
+        <a
+          class="lang"
+          href={l.href}
+          hreflang={l.lang}
+          lang={l.lang}
+          title={LOCALES[l.lang].name}
+          data-lang-switch={l.lang}
+        >
+          {LOCALES[l.lang].code}
+          <span class="sr-only"> · {LOCALES[l.lang].name}</span>
+        </a>
+      ))}
+      <button
+        type="button"
+        class="inspect"
+        aria-expanded="false"
+        aria-keyshortcuts="Shift+I"
+        title={`${copy.inspector.open} (${copy.inspector.shortcut})`}
+        data-inspector-toggle
+        data-strings-url={inspectorStringsPath(langOf(Astro.currentLocale))}
+      >
+        <svg class="icon" viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+          <path d="M3 7h10v10H3z" />
+          <path d="M7 3h10v10" />
+        </svg>
+        <span class="label">{copy.inspector.open}</span>
+      </button>
+    </div>
   </div>
 </header>
 
@@ -109,243 +118,3 @@ const here = unlocalize(path);
   // Language, prefetch, the Inspector and the command menu: src/scripts/masthead.ts.
   import '../../scripts/masthead';
 </script>
-
-<style>
-  .mast {
-    position: sticky;
-    top: env(safe-area-inset-top, 0px);
-    z-index: 20;
-    background: var(--color-bg);
-    border-bottom: 1px solid var(--color-rule);
-  }
-  .mast .wrap {
-    display: flex;
-    align-items: center;
-    gap: var(--space-4);
-    min-height: 60px;
-  }
-  .me {
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    gap: var(--space-3);
-    font-weight: 700;
-    letter-spacing: -0.01em;
-    text-decoration: none;
-    white-space: nowrap;
-    min-height: 44px;
-  }
-  /* The menu may shrink and scroll sideways, so the row never pushes the page wider: by design
-     below 375 px, and as a safety net above it, where every width leaves some room (fonts render a
-     few pixels wider on some systems). The focus ring is drawn inside each link so the scroll box
-     doesn't clip it. */
-  nav {
-    margin-left: auto;
-    display: flex;
-    gap: var(--space-1);
-    min-width: 0;
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
-  nav a {
-    flex-shrink: 0;
-    outline-offset: -2px;
-    font-size: var(--size-sm);
-    white-space: nowrap;
-    color: var(--color-mute);
-    text-decoration: none;
-    padding: 0 var(--space-2);
-    min-height: 44px;
-    display: inline-flex;
-    align-items: center;
-    transition: color var(--motion-fast) var(--motion-ease-out);
-  }
-  nav a:hover,
-  nav a[aria-current='page'] {
-    color: var(--color-ink);
-  }
-  nav a[aria-current='page'] {
-    text-decoration: underline;
-    text-decoration-color: var(--color-accent-ui);
-    text-decoration-thickness: 2px;
-    text-underline-offset: 6px;
-  }
-  .lang {
-    flex-shrink: 0;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 36px;
-    min-height: 44px;
-    font: 500 var(--type-caption);
-    letter-spacing: 0.04em;
-    color: var(--color-mute);
-    text-decoration: none;
-    transition: color var(--motion-fast) var(--motion-ease-out);
-  }
-  .lang:hover {
-    color: var(--color-ink);
-  }
-  .inspect {
-    flex-shrink: 0;
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-2);
-    min-height: 36px;
-    margin-left: var(--space-2);
-    padding: 0 var(--space-3);
-    border: 1px solid var(--color-rule);
-    border-radius: var(--radius-pill);
-    background: transparent;
-    color: var(--color-ink);
-    font: inherit;
-    font-size: var(--size-sm);
-    cursor: pointer;
-    transition: border-color var(--motion-fast) var(--motion-ease-out);
-  }
-  .inspect:hover,
-  .inspect[aria-expanded='true'] {
-    border-color: var(--color-accent-ui);
-  }
-  .inspect .icon {
-    display: none;
-    width: 18px;
-    height: 18px;
-    fill: none;
-    stroke: currentColor;
-    stroke-width: 1.5;
-  }
-  .inspect kbd {
-    font: 500 var(--type-caption);
-    color: var(--color-mute);
-  }
-  @media (pointer: coarse) {
-    .inspect kbd {
-      display: none;
-    }
-  }
-  .commands {
-    flex-shrink: 0;
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-2);
-    min-height: 36px;
-    padding: 0 var(--space-3);
-    border: 1px solid var(--color-rule);
-    border-radius: var(--radius-pill);
-    background: transparent;
-    color: var(--color-ink);
-    font: inherit;
-    font-size: var(--size-sm);
-    cursor: pointer;
-    transition: border-color var(--motion-fast) var(--motion-ease-out);
-  }
-  .commands:hover {
-    border-color: var(--color-accent-ui);
-  }
-  .commands .glass {
-    width: 16px;
-    height: 16px;
-    fill: none;
-    stroke: currentColor;
-    stroke-width: 1.75;
-    stroke-linecap: round;
-  }
-  .commands kbd {
-    font: 500 var(--type-caption);
-    color: var(--color-mute);
-  }
-  /* Phones: a round button in the bottom corner, clear of the home indicator and the notch. */
-  @media (max-width: 720px) {
-    .commands {
-      position: fixed;
-      right: max(var(--space-4), env(safe-area-inset-right));
-      bottom: max(var(--space-4), env(safe-area-inset-bottom));
-      z-index: 30;
-      width: 52px;
-      height: 52px;
-      justify-content: center;
-      padding: 0;
-      background: var(--color-surface);
-      box-shadow: 0 8px 24px -8px color-mix(in oklab, var(--color-ink) 45%, transparent);
-    }
-    .commands .glass {
-      width: 20px;
-      height: 20px;
-    }
-    .commands kbd {
-      display: none;
-    }
-    :global(.inspecting) .commands {
-      display: none;
-    }
-  }
-  /* Narrow screens: the button keeps its name for assistive tech but shows only the layers icon. */
-  @media (max-width: 585px) {
-    .inspect {
-      flex-shrink: 0;
-      width: 40px;
-      min-height: 40px;
-      padding: 0;
-      justify-content: center;
-    }
-    .inspect .icon {
-      display: block;
-    }
-    .inspect .label {
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      overflow: hidden;
-      clip-path: inset(50%);
-      white-space: nowrap;
-    }
-    .inspect kbd {
-      display: none;
-    }
-  }
-  /* Each width drops what the row can't hold, measured in Spanish, the longer menu: Inspect's
-     shortcut below 920 px, the command menu's below 860 px (its magnifier stays), the menu's padding
-     below 805 px and the name beside the logo below 775 px. Each cut leaves a few pixels to spare. */
-  @media (max-width: 920px) {
-    .inspect kbd {
-      display: none;
-    }
-  }
-  @media (max-width: 860px) {
-    .commands kbd {
-      display: none;
-    }
-  }
-  @media (max-width: 775px) {
-    .me span {
-      display: none;
-    }
-  }
-  @media (max-width: 805px) {
-    nav a {
-      padding: 0 var(--space-1);
-    }
-  }
-  /* Phones up to 505 px (375–430 is most of them): smaller links and tighter spacing so the logo,
-     the menu, the language and Inspect share one row inside the page's margins. */
-  @media (max-width: 505px) {
-    .mast .wrap {
-      gap: 6px;
-    }
-    nav {
-      gap: 0;
-    }
-    nav a {
-      padding: 0 2px;
-      font-size: var(--size-xs);
-    }
-    .lang {
-      min-width: 24px;
-    }
-    .inspect {
-      width: 36px;
-      margin-left: 0;
-    }
-  }
-</style>
