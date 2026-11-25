@@ -41,7 +41,7 @@ pnpm lint         # ESLint (TypeScript, Astro, Vue, jsx-a11y strict)
 pnpm check        # astro check (types)
 pnpm test         # WCAG AA contrast for 3 identities × 2 themes
 pnpm test:e2e     # axe in every identity and theme, no overflow at 375px
-pnpm lighthouse   # budgets: LCP < 1.8 s, CLS < 0.05, initial JS < 15 KB
+pnpm lighthouse   # budgets: LCP < 1.85 s, CLS < 0.05, initial JS < 15 KB
 ```
 
 ## Engineering
