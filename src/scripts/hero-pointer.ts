@@ -5,7 +5,7 @@
  * WebGL 2, while the Inspector is open or while the hero is off screen; each effect also sleeps
  * when the pointer rests (src/components/site/pointer-layer.ts).
  *
- * Started by the home page's hero script, next to the 3D figure's loader.
+ * Started by the home page's hero script, next to the 3D figure's loader, at that first real move.
  */
 import { POINTER_EVENT, pointerEffect, type PointerEffect } from '../lib/pointer-effect';
 import type { PointerLayer } from '../components/site/pointer-layer';
@@ -66,4 +66,7 @@ export const initHeroPointer = (): void => {
   new IntersectionObserver(([entry]) => {
     onScreen = entry?.isIntersecting ?? true;
   }).observe(hero);
+  // The move that brought this script here was the visitor's: the effect starts now, without
+  // waiting for another one (on a slow connection the hand may have stopped by the time it arrives).
+  if (choice !== 'off' && !root.classList.contains('inspecting')) void mount(choice);
 };

@@ -12,8 +12,9 @@ const sceneReady = { timeout: 15_000 };
 
 // CI has no GPU. SwiftShader gives the browser a software WebGL2, and the init script lets the
 // capability check accept it (it turns software rendering away on purpose, for real visitors).
-// One worker for this file: several software-rendered scenes at once can starve SwiftShader, and
-// then the capability check rightly falls back to the SVG.
+// One at a time with the other software-GL specs (the software-gl project, playwright.config.ts):
+// several software-rendered scenes at once can starve SwiftShader, and then the scene rightly falls
+// back to the SVG.
 // Software WebGL is slow, more so with the hero's scene and the Work star on one page: a longer
 // limit for these tests only.
 test.describe.configure({ mode: 'default', timeout: 90_000 });

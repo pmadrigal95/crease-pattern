@@ -60,6 +60,18 @@ test('by default the surface takes over from the still texture', async ({ page }
   expect(loaded()).not.toContain('pointer-ink');
 });
 
+test('the move that downloads the effect is enough to start it', async ({ page }) => {
+  // On a slow connection the effect's script arrives after the hand has stopped: that move counts.
+  await page.route(/\/_astro\/hero-pointer\./, async (route) => {
+    await new Promise((resolve) => setTimeout(resolve, 1_500));
+    await route.continue();
+  });
+  await page.goto('/');
+  await page.waitForLoadState('networkidle');
+  await stroke(page);
+  await expect(page.locator('.hero > canvas.pointer-layer.surface')).toHaveCount(1, ready);
+});
+
 test('the Inspector switches the effect, and the choice is remembered', async ({ browser }) => {
   // Reduced motion keeps the 3D figure off, so this test drives only the pointer effect.
   const context = await browser.newContext({ reducedMotion: 'reduce' });
