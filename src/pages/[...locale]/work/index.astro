@@ -1,14 +1,15 @@
 ---
 /**
- * Case studies (M6): one card per case in this language, newest first, and one for this site,
- * whose "how it's built" lives in the colophon. Adding a case is adding a file to
- * src/content/cases; this page, the home page, ⌘K and the sitemap follow.
+ * Case studies (M6): one card per case in this language, jobs first, then the earlier roles in a
+ * few lines each. Adding a case is adding a file to src/content/cases; this page, the home page,
+ * ⌘K and the sitemap follow.
  */
 import PageLayout from '../../../layouts/PageLayout.astro';
 import CaseCard from '../../../components/work/CaseCard.astro';
-import { copyFor, fill } from '../../../i18n/dictionary';
-import { langOf, localeStaticPaths, localize } from '../../../i18n/routing';
-import { caseHref, caseSlug, getCases } from '../../../lib/cases';
+import EarlierWork from '../../../components/work/EarlierWork.astro';
+import { copyFor } from '../../../i18n/dictionary';
+import { langOf, localeStaticPaths } from '../../../i18n/routing';
+import { caseHref, caseMeta, caseSlug, getCases } from '../../../lib/cases';
 const lang = langOf(Astro.currentLocale);
 const copy = copyFor(lang);
 const t = copy.cases.index;
@@ -29,22 +30,15 @@ export const getStaticPaths = localeStaticPaths;
       {cases.map((c) => (
         <CaseCard
           href={caseHref(caseSlug(c), lang)}
-          meta={`${c.data.role} · ${fill(t.since, { year: c.data.start.getUTCFullYear() })}`}
+          meta={caseMeta(c, t)}
           title={c.data.company}
           summary={c.data.summary}
           link={t.read}
-          plates={c.data.plates.length + 1}
+          plates={c.data.kind === 'project' ? 0 : c.data.plates.length + 1}
         />
       ))}
-      <CaseCard
-        href={localize('/colophon', lang)}
-        meta={t.site.meta}
-        title={t.site.title}
-        summary={t.site.summary}
-        link={t.site.link}
-        plates={0}
-      />
     </div>
+    <EarlierWork exclude={cases.map((c) => c.data.company)} />
   </div>
 </PageLayout>
 
@@ -53,6 +47,6 @@ export const getStaticPaths = localeStaticPaths;
     display: grid;
     gap: var(--space-6);
     grid-template-columns: repeat(auto-fill, minmax(min(320px, 100%), 1fr));
-    padding-bottom: var(--space-24);
+    padding-bottom: var(--space-16);
   }
 </style>

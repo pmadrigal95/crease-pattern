@@ -11,17 +11,30 @@ import FigureArch from './figures/FigureArch.astro';
 import FigureDeploy from './figures/FigureDeploy.astro';
 import FigureReview from './figures/FigureReview.astro';
 import FigureDecisions from './figures/FigureDecisions.astro';
+import FigureSystem from './figures/FigureSystem.astro';
+import FigureGates from './figures/FigureGates.astro';
+import FigureLayers from './figures/FigureLayers.astro';
+import FigurePort from './figures/FigurePort.astro';
+import type { Case } from '../../lib/cases';
 
 interface Props {
-  kind: 'arch' | 'deploy' | 'review' | 'decisions';
+  kind: Case['data']['plates'][number]['figure'];
   labels: Record<string, string>;
   /** Read aloud instead of the drawing. */
   description: string;
 }
 const { kind, labels, description } = Astro.props;
-const Figure = { arch: FigureArch, deploy: FigureDeploy, review: FigureReview, decisions: FigureDecisions }[
-  kind
-];
+const figures = {
+  arch: FigureArch,
+  deploy: FigureDeploy,
+  review: FigureReview,
+  decisions: FigureDecisions,
+  system: FigureSystem,
+  gates: FigureGates,
+  layers: FigureLayers,
+  port: FigurePort,
+} satisfies Record<Props['kind'], unknown>;
+const Figure = figures[kind];
 ---
 
 <figure class="case-figure" data-inspect="CaseFigure">

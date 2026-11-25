@@ -1,0 +1,74 @@
+---
+/** Case figure "port" (CaseFigure.astro): code from 2022, the same algorithm with only its input and output changed, running in the browser on one thread or several. Wide and tall drawings. */
+interface Props {
+  labels: Record<string, string>;
+  description: string;
+}
+const { labels, description } = Astro.props;
+const l = (key: string): string => {
+  const text = labels[key];
+  if (text === undefined) throw new Error(`Case figure "port" needs the label "${key}"`);
+  return text;
+};
+---
+
+<svg class="dg wide" viewBox="0 0 480 260" role="img" aria-label={description}>
+  <rect class="box soft" x="10" y="100" width="124" height="60" rx="6" />
+  <text class="lbl" x="72" y="127" text-anchor="middle">
+    {l('source')}
+  </text>
+  <text class="small" x="72" y="145" text-anchor="middle">
+    {l('lang')}
+  </text>
+  <text class="dimt" x="162" y="80" text-anchor="middle">
+    {l('same')}
+  </text>
+  <path class="dim" d="M134 90 H196" />
+  <path class="ln key" d="M134 130 H190 M184 124 L190 130 L184 136" />
+  <rect class="box key fillkey" x="196" y="94" width="120" height="72" rx="6" />
+  <text class="lbl" x="256" y="135" text-anchor="middle">
+    {l('browser')}
+  </text>
+  <path class="ln key" d="M316 130 C 340 130, 340 80, 364 80 M316 130 C 340 130, 340 180, 364 180" />
+  <rect class="box" x="370" y="60" width="100" height="40" rx="6" />
+  <text x="420" y="85" text-anchor="middle">
+    {l('serial')}
+  </text>
+  <rect class="box" x="370" y="160" width="100" height="40" rx="6" />
+  <text x="420" y="185" text-anchor="middle">
+    {l('parallel')}
+  </text>
+  <path class="dim" d="M10 216 H316 M10 211 V221 M316 211 V221" />
+  <text class="dimt" x="163" y="240" text-anchor="middle">
+    {l('io')}
+  </text>
+</svg>
+<svg class="dg tall" viewBox="0 0 320 360" role="img" aria-label={description}>
+  <rect class="box soft" x="90" y="10" width="140" height="56" rx="6" />
+  <text class="lbl" x="160" y="35" text-anchor="middle">
+    {l('source')}
+  </text>
+  <text class="small" x="160" y="53" text-anchor="middle">
+    {l('lang')}
+  </text>
+  <path class="ln key" d="M160 66 V110 M154 104 L160 110 L166 104" />
+  <text class="dimt" x="172" y="92">
+    {l('same')}
+  </text>
+  <rect class="box key fillkey" x="90" y="116" width="140" height="60" rx="6" />
+  <text class="lbl" x="160" y="151" text-anchor="middle">
+    {l('browser')}
+  </text>
+  <path class="ln key" d="M160 176 C 160 200, 90 200, 90 226 M160 176 C 160 200, 230 200, 230 226" />
+  <rect class="box" x="30" y="232" width="120" height="40" rx="6" />
+  <text x="90" y="257" text-anchor="middle">
+    {l('serial')}
+  </text>
+  <rect class="box" x="170" y="232" width="120" height="40" rx="6" />
+  <text x="230" y="257" text-anchor="middle">
+    {l('parallel')}
+  </text>
+  <text class="dimt" x="160" y="320" text-anchor="middle">
+    {l('io')}
+  </text>
+</svg>

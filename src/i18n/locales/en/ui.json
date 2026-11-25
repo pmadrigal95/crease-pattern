@@ -176,7 +176,11 @@
     "close": "Close the inspector",
     "intro": "Hover a block · Click to pin · Esc to leave",
     "view": "View",
-    "views": { "layers": "Layers", "fold": "Fold", "pattern": "Pattern" },
+    "views": {
+      "layers": "Layers",
+      "fold": "Fold",
+      "pattern": "Pattern"
+    },
     "tour": "Walk through",
     "tourStop": "Stop the tour",
     "openCrease": "Open this crease",
@@ -480,11 +484,10 @@
       "intro": "How I approached real work: what had to be achieved, what I decided and what came of it. Each case includes only what the company approved for publication.",
       "read": "Read the case",
       "since": "since {year}",
-      "site": {
-        "meta": "Personal project · 2026",
-        "title": "This site",
-        "summary": "A portfolio you can inspect: every number is measured when it's published.",
-        "link": "See how it's built"
+      "project": "Personal project · {year}",
+      "earlier": {
+        "title": "Earlier work",
+        "intro": "My earlier roles, in a few lines. Each one is in full in the Changelog."
       }
     },
     "case": {
@@ -502,7 +505,8 @@
       "mountain": "mountain",
       "built": "what I built",
       "back": "Back to case studies",
-      "career": "See my career, version by version"
+      "career": "See my career, version by version",
+      "colophon": "See how it's built, in the colophon"
     }
   },
   "commands": {
