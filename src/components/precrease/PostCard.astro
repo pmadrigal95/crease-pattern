@@ -1,8 +1,12 @@
 ---
-/** One post in a Precrease list: its number, thumbnail, title and what kind of post it is. */
+/**
+ * One post in a Precrease list: its thumbnail, title and what kind of post it is, in words. No post
+ * number here: a list can be filtered, and a lone number would read like a rank, a series part or a
+ * book's chapter. The number ("Crease No. 003") lives in the post's own header, labelled.
+ */
 import PostThumb from './PostThumb.astro';
 import { copyFor, fill } from '../../i18n/dictionary';
-import { formatDate, padNumber } from '../../lib/format';
+import { formatDate } from '../../lib/format';
 import { postHref, postKind, type PostSummary } from '../../lib/precrease';
 import { readingMinutes } from '../../lib/reading';
 import { LOCALES, langOf } from '../../i18n/routing';
@@ -22,8 +26,6 @@ const otherLang = post.lang === lang ? undefined : LOCALES[post.lang].htmlLang;
 
 <article class="post-card" data-inspect="PostCard">
   <a href={postHref(post)} class="link">
-    {/* "No. 003": an issue number, not a rank, so a topic's list can skip numbers without looking odd. */}
-    <span class="num">{fill(t.issue, { number: padNumber(data.number) })}</span>
     <PostThumb slug={post.key} format={data.format} />
     <Heading class="title" lang={otherLang}>
       {data.title}
@@ -31,6 +33,12 @@ const otherLang = post.lang === lang ? undefined : LOCALES[post.lang].htmlLang;
   </a>
   <p class="meta">
     <span>{postKind(post.entry, lang)}</span>
+    {data.book && (
+      <span>
+        <cite>{data.book.title}</cite>
+        {data.book.chapter && <> · {fill(t.chapter, { chapter: data.book.chapter })}</>}
+      </span>
+    )}
     {otherLang && <span>{t.untranslated}</span>}
     <span>{fill(t.minutes, { minutes: readingMinutes(post.entry.body ?? '') })}</span>
     {data.draft && <span class="draft">{t.draft}</span>}
@@ -51,10 +59,6 @@ const otherLang = post.lang === lang ? undefined : LOCALES[post.lang].htmlLang;
     gap: var(--space-3);
     color: inherit;
     text-decoration: none;
-  }
-  .num {
-    font: italic 400 1.25rem/1 var(--font-serif);
-    color: var(--color-mute);
   }
   .title {
     margin: 0;
