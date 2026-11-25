@@ -7,12 +7,22 @@ initLanguage();
 // The next page loads when a link shows intent (src/scripts/prefetch.ts), in this same script.
 import { initPrefetch } from './prefetch';
 initPrefetch();
-// A walkthrough under way continues on this page (src/components/site/walkthrough.ts).
+// A walkthrough under way continues on this page (src/components/site/walkthrough.ts). Otherwise,
+// on a first visit, a tip points at Inspect shortly after the visitor's first interaction
+// (src/components/site/first-tip.ts): never before it, and never again once it has shown.
 try {
   if (sessionStorage.getItem('pm.walkthrough') !== null)
     void import('../components/site/walkthrough').then((m) => m.resumeWalkthrough());
+  else if (localStorage.getItem('pm.tips') === null) {
+    const firsts = ['scroll', 'pointerdown', 'keydown'] as const;
+    const arm = () => {
+      for (const type of firsts) removeEventListener(type, arm);
+      setTimeout(() => void import('../components/site/first-tip').then((m) => m.showFirstTip()), 1800);
+    };
+    for (const type of firsts) addEventListener(type, arm, { passive: true });
+  }
 } catch {
-  // Storage blocked: no walkthrough to resume.
+  // Storage blocked: nothing to resume, and no tip.
 }
 // Opens the Inspector (decision 44): the button, any [data-inspector-open], Shift+I or ?inspect. Vue and the
 // panel download only now, on first use; hovering the button starts that download early.

@@ -16,8 +16,9 @@
 //  - heroPointer: the hero's pointer effects (src/components/site/pointer-*.ts) and their loader
 //    (src/scripts/hero-pointer.ts), fetched on the home page at the first real move of a mouse over
 //    the hero: the surface and the ink, both counted.
-//  - walkthrough: the walkthrough (src/components/site/walkthrough.ts), loaded when a visitor
-//    starts it from the Inspector or the command menu, or resumes it on the next page.
+//  - walkthrough: the walkthrough and the first-visit tip (src/components/site/walkthrough.ts,
+//    first-tip.ts) and the coach mark they share, loaded when a visitor starts or resumes the
+//    walkthrough, or once after their first interaction for the tip.
 //  These have budgets of their own, and the other groups stop at them.
 import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -44,7 +45,8 @@ const isInspectorViews = (file: string): boolean => /^fold\.[\w-]+\.js$/.test(fi
 const isHeroPointer = (file: string): boolean =>
   /^(hero-pointer|pointer-(layer|surface|ink))\.[\w-]+\.js$/.test(file);
 /** The walkthrough's entry chunk. */
-const isWalkthrough = (file: string): boolean => /^walkthrough\.[\w-]+\.js$/.test(file);
+const isWalkthrough = (file: string): boolean =>
+  /^(walkthrough|walkthrough-strings|coachmark|first-tip)\.[\w-]+\.js$/.test(file);
 /** Where the page and on-demand groups stop: code with budgets of its own. */
 const isOwnBudget = (file: string): boolean =>
   isScene3d(file) ||

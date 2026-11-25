@@ -5,7 +5,7 @@ import { STOPS } from '../../src/config/walkthrough';
 // The walkthrough (src/components/site/walkthrough.ts, src/config/walkthrough.ts): started by the
 // visitor only, seven stops across pages, keyboard first, and gone without a trace when it ends.
 const ready = { timeout: 15_000 };
-const card = '.wt-card';
+const card = '.cm-card';
 
 const start = async (page: Page) => {
   await page.locator('[data-inspector-toggle]').click();
@@ -39,14 +39,14 @@ test('the Inspector starts it; Escape ends it, forgets it and gives focus back',
   expect(await stored(page)).toBe('0');
   await page.keyboard.press('Escape');
   await expect(page.locator(card)).toHaveCount(0);
-  await expect(page.locator('.wt-ring')).toHaveCount(0);
+  await expect(page.locator('.cm-ring')).toHaveCount(0);
   expect(await stored(page)).toBeNull();
 });
 
 test('it walks on to the next page and picks up there, in the same language', async ({ page }) => {
   await page.goto('/es');
   await start(page);
-  for (let i = 0; i < 3; i++) await page.locator(`${card} .wt-next`).click();
+  for (let i = 0; i < 3; i++) await page.locator(`${card} .cm-primary`).click();
   await page.waitForURL(/\/es\/work\/buo$/, ready);
   await expect(page.locator(card)).toContainText('4 de 7', ready);
   await page.keyboard.press('ArrowLeft');
@@ -59,7 +59,7 @@ test('the last stop finishes it', async ({ page }) => {
   await page.evaluate(() => sessionStorage.setItem('pm.walkthrough', '6'));
   await page.reload();
   await expect(page.locator(card)).toContainText('7 of 7', ready);
-  await page.locator(`${card} .wt-next`).click();
+  await page.locator(`${card} .cm-primary`).click();
   await expect(page.locator(card)).toHaveCount(0);
   expect(await stored(page)).toBeNull();
 });
@@ -69,6 +69,10 @@ for (const theme of ['light', 'dark'] as const) {
     await page.addInitScript((t) => localStorage.setItem('pm.theme', t), theme);
     await page.goto('/');
     await start(page);
+    // Measure the card as it rests, not while it unfolds in.
+    await page
+      .locator(card)
+      .evaluate((el) => Promise.all(el.getAnimations({ subtree: true }).map((a) => a.finished)));
     const results = await new AxeBuilder({ page })
       .include(card)
       .withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa'])

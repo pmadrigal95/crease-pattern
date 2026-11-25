@@ -595,6 +595,13 @@
         "title": "Todo, a un atajo",
         "body": "Ctrl K (⌘ K en Mac) encuentra cualquier página, sección o entrada, y cambia la identidad o el tema."
       }
+    },
+    "tip": {
+      "title": "Mira cómo está hecho este sitio",
+      "keys": "Haz un recorrido de un minuto, o pulsa Mayús I cuando quieras para abrir el Inspector.",
+      "touch": "Haz un recorrido de un minuto, o toca Inspeccionar cuando quieras para abrir el Inspector.",
+      "start": "Hacer el recorrido",
+      "later": "Ahora no"
     }
   }
 }

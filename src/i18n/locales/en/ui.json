@@ -595,6 +595,13 @@
         "title": "Everything, one shortcut away",
         "body": "Ctrl K (⌘ K on a Mac) finds any page, section or post, and changes the identity or the theme."
       }
+    },
+    "tip": {
+      "title": "See how this site is built",
+      "keys": "Take a one-minute walkthrough, or press Shift I any time to open the Inspector.",
+      "touch": "Take a one-minute walkthrough, or tap Inspect any time to open the Inspector.",
+      "start": "Take the walkthrough",
+      "later": "Not now"
     }
   }
 }
