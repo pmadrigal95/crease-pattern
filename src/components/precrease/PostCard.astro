@@ -22,7 +22,8 @@ const otherLang = post.lang === lang ? undefined : LOCALES[post.lang].htmlLang;
 
 <article class="post-card" data-inspect="PostCard">
   <a href={postHref(post)} class="link">
-    <span class="num">{padNumber(data.number)}</span>
+    {/* "No. 003": an issue number, not a rank, so a topic's list can skip numbers without looking odd. */}
+    <span class="num">{fill(t.issue, { number: padNumber(data.number) })}</span>
     <PostThumb slug={post.key} format={data.format} />
     <Heading class="title" lang={otherLang}>
       {data.title}
@@ -52,9 +53,8 @@ const otherLang = post.lang === lang ? undefined : LOCALES[post.lang].htmlLang;
     text-decoration: none;
   }
   .num {
-    font: italic 300 3.5rem/1 var(--font-serif);
-    font-variation-settings: 'opsz' 72;
-    color: var(--color-accent);
+    font: italic 400 1.25rem/1 var(--font-serif);
+    color: var(--color-mute);
   }
   .title {
     margin: 0;

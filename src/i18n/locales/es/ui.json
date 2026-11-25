@@ -235,6 +235,7 @@
       "rss": "Suscribirse"
     },
     "number": "Pliegue n.º {number}",
+    "issue": "n.º {number}",
     "minutes": "{minutes} min de lectura",
     "published": "Publicada el {date}",
     "updated": "Actualizada el {date}",
