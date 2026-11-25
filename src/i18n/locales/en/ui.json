@@ -235,6 +235,7 @@
       "rss": "Subscribe"
     },
     "number": "Crease No. {number}",
+    "part": "{kind} · part {part}",
     "minutes": "{minutes} min read",
     "published": "Published {date}",
     "updated": "Updated {date}",
