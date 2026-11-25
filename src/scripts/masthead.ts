@@ -7,6 +7,33 @@ initLanguage();
 // The next page loads when a link shows intent (src/scripts/prefetch.ts), in this same script.
 import { initPrefetch } from './prefetch';
 initPrefetch();
+// A walkthrough under way continues on this page (src/components/site/walkthrough.ts). Otherwise,
+// on a first visit, help shows on its own: the walkthrough on the home page, a tip beside Inspect
+// elsewhere (src/components/site/first-tip.ts). It comes with the visitor's first interaction (a
+// real pointer move counts) or a few seconds after the page has loaded, whichever is first: never
+// during the load itself, and never again once it has shown.
+try {
+  if (sessionStorage.getItem('pm.walkthrough') !== null)
+    void import('../components/site/walkthrough').then((m) => m.resumeWalkthrough());
+  else if (localStorage.getItem('pm.tips') === null) {
+    const firsts = ['scroll', 'pointerdown', 'keydown', 'pointermove'] as const;
+    let armed = false;
+    const arm = (e?: Event) => {
+      // A pointermove with no movement is the page changing under a resting pointer (hero3d.ts).
+      if (e instanceof PointerEvent && e.type === 'pointermove' && !e.movementX && !e.movementY) return;
+      if (armed) return;
+      armed = true;
+      for (const type of firsts) removeEventListener(type, arm);
+      setTimeout(() => void import('../components/site/first-tip').then((m) => m.showFirstHelp()), 1200);
+    };
+    for (const type of firsts) addEventListener(type, arm, { passive: true });
+    const later = () => setTimeout(arm, 3500);
+    if (document.readyState === 'complete') later();
+    else addEventListener('load', later, { once: true });
+  }
+} catch {
+  // Storage blocked: nothing to resume, and no tip.
+}
 // Opens the Inspector (decision 44): the button, any [data-inspector-open], Shift+I or ?inspect. Vue and the
 // panel download only now, on first use; hovering the button starts that download early.
 type Handle = { close(): void };

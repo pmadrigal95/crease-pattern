@@ -2,6 +2,8 @@ import { expect, test } from '@playwright/test';
 
 // /privacy promises no cookies, no storage the visitor didn't choose, and no analytics outside the live host.
 const pages = ['/', '/changelog', '/about', '/colophon', '/privacy'];
+// A first visit, with nothing stored (the suite's other files start with the first-visit tip seen).
+test.use({ storageState: { cookies: [], origins: [] } });
 
 for (const path of pages) {
   test(`${path} sets no cookies, no storage and calls no third party off the live host`, async ({
