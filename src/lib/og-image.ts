@@ -114,7 +114,17 @@ const card = async ({
       ]),
     ]),
   ]);
-  const svgCard = await satori(root as never, { width: 1200, height: 630, fonts: loadFonts() });
+  const svgCard = await satori(root as never, {
+    width: 1200,
+    height: 630,
+    fonts: loadFonts(),
+    // Satori asks for more fonts when the card's have no glyph for some text, and would otherwise
+    // draw it as nothing: the build fails and names the text instead.
+    loadAdditionalAsset: (code: string, segment: string) =>
+      Promise.reject(
+        new Error(`Social card: no font has "${segment}" (${code}), in "${kicker}" / "${title}"`),
+      ),
+  });
   return new Resvg(svgCard, { fitTo: { mode: 'width', value: 1200 } }).render().asPng();
 };
 
