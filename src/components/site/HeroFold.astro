@@ -369,4 +369,15 @@ const card = MODEL_IDS.map((id) => ({ id, facets: models[id].fold.faces.length }
   // page's first paint (About's LCP lost a round trip).
   import { initHero3d } from '../../scripts/hero3d';
   initHero3d();
+  // The pointer effect behind the figure (src/scripts/hero-pointer.ts) downloads only when a mouse
+  // really moves over the hero, so the first load doesn't carry it. A pointermove with no movement
+  // is the page changing under a resting pointer, not the visitor.
+  const hero = document.querySelector<HTMLElement>('.hero');
+  const start = (e: PointerEvent) => {
+    if (e.pointerType === 'touch' || (!e.movementX && !e.movementY)) return;
+    hero?.removeEventListener('pointermove', start);
+    void import('../../scripts/hero-pointer').then((m) => m.initHeroPointer()).catch(() => undefined);
+  };
+  if (!matchMedia('(pointer: coarse)').matches)
+    hero?.addEventListener('pointermove', start, { passive: true });
 </script>

@@ -222,6 +222,13 @@
       "light": "Claro",
       "dark": "Oscuro"
     },
+    "pointer": "Efecto del puntero",
+    "pointers": {
+      "off": "Apagado",
+      "surface": "Superficie",
+      "ink": "Tinta"
+    },
+    "pointerNote": "Se mueve detrás de la figura del inicio cuando pasa el puntero.",
     "sheetExpand": "Ver más del panel",
     "sheetShrink": "Ver más de la página"
   },

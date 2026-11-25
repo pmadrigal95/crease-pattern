@@ -68,6 +68,12 @@ export const jsBudgetKb = {
    */
   scene3d: 180,
   /**
+   * The hero's pointer effects (src/components/site/pointer-*.ts, decision 8f revisited), loaded on
+   * the home page at the first real move of a mouse over the hero: the surface and the ink, counted
+   * together though a visitor downloads one at a time.
+   */
+  heroPointer: 10,
+  /**
    * The 3D scenes' data, fetched with the scene: today the Irazú's height grid from Copernicus
    * GLO-30 (src/assets/scenes/irazu-dem.bin), 28.5 KB. The M4 plan capped it at 150 KB.
    */
