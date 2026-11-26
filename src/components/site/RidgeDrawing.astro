@@ -1,0 +1,368 @@
+---
+/**
+ * One drawing of the career's paper ridge (AltitudeProfile.astro, which shows the wide or the
+ * narrow one): the far range, each release's volcano, the route along the skyline and the
+ * marker, at now. Geometry from src/lib/ridge.ts; the walk script moves the marker and the
+ * walked part of the route, and lights the volcano it's on.
+ *
+ * The identity draws its own landscape over the same volcanoes, names and heights (only the look
+ * changes, as everywhere on this site): Basalt & glacier caps the summits above 3,000 m with ice
+ * and shades in basalt; Washi & asagi draws them as a woodblock print would, a snow cap with a
+ * jagged edge and paper fibers; Contour lines draws the contour every 250 m.
+ *
+ * While inspecting, the ridge shows how it's built, as the hero's figure unfolds into its crease
+ * pattern: each volcano stands off the page as cut paper, its faces turn translucent, every fold
+ * and contour shows, and the drawing is annotated with its heights (a guide every 1,000 m, each
+ * summit's height above it).
+ */
+import type { Ridge, RidgeFrame } from '../../lib/ridge';
+interface Props {
+  name: 'wide' | 'narrow';
+  frame: RidgeFrame;
+  ridge: Ridge;
+  /** Each release's name, by major version. */
+  names: Map<number, string>;
+  /** Each release's summit height, written out ("3,432 m"), by major version. */
+  heights: Map<number, string>;
+  /** A height written out, for the guides. */
+  metres: (m: number) => string;
+  /** The current release's major version: lit until the visitor walks elsewhere. */
+  current: number;
+}
+const { name, frame, ridge: r, names, heights, metres, current } = Astro.props;
+/** A woodblock snow cap: everything above a jagged line at y, clipped to the volcano. */
+const snow = (y: number) => {
+  let d = `M0 ${y - 400} L0 ${y}`;
+  for (let x = 0, k = 0; x <= frame.width; x += 9, k++) d += ` L${x} ${(y + (k % 2 ? 5 : -3)).toFixed(1)}`;
+  return `${d} L${frame.width} ${y - 400} Z`;
+};
+---
+
+<svg
+  class={`drawing ${name}`}
+  viewBox={`0 0 ${frame.width} ${frame.height}`}
+  aria-hidden="true"
+  focusable="false"
+  data-end={r.routeEnd.toFixed(1)}
+>
+  <defs>
+    {r.peaks.map((p) => (
+      <clipPath id={`ridge-${name}-${p.major}`}>
+        <path d={p.shape} />
+      </clipPath>
+    ))}
+    <clipPath id={`ridge-${name}-walked`}>
+      <rect x="0" y="-40" width={r.routeEnd.toFixed(1)} height={frame.height + 80} data-walked />
+    </clipPath>
+    <pattern id={`ridge-${name}-fibers`} width="60" height="40" patternUnits="userSpaceOnUse">
+      <path d="M4 8 q 12 -4 26 2 M30 26 q 10 3 22 -2 M10 33 q 8 -3 16 1 M40 12 q 6 2 14 -1" />
+    </pattern>
+  </defs>
+  <path class="far" d={r.far} />
+  <g class="peaks">
+    {r.peaks.map((p) => (
+      <g
+        class:list={['peak', { on: p.major === current }]}
+        data-major={p.major}
+        data-x0={p.x0.toFixed(1)}
+        data-x1={p.x1.toFixed(1)}
+        data-summit={p.summit[0].toFixed(1)}
+      >
+        <path class="lit" d={p.lit} />
+        <path class="shaded" d={p.shaded} />
+        <g class="contours" clip-path={`url(#ridge-${name}-${p.major})`}>
+          {p.contours.map((y) => (
+            <line x1="0" x2={frame.width} y1={y} y2={y} />
+          ))}
+        </g>
+        {p.capY !== null && (
+          <g clip-path={`url(#ridge-${name}-${p.major})`}>
+            {p.high && (
+              <rect
+                class="ice"
+                x="0"
+                y={p.summit[1] - 20}
+                width={frame.width}
+                height={p.capY - p.summit[1] + 20}
+              />
+            )}
+            <path class="snow" d={snow(p.capY)} />
+            <rect
+              class="fibers"
+              x="0"
+              y="0"
+              width={frame.width}
+              height={frame.height}
+              fill={`url(#ridge-${name}-fibers)`}
+            />
+          </g>
+        )}
+        <path class="edge" d={p.outline} />
+        {p.fold && <path class="fold" d={p.fold} />}
+        <text class="name" x={p.labelX} y={frame.height - 10}>
+          {names.get(p.major)}
+        </text>
+      </g>
+    ))}
+  </g>
+  <g class="plan">
+    {r.guides.map((g) => (
+      <g>
+        <line x1="0" x2={frame.width} y1={g.y} y2={g.y} />
+        <text x="2" y={g.y - 5}>
+          {metres(g.m)}
+        </text>
+      </g>
+    ))}
+    {r.peaks.map((p) => (
+      <text class="height" x={p.summit[0]} y={p.summit[1] - 16}>
+        {heights.get(p.major)}
+      </text>
+    ))}
+  </g>
+  <path class="trail" d={r.route} data-route />
+  <path class="walked" d={r.route} clip-path={`url(#ridge-${name}-walked)`} />
+  <g class="marker" data-marker>
+    <line x1={r.routeEnd} x2={r.routeEnd} y1={r.peaks.at(-1)!.summit[1] - 4} y2={frame.baseline} />
+    <circle cx={r.routeEnd} cy={r.peaks.at(-1)!.summit[1] - 4} r={name === 'wide' ? 6 : 5} />
+  </g>
+</svg>
+
+<style>
+  .drawing {
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+  .narrow {
+    display: none;
+  }
+  @media (max-width: 719px) {
+    .wide {
+      display: none;
+    }
+    .narrow {
+      display: block;
+    }
+  }
+  .far {
+    fill: color-mix(in oklab, var(--color-ink) 6%, transparent);
+  }
+  .lit {
+    fill: color-mix(in oklab, var(--color-accent-ui) 14%, var(--color-surface));
+  }
+  .shaded {
+    fill: color-mix(in oklab, var(--color-accent-ui) 30%, var(--color-surface));
+  }
+  .lit,
+  .shaded,
+  .fold,
+  .name {
+    transition:
+      fill var(--motion-base) var(--motion-ease-out),
+      opacity var(--motion-base) var(--motion-ease-out);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .lit,
+    .shaded,
+    .fold,
+    .name,
+    .plan,
+    .peak {
+      transition: none;
+    }
+  }
+  /* Each identity's landscape: hidden unless its identity draws it. */
+  .ice,
+  .snow,
+  .fibers {
+    display: none;
+  }
+  pattern path {
+    fill: none;
+    stroke: var(--color-ink);
+    stroke-width: 0.6;
+    opacity: 0.25;
+  }
+  /* Basalt & glacier: ice on the summits above 3,000 m. */
+  /* Only each cap's lower edge falls inside the volcano (the rest is clipped away), so its stroke
+     draws the snow line, which keeps the cap readable on a light face too. */
+  :global(:root[data-direction='basalt-glacier']) .ice {
+    display: inline;
+    fill: color-mix(in oklab, white 86%, var(--color-accent-ui));
+    stroke: color-mix(in oklab, var(--color-accent-ui) 60%, transparent);
+    stroke-width: 1.2;
+  }
+  /* Washi & asagi: a woodblock print's snow cap on every volcano, on fibrous paper. */
+  :global(:root[data-direction='washi-asagi']) :is(.snow, .fibers) {
+    display: inline;
+  }
+  :global(:root[data-direction='washi-asagi']) .snow {
+    fill: color-mix(in oklab, white 90%, var(--color-accent-ui));
+    stroke: color-mix(in oklab, var(--color-accent-ui) 60%, transparent);
+    stroke-width: 1.2;
+    stroke-linejoin: round;
+  }
+
+  /* Inspecting: the ridge as built. */
+  .plan {
+    opacity: 0;
+    transition: opacity var(--motion-base) var(--motion-ease-out);
+  }
+  .plan line {
+    stroke: var(--color-accent-ui);
+    stroke-width: 1;
+    stroke-dasharray: 2 5;
+    opacity: 0.6;
+  }
+  .plan text {
+    font: 500 11px var(--font-mono);
+    fill: var(--color-mute);
+  }
+  .plan .height {
+    font-weight: 600;
+    fill: var(--color-ink);
+    text-anchor: middle;
+  }
+  :global(.inspecting) .plan {
+    opacity: 1;
+  }
+  .peak {
+    transition: filter var(--motion-base) var(--motion-ease-out);
+  }
+  :global(.inspecting) .peak {
+    filter: drop-shadow(0 10px 8px rgb(0 0 0 / 0.22));
+  }
+  :global(.inspecting) :is(.lit, .shaded) {
+    fill-opacity: 0.55;
+  }
+  :global(.inspecting) .contours line {
+    display: inline;
+  }
+  :global(.inspecting) .edge {
+    stroke: var(--color-accent-ui);
+  }
+  :global(.inspecting) .fold {
+    opacity: 1;
+    stroke-width: 1.6;
+  }
+  .on .lit {
+    fill: color-mix(in oklab, var(--color-accent-ui) 30%, var(--color-surface));
+  }
+  .on .shaded {
+    fill: color-mix(in oklab, var(--color-accent-ui) 55%, var(--color-surface));
+  }
+  .edge {
+    fill: none;
+    stroke: color-mix(in oklab, var(--color-ink) 45%, transparent);
+    stroke-width: 1;
+    stroke-linejoin: round;
+    vector-effect: non-scaling-stroke;
+  }
+  /* The mountain fold down each ridge: origami's dash-dot. */
+  .fold {
+    fill: none;
+    stroke: var(--color-accent-ui);
+    stroke-width: 1;
+    stroke-dasharray: 8 3 1.5 3;
+    opacity: 0.7;
+  }
+  .on .fold {
+    opacity: 1;
+  }
+  .contours line {
+    display: none;
+    stroke: color-mix(in oklab, var(--color-ink) 30%, transparent);
+    stroke-width: 0.7;
+  }
+  .name {
+    font: 500 13px var(--font-sans);
+    fill: var(--color-mute);
+    text-anchor: middle;
+  }
+  .narrow .name {
+    font-size: 11px;
+  }
+  .on .name {
+    font-weight: 700;
+    fill: var(--color-ink);
+  }
+  .trail {
+    fill: none;
+    stroke: var(--color-ink);
+    stroke-width: 1.6;
+    stroke-dasharray: 2 5;
+    stroke-linecap: round;
+  }
+  .walked {
+    fill: none;
+    stroke: var(--color-accent-ui);
+    stroke-width: 2.2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .marker line {
+    stroke: var(--color-accent-ui);
+    stroke-width: 1;
+    stroke-dasharray: 3 3;
+  }
+  .marker circle {
+    fill: var(--color-bg);
+    stroke: var(--color-accent-ui);
+    stroke-width: 2.5;
+  }
+
+  /* The identity's paper. Basalt & glacier: plates, the shaded face in stone. */
+  :global(:root[data-direction='basalt-glacier']) .shaded {
+    fill: color-mix(in oklab, var(--color-ink) 22%, var(--color-surface));
+  }
+  :global(:root[data-direction='basalt-glacier']) .on .shaded {
+    fill: color-mix(in oklab, var(--color-accent-ui) 50%, var(--color-ink) 15%);
+  }
+  /* Washi & asagi: lighter paper. */
+  :global(:root[data-direction='washi-asagi']) .lit {
+    fill: color-mix(in oklab, var(--color-accent-ui) 8%, var(--color-surface));
+  }
+  :global(:root[data-direction='washi-asagi']) .shaded {
+    fill: color-mix(in oklab, var(--color-accent-ui) 20%, var(--color-surface));
+  }
+  /* Contour lines: the volcanoes as a map, a line every 250 m. */
+  :global(:root[data-direction='contour-lines']) .contours line {
+    display: inline;
+  }
+  :global(:root[data-direction='contour-lines']) :is(.lit, .shaded) {
+    fill: color-mix(in oklab, var(--color-accent-ui) 10%, var(--color-surface));
+  }
+  :global(:root[data-direction='contour-lines']) .on :is(.lit, .shaded) {
+    fill: color-mix(in oklab, var(--color-accent-ui) 24%, var(--color-surface));
+  }
+
+  /* The range rises as it scrolls into view, where the browser can tie that to the scroll. */
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .far {
+        animation: rise-far linear both;
+        animation-timeline: view();
+        animation-range: entry 0% cover 45%;
+      }
+      .peaks {
+        animation: rise-near linear both;
+        animation-timeline: view();
+        animation-range: entry 0% cover 40%;
+      }
+    }
+  }
+  @keyframes rise-far {
+    from {
+      transform: translateY(26px);
+      opacity: 0.2;
+    }
+  }
+  @keyframes rise-near {
+    from {
+      transform: translateY(48px);
+      opacity: 0;
+    }
+  }
+</style>
