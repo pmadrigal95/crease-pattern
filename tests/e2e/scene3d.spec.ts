@@ -202,6 +202,8 @@ test('the 3D scene raises no Content Security Policy violations', async ({ page 
 
 for (const theme of ['light', 'dark'] as const) {
   test(`the home page with the 3D figure has no axe violations · ${theme}`, async ({ page }) => {
+    // axe over the whole home page while software WebGL draws takes over a minute in dark: room to spare.
+    test.setTimeout(180_000);
     await allowSoftwareGl(page);
     await page.addInitScript((t) => localStorage.setItem('pm.theme', t), theme);
     await page.goto('/?inspect');

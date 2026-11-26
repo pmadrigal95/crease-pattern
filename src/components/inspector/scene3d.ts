@@ -32,6 +32,7 @@ import { makeIdentityScene, type IdentityScene } from './identity-scenes3d';
 import { isDark, makeFigure, type Css, type Figure } from './origami-figure3d';
 import { CAMERA, drawFigure, mask, type Framed } from './figure-framing';
 import { FoldControl, FrameProbe, Orbit } from './hero-motion';
+import { Refold } from './refold';
 
 export interface FigureScene {
   /** Runs Inspect's progress toward 1 (on) or back to 0 (off). */
@@ -45,7 +46,6 @@ export interface FigureScene {
 /** A 3/4 view: a V fold seen face-on flattens out (teardown rule 6). */
 const FIGURE_Z = 0.6;
 /** Unfolding to the sheet, and folding the next figure from it. */
-const REFOLD_MS = { unfold: 1500, fold: 1800 };
 const FADE_MS = 300;
 
 /** One input in [0, 1] moving toward a target: entering takes INSPECT_MS.enter, leaving .exit. */
@@ -70,49 +70,6 @@ class Progress {
   /** How long until it settles, from `now`. */
   remaining(now: number) {
     return Math.max(0, this.start + this.ms - now);
-  }
-}
-
-/**
- * Changing figure: the shown one unfolds to the sheet, then the next folds from it. One value u
- * (0 folded … 1 flat) and the figure waiting for the sheet; a new request while it runs only
- * changes which figure that is.
- */
-class Refold {
-  u = 0;
-  private from = 0;
-  private to = 0;
-  private start = 0;
-  private ms = 0;
-  private next: ModelId | null = null;
-  constructor(public shown: ModelId) {}
-  request(id: ModelId, now: number) {
-    if (this.next) this.next = id;
-    else if (id !== this.shown) {
-      this.next = id;
-      this.run(1, now, REFOLD_MS.unfold * (1 - this.u));
-    }
-  }
-  cancel() {
-    this.next = null;
-  }
-  /** Advances to `now`; true while moving. `swap` is called flat, with the figure to fold next. */
-  step(now: number, swap: (id: ModelId) => void): boolean {
-    if (!this.ms) return false;
-    const k = Math.min(1, Math.max(0, (now - this.start) / this.ms));
-    this.u = this.from + (this.to - this.from) * k;
-    if (k < 1) return true;
-    this.ms = 0;
-    if (!this.next) return false;
-    // Flat on the floor, every figure is the same kind of thing: a sheet. Swap, then fold.
-    this.shown = this.next;
-    this.next = null;
-    swap(this.shown);
-    this.run(0, now, REFOLD_MS.fold);
-    return true;
-  }
-  private run(to: number, now: number, ms: number) {
-    Object.assign(this, { from: this.u, to, start: now, ms });
   }
 }
 
@@ -300,14 +257,17 @@ const handsOn = (
     else probe.pause();
     return goOn;
   };
-  return { orbit, fold, next, stop: () => sight.disconnect() };
+  return { orbit, fold, next, seen: () => onScreen, stop: () => sight.disconnect() };
 };
+
+/** The figure the identity and theme ask for now. */
+const modelNow = () => modelFor(currentDirection(), isDark());
 
 export const mountFigureScene = (stage: HTMLElement, onSlow: () => void = () => {}): FigureScene => {
   const hero = stage.closest<HTMLElement>('[data-hero-fold]');
   const { canvas, renderer, scene, camera } = createStage(stage);
   const holder = figureHolder(scene);
-  const refold = new Refold(modelFor(currentDirection(), isDark()));
+  const refold = new Refold(modelNow());
   const slot = figureSlot(holder, refold.shown);
   const world = new Group();
   scene.add(world);
@@ -375,10 +335,10 @@ export const mountFigureScene = (stage: HTMLElement, onSlow: () => void = () => 
   };
 
   // An identity or theme change repaints everything and, when the figure changes, refolds it from
-  // the sheet; while inspecting, the identity scenes exchange.
+  // the sheet (off screen, swaps it at once); while inspecting, the identity scenes exchange.
   const onIdentity = () => {
     const now = performance.now();
-    refold.request(modelFor(currentDirection(), isDark()), now);
+    refold.request(modelNow(), now, hands.seen() || inspecting ? undefined : slot.swap);
     const next = currentDirection();
     if (next !== direction) {
       actors.get(direction)?.q.to(0, now); // the old scene sinks (exit)

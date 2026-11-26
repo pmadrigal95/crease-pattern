@@ -146,19 +146,22 @@ test('the parts pop up in reading order, each leaving its footprint, and the poi
   );
   for (let i = 1; i < sway.length; i++) expect(Math.abs(sway[i]! - sway[i - 1]!)).toBeLessThan(0.15);
   await expect.poll(turnX).toBeGreaterThan(0.4);
-  // The pivot holds still while the page scrolls, and moves once it stops.
+  // The pivot follows the scroll on the next frame, and never glides there afterwards.
   const origin = () => page.locator('main').evaluate((el) => el.style.getPropertyValue('--tilt-origin'));
   await page.waitForTimeout(400); // nothing pending from earlier scrolls
-  const [before, during] = await page.evaluate(async () => {
+  const [before, after] = await page.evaluate(async () => {
     const read = () => document.querySelector('main')!.style.getPropertyValue('--tilt-origin');
     const start = read();
-    // Read in the scroll event itself: the page has moved, the pivot hasn't.
-    const during = new Promise<string>((r) => addEventListener('scroll', () => r(read()), { once: true }));
     scrollBy(0, 300);
-    return [start, await during];
+    await new Promise((r) => addEventListener('scroll', r, { once: true }));
+    await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+    return [start, read()];
   });
-  expect(during).toBe(before);
-  await expect.poll(origin).not.toBe(before);
+  expect(parseFloat(after) - parseFloat(before)).toBeCloseTo(300, 0);
+  expect(await origin()).toBe(after);
+  await expect
+    .poll(() => page.locator('main').evaluate((el) => getComputedStyle(el).transitionDuration))
+    .toBe('0s');
 
   await page.keyboard.press('Escape');
   await expect(page.locator('main')).not.toHaveAttribute('style', /--turn-x/);

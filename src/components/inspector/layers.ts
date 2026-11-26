@@ -108,14 +108,15 @@ export const explode = (parts: HTMLElement[]): (() => void) => {
   const stopFollowing = followPointer(main);
 
   // Tilt around the middle of the viewport, so what the visitor was reading stays in front. The
-  // pivot moves only once the scroll stops, and glides there (inspector.css): following every
-  // frame of a fast scroll would swing the whole page under the reader's eyes.
+  // pivot follows the scroll on every frame, so the part being read never drifts; it never glides
+  // there afterwards either: motion the visitor didn't make, once they stop, is what makes a tilted
+  // page dizzying.
   const mainTop = main.getBoundingClientRect().top + scrollY;
   const center = () => main.style.setProperty('--tilt-origin', `${scrollY + innerHeight / 2 - mainTop}px`);
-  let still: ReturnType<typeof setTimeout> | undefined;
+  let still = 0;
   const pivot = () => {
-    clearTimeout(still);
-    still = setTimeout(center, 160);
+    cancelAnimationFrame(still);
+    still = requestAnimationFrame(center);
   };
   center();
   addEventListener('scroll', pivot, { passive: true });
@@ -124,7 +125,7 @@ export const explode = (parts: HTMLElement[]): (() => void) => {
   const settled = setTimeout(() => root.classList.add('layers-settled'), 760);
 
   return () => {
-    clearTimeout(still);
+    cancelAnimationFrame(still);
     clearTimeout(settled);
     root.classList.remove('layers-settled');
     removeEventListener('scroll', pivot);
