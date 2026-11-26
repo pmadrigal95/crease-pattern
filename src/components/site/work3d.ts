@@ -117,11 +117,14 @@ const buildStar = (scene: Scene) => {
  * The star at rest is alive (portfolio-discovery/29-work-plan.md): it floats, rising and swaying a
  * little, and a drag turns it, with inertia; let go, it eases back to its pose. A horizontal drag
  * turns it and a vertical one still scrolls the page (touch-action: pan-y). It draws frames only
- * while it's on screen and something moves; with reduced motion it doesn't float, but still turns
- * when the visitor drags it.
+ * while it's on screen and something moves; with reduced motion, or while the Inspector is open
+ * (the star is apart then, showing the count, and the page has its own 3D to draw), it doesn't
+ * float, but still turns when the visitor drags it.
  */
 const floatAndTurn = (stage: HTMLElement, holder: Group, render: () => void) => {
-  const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const root = document.documentElement;
+  let still = reduced || root.classList.contains('inspecting');
   const pose = { x: holder.rotation.x, y: holder.rotation.y };
   const turn = { yaw: 0, pitch: 0, vYaw: 0, vPitch: 0, held: false, x: 0, y: 0, letGo: 0 };
   let visible = false;
@@ -161,6 +164,11 @@ const floatAndTurn = (stage: HTMLElement, holder: Group, render: () => void) => 
     wake();
   });
   seen.observe(stage);
+  const inspecting = new MutationObserver(() => {
+    still = reduced || root.classList.contains('inspecting');
+    wake();
+  });
+  inspecting.observe(root, { attributes: true, attributeFilter: ['class'] });
 
   stage.classList.add('turnable');
   const grab = (e: PointerEvent) => {
@@ -190,6 +198,7 @@ const floatAndTurn = (stage: HTMLElement, holder: Group, render: () => void) => 
   stage.addEventListener('pointercancel', release);
   return () => {
     seen.disconnect();
+    inspecting.disconnect();
     cancelAnimationFrame(frame);
     stage.classList.remove('turnable');
     stage.removeEventListener('pointerdown', grab);
