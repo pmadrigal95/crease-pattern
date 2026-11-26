@@ -373,9 +373,11 @@ const card = MODEL_IDS.map((id) => ({ id, facets: models[id].fold.faces.length }
         if (!in3d()) set(current() >= 0.5 ? 1 : 0);
       });
     }
-    // A mouse resting on the figure previews the unfold; leaving folds it back.
-    stage.addEventListener('pointerenter', (e) => {
-      if (e.pointerType === 'mouse' && !e.buttons && !in3d()) set(1);
+    // A mouse moved onto the figure previews the unfold; leaving folds it back. Only a real move
+    // counts, not the page scrolling under a resting pointer (no movement).
+    stage.addEventListener('pointermove', (e) => {
+      if (e.pointerType !== 'mouse' || e.buttons || in3d() || !(e.movementX || e.movementY)) return;
+      if (current() < 0.5) set(1);
     });
     stage.addEventListener('pointerleave', (e) => {
       if (e.pointerType === 'mouse' && !e.buttons && !in3d()) set(0);

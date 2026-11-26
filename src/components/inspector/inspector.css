@@ -517,7 +517,7 @@ main [data-inspect] {
 .inspector-3d main {
   transform-style: preserve-3d;
   transform: perspective(1700px) translateZ(-260px) rotateX(calc(26deg + var(--turn-y, 0) * 1.5deg))
-    rotateY(calc(var(--turn-x, 0) * 2deg)) rotateZ(-7deg);
+    rotateY(calc(var(--turn-x, 0) * 2deg));
   background: var(--color-surface);
   outline: 1px solid var(--color-rule);
   box-shadow:
@@ -526,9 +526,10 @@ main [data-inspect] {
 }
 
 /* Tilted, the page no longer eases its transform: the pointer's turn is already smoothed in
-   layers.ts. The pivot glides to the middle of the viewport when a scroll stops. */
+   layers.ts, and the pivot follows the scroll as it goes. No roll (rotateZ): a scrolled page then
+   moves straight up and down, never diagonally. */
 .inspector-3d.layers-settled main {
-  transition: transform-origin 600ms ease-out;
+  transition: none;
 }
 
 .inspector-3d main .layer-path {

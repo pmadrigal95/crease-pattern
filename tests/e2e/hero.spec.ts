@@ -58,3 +58,38 @@ for (const home of ['/', '/es']) {
     await expect(page.locator('[data-metric="first-load-js"]')).toHaveText(/^\d+\.\d$/);
   });
 }
+
+test('the page scrolling under a resting pointer never unfolds the figure; a real move does', async ({
+  page,
+}) => {
+  // The SVG figure: no WebGL.
+  await page.addInitScript(() => {
+    const getContext = HTMLCanvasElement.prototype.getContext;
+    HTMLCanvasElement.prototype.getContext = function (
+      this: HTMLCanvasElement,
+      type: string,
+      options?: object,
+    ) {
+      return type === 'webgl2' ? null : getContext.call(this, type, options);
+    } as typeof getContext;
+  });
+  await page.goto('/');
+  const stage = page.locator('[data-hero-fold] [data-stage]');
+  const slider = page.getByRole('slider', { name: 'Unfold the figure into its crease pattern' });
+  const box = (await stage.boundingBox())!;
+  // Switch identity from the Work section with the keyboard, the pointer resting where the figure
+  // will be once the page is back at the top.
+  const paper = page.locator('[data-paper="washi-asagi"]');
+  await paper.scrollIntoViewIfNeeded();
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  await paper.focus();
+  await page.keyboard.press('Enter');
+  await expect(page.locator('html')).toHaveAttribute('data-direction', 'washi-asagi');
+  await expect(page.locator('html')).not.toHaveClass(/vt-identity/); // the switch's transition is over
+  await page.evaluate(() => scrollTo(0, 0));
+  await page.waitForTimeout(600);
+  await expect(slider).toHaveAttribute('aria-valuenow', '0');
+  // A real move over it still previews the unfold.
+  await page.mouse.move(box.x + box.width / 2 + 12, box.y + box.height / 2 + 6, { steps: 3 });
+  await expect(slider).toHaveAttribute('aria-valuenow', '100');
+});
