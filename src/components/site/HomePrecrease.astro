@@ -1,9 +1,13 @@
 ---
 /**
- * Precrease on the home page in the zine's own voice (design debt phase 4, option A): the
- * wordmark over a rule, the latest Crease large with its generated thumbnail, and the earlier
- * ones as a list. Replaces a heading, a grey paragraph and three links, the same rhythm every
- * other section had.
+ * Precrease on the home page in the zine's own voice (design debt phase 4; cover, doc 32): the
+ * wordmark over a rule, the latest Crease as a cover, and the two before it as cards.
+ *
+ * - The cover's sheet is the post's generated crease pattern (PostThumb), stamped with its number,
+ *   labelled ("Crease No. 003"): the only number here. Lists say what a post is in words, its kind
+ *   and its branch of the topic tree, as PostCard does; a bare number would read as a rank.
+ * - The cover's motion, and what inspecting shows, live with it (PrecreaseCover.astro).
+ * - Empty: no posts, the intro says the first is coming and nothing else shows; one, the cover.
  *
  * Newsreader, the zine's serif, is heavy as Precrease loads it (a variable font, 280 KB). Here
  * three static weights of the same family (about 70 KB) load only as the section approaches;
@@ -14,9 +18,12 @@ import newsreader400 from '@fontsource/newsreader/files/newsreader-latin-400-nor
 import newsreader600 from '@fontsource/newsreader/files/newsreader-latin-600-normal.woff2?url';
 import newsreader300Italic from '@fontsource/newsreader/files/newsreader-latin-300-italic.woff2?url';
 import PostThumb from '../precrease/PostThumb.astro';
+import PrecreaseCover from './PrecreaseCover.astro';
 import { copyFor, fill } from '../../i18n/dictionary';
 import { formatDate } from '../../lib/format';
-import { creaseNumber, getPosts, postHref, postKind } from '../../lib/precrease';
+import { getPosts, postHref, postKind, type PostSummary } from '../../lib/precrease';
+import { readingMinutes } from '../../lib/reading';
+import { topicsFor } from '../../lib/taxonomy';
 import { LOCALES, langOf, localize } from '../../i18n/routing';
 const lang = langOf(Astro.currentLocale);
 const copy = copyFor(Astro.currentLocale);
@@ -26,6 +33,15 @@ const t = copy.home.notes;
 const otherLang = (post: { lang: string }) =>
   post.lang === lang ? undefined : LOCALES[langOf(post.lang)].htmlLang;
 const [latest, ...older] = (await getPosts(lang)).slice(0, 3);
+const topics = topicsFor(lang);
+/** A post's first topic with its parent in the tree: "Systems › Concurrency". */
+const branch = (post: PostSummary) => {
+  const own = topics.find((topic) => topic.id === post.entry.data.topics[0]);
+  const parent = topics.find((topic) => topic.id === own?.parent);
+  return [parent?.label, own?.label].filter(Boolean).join(' › ');
+};
+const minutes = (post: PostSummary) =>
+  fill(copy.precrease.minutes, { minutes: readingMinutes(post.entry.body ?? '') });
 const fonts = JSON.stringify([
   { url: newsreader400, weight: '400', style: 'normal' },
   { url: newsreader600, weight: '600', style: 'normal' },
@@ -50,51 +66,46 @@ const fonts = JSON.stringify([
       <p class="intro">{latest ? t.intro : t.empty}</p>
     </div>
     {latest && (
-      <article class="latest">
-        <a class="thumb" href={postHref(latest)} aria-hidden="true" tabindex="-1">
-          <PostThumb slug={latest.key} format={latest.entry.data.format} />
-        </a>
-        <div>
-          <p class="kicker">
-            {fill(t.kicker, {
-              number: creaseNumber(latest.number, lang),
-              kind: postKind(latest.entry, lang),
-              date: formatDate(latest.entry.data.date, lang),
-            })}
-          </p>
-          <h3>
-            <a href={postHref(latest)} lang={otherLang(latest)}>
-              {latest.entry.data.title}
-            </a>
-          </h3>
-          <p class="dek" lang={otherLang(latest)}>
-            {latest.entry.data.description}
-          </p>
-          {otherLang(latest) && <p class="kicker">{copy.precrease.untranslated}</p>}
-        </div>
-      </article>
+      <PrecreaseCover
+        post={latest}
+        branch={branch(latest)}
+        minutes={minutes(latest)}
+        otherLang={otherLang(latest)}
+      />
     )}
     {older.length > 0 && (
-      <ul class="older">
+      <div class="cards">
         {older.map((p) => (
-          <li>
-            <span class="kicker">{creaseNumber(p.number, lang)}</span>
-            <a href={postHref(p)} lang={otherLang(p)}>
-              {p.entry.data.title}
-            </a>
-            <span class="date">{formatDate(p.entry.data.date, lang)}</span>
-          </li>
+          <article class="card">
+            <span class="sheet" aria-hidden="true">
+              <PostThumb slug={p.key} format={p.entry.data.format} />
+            </span>
+            <div>
+              <p class="kind">{branch(p)}</p>
+              <h3>
+                <a href={postHref(p)} lang={otherLang(p)}>
+                  {p.entry.data.title}
+                </a>
+              </h3>
+              <p class="meta">
+                {postKind(p.entry, lang)} · {formatDate(p.entry.data.date, lang)} · {minutes(p)}
+                {otherLang(p) && <> · {copy.precrease.untranslated}</>}
+              </p>
+            </div>
+          </article>
         ))}
-      </ul>
+      </div>
     )}
-    <p class="more">
-      <a class="action" href={localize('/precrease', lang)}>
-        {t.all}
-        <span class="arrow" aria-hidden="true">
-          →
-        </span>
-      </a>
-    </p>
+    {latest && (
+      <p class="more">
+        <a class="action" href={localize('/precrease', lang)}>
+          {t.all}
+          <span class="arrow" aria-hidden="true">
+            →
+          </span>
+        </a>
+      </p>
+    )}
   </div>
 </section>
 
@@ -129,6 +140,8 @@ const fonts = JSON.stringify([
 <style>
   .home-precrease {
     --serif: 'Newsreader Home', 'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
+    --ease: cubic-bezier(0.16, 1, 0.3, 1);
+    --lift: color-mix(in oklab, var(--color-ink) 55%, transparent);
     border-top: 1px solid var(--color-rule);
   }
   .home-precrease > .wrap {
@@ -161,74 +174,82 @@ const fonts = JSON.stringify([
     font-size: var(--size-sm);
     color: var(--color-mute);
   }
-  .latest {
-    display: grid;
-    grid-template-columns: 220px minmax(0, 1fr);
-    gap: var(--space-12);
-    align-items: center;
-    padding-block: var(--space-12);
-    border-bottom: 1px solid var(--color-rule);
-  }
-  .thumb {
-    display: block;
-  }
-  .kicker,
-  .date {
+  .kind {
     margin: 0;
-    font: 500 var(--size-xs) var(--font-mono);
+    font: 600 var(--size-xs) / 1.4 var(--font-mono);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+  }
+  .meta {
+    margin: 0;
+    font-size: var(--size-xs);
     color: var(--color-mute);
   }
-  h3 {
-    margin: var(--space-2) 0 var(--space-3);
-    font: 600 clamp(2rem, 3.6vw, 2.875rem) / 1.05 var(--serif);
-    letter-spacing: -0.015em;
-    text-wrap: balance;
-  }
-  h3 a,
-  .older a {
+  .card h3 a {
     text-decoration: none;
   }
-  h3 a:hover,
-  .older a:hover {
+  .card h3 a:hover {
     text-decoration: underline;
     text-decoration-thickness: 1px;
     text-underline-offset: 0.18em;
+    text-decoration-color: var(--color-accent-ui);
   }
-  .dek {
-    max-width: 56ch;
-    margin: 0;
-    color: var(--color-mute);
-  }
-  .older {
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-  .older li {
+
+  /* The two before it. A card is one link: its title, stretched over the card. */
+  .cards {
     display: grid;
-    grid-template-columns: 7.5rem minmax(0, 1fr) auto;
-    gap: var(--space-6);
-    align-items: baseline;
-    padding-block: var(--space-4);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     border-bottom: 1px solid var(--color-rule);
   }
-  .older a {
-    font: 400 var(--size-lg) / 1.2 var(--serif);
+  .card {
+    position: relative;
+    display: grid;
+    grid-template-columns: 88px minmax(0, 1fr);
+    gap: var(--space-6);
+    align-items: center;
+    padding: var(--space-8) var(--space-6) var(--space-8) 0;
+  }
+  .card + .card {
+    padding-left: var(--space-6);
+    border-left: 1px solid var(--color-rule);
+  }
+  .card .sheet {
+    display: block;
+    box-shadow: 0 14px 22px -18px var(--lift);
+    transition: transform 0.5s var(--ease);
+  }
+  .card:hover .sheet,
+  .card:focus-within .sheet {
+    transform: translateY(-4px) rotate(-2deg);
+  }
+  .card h3 {
+    margin: var(--space-1) 0 var(--space-2);
+    font: 500 var(--size-xl) / 1.15 var(--serif);
+    letter-spacing: -0.01em;
+  }
+  .card h3 a::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+  /* Inspecting lays the sheets flat, as the cover's (PrecreaseCover.astro). */
+  :global(.inspecting) .card .sheet {
+    box-shadow: none;
+    transform: none;
   }
   .more {
-    margin: var(--space-6) 0 0;
+    margin: var(--space-8) 0 0;
   }
+
   @media (max-width: 860px) {
-    .latest {
+    .cards {
       grid-template-columns: minmax(0, 1fr);
-      gap: var(--space-4);
     }
-    .thumb {
-      max-width: 180px;
-    }
-    .older li {
-      grid-template-columns: minmax(0, 1fr);
-      gap: var(--space-1);
+    .card + .card {
+      padding-left: 0;
+      border-top: 1px solid var(--color-rule);
+      border-left: 0;
     }
   }
 </style>
