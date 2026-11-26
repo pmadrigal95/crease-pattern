@@ -129,11 +129,13 @@ const snow = (y: number) => {
 </svg>
 
 <style>
+  /* Clipped to the content's width: base camp's hill starts before the drawing does, and would
+     otherwise run to the window's edge. */
   .drawing {
     display: block;
     width: 100%;
     height: auto;
-    overflow: visible;
+    overflow: hidden;
   }
   .narrow {
     display: none;
