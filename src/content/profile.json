@@ -5,6 +5,10 @@
       "email": "pablomadrigal.1995@gmail.com",
       "linkedin": "https://www.linkedin.com/in/pablomadrigal95/",
       "github": "https://github.com/pmadrigal95"
+    },
+    "city": {
+      "lat": 9.86,
+      "lon": -83.92
     }
   }
 }

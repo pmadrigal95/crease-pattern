@@ -1,0 +1,428 @@
+---
+/**
+ * "This site, measured" (decision 50), as instruments (portfolio-discovery/29-work-plan.md): each
+ * figure comes with the drawing of what it means, from the same data the build checks:
+ * - the first-load JavaScript, on a sheet of the page budget (src/config/quality.ts), one segment
+ *   per KB. Its value is only known after the build: scripts/stamp-site-metrics.ts fills the
+ *   number, the margin and the width of the used part in dist;
+ * - the 0, as every axe run behind it: each audited page in each identity and theme;
+ * - the parts the Inspector can open (src/generated/inspector.json), by family;
+ * - the identities, as their papers (src/generated/tokens.json); a click switches to one.
+ * The drawings are decoration for the figure and its words, so assistive tech skips them; the
+ * identities are real buttons.
+ */
+import manifest from '../../generated/inspector.json';
+import tokens from '../../generated/tokens.json';
+import { auditedPages, jsBudgetKb, themes } from '../../config/quality';
+import { allVisualDirections } from '../../config/visual-direction';
+import { copyFor, fill } from '../../i18n/dictionary';
+
+const copy = copyFor(Astro.currentLocale);
+const m = copy.home.work.metrics;
+type Palette = Record<'bg' | 'surface' | 'ink' | 'accent', string>;
+const palettes = tokens.directions as Record<string, { light: Palette; dark: Palette }>;
+
+// The JavaScript sheet: one segment per KB of the budget.
+const KB = { width: 300, height: 30, gap: 3 };
+const segment = (KB.width - (jsBudgetKb.page - 1) * KB.gap) / jsBudgetKb.page;
+const segments = Array.from({ length: jsBudgetKb.page }, (_, i) => i * (segment + KB.gap));
+
+// Every axe run: a column per audited page, a row per identity and theme.
+const CELL = 14;
+const runs = allVisualDirections.flatMap((direction) => themes.map((theme) => ({ direction, theme })));
+const runCount = auditedPages.length * runs.length;
+
+// The parts by family: the folder under src/components, or the page that holds them.
+const order = ['pages', 'site', 'precrease', 'sonobe', 'threads', 'work'] as const;
+type Family = (typeof order)[number];
+const families = new Map<Family, string[]>(order.map((f) => [f, []]));
+for (const [part, file] of Object.entries(manifest.parts)) {
+  const folder = file.split('/')[2];
+  const family = (file.startsWith('src/components/') ? folder : 'pages') as Family;
+  families.get(family)?.push(part);
+}
+const parts = [...families].filter(([, list]) => list.length).sort((a, b) => b[1].length - a[1].length);
+const total = Object.keys(manifest.parts).length;
+---
+
+<dl class="readout" data-readout>
+  <div>
+    <dt>
+      {m.js.label}
+      <span class="note">{fill(m.js.note, { budget: jsBudgetKb.page })}</span>
+    </dt>
+    <dd>
+      <span class="fig">
+        <span data-metric="first-load-js">—</span>
+        <span class="unit">{m.js.unit}</span>
+      </span>
+      <div class="viz" aria-hidden="true">
+        <svg viewBox={`0 0 ${KB.width} ${KB.height}`} class="sheet">
+          <defs>
+            <clipPath id="kb-segments">
+              {segments.map((x) => (
+                <rect x={x} width={segment} height={KB.height} rx="2" />
+              ))}
+            </clipPath>
+          </defs>
+          {segments.map((x) => (
+            <rect class="slot" x={x} width={segment} height={KB.height} rx="2" />
+          ))}
+          <rect
+            class="used"
+            width="0"
+            height={KB.height}
+            clip-path="url(#kb-segments)"
+            data-metric-bar="first-load-js"
+          />
+        </svg>
+        <p class="cap">
+          <span>0</span>
+          <span>
+            <span data-metric="js-spare">—</span> KB {m.js.spare}
+          </span>
+          <span>{jsBudgetKb.page} KB</span>
+        </p>
+      </div>
+    </dd>
+  </div>
+
+  <div>
+    <dt>
+      {fill(m.axe.label, {
+        pages: auditedPages.length,
+        identities: allVisualDirections.length,
+        themes: themes.length,
+      })}
+      <span class="note">{m.axe.note}</span>
+    </dt>
+    <dd>
+      <span class="fig">0</span>
+      <div class="viz" aria-hidden="true">
+        <svg
+          class="runs"
+          viewBox={`0 0 ${auditedPages.length * (CELL + 3) - 3} ${runs.length * (CELL + 3) - 3}`}
+        >
+          {auditedPages.map((page, col) =>
+            runs.map(({ direction, theme }, row) => (
+              <rect class={theme} x={col * (CELL + 3)} y={row * (CELL + 3)} width={CELL} height={CELL} rx="2">
+                <title>{`${page} · ${copy.identities[direction]} · ${copy.inspector.themes[theme]}`}</title>
+              </rect>
+            )),
+          )}
+        </svg>
+        <p class="cap">
+          <span>
+            {fill(m.axe.grid, {
+              pages: auditedPages.length,
+              identities: allVisualDirections.length,
+              themes: themes.length,
+            })}
+          </span>
+          <span>{fill(m.axe.clean, { runs: runCount })}</span>
+        </p>
+      </div>
+    </dd>
+  </div>
+
+  <div>
+    <dt>
+      {m.parts.label}
+      <span class="note">{m.parts.note}</span>
+    </dt>
+    <dd>
+      <span class="fig">{total}</span>
+      <div class="viz families" aria-hidden="true">
+        {parts.map(([family, list]) => (
+          <p class:list={['family', family]}>
+            <span>{m.parts.families[family]}</span>
+            <span class="dots">
+              {list.map((part) => (
+                <i title={part} />
+              ))}
+            </span>
+            <span class="n">{list.length}</span>
+          </p>
+        ))}
+      </div>
+    </dd>
+  </div>
+
+  <div>
+    <dt>
+      {m.identities.label}
+      <span class="note">{m.identities.note}</span>
+    </dt>
+    <dd>
+      <span class="fig">{allVisualDirections.length}</span>
+      <div class="viz papers">
+        {allVisualDirections.map((direction) => (
+          <button type="button" class="paper" aria-pressed="false" data-paper={direction}>
+            <svg viewBox="0 0 80 20" aria-hidden="true">
+              {(['light', 'dark'] as const).map((mode) => {
+                const p = palettes[direction]![mode];
+                return (
+                  <g class={mode}>
+                    <rect width="16" height="20" fill={p.bg} />
+                    <rect x="16" width="16" height="20" fill={p.surface} />
+                    <rect x="32" width="30" height="20" fill={p.accent} />
+                    <rect x="62" width="18" height="20" fill={p.ink} />
+                  </g>
+                );
+              })}
+            </svg>
+            {copy.identities[direction]}
+          </button>
+        ))}
+      </div>
+    </dd>
+  </div>
+</dl>
+
+<script>
+  // The papers switch the identity with the Inspector's own code (inspector/identity.ts), loaded
+  // on the first click so the page's first load doesn't carry it; they show which one is on,
+  // whoever changed it.
+  import type { VisualDirection } from '../../config/visual-direction';
+  const papers = document.querySelectorAll<HTMLButtonElement>('[data-paper]');
+  const show = () => {
+    const current = document.documentElement.getAttribute('data-direction');
+    for (const paper of papers) paper.setAttribute('aria-pressed', String(paper.dataset.paper === current));
+  };
+  for (const paper of papers)
+    paper.addEventListener('click', (e) => {
+      void import('../inspector/identity').then((m) =>
+        m.setDirection(paper.dataset.paper as VisualDirection, { x: e.clientX, y: e.clientY }),
+      );
+    });
+  new MutationObserver(show).observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ['data-direction'],
+  });
+  show();
+</script>
+
+<style>
+  .readout {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin: var(--space-12) 0 0;
+    border-top: var(--stroke-crease) solid var(--color-ink);
+  }
+  /* Each instrument: the figure and its drawing side by side (the dd), the words under them. */
+  .readout > div {
+    display: grid;
+    grid-template-areas: 'dd' 'dt';
+    align-content: start;
+    gap: var(--space-4);
+    padding: var(--space-8) var(--space-8) var(--space-8) 0;
+  }
+  .readout > div:nth-child(even) {
+    padding-left: var(--space-8);
+    border-left: 1px dashed var(--color-rule);
+  }
+  .readout > div:nth-child(n + 3) {
+    border-top: 1px dashed var(--color-rule);
+  }
+  dt {
+    grid-area: dt;
+    max-width: 46ch;
+    font: 500 var(--size-sm) / 1.45 var(--font-sans);
+    color: var(--color-ink);
+  }
+  .note {
+    display: block;
+    margin-top: var(--space-1);
+    font-weight: 400;
+    color: var(--color-mute);
+  }
+  dd {
+    grid-area: dd;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: end;
+    gap: var(--space-4) var(--space-8);
+    margin: 0;
+  }
+  .fig {
+    font: 600 clamp(2.75rem, 5vw, 4rem) / 0.9 var(--font-sans);
+    letter-spacing: -0.04em;
+  }
+  .unit {
+    margin-left: var(--space-1);
+    font-size: 0.35em;
+    font-weight: 500;
+    letter-spacing: 0;
+    color: var(--color-mute);
+  }
+  .viz {
+    min-width: 0;
+  }
+  .viz svg {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .cap {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: var(--space-1) var(--space-3);
+    margin: var(--space-2) 0 0;
+    font: 500 var(--size-xs) / 1.2 var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    color: var(--color-mute);
+  }
+
+  /* The JavaScript on its sheet: the used part in accent, the rest a hatched crease. */
+  .slot {
+    fill: color-mix(in oklab, var(--color-rule) 45%, transparent);
+    stroke: var(--color-rule);
+  }
+  .used {
+    fill: var(--color-accent-ui);
+  }
+
+  /* Every axe run, day runs lighter than night runs. */
+  .runs {
+    max-width: 300px;
+    margin-left: auto;
+  }
+  .runs rect {
+    fill: var(--color-accent-ui);
+  }
+  .runs .light {
+    fill: color-mix(in oklab, var(--color-accent-ui) 50%, var(--color-surface));
+  }
+
+  /* The parts, a row per family: the pages in ink, the components in accent. */
+  .families {
+    display: grid;
+    gap: 7px;
+  }
+  .family {
+    display: grid;
+    grid-template-columns: 9.5em minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--space-3);
+    margin: 0;
+    font: 500 var(--size-xs) / 1 var(--font-mono);
+    color: var(--color-mute);
+  }
+  .dots {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  .dots i {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--color-accent-ui);
+  }
+  .pages .dots i {
+    background: color-mix(in oklab, var(--color-ink) 70%, transparent);
+  }
+  .n {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* The identities, as their papers: day or night, as the page is (origami.css's rule). */
+  .papers {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-2);
+  }
+  .paper {
+    display: grid;
+    gap: var(--space-2);
+    min-height: 44px;
+    padding: var(--space-2);
+    border: 0;
+    border-radius: 10px;
+    background: var(--color-surface);
+    box-shadow: inset 0 0 0 1px var(--color-rule);
+    color: var(--color-ink);
+    font: 600 var(--size-xs) / 1.2 var(--font-sans);
+    text-align: left;
+    cursor: pointer;
+    transition:
+      transform var(--motion-fast) var(--motion-ease-out),
+      box-shadow var(--motion-fast) var(--motion-ease-out);
+  }
+  .paper svg {
+    border-radius: 5px;
+    overflow: hidden;
+  }
+  .paper[aria-pressed='true'] {
+    box-shadow: inset 0 0 0 2px var(--color-accent-ui);
+  }
+  .paper:focus-visible {
+    outline: 2px solid var(--color-accent-ui);
+    outline-offset: 3px;
+  }
+  @media (hover: hover) {
+    .paper:hover {
+      transform: translateY(-2px);
+    }
+  }
+  .paper .dark {
+    display: none;
+  }
+  :global(:root[data-theme='dark']) .paper .dark {
+    display: inline;
+  }
+  :global(:root[data-theme='dark']) .paper .light {
+    display: none;
+  }
+  @media (prefers-color-scheme: dark) {
+    :global(:root:not([data-theme='light'])) .paper .dark {
+      display: inline;
+    }
+    :global(:root:not([data-theme='light'])) .paper .light {
+      display: none;
+    }
+  }
+
+  /* The drawings come in as they scroll into view, where the browser can tie that to the scroll. */
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .viz {
+        animation: draw-in linear both;
+        animation-timeline: view();
+        animation-range: entry 0% entry 70%;
+      }
+    }
+  }
+  @keyframes draw-in {
+    from {
+      opacity: 0;
+      translate: 0 12px;
+    }
+  }
+
+  @media (max-width: 860px) {
+    .readout {
+      grid-template-columns: 1fr;
+    }
+    .readout > div,
+    .readout > div:nth-child(even) {
+      padding: var(--space-8) 0;
+      border-left: 0;
+    }
+    dd {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .readout > div + div {
+      border-top: 1px dashed var(--color-rule);
+    }
+    .runs {
+      margin-left: 0;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .paper {
+      transition: none;
+    }
+  }
+</style>

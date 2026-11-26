@@ -88,7 +88,12 @@ const card = MODEL_IDS.map((id) => ({ id, facets: models[id].fold.faces.length }
       {t.architecture}
     </span>
   </div>
-  <figcaption>{t.caption}</figcaption>
+  {/* The slider's own words: what each end means, under that end, crossfading as the figure folds.
+       Without JavaScript the figure stays folded, and so does the phrase. */}
+  <figcaption>
+    <span class="folded-say">{t.say.folded}</span>
+    <span class="unfolded-say">{t.say.unfolded}</span>
+  </figcaption>
 </figure>
 
 <style>
@@ -266,10 +271,31 @@ const card = MODEL_IDS.map((id) => ({ id, facets: models[id].fold.faces.length }
     border: var(--stroke-crease) solid var(--color-accent-ui);
   }
   figcaption {
-    max-width: 44ch;
+    display: grid;
     margin: var(--space-3) 0 0;
-    font: var(--type-caption);
-    color: var(--color-mute);
+    font: 400 var(--size-sm) / 1.4 var(--font-sans);
+    color: var(--color-ink);
+  }
+  figcaption span {
+    grid-area: 1 / 1;
+    max-width: 70%;
+    transition:
+      opacity var(--motion-base) var(--motion-ease-out),
+      translate var(--motion-base) var(--motion-ease-out);
+  }
+  .folded-say {
+    justify-self: start;
+    opacity: max(0, 1 - var(--t) * 2);
+    translate: calc(var(--t) * -6px) 0;
+  }
+  .unfolded-say {
+    justify-self: end;
+    text-align: right;
+    opacity: max(0, var(--t) * 2 - 1);
+    translate: calc((1 - var(--t)) * 6px) 0;
+  }
+  .scrubbing figcaption span {
+    transition: none;
   }
 
   /* First visit: the flat sheet folds into the figure once. */
@@ -285,8 +311,10 @@ const card = MODEL_IDS.map((id) => ({ id, facets: models[id].fold.faces.length }
   @media (prefers-reduced-motion: reduce) {
     .flat,
     .folded,
-    .knob {
+    .knob,
+    figcaption span {
       transition: none;
+      translate: none;
     }
     :global(.intro) .hero-fold {
       animation: none;
@@ -345,13 +373,28 @@ const card = MODEL_IDS.map((id) => ({ id, facets: models[id].fold.faces.length }
         if (!in3d()) set(current() >= 0.5 ? 1 : 0);
       });
     }
-    // A mouse resting on the figure previews the unfold; leaving folds it back.
-    stage.addEventListener('pointerenter', (e) => {
-      if (e.pointerType === 'mouse' && !e.buttons && !in3d()) set(1);
+    // A mouse moved onto the figure previews the unfold; leaving folds it back. Only a real move
+    // counts, not the page scrolling under a resting pointer (no movement).
+    stage.addEventListener('pointermove', (e) => {
+      if (e.pointerType !== 'mouse' || e.buttons || in3d() || !(e.movementX || e.movementY)) return;
+      if (current() < 0.5) set(1);
     });
     stage.addEventListener('pointerleave', (e) => {
       if (e.pointerType === 'mouse' && !e.buttons && !in3d()) set(0);
     });
+    // Arriving from the Inspector's "See the figure fold" link (?fold): the figure starts flat, as its
+    // crease pattern, and folds itself. Under reduced motion it simply stays folded.
+    if (
+      new URLSearchParams(location.search).has('fold') &&
+      !matchMedia('(prefers-reduced-motion: reduce)').matches
+    ) {
+      figure.classList.add('scrubbing');
+      set(1);
+      requestAnimationFrame(() => {
+        figure.classList.remove('scrubbing');
+        setTimeout(() => set(0), 600);
+      });
+    }
     track.addEventListener('keydown', (e) => {
       const step = { ArrowRight: 0.1, ArrowUp: 0.1, ArrowLeft: -0.1, ArrowDown: -0.1, Home: -1, End: 1 }[
         e.key
@@ -369,4 +412,15 @@ const card = MODEL_IDS.map((id) => ({ id, facets: models[id].fold.faces.length }
   // page's first paint (About's LCP lost a round trip).
   import { initHero3d } from '../../scripts/hero3d';
   initHero3d();
+  // The pointer effect behind the figure (src/scripts/hero-pointer.ts) downloads only when a mouse
+  // really moves over the hero, so the first load doesn't carry it. A pointermove with no movement
+  // is the page changing under a resting pointer, not the visitor.
+  const hero = document.querySelector<HTMLElement>('.hero');
+  const start = (e: PointerEvent) => {
+    if (e.pointerType === 'touch' || (!e.movementX && !e.movementY)) return;
+    hero?.removeEventListener('pointermove', start);
+    void import('../../scripts/hero-pointer').then((m) => m.initHeroPointer()).catch(() => undefined);
+  };
+  if (!matchMedia('(pointer: coarse)').matches)
+    hero?.addEventListener('pointermove', start, { passive: true });
 </script>

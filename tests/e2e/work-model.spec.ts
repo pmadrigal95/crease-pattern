@@ -78,6 +78,26 @@ test('on a capable device the star assembles in 3D, comes apart with the Inspect
   await expect(page.locator(counts)).toBeHidden(ready);
 });
 
+test('the 3D star floats on its own, and a drag turns it without scrolling the page', async ({ page }) => {
+  await withGl(page);
+  await page.goto('/');
+  await toWork(page);
+  await expect(page.locator(figure)).toHaveClass(/scene-3d/, ready);
+  const stage = page.locator(`${figure} [data-stage]`);
+  await expect(stage).toHaveClass(/turnable/);
+  await page.waitForTimeout(2_500); // the assembly settles
+  const still = await stage.screenshot();
+  await page.waitForTimeout(700);
+  expect((await stage.screenshot()).equals(still)).toBe(false); // it floats
+  const box = (await stage.boundingBox())!;
+  const scrolled = await page.evaluate(() => scrollY);
+  await page.mouse.move(box.x + box.width * 0.3, box.y + box.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(box.x + box.width * 0.8, box.y + box.height / 2, { steps: 8 });
+  await page.mouse.up();
+  expect(await page.evaluate(() => scrollY)).toBe(scrolled);
+});
+
 test('without WebGL the star assembles in SVG and never downloads three.js', async ({ page }) => {
   await withoutGl(page);
   const requested: string[] = [];
@@ -89,6 +109,8 @@ test('without WebGL the star assembles in SVG and never downloads three.js', asy
   expect(await page.locator(`${figure} polygon`).count()).toBeGreaterThan(20);
   await expect(page.locator(`${figure} canvas`)).toHaveCount(0);
   expect(requested.filter((url) => /\/_astro\/(work3d|three\.module)\./.test(url))).toEqual([]);
+  // In SVG it floats too.
+  expect(await page.locator(`${figure} svg`).evaluate((el) => el.getAnimations().length)).toBe(1);
 });
 
 test('reduced motion keeps the star assembled and still, in SVG', async ({ browser }) => {
@@ -101,6 +123,7 @@ test('reduced motion keeps the star assembled and still, in SVG', async ({ brows
   await page.waitForTimeout(1_000);
   expect(await page.locator(`${figure} polygon`).count()).toBe(before);
   await expect(page.locator(`${figure} canvas`)).toHaveCount(0);
+  expect(await page.locator(`${figure} svg`).evaluate((el) => el.getAnimations().length)).toBe(0);
   await context.close();
 });
 

@@ -6,11 +6,19 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { measurePage, toKb } from './bundle-sizes.ts';
 import { DEFAULT_LANG, LANGS } from '../src/i18n/config.ts';
+import { jsBudgetKb } from '../src/config/quality.ts';
 
 const dist = join(import.meta.dirname, '..', 'dist');
 // Measured on the English home page: external scripts plus the ones Astro inlined. Every language's
 // home ships the same scripts, so they all show this figure.
-const values = { 'first-load-js': toKb(measurePage(dist, 'index.html')).toFixed(1) };
+const firstLoad = toKb(measurePage(dist, 'index.html'));
+const values = {
+  'first-load-js': firstLoad.toFixed(1),
+  // What's left of the page budget, the margin under the drawing (src/components/site/WorkReadout.astro).
+  'js-spare': (jsBudgetKb.page - firstLoad).toFixed(1),
+};
+// The drawing's used part: as wide as the figure is a share of the budget, of the sheet's width.
+const bars = { 'first-load-js': firstLoad / jsBudgetKb.page };
 /** The home page in each language: index.html, and <lang>.html for the others (src/i18n/config.ts). */
 const homes = LANGS.map((lang) => (lang === DEFAULT_LANG ? 'index.html' : `${lang}.html`));
 
@@ -21,6 +29,22 @@ for (const home of homes) {
     const pattern = new RegExp(`(<[^>]+data-metric="${name}"[^>]*>)[^<]*(<)`);
     if (!pattern.test(html)) throw new Error(`${home} has no data-metric="${name}" to fill`);
     html = html.replace(pattern, `$1${value}$2`);
+  }
+  for (const [name, share] of Object.entries(bars)) {
+    const bar = new RegExp(`<rect[^>]*data-metric-bar="${name}"[^>]*>`);
+    const tag = html.match(bar)?.[0];
+    const sheet =
+      tag &&
+      html
+        .slice(0, html.indexOf(tag))
+        .match(/<svg[^>]*viewBox="0 0 (\d+(?:\.\d+)?) /g)
+        ?.at(-1);
+    const width = sheet ? Number(sheet.match(/viewBox="0 0 ([\d.]+) /)![1]) : NaN;
+    if (!tag || !Number.isFinite(width)) throw new Error(`${home} has no data-metric-bar="${name}" to fill`);
+    html = html.replace(
+      tag,
+      tag.replace(/width="[^"]*"/, `width="${(Math.min(1, share) * width).toFixed(1)}"`),
+    );
   }
   writeFileSync(file, html);
 }

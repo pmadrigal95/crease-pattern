@@ -20,7 +20,6 @@
         "unfolded": "Unfolded: the crease pattern",
         "mountain": "mountain",
         "valley": "valley",
-        "caption": "The figure is what you see on screen: the interface. Unfold it and you get the folds that shape it, the architecture. Each identity folds its own: a crane, a blue morpho by day and a red-eyed tree frog by night, an arctic fox. \"See how this page is built\" opens any page here the same way.",
         "figures": {
           "crane": "The crane",
           "morpho": "The blue morpho",
@@ -30,9 +29,19 @@
         "facets": "facets",
         "hinges": "hinges",
         "sheet": "sheet",
-        "drag": "Drag to turn it"
+        "drag": "Drag to turn it",
+        "say": {
+          "folded": "What you see on screen.",
+          "unfolded": "The folds that shape it."
+        }
       },
-      "who": "{name} · {role} · {location}"
+      "coords": {
+        "north": "N",
+        "south": "S",
+        "east": "E",
+        "west": "W",
+        "map": "See {coords} on a map"
+      }
     },
     "work": {
       "heading": "This site, measured.",
@@ -51,19 +60,30 @@
         "js": {
           "unit": "KB",
           "label": "of JavaScript your browser runs for this page",
-          "note": "the limit is {budget} KB: less code loads faster, even on slow phones"
+          "note": "the limit is {budget} KB: less code loads faster, even on slow phones",
+          "spare": "to spare"
         },
         "axe": {
           "label": "accessibility errors found by automated checks, across {pages} pages, {identities} visual styles, light and dark",
-          "note": "run with axe on every change"
+          "note": "run with axe on every change",
+          "grid": "{pages} pages × {identities} styles × {themes} themes",
+          "clean": "{runs} of {runs} clean"
         },
         "parts": {
           "label": "parts of this site you can open and inspect",
-          "note": "each shows its code, design values and last change"
+          "note": "each shows its code, design values and last change",
+          "families": {
+            "pages": "Pages",
+            "site": "Site",
+            "precrease": "Precrease",
+            "sonobe": "Sonobe essay",
+            "threads": "Threads essay",
+            "work": "Cases"
+          }
         },
         "identities": {
           "label": "visual styles, one design system",
-          "note": "switch them in the Inspector; only the colors change"
+          "note": "switch them here or in the Inspector; only the colors change"
         }
       },
       "source": "Measured on version {commit} of this site, the one you're reading.",
@@ -87,7 +107,9 @@
       "profile": {
         "summary": "My career as an elevation profile, from {from} to today: {releases}. I'm on version {version} now.",
         "release": "v{major} {codename}, {elevation}, {theme}",
-        "now": "v{version} · {codename} · NOW"
+        "now": "v{version} · {codename} · now",
+        "walk": "Walk the route",
+        "label": "My career, volcano by volcano. Use the arrow keys to walk it."
       }
     },
     "notes": {
@@ -175,6 +197,8 @@
     "title": "Inspector",
     "close": "Close the inspector",
     "intro": "Hover a block · Click to pin · Esc to leave",
+    "walkthrough": "Take the walkthrough",
+    "walkthroughInvite": "New here? Take the one-minute walkthrough",
     "view": "View",
     "views": {
       "layers": "Layers",
@@ -222,6 +246,14 @@
       "light": "Light",
       "dark": "Dark"
     },
+    "pointer": "Pointer effect",
+    "pointers": {
+      "off": "Off",
+      "surface": "Surface",
+      "ink": "Ink"
+    },
+    "pointerNote": "Moves behind the home page's figure when the pointer crosses it.",
+    "watchFold": "See the figure fold on the home page →",
     "sheetExpand": "Show more of the panel",
     "sheetShrink": "Show more of the page"
   },
@@ -235,6 +267,7 @@
       "rss": "Subscribe"
     },
     "number": "Crease No. {number}",
+    "part": "{kind} · part {part}",
     "minutes": "{minutes} min read",
     "published": "Published {date}",
     "updated": "Updated {date}",
@@ -523,6 +556,7 @@
     },
     "actions": {
       "inspect": "Inspect this page",
+      "walkthrough": "Take the walkthrough",
       "light": "Use the light theme",
       "dark": "Use the dark theme",
       "system": "Follow the system theme",
@@ -547,5 +581,51 @@
     "basalt-glacier": "Basalt & glacier",
     "washi-asagi": "Washi & asagi",
     "contour-lines": "Contour lines"
+  },
+  "walkthrough": {
+    "label": "Walkthrough",
+    "count": "{n} of {total}",
+    "back": "Back",
+    "next": "Next",
+    "skip": "Skip",
+    "finish": "Finish",
+    "close": "Close the walkthrough",
+    "stops": {
+      "figure": {
+        "title": "The figure is the interface",
+        "body": "Unfold it, with the slider or by dragging, and you see its crease pattern: the architecture."
+      },
+      "inspect": {
+        "title": "Every page, in layers",
+        "body": "Inspect opens any page into its layers, with the component behind each part and its real metrics."
+      },
+      "measured": {
+        "title": "Measured, not written",
+        "body": "Every number in this section comes from the last build, not from a sentence I typed."
+      },
+      "case": {
+        "title": "Real work",
+        "body": "Each case shows what had to be achieved, what I decided and what came of it, with only what the company approved."
+      },
+      "career": {
+        "title": "A career, version by version",
+        "body": "Each major version is a step up in responsibility, named after a Costa Rican volcano."
+      },
+      "precrease": {
+        "title": "Precrease",
+        "body": "Where I write about the work before the shape, from architecture to AI."
+      },
+      "commands": {
+        "title": "Everything, one shortcut away",
+        "body": "Ctrl K (⌘ K on a Mac) finds any page, section or post, and changes the identity or the theme."
+      }
+    },
+    "tip": {
+      "title": "See how this site is built",
+      "keys": "Take a one-minute walkthrough, or press Shift I any time to open the Inspector.",
+      "touch": "Take a one-minute walkthrough, or tap Inspect any time to open the Inspector.",
+      "start": "Take the walkthrough",
+      "later": "Not now"
+    }
   }
 }

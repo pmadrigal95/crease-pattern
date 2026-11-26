@@ -14,10 +14,9 @@ import {
   type Vitals,
 } from './measure';
 import { explode, layersEnabled, markCurrent } from './layers';
-import { currentDirection, currentTheme, setDirection, setTheme, type Theme } from './identity';
-import { allVisualDirections, type VisualDirection } from '../../config/visual-direction';
 import { useViews } from './use-views';
 import InspectorViews from './InspectorViews.vue';
+import InspectorIdentity from './InspectorIdentity.vue';
 import { fill } from '../../lib/template';
 import type { Copy } from '../../i18n/dictionary';
 
@@ -43,6 +42,11 @@ export interface Manifest {
 const props = defineProps<{ manifest: Manifest; openedAt: number; strings: InspectorStrings }>();
 const t = props.strings;
 const emit = defineEmits<{ close: [] }>();
+// The walkthrough points at the page itself, so the panel steps aside first.
+const walk = () => {
+  emit('close');
+  void import('../site/walkthrough').then((m) => m.startWalkthrough());
+};
 
 const elements = ref<HTMLElement[]>([]);
 const pinned = ref<HTMLElement | null>(null);
@@ -54,24 +58,6 @@ const firstRun = ref(true);
 const box = ref<DOMRect | null>(null);
 // The 3D layer view (M2b); phones and reduced motion keep the flat outline.
 const threeD = layersEnabled();
-const direction = ref<VisualDirection>(currentDirection());
-const theme = ref<Theme>(currentTheme());
-const themes: Theme[] = ['system', 'light', 'dark'];
-const dark = () =>
-  theme.value === 'dark' || (theme.value === 'system' && matchMedia('(prefers-color-scheme: dark)').matches);
-// The point the contour transition rises from: the control the visitor used.
-const origin = (e: Event) => {
-  const r = (e.target as HTMLElement).closest('label')?.getBoundingClientRect();
-  return r ? { x: r.left + r.width / 2, y: r.top + r.height / 2 } : { x: innerWidth / 2, y: innerHeight / 2 };
-};
-const chooseDirection = (id: VisualDirection, e: Event) => {
-  direction.value = id;
-  setDirection(id, origin(e));
-};
-const chooseTheme = (value: Theme, e: Event) => {
-  theme.value = value;
-  setTheme(value, origin(e));
-};
 const heading = ref<HTMLElement | null>(null);
 const layerButtons = ref<HTMLButtonElement[]>([]);
 const scripts = scriptBytes(props.openedAt);
@@ -258,50 +244,23 @@ const metrics = computed(() => [
       ></button>
       <header class="top">
         <h2 ref="heading" tabindex="-1">{{ t.title }}</h2>
-        <button type="button" class="close" :aria-label="t.close" @click="emit('close')">×</button>
+        <div class="top-actions">
+          <button type="button" class="help" :aria-label="t.walkthrough" :title="t.walkthrough" @click="walk">
+            ?
+          </button>
+          <button type="button" class="close" :aria-label="t.close" @click="emit('close')">×</button>
+        </div>
       </header>
-      <p v-if="firstRun" class="intro">{{ t.intro }}</p>
+      <!-- First use: how the panel works, and the walkthrough for anyone new to inspecting. -->
+      <div v-if="firstRun" class="intro">
+        <p>{{ t.intro }}</p>
+        <button type="button" class="intro-walk" @click="walk">
+          {{ t.walkthroughInvite }} <span aria-hidden="true">→</span>
+        </button>
+      </div>
       <p class="sr-only" role="status" aria-live="polite">{{ announce }}</p>
 
-      <section aria-labelledby="inspector-identity">
-        <h3 id="inspector-identity">{{ t.identity }}</h3>
-        <fieldset class="choices">
-          <legend class="sr-only">{{ t.identity }}</legend>
-          <label v-for="id in allVisualDirections" :key="id" class="choice paper" :data-id="id">
-            <input
-              type="radio"
-              name="inspector-direction"
-              :value="id"
-              :checked="direction === id"
-              @change="chooseDirection(id, $event)"
-            />
-            <span class="sample" aria-hidden="true">
-              <span class="swatches">
-                <span
-                  v-for="(color, i) in manifest.identities.swatches[id]?.[dark() ? 'dark' : 'light']"
-                  :key="i"
-                  :style="{ background: color }"
-                ></span>
-              </span>
-            </span>
-            <span class="name">{{ t.identities[id] }}</span>
-          </label>
-        </fieldset>
-        <p class="muted">{{ fill(t.identityNote, { count: manifest.identities.tokenCount }) }}</p>
-        <fieldset class="choices themes">
-          <legend>{{ t.theme }}</legend>
-          <label v-for="value in themes" :key="value" class="choice">
-            <input
-              type="radio"
-              name="inspector-theme"
-              :value="value"
-              :checked="theme === value"
-              @change="chooseTheme(value, $event)"
-            />
-            {{ t.themes[value] }}
-          </label>
-        </fieldset>
-      </section>
+      <InspectorIdentity :t="t" :identities="manifest.identities" />
 
       <InspectorViews
         v-if="threeD"

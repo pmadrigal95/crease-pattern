@@ -9,6 +9,7 @@
  * three static weights of the same family (about 70 KB) load only as the section approaches;
  * until then, and without JavaScript, a system serif stands in.
  */
+import '../../styles/buttons-quiet.css';
 import newsreader400 from '@fontsource/newsreader/files/newsreader-latin-400-normal.woff2?url';
 import newsreader600 from '@fontsource/newsreader/files/newsreader-latin-600-normal.woff2?url';
 import newsreader300Italic from '@fontsource/newsreader/files/newsreader-latin-300-italic.woff2?url';
@@ -87,7 +88,12 @@ const fonts = JSON.stringify([
       </ul>
     )}
     <p class="more">
-      <a href={localize('/precrease', lang)}>{t.all}</a>
+      <a class="action" href={localize('/precrease', lang)}>
+        {t.all}
+        <span class="arrow" aria-hidden="true">
+          →
+        </span>
+      </a>
     </p>
   </div>
 </section>
@@ -211,13 +217,6 @@ const fonts = JSON.stringify([
   }
   .more {
     margin: var(--space-6) 0 0;
-  }
-  .more a {
-    font-weight: 600;
-    color: var(--color-accent);
-    min-height: 44px;
-    display: inline-flex;
-    align-items: center;
   }
   @media (max-width: 860px) {
     .latest {

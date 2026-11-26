@@ -8,7 +8,7 @@
  * motion, and the first frame for everything else. As the section approaches, a small script
  * loads the animator (src/components/site/work-model.ts), which plays the assembly in SVG and, on a
  * device that can run it, hands the square to a three.js scene (work3d.ts) that shares its code
- * with the hero's 3D fox.
+ * with the hero's 3D fox. There, at rest, it floats, and a drag turns it.
  */
 import usage from '../../generated/components.json';
 import { copyFor } from '../../i18n/dictionary';
@@ -86,6 +86,15 @@ const points = (pts: readonly (readonly [number, number])[]) =>
     max-width: 420px;
     margin-inline: auto;
   }
+  /* In 3D the star turns under a drag (work3d.ts); a vertical swipe still scrolls the page. */
+  .stage:global(.turnable) {
+    cursor: grab;
+    touch-action: pan-y;
+    user-select: none;
+  }
+  .stage:global(.turnable):active {
+    cursor: grabbing;
+  }
   .stage svg {
     display: block;
     width: 100%;
@@ -95,6 +104,18 @@ const points = (pts: readonly (readonly [number, number])[]) =>
   /* The 3D scene (work3d.ts) takes the square once its first frame is drawn. */
   .work-model:global(.scene-3d) .stage svg {
     opacity: 0;
+  }
+  /* Where the star stays in SVG, it floats too, as the 3D one does; never under reduced motion. */
+  @media (prefers-reduced-motion: no-preference) {
+    .stage svg {
+      animation: float 6.5s ease-in-out infinite;
+    }
+  }
+  @keyframes float {
+    50% {
+      translate: 0 -2.5%;
+      rotate: 1.2deg;
+    }
   }
   polygon {
     stroke: var(--color-ink);

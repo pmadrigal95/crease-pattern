@@ -120,11 +120,15 @@ export const getPosts = async (lang: Lang = DEFAULT_LANG): Promise<PostSummary[]
 export const creaseNumber = (value: number, lang: Lang = DEFAULT_LANG): string =>
   fill(copyFor(lang).precrease.number, { number: padNumber(value) });
 
-/** What kind of post it is: "Essay", or "Basic Folds 03" inside a series. */
+/**
+ * What kind of post it is, in words: "Essay", or "Basic Folds · part 3" inside a series. Numbers
+ * always carry their word, so a series part never reads like the post's own number (Crease No.)
+ * or a book's chapter.
+ */
 export const postKind = (post: Post, lang: Lang = DEFAULT_LANG): string => {
   const { format, series } = post.data;
-  const label = formatsFor(lang)[format].label;
-  return series ? `${label} ${padNumber(series.part, 2)}` : label;
+  const kind = formatsFor(lang)[format].label;
+  return series ? fill(copyFor(lang).precrease.part, { kind, part: series.part }) : kind;
 };
 
 /** Where a post's edition lives: /precrease/<slug>, /es/precrease/<slug>. */

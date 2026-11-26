@@ -63,8 +63,9 @@ test.describe('a browser that prefers Spanish', () => {
     await expect(hint).toBeVisible();
     await expect(hint).toHaveAttribute('lang', 'es');
     await expect(hint.getByRole('link')).toHaveAttribute('href', '/es/about');
-    // Showing it writes nothing; dismissing it does, so it stays closed.
-    expect(await page.evaluate(() => localStorage.length)).toBe(0);
+    // Showing it writes nothing; dismissing it does, so it stays closed. (pm.tips is the suite's
+    // first-visit tip, seen before the test starts: tests/tip-seen.ts.)
+    expect(await page.evaluate(() => Object.keys(localStorage).filter((k) => k !== 'pm.tips'))).toEqual([]);
     await hint.getByRole('button').click();
     await expect(hint).toBeHidden();
     await page.reload();
@@ -100,6 +101,8 @@ for (const path of ['/es', '/es/about', '/es/precrease', '/es/precrease/el-traba
         document
           .getAnimations()
           .filter((a) => a.timeline instanceof DocumentTimeline)
+          // A loop never finishes (the Work star floating, WorkModel.astro): it isn't waited for.
+          .filter((a) => a.effect?.getComputedTiming().endTime !== Infinity)
           .map((a) => a.finished.catch(() => undefined)),
       ),
     );

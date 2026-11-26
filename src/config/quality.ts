@@ -28,8 +28,12 @@ export const themes = ['light', 'dark'] as const;
 export const jsBudgetKb = {
   /** Every script an HTML page references directly. */
   page: 15,
-  /** What those scripts can import later: today the Inspector. */
-  onDemand: 32,
+  /**
+   * What those scripts can import later: today the Inspector. Raised from 32 to 34 KB (Pablo,
+   * 2026-11-25) when the pointer effect control, the refolding logo's link and the walkthrough's
+   * entry joined the panel, leaving it at 31.9 of 32; Vue alone is about 23 KB of it.
+   */
+  onDemand: 34,
   /**
    * The Inspector's manifest (src/generated/inspector.json), fetched when the panel opens. It grows
    * with every inspectable part, so it lives outside the panel's code with a budget of its own:
@@ -68,6 +72,22 @@ export const jsBudgetKb = {
    */
   scene3d: 180,
   /**
+   * The hero's pointer effects (src/components/site/pointer-*.ts, decision 8f revisited), loaded on
+   * the home page at the first real move of a mouse over the hero: the surface and the ink, counted
+   * together though a visitor downloads one at a time.
+   */
+  heroPointer: 10,
+  /**
+   * The walkthrough (src/components/site/walkthrough.ts), loaded when a visitor starts it from the
+   * Inspector or the command menu, or resumes it on the next page.
+   */
+  walkthrough: 6,
+  /**
+   * The coach marks' styles (src/components/site/coachmark.css), fetched with the first walkthrough
+   * stop or first-visit tip: kept out of the pages' HTML, where an import would put them.
+   */
+  coachmarkStyles: 2,
+  /**
    * The 3D scenes' data, fetched with the scene: today the Irazú's height grid from Copernicus
    * GLO-30 (src/assets/scenes/irazu-dem.bin), 28.5 KB. The M4 plan capped it at 150 KB.
    */
@@ -82,7 +102,8 @@ export const jsBudgetKb = {
    * Everything one Precrease post can run, Web Workers included, checked for every post in the
    * build (drafts only exist in preview builds). Set at 45 KB for Crease No. 002, the heaviest
    * (42 KB); widened from interactive essays to every post when No. 003 brought its own demos.
-   * It includes the Inspector every page can open (about 30 KB), so a post's own share is the rest.
+   * It includes the Inspector every page can open (about 32 KB), so a post's own share is the rest.
+   * Raised from 45 to 46 KB with onDemand (2026-11-25), so the Inspector's growth doesn't eat it.
    */
-  post: 45,
+  post: 46,
 } as const;

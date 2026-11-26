@@ -2,46 +2,24 @@
 import site from '../../../site.config';
 import PageLayout from '../../layouts/PageLayout.astro';
 import AltitudeProfile from '../../components/site/AltitudeProfile.astro';
+import Byline from '../../components/site/Byline.astro';
 import CopyText from '../../components/site/CopyText.astro';
 import HeroFold from '../../components/site/HeroFold.astro';
 import HomePrecrease from '../../components/site/HomePrecrease.astro';
+import WorkReadout from '../../components/site/WorkReadout.astro';
 import WorkModel from '../../components/site/WorkModel.astro';
 import HomeCases from '../../components/work/HomeCases.astro';
 import { getProfile } from '../../lib/profile';
 import { copyFor, fill } from '../../i18n/dictionary';
-import { auditedPages, jsBudgetKb, themes } from '../../config/quality';
-import { allVisualDirections } from '../../config/visual-direction';
 import manifest from '../../generated/inspector.json';
 import { langOf, localeStaticPaths, localize } from '../../i18n/routing';
+import '../../styles/buttons-quiet.css';
 const lang = langOf(Astro.currentLocale);
 const copy = copyFor(lang);
 
 const profile = await getProfile(Astro.currentLocale);
 const home = copy.home;
 const work = home.work;
-// "This site, measured" (decision 50). The first-load JavaScript is only known after the build:
-// the page renders a placeholder and scripts/stamp-site-metrics.ts fills it in dist.
-interface Metric {
-  value: string | null;
-  unit?: string;
-  label: string;
-  note: string;
-}
-const m = work.metrics;
-const metrics: Metric[] = [
-  { value: null, unit: m.js.unit, label: m.js.label, note: fill(m.js.note, { budget: jsBudgetKb.page }) },
-  {
-    value: '0',
-    label: fill(m.axe.label, {
-      pages: auditedPages.length,
-      identities: allVisualDirections.length,
-      themes: themes.length,
-    }),
-    note: m.axe.note,
-  },
-  { value: String(Object.keys(manifest.parts).length), label: m.parts.label, note: m.parts.note },
-  { value: String(allVisualDirections.length), label: m.identities.label, note: m.identities.note },
-];
 const commit = manifest.commit.slice(0, 7);
 
 /** This page in every language (src/i18n/routing.ts). */
@@ -57,17 +35,25 @@ export const getStaticPaths = localeStaticPaths;
   <section class="hero" aria-labelledby="hero-title" data-inspect="index#hero">
     <div class="wrap hero-grid">
       <div class="hero-text">
-        <p class="who">
-          {fill(home.hero.who, { name: profile.name, role: profile.role, location: profile.location })}
-        </p>
+        <Byline />
         <h1 id="hero-title">{home.hero.title}</h1>
         <p class="sub">{profile.summary}</p>
         <p class="cta">
-          <button class="inspect" type="button" data-inspector-open>
+          <button
+            class="inspect btn-primary"
+            type="button"
+            aria-keyshortcuts="Shift+I"
+            title={`${home.hero.inspect} (${copy.inspector.shortcut})`}
+            data-inspector-open
+          >
             {home.hero.inspect}
-            <kbd aria-hidden="true">{copy.inspector.shortcut}</kbd>
           </button>
-          <a href={localize('/changelog', lang)}>{home.hero.releases}</a>
+          <a class="action" href={localize('/changelog', lang)}>
+            {home.hero.releases}
+            <span class="arrow" aria-hidden="true">
+              →
+            </span>
+          </a>
         </p>
       </div>
       <HeroFold />
@@ -84,25 +70,22 @@ export const getStaticPaths = localeStaticPaths;
         </div>
         <WorkModel />
       </div>
-      <dl class="readout">
-        {metrics.map((metric) => (
-          <div>
-            <dt>
-              {metric.label}
-              <span class="note">{metric.note}</span>
-            </dt>
-            <dd>
-              {metric.value === null ? <span data-metric="first-load-js">—</span> : metric.value}
-              {metric.unit && <span class="unit">{metric.unit}</span>}
-            </dd>
-          </div>
-        ))}
-      </dl>
+      <WorkReadout />
       <div class="source">
         <p>{fill(work.source, { commit })}</p>
         <p class="actions">
-          <a href={localize('/colophon', lang)}>{work.links.colophon}</a>
-          <a href={site.repository}>{work.links.repo}</a>
+          <a class="action" href={localize('/colophon', lang)}>
+            {work.links.colophon}
+            <span class="arrow" aria-hidden="true">
+              →
+            </span>
+          </a>
+          <a class="action" href={site.repository}>
+            {work.links.repo}
+            <span class="arrow" aria-hidden="true">
+              →
+            </span>
+          </a>
         </p>
       </div>
       <HomeCases />
@@ -115,7 +98,12 @@ export const getStaticPaths = localeStaticPaths;
       <p class="lead">{home.changelog.intro}</p>
       <AltitudeProfile />
       <p class="actions">
-        <a href={localize('/changelog', lang)}>{home.changelog.full}</a>
+        <a class="action" href={localize('/changelog', lang)}>
+          {home.changelog.full}
+          <span class="arrow" aria-hidden="true">
+            →
+          </span>
+        </a>
       </p>
     </div>
   </section>
@@ -204,11 +192,6 @@ export const getStaticPaths = localeStaticPaths;
     align-items: center;
     padding-block: var(--space-16);
   }
-  .who {
-    margin: 0 0 var(--space-6);
-    font: 500 var(--type-caption);
-    color: var(--color-mute);
-  }
   h1 {
     margin: 0;
     font-size: clamp(3rem, 8vw, 6.5rem);
@@ -231,36 +214,10 @@ export const getStaticPaths = localeStaticPaths;
     gap: var(--space-4) var(--space-8);
     margin: var(--space-8) 0 0;
   }
-  .cta a {
-    font-weight: 500;
-  }
   .inspect {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-3);
-    min-height: 48px;
+    min-height: 50px;
     padding: 0 var(--space-6);
-    border: 0;
-    border-radius: var(--radius-control);
-    background: var(--color-accent);
-    color: var(--color-bg);
-    font: 600 var(--size-md) var(--font-sans);
-    cursor: pointer;
-    transition: transform var(--motion-fast) var(--motion-ease-out);
-  }
-  .inspect:active {
-    transform: scale(0.97);
-  }
-  .inspect kbd {
-    padding: 1px var(--space-2);
-    border: 1px solid color-mix(in oklab, var(--color-bg) 45%, transparent);
-    border-radius: var(--radius-control);
-    font: 500 var(--type-caption);
-  }
-  @media (hover: none) {
-    .inspect kbd {
-      display: none;
-    }
+    font-size: var(--size-md);
   }
 
   .sec {
@@ -288,13 +245,6 @@ export const getStaticPaths = localeStaticPaths;
     gap: var(--space-2) var(--space-6);
     margin: var(--space-6) 0 0;
   }
-  .actions a {
-    font-weight: 600;
-    color: var(--color-accent);
-    min-height: 44px;
-    display: inline-flex;
-    align-items: center;
-  }
 
   /* Work: this site as a measured exhibit. */
   .work-head {
@@ -313,46 +263,6 @@ export const getStaticPaths = localeStaticPaths;
   .eyebrow {
     margin: 0 0 var(--space-3);
     font: var(--type-caption);
-    color: var(--color-mute);
-  }
-  .readout {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    margin: var(--space-12) 0 0;
-    border-top: var(--stroke-crease) solid var(--color-ink);
-  }
-  .readout > div {
-    display: flex;
-    flex-direction: column-reverse;
-    justify-content: flex-end;
-    gap: var(--space-2);
-    padding: var(--space-6) var(--space-6) 0 0;
-  }
-  .readout > div + div {
-    padding-left: var(--space-6);
-    border-left: 1px dashed var(--color-rule);
-  }
-  dt {
-    font: var(--type-caption);
-    color: var(--color-mute);
-  }
-  .note {
-    display: block;
-    margin-top: var(--space-2);
-    color: var(--color-second);
-  }
-  dd {
-    margin: 0;
-    font-size: clamp(2.25rem, 4.5vw, 3.5rem);
-    font-weight: 600;
-    line-height: 1;
-    letter-spacing: -0.03em;
-  }
-  .unit {
-    margin-left: var(--space-1);
-    font-size: 0.4em;
-    font-weight: 500;
-    letter-spacing: 0;
     color: var(--color-mute);
   }
   .source {
@@ -404,14 +314,6 @@ export const getStaticPaths = localeStaticPaths;
     }
     .hero-grid :global(.hero-fold) {
       max-width: 300px;
-    }
-    .readout {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      row-gap: var(--space-8);
-    }
-    .readout > div:nth-child(odd) {
-      padding-left: 0;
-      border-left: 0;
     }
   }
 </style>

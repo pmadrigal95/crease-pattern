@@ -7,6 +7,33 @@ initLanguage();
 // The next page loads when a link shows intent (src/scripts/prefetch.ts), in this same script.
 import { initPrefetch } from './prefetch';
 initPrefetch();
+// A walkthrough under way continues on this page (src/components/site/walkthrough.ts). Otherwise,
+// on a first visit, help shows on its own: the walkthrough on the home page, a tip beside Inspect
+// elsewhere (src/components/site/first-tip.ts). It comes with the visitor's first interaction (a
+// real pointer move counts) or a few seconds after the page has loaded, whichever is first: never
+// during the load itself, and never again once it has shown.
+try {
+  if (sessionStorage.getItem('pm.walkthrough') !== null)
+    void import('../components/site/walkthrough').then((m) => m.resumeWalkthrough());
+  else if (localStorage.getItem('pm.tips') === null) {
+    const firsts = ['scroll', 'pointerdown', 'keydown', 'pointermove'] as const;
+    let armed = false;
+    const arm = (e?: Event) => {
+      // A pointermove with no movement is the page changing under a resting pointer (hero3d.ts).
+      if (e instanceof PointerEvent && e.type === 'pointermove' && !e.movementX && !e.movementY) return;
+      if (armed) return;
+      armed = true;
+      for (const type of firsts) removeEventListener(type, arm);
+      setTimeout(() => void import('../components/site/first-tip').then((m) => m.showFirstHelp()), 1200);
+    };
+    for (const type of firsts) addEventListener(type, arm, { passive: true });
+    const later = () => setTimeout(arm, 3500);
+    if (document.readyState === 'complete') later();
+    else addEventListener('load', later, { once: true });
+  }
+} catch {
+  // Storage blocked: nothing to resume, and no tip.
+}
 // Opens the Inspector (decision 44): the button, any [data-inspector-open], Shift+I or ?inspect. Vue and the
 // panel download only now, on first use; hovering the button starts that download early.
 type Handle = { close(): void };
@@ -63,8 +90,9 @@ const openCommands = () => {
 };
 commandButton?.addEventListener('click', () => openCommands());
 commandButton?.addEventListener('pointerenter', () => void commandMenu(), { once: true });
-const shortcut = commandButton?.querySelector('[data-shortcut]');
-if (shortcut && /Mac|iPhone|iPad/.test(navigator.platform)) shortcut.textContent = '⌘ K';
+// The tooltip names the shortcut the visitor's keyboard has.
+if (commandButton && /Mac|iPhone|iPad/.test(navigator.platform))
+  commandButton.title = commandButton.title.replace('Ctrl K', '⌘ K');
 addEventListener('keydown', (e) => {
   if (e.key.toLowerCase() !== 'k' || !(e.ctrlKey || e.metaKey) || e.altKey || e.shiftKey) return;
   e.preventDefault();
@@ -86,3 +114,17 @@ addEventListener('keydown', (e) => {
   toggle(active instanceof HTMLElement && active !== document.body ? active : button);
 });
 if (new URLSearchParams(location.search).has('inspect')) void open(button);
+// The bar's material answers the scroll (src/styles/masthead.css): data-scrolled once the page has
+// moved, and --lift over the first 120 px, which Basalt & glacier's shadow grows with. One update per
+// frame at most.
+const mast = document.querySelector<HTMLElement>('.mast');
+if (mast) {
+  let frame = 0;
+  const update = () => {
+    frame = 0;
+    mast.toggleAttribute('data-scrolled', scrollY > 8);
+    mast.style.setProperty('--lift', Math.min(1, scrollY / 120).toFixed(2));
+  };
+  addEventListener('scroll', () => (frame ||= requestAnimationFrame(update)), { passive: true });
+  update();
+}

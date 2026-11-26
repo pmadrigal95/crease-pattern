@@ -63,6 +63,8 @@ for (const theme of ['light', 'dark'] as const) {
         document
           .getAnimations()
           .filter((a) => a.timeline instanceof DocumentTimeline)
+          // A loop never finishes (the Work star floating, WorkModel.astro): it isn't waited for.
+          .filter((a) => a.effect?.getComputedTiming().endTime !== Infinity)
           .map((a) => a.finished.catch(() => undefined)),
       ),
     );
@@ -105,6 +107,67 @@ test('on wide screens the page tilts into layers, nested parts sit higher, and c
   await page.keyboard.press('Escape');
   await expect(page.locator('html')).not.toHaveClass(/inspector-3d/);
   await expect(page.locator('.layer-path')).toHaveCount(0);
+});
+
+test('the parts pop up in reading order, each leaving its footprint, and the pointer turns the model', async ({
+  page,
+}) => {
+  await page.goto('/?inspect');
+  await expect(page.locator('html')).toHaveClass(/inspector-3d/);
+  const lifted = page.locator('main [data-inspect]');
+  const count = await lifted.count();
+  // One footprint per part, hidden from assistive tech, inside the part it belongs to.
+  await expect(page.locator('main .layer-print')).toHaveCount(count);
+  await expect(page.locator('main .layer-print').first()).toHaveAttribute('aria-hidden', 'true');
+  const orders = await lifted.evaluateAll((els) =>
+    els.map((el) => Number(el.style.getPropertyValue('--pop-order'))),
+  );
+  expect(orders).toEqual(orders.map((_, i) => i)); // document order is reading order
+  // Framed by perspective alone: no scale() that would resample the text.
+  await expect
+    .poll(() => page.locator('main').evaluate((el) => getComputedStyle(el).transform))
+    .toMatch(/^matrix3d/);
+  // A fast swing of the mouse becomes a slow sway: the turn chases the pointer, a little per frame.
+  const turnX = () =>
+    page.locator('main').evaluate((el) => Number(el.style.getPropertyValue('--turn-x') || 0));
+  await page.mouse.move(10, 400);
+  await page.mouse.move(1040, 400);
+  const sway = await page.evaluate(
+    () =>
+      new Promise<number[]>((resolve) => {
+        const seen: number[] = [];
+        const look = () => {
+          seen.push(Number(document.querySelector('main')!.style.getPropertyValue('--turn-x') || 0));
+          if (seen.length < 12) requestAnimationFrame(look);
+          else resolve(seen);
+        };
+        requestAnimationFrame(look);
+      }),
+  );
+  for (let i = 1; i < sway.length; i++) expect(Math.abs(sway[i]! - sway[i - 1]!)).toBeLessThan(0.15);
+  await expect.poll(turnX).toBeGreaterThan(0.4);
+  // The pivot follows the scroll on the next frame, and never glides there afterwards.
+  const origin = () => page.locator('main').evaluate((el) => el.style.getPropertyValue('--tilt-origin'));
+  await page.waitForTimeout(400); // nothing pending from earlier scrolls
+  const [before, after] = await page.evaluate(async () => {
+    const read = () => document.querySelector('main')!.style.getPropertyValue('--tilt-origin');
+    const start = read();
+    scrollBy(0, 300);
+    await new Promise((r) => addEventListener('scroll', r, { once: true }));
+    await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+    return [start, read()];
+  });
+  expect(parseFloat(after) - parseFloat(before)).toBeCloseTo(300, 0);
+  expect(await origin()).toBe(after);
+  await expect
+    .poll(() => page.locator('main').evaluate((el) => getComputedStyle(el).transitionDuration))
+    .toBe('0s');
+
+  await page.keyboard.press('Escape');
+  await expect(page.locator('main')).not.toHaveAttribute('style', /--turn-x/);
+  // The footprints go once the parts have settled back.
+  await expect(page.locator('.layer-print')).toHaveCount(0, { timeout: 5_000 });
+  await expect(page.locator('.layer-anchor')).toHaveCount(0);
 });
 
 test('reduced motion keeps the Inspector flat', async ({ browser }) => {

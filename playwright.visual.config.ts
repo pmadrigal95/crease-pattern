@@ -1,4 +1,5 @@
 import { defineConfig, devices } from '@playwright/test';
+import { tipSeen } from './tests/tip-seen';
 
 /**
  * Visual regression, local only: a safety net for refactors that must not change what visitors
@@ -11,7 +12,11 @@ export default defineConfig({
   snapshotPathTemplate: '.visual-baselines/{arg}{ext}',
   fullyParallel: true,
   reporter: 'list',
-  use: { baseURL: 'http://localhost:4321', reducedMotion: 'reduce' },
+  use: {
+    baseURL: 'http://localhost:4321',
+    reducedMotion: 'reduce',
+    storageState: tipSeen('http://localhost:4321'),
+  },
   expect: { toHaveScreenshot: { animations: 'disabled', maxDiffPixelRatio: 0.001 } },
   projects: [
     { name: 'desktop', use: { ...devices['Desktop Chrome'], viewport: { width: 1280, height: 900 } } },

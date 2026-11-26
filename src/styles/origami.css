@@ -28,6 +28,41 @@
   }
 }
 
+/* When a change of identity (or of day and night, in Contour lines) brings a new figure, the marks
+   refold: the old figure folds flat along its vertical crease and the new one unfolds from it, in
+   the time the new colors take to rise. src/components/inspector/identity.ts adds .vt-figure for the
+   length of the transition; without View Transitions, or with reduced motion, the figure simply
+   changes. */
+.vt-figure .mast .origami-mark {
+  view-transition-name: mark-head;
+}
+.vt-figure footer .origami-mark {
+  view-transition-name: mark-foot;
+}
+::view-transition-group(mark-head),
+::view-transition-group(mark-foot) {
+  z-index: 5;
+  animation: none;
+}
+::view-transition-old(mark-head),
+::view-transition-old(mark-foot) {
+  animation: mark-fold-flat 320ms var(--motion-ease-in-out) both;
+}
+::view-transition-new(mark-head),
+::view-transition-new(mark-foot) {
+  animation: mark-unfold 460ms 300ms var(--motion-ease-out) both;
+}
+@keyframes mark-fold-flat {
+  to {
+    transform: perspective(160px) rotateY(88deg);
+  }
+}
+@keyframes mark-unfold {
+  from {
+    transform: perspective(160px) rotateY(-88deg);
+  }
+}
+
 /* Paper is light in every theme: an arctic fox is white at night too. And the dark it shades to
    is ink by day and the background by night. The figures' file and the 3D scene read these
    (src/lib/origami/sprite.ts, src/components/inspector/scene3d.ts). */

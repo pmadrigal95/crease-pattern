@@ -1,63 +1,62 @@
 ---
 /**
- * The career as an elevation chart (design debt phase 2), on the home page. It reads like the
- * elevation chart of a workout: one smooth line in the identity's accent with a fill that fades
- * to the baseline, three quiet altitude guides, the release names along the axis, and one large
- * readout. The readout shows the current release; pointing at a stretch shows that one instead.
- * Geometry comes from src/lib/altitude.ts; this file only draws it.
+ * The career as a paper ridge (portfolio-discovery/31-changelog-plan.md), on the home page. Each
+ * release is its volcano, folded paper at its real height, placed along time; the route walks
+ * the skyline they make and ends on the last summit, now. Moving along it (pointer, finger or the
+ * arrow keys) shows that release above the drawing: its version, height, theme, years and the
+ * releases inside it. The identity picks the paper: plates (Basalt & glacier), washi fibers
+ * (Washi & asagi), contour lines every 250 m (Contour lines). Geometry: src/lib/ridge.ts.
  *
- * Two drawings, wide and narrow, because SVG text doesn't scale down gracefully. CSS shows one;
- * the other is display: none, so it's hidden from screen readers too. Screen readers get one
- * sentence that says the whole chart, so the drawing itself is aria-hidden.
- *
- * Static SVG, no JavaScript: the pointer readout is CSS (:hover and :has). Positions are SVG
- * attributes, never inline styles, so the CSP stays strict.
+ * Without JavaScript it's complete: the current release is shown, and the drawing is still.
+ * Two drawings, wide and narrow, because SVG text doesn't scale down gracefully; CSS shows one.
+ * Screen readers get one sentence that says the whole climb, and each release as it's reached.
+ * Positions are SVG attributes, never inline styles, so the CSP stays strict.
  */
-import { careerFor, climbs, currentVersion } from '../../lib/career';
-import { profile, type Frame } from '../../lib/altitude';
+import { careerFor, climbs, currentVersion, releasesNewestFirst } from '../../lib/career';
+import { ridge, type RidgeFrame } from '../../lib/ridge';
+import RidgeDrawing from './RidgeDrawing.astro';
 import { copyFor, fill } from '../../i18n/dictionary';
 import { formatList, formatNumber } from '../../lib/format';
 import { langOf } from '../../i18n/routing';
 const lang = langOf(Astro.currentLocale);
-const copy = copyFor(Astro.currentLocale);
+const t = copyFor(Astro.currentLocale).home.changelog;
 
-const t = copy.home.changelog;
 const career = careerFor(lang);
 const data = climbs(career);
 const version = currentVersion(career);
+const current = data.at(-1)!.major;
+const releases = new Map(releasesNewestFirst(career).map((r) => [r.major, r]));
 const frames = {
-  wide: {
-    width: 1000,
-    height: 360,
-    top: 120,
-    bottom: 44,
-    right: 64,
-    floorM: 900,
-    ceilingM: 3600,
-    axisFont: 13,
-  },
-  narrow: {
-    width: 360,
-    height: 300,
-    top: 104,
-    bottom: 38,
-    right: 44,
-    floorM: 900,
-    ceilingM: 3600,
-    axisFont: 11,
-  },
-} satisfies Record<string, Frame>;
+  wide: { width: 1000, height: 340, baseline: 300, top: 24, floorM: 900, ceilingM: 3600 },
+  narrow: { width: 400, height: 280, baseline: 244, top: 20, floorM: 900, ceilingM: 3600 },
+} satisfies Record<string, RidgeFrame>;
 const drawings = (['wide', 'narrow'] as const).map((name) => ({
   name,
   frame: frames[name],
-  p: profile(data, frames[name]),
+  r: ridge(data, frames[name]),
 }));
-const byMajor = new Map(data.map((c) => [c.major, c]));
-const current = data.at(-1)!.major;
-const span = (major: number) => {
-  const c = byMajor.get(major)!;
-  return `${Math.floor(c.start)} – ${major === current ? t.present : Math.floor(c.end)}`;
-};
+const names = new Map(data.map((c) => [c.major, c.codename]));
+const heights = new Map(
+  data.map((c) => [c.major, fill(t.elevation, { elevation: formatNumber(c.elevationM, lang) })]),
+);
+const metres = (m: number) => fill(t.elevation, { elevation: formatNumber(m, lang) });
+/** "3.2.0" → "v3.2"; "0.0.1" stays whole. */
+const short = (v: string) => `v${v.replace(/\.0$/, '')}`;
+const eras = data.map((c) => {
+  const entries = releases.get(c.major)!.entries;
+  const end = c.major === current ? t.present : Math.floor(c.end);
+  return {
+    ...c,
+    entries,
+    tag:
+      c.major === current
+        ? fill(t.profile.now, { version, codename: c.codename })
+        : `v${entries[0]!.version.split('.').slice(0, 2).join('.')} · ${c.codename}`,
+    span: `${Math.floor(c.start)} – ${end}`,
+    // What a screen reader hears when the route reaches it.
+    said: `${c.codename}, ${fill(t.elevation, { elevation: formatNumber(c.elevationM, lang) })}, ${c.theme}, ${Math.floor(c.start)} – ${end}`,
+  };
+});
 const summary = fill(t.profile.summary, {
   from: Math.floor(data[0]!.start),
   releases: formatList(
@@ -75,251 +74,250 @@ const summary = fill(t.profile.summary, {
 });
 ---
 
-<figure class="altitude" data-inspect="AltitudeProfile">
-  {drawings.map(({ name, frame, p }) => (
-    <svg
-      class={`drawing ${name}`}
-      viewBox={`0 0 ${frame.width} ${frame.height}`}
-      aria-hidden="true"
-      focusable="false"
-    >
-      <defs>
-        <linearGradient id={`altitude-fill-${name}`} x1="0" y1="0" x2="0" y2="1">
-          <stop class="fill-top" offset="0" />
-          <stop class="fill-bottom" offset="1" />
-        </linearGradient>
-      </defs>
+<figure class="altitude" data-inspect="AltitudeProfile" data-ridge data-label={t.profile.label}>
+  <div class="heads">
+    {eras.map((e) => (
+      <div class:list={['head', { away: e.major !== current }]} data-era={e.major} data-said={e.said}>
+        <div>
+          <p class="tag">{e.tag}</p>
+          <p class="alt">
+            {formatNumber(e.elevationM, lang)}
+            <span class="unit">m</span>
+          </p>
+          <p class="theme">
+            {e.theme} · {e.span}
+          </p>
+        </div>
+        <ul class="releases">
+          {e.entries.slice(0, 4).map((en) => (
+            <li>
+              <span class="v">{short(en.version)}</span>
+              <span>
+                <span class="title">{en.title}</span> · <span class="org">{en.org}</span>
+              </span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    ))}
+  </div>
 
-      {p.guides.map((g) => (
-        <g>
-          <line class="guide" x1="0" x2={p.plotRight} y1={g.y} y2={g.y} />
-          <text class="guide-label" x={p.plotRight + 8} y={g.y} dy="0.35em">
-            {fill(t.elevation, { elevation: formatNumber(g.m, lang) })}
-          </text>
-        </g>
-      ))}
-      {p.stretches.slice(1).map((s) => (
-        <line class="crease" x1={s.x0} x2={s.x0} y1={frame.top - 16} y2={p.baseline} />
-      ))}
-      <line class="axis" x1="0" x2={p.plotRight} y1={p.baseline} y2={p.baseline} />
-
-      <path class="area" d={p.area} fill={`url(#altitude-fill-${name})`} />
-      <path class="line" d={p.line} pathLength="1" />
-
-      {p.stretches.map((s) => {
-        const c = byMajor.get(s.major)!;
-        const isCurrent = s.major === current;
-        const mark = isCurrent ? p.here : s.peak;
-        return (
-          <g class={isCurrent ? 'stretch current' : 'stretch'}>
-            <rect class="zone" x={s.x0} y="0" width={s.x1 - s.x0} height={frame.height} />
-            <text
-              class="axis-name"
-              text-anchor="middle"
-              x={s.labelX}
-              y={p.baseline + (name === 'wide' ? 26 : 22)}
-            >
-              {s.fullName ? c.codename : `v${c.major}`}
-            </text>
-            <g class="marker">
-              <line class="marker-rule" x1={mark.x} x2={mark.x} y1={mark.y} y2={p.baseline} />
-              <circle class="marker-halo" cx={mark.x} cy={mark.y} r="8" />
-              <circle class="marker-dot" cx={mark.x} cy={mark.y} r="4.5" />
-            </g>
-            <g class="readout">
-              <text class="readout-caption" x="0" y={name === 'wide' ? 18 : 16}>
-                {isCurrent
-                  ? fill(t.profile.now, { version, codename: c.codename.toUpperCase() })
-                  : `v${c.major} · ${c.codename.toUpperCase()}`}
-              </text>
-              <text x="0" y={name === 'wide' ? 66 : 56}>
-                <tspan class="readout-value">{formatNumber(c.elevationM, lang)}</tspan>
-                <tspan class="readout-unit"> m</tspan>
-              </text>
-              <text class="readout-detail" x="0" y={name === 'wide' ? 92 : 80}>
-                {c.theme} · {span(c.major)}
-              </text>
-            </g>
-          </g>
-        );
-      })}
-    </svg>
-  ))}
+  <div class="stage" data-stage>
+    <p class="hint" data-hint hidden>
+      ← {t.profile.walk} →
+    </p>
+    {drawings.map(({ name, frame, r }) => (
+      <RidgeDrawing
+        name={name}
+        frame={frame}
+        ridge={r}
+        names={names}
+        heights={heights}
+        metres={metres}
+        current={current}
+      />
+    ))}
+  </div>
+  <p class="sr-only" aria-live="polite" data-live></p>
   <figcaption class="sr-only">{summary}</figcaption>
 </figure>
 
+<script>
+  // Walking the route (src/components/site/AltitudeProfile.astro). Self-contained (ENGINEERING.md,
+  // "Browser scripts"): Astro inlines it on the home page.
+  for (const figure of document.querySelectorAll<HTMLElement>('[data-ridge]')) {
+    const stage = figure.querySelector<HTMLElement>('[data-stage]')!;
+    const heads = [...figure.querySelectorAll<HTMLElement>('[data-era]')];
+    const said = figure.querySelector<HTMLElement>('[data-live]')!;
+    const label = figure.querySelector<HTMLElement>('[data-hint]');
+    // The drawing on screen: wide or narrow, as CSS decides.
+    const drawing = () =>
+      [...figure.querySelectorAll<SVGSVGElement>('svg.drawing')].find((s) => s.getClientRects().length);
+    let at = -1;
+    const show = (x: number) => {
+      const svg = drawing();
+      if (!svg) return;
+      const route = svg.querySelector<SVGPathElement>('[data-route]')!;
+      const end = Number(svg.dataset.end);
+      x = Math.max(0, Math.min(end, x));
+      // The marker's height on the route: x only grows along it, so halve the length until it's there.
+      const length = route.getTotalLength();
+      let lo = 0;
+      let hi = length;
+      for (let k = 0; k < 18; k++) {
+        const mid = (lo + hi) / 2;
+        if (route.getPointAtLength(mid).x < x) lo = mid;
+        else hi = mid;
+      }
+      const y = route.getPointAtLength(hi).y;
+      const marker = svg.querySelector('[data-marker]')!;
+      const line = marker.querySelector('line')!;
+      const dot = marker.querySelector('circle')!;
+      line.setAttribute('x1', x.toFixed(1));
+      line.setAttribute('x2', x.toFixed(1));
+      line.setAttribute('y1', y.toFixed(1));
+      dot.setAttribute('cx', x.toFixed(1));
+      dot.setAttribute('cy', y.toFixed(1));
+      svg.querySelector('[data-walked]')!.setAttribute('width', x.toFixed(1));
+      const peaks = [...svg.querySelectorAll<SVGGElement>('.peak')];
+      const index = Math.max(
+        0,
+        peaks.findLastIndex((p) => x >= Number(p.dataset.x0)),
+      );
+      if (index === at) return;
+      at = index;
+      peaks.forEach((p, i) => p.classList.toggle('on', i === index));
+      heads.forEach((h, i) => h.classList.toggle('away', i !== index));
+      said.textContent = heads[index]!.dataset.said ?? '';
+    };
+    const summitOf = (i: number) =>
+      Number(drawing()?.querySelectorAll<SVGGElement>('.peak')[i]?.dataset.summit);
+    const toNow = () => show(Number(drawing()?.dataset.end));
+    const xOf = (e: PointerEvent) => {
+      const svg = drawing()!;
+      const box = svg.getBoundingClientRect();
+      return ((e.clientX - box.left) / box.width) * svg.viewBox.baseVal.width;
+    };
+
+    stage.tabIndex = 0;
+    stage.setAttribute('role', 'group');
+    stage.setAttribute('aria-label', figure.dataset.label ?? '');
+    stage.classList.add('walkable');
+    if (label) label.hidden = false;
+    stage.addEventListener('pointermove', (e) => show(xOf(e)));
+    stage.addEventListener('pointerdown', (e) => {
+      stage.setPointerCapture(e.pointerId);
+      show(xOf(e));
+    });
+    stage.addEventListener('pointerleave', (e) => {
+      if (e.pointerType === 'mouse') toNow();
+    });
+    stage.addEventListener('keydown', (e) => {
+      const step = { ArrowRight: 1, ArrowLeft: -1, Home: -heads.length, End: heads.length }[e.key];
+      if (step === undefined) return;
+      e.preventDefault();
+      const i = Math.max(0, Math.min(heads.length - 1, at + step));
+      show(summitOf(i));
+    });
+    // The route starts at now, where the page was drawn.
+    toNow();
+    // Wide or narrow can change under the visitor: start again at now.
+    matchMedia('(max-width: 719px)').addEventListener('change', () => {
+      at = -1;
+      toNow();
+    });
+  }
+</script>
+
 <style>
   .altitude {
+    margin: var(--space-8) 0 0;
+  }
+  /* Above the drawing: the release the route is on. */
+  .head {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+    align-items: end;
+    gap: var(--space-4) var(--space-12);
+    min-height: 168px;
+  }
+  /* Every release's head in the same place, as tall as the tallest: walking never moves the page.
+     The one the route is on fades in; the others stay laid out but unseen and unheard (visibility
+     hides them from assistive tech too). */
+  .heads {
+    display: grid;
+  }
+  .heads > .head {
+    grid-area: 1 / 1;
+    transition: opacity var(--motion-fast) var(--motion-ease-out);
+  }
+  .head.away {
+    visibility: hidden;
+    opacity: 0;
+  }
+  .tag {
     margin: 0;
+    font: 600 var(--size-xs) / 1 var(--font-mono);
+    letter-spacing: 0.08em;
+    color: var(--color-accent);
+    text-transform: uppercase;
   }
-  .drawing {
-    display: block;
-    width: 100%;
-    height: auto;
-    overflow: visible;
+  .alt {
+    margin: var(--space-2) 0 0;
+    font: 600 clamp(3rem, 7vw, 5.25rem) / 0.9 var(--font-sans);
+    letter-spacing: -0.045em;
   }
-  .narrow {
-    display: none;
+  .unit {
+    margin-left: 0.12em;
+    font-size: 0.32em;
+    font-weight: 500;
+    letter-spacing: 0;
+    color: var(--color-mute);
+  }
+  .theme {
+    margin: var(--space-3) 0 0;
+    color: var(--color-mute);
+  }
+  .releases {
+    display: grid;
+    gap: var(--space-2);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .releases li {
+    display: grid;
+    grid-template-columns: 4.2em minmax(0, 1fr);
+    align-items: baseline;
+    gap: var(--space-3);
+    padding-top: var(--space-2);
+    border-top: 1px dashed var(--color-rule);
+  }
+  .releases .v {
+    font: 600 var(--size-xs) / 1.4 var(--font-mono);
+    color: var(--color-accent);
+  }
+  .releases .title {
+    font-weight: 600;
+  }
+  .releases .org {
+    color: var(--color-mute);
+  }
+
+  /* The drawing. */
+  .stage {
+    position: relative;
+    margin-top: var(--space-6);
+    border-radius: 4px;
+    outline-offset: 6px;
+  }
+  .stage.walkable {
+    cursor: ew-resize;
+    touch-action: pan-y;
+  }
+  .stage:focus-visible {
+    outline: 2px solid var(--color-accent-ui);
+  }
+  .hint {
+    position: absolute;
+    top: -4px;
+    right: 0;
+    margin: 0;
+    font: 500 var(--size-xs) var(--font-mono);
+    color: var(--color-mute);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .heads > .head {
+      transition: none;
+    }
   }
   @media (max-width: 719px) {
-    .wide {
+    .head {
+      grid-template-columns: 1fr;
+      min-height: 0;
+    }
+    .hint {
       display: none;
-    }
-    .narrow {
-      display: block;
-    }
-  }
-
-  /* The fill fades from the accent to nothing, so the line carries the shape. */
-  .fill-top {
-    stop-color: var(--color-accent-ui);
-    stop-opacity: 0.32;
-  }
-  .fill-bottom {
-    stop-color: var(--color-accent-ui);
-    stop-opacity: 0;
-  }
-  .line {
-    fill: none;
-    stroke: var(--color-accent-ui);
-    stroke-width: 2.5px;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-    vector-effect: non-scaling-stroke;
-  }
-  .guide,
-  .axis {
-    stroke: var(--color-rule);
-    stroke-width: 1px;
-    vector-effect: non-scaling-stroke;
-  }
-  .axis {
-    stroke: var(--color-mute);
-    opacity: 0.5;
-  }
-  /* Where each release starts: a crease, dashed like a valley fold, barely there. */
-  .crease {
-    stroke: var(--color-rule);
-    stroke-width: var(--stroke-crease);
-    stroke-dasharray: 4 5;
-    vector-effect: non-scaling-stroke;
-  }
-  text {
-    font-family: var(--font-sans);
-    fill: var(--color-mute);
-    font-variant-numeric: tabular-nums;
-  }
-  .guide-label {
-    font: 11px var(--font-mono);
-  }
-  .axis-name {
-    font-size: 13px;
-    font-weight: 500;
-  }
-  .narrow .axis-name {
-    font-size: 11px;
-  }
-
-  /* The readout and the marker belong to one stretch at a time: the current release, or the one
-     under the pointer. */
-  .zone {
-    fill: transparent;
-  }
-  .marker,
-  .readout {
-    opacity: 0;
-    transition: opacity var(--motion-fast) var(--motion-ease-out);
-    pointer-events: none;
-  }
-  .stretch.current .marker,
-  .stretch.current .readout,
-  .stretch:hover .marker,
-  .stretch:hover .readout {
-    opacity: 1;
-  }
-  .drawing:has(.stretch:not(.current):hover) .stretch.current .marker,
-  .drawing:has(.stretch:not(.current):hover) .stretch.current .readout {
-    opacity: 0;
-  }
-  .stretch.current .axis-name,
-  .stretch:hover .axis-name {
-    fill: var(--color-ink);
-    font-weight: 600;
-  }
-  .drawing:has(.stretch:not(.current):hover) .stretch.current .axis-name {
-    fill: var(--color-mute);
-    font-weight: 500;
-  }
-  .marker-rule {
-    stroke: var(--color-accent-ui);
-    stroke-width: var(--stroke-crease);
-    stroke-dasharray: 4 4;
-    vector-effect: non-scaling-stroke;
-  }
-  .marker-halo {
-    fill: var(--color-bg);
-  }
-  .marker-dot {
-    fill: var(--color-accent-ui);
-  }
-  .readout-caption {
-    font: 600 12px var(--font-mono);
-    letter-spacing: 0.06em;
-    fill: var(--color-accent);
-  }
-  /* Proportional figures for the big number: tabular ones leave gaps around the comma. */
-  .readout-value {
-    font-variant-numeric: proportional-nums;
-    font-size: 48px;
-    font-weight: 600;
-    letter-spacing: -0.03em;
-    fill: var(--color-ink);
-  }
-  .readout-unit {
-    font-size: 22px;
-    font-weight: 500;
-  }
-  .readout-detail {
-    font-size: 14px;
-  }
-  .narrow .readout-caption {
-    font-size: 11px;
-  }
-  .narrow .readout-value {
-    font-size: 40px;
-  }
-  .narrow .readout-unit {
-    font-size: 18px;
-  }
-  .narrow .readout-detail {
-    font-size: 13px;
-  }
-
-  /* The one moment of motion on the home page: the line draws itself as the chart scrolls in
-     (decision 42). Longhands, with the timeline through a variable: the CSS minifier otherwise
-     folds animation-timeline into the shorthand, which browsers reject. */
-  @supports (animation-timeline: view()) {
-    @media (prefers-reduced-motion: no-preference) {
-      .altitude {
-        view-timeline-name: --altitude;
-      }
-      .line {
-        --altitude-timeline: --altitude;
-        stroke-dasharray: 1;
-        animation-name: line-draw;
-        animation-timing-function: linear;
-        animation-fill-mode: both;
-        animation-timeline: var(--altitude-timeline);
-        animation-range: entry 10% cover 40%;
-      }
-    }
-  }
-  @keyframes line-draw {
-    from {
-      stroke-dashoffset: 1;
-    }
-    to {
-      stroke-dashoffset: 0;
     }
   }
 </style>

@@ -110,14 +110,109 @@ const buildStar = (scene: Scene) => {
     return { group, material };
   });
 
-  return { units, directions, rank, edgeMaterial };
+  return { holder, units, directions, rank, edgeMaterial };
+};
+
+/**
+ * The star at rest is alive (portfolio-discovery/29-work-plan.md): it floats, rising and swaying a
+ * little, and a drag turns it, with inertia; let go, it eases back to its pose. A horizontal drag
+ * turns it and a vertical one still scrolls the page (touch-action: pan-y). It draws frames only
+ * while it's on screen and something moves; with reduced motion, or while the Inspector is open
+ * (the star is apart then, showing the count, and the page has its own 3D to draw), it doesn't
+ * float, but still turns when the visitor drags it.
+ */
+const floatAndTurn = (stage: HTMLElement, holder: Group, render: () => void) => {
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const root = document.documentElement;
+  let still = reduced || root.classList.contains('inspecting');
+  const pose = { x: holder.rotation.x, y: holder.rotation.y };
+  const turn = { yaw: 0, pitch: 0, vYaw: 0, vPitch: 0, held: false, x: 0, y: 0, letGo: 0 };
+  let visible = false;
+  let frame = 0;
+  const step = (now: number) => {
+    frame = 0;
+    const t = now / 1000;
+    if (!turn.held) {
+      turn.yaw += turn.vYaw;
+      turn.pitch += turn.vPitch;
+      turn.vYaw *= 0.94;
+      turn.vPitch *= 0.94;
+      // Back to its pose, slowly, once the spin has died down.
+      if (Math.abs(turn.vYaw) + Math.abs(turn.vPitch) < 0.002 && now - turn.letGo > 1600) {
+        turn.yaw *= 0.97;
+        turn.pitch *= 0.97;
+      }
+    }
+    turn.pitch = Math.max(-0.7, Math.min(0.7, turn.pitch));
+    holder.position.y = still ? 0 : Math.sin(t * 0.9) * 0.07;
+    holder.rotation.set(
+      pose.x + turn.pitch,
+      pose.y + turn.yaw + (still ? 0 : Math.sin(t * 0.55) * 0.05),
+      still ? 0 : Math.sin(t * 0.7) * 0.025,
+    );
+    render();
+    const turning =
+      turn.held ||
+      Math.abs(turn.vYaw) + Math.abs(turn.vPitch) + Math.abs(turn.yaw) + Math.abs(turn.pitch) > 0.001;
+    if (visible && (!still || turning)) frame = requestAnimationFrame(step);
+  };
+  const wake = () => {
+    if (!frame && visible) frame = requestAnimationFrame(step);
+  };
+  const seen = new IntersectionObserver(([entry]) => {
+    visible = !!entry?.isIntersecting;
+    wake();
+  });
+  seen.observe(stage);
+  const inspecting = new MutationObserver(() => {
+    still = reduced || root.classList.contains('inspecting');
+    wake();
+  });
+  inspecting.observe(root, { attributes: true, attributeFilter: ['class'] });
+
+  stage.classList.add('turnable');
+  const grab = (e: PointerEvent) => {
+    turn.held = true;
+    turn.x = e.clientX;
+    turn.y = e.clientY;
+    stage.setPointerCapture(e.pointerId);
+    wake();
+  };
+  const drag = (e: PointerEvent) => {
+    if (!turn.held) return;
+    turn.vYaw = (e.clientX - turn.x) * 0.008;
+    turn.vPitch = (e.clientY - turn.y) * 0.008;
+    turn.yaw += turn.vYaw;
+    turn.pitch += turn.vPitch;
+    turn.x = e.clientX;
+    turn.y = e.clientY;
+  };
+  const release = () => {
+    turn.held = false;
+    turn.letGo = performance.now();
+    wake();
+  };
+  stage.addEventListener('pointerdown', grab);
+  stage.addEventListener('pointermove', drag);
+  stage.addEventListener('pointerup', release);
+  stage.addEventListener('pointercancel', release);
+  return () => {
+    seen.disconnect();
+    inspecting.disconnect();
+    cancelAnimationFrame(frame);
+    stage.classList.remove('turnable');
+    stage.removeEventListener('pointerdown', grab);
+    stage.removeEventListener('pointermove', drag);
+    stage.removeEventListener('pointerup', release);
+    stage.removeEventListener('pointercancel', release);
+  };
 };
 
 export const mountWorkScene = (stage: HTMLElement, figure: HTMLElement, redraw: () => void): StarRenderer => {
   const { canvas, renderer, scene, camera } = createWorkStage(stage);
 
   // The star: one group per unit, so a unit moves as one piece along its direction.
-  const { units, directions, rank, edgeMaterial } = buildStar(scene);
+  const { holder, units, directions, rank, edgeMaterial } = buildStar(scene);
 
   // Colours: the five papers of Crease No. 003, from the active identity's tokens.
   const css = (name: string) =>
@@ -158,6 +253,8 @@ export const mountWorkScene = (stage: HTMLElement, figure: HTMLElement, redraw: 
   paint();
   resize();
 
+  const stopTurning = floatAndTurn(stage, holder, () => renderer.render(scene, camera));
+
   let shown = false;
   return {
     draw(a, e) {
@@ -179,6 +276,7 @@ export const mountWorkScene = (stage: HTMLElement, figure: HTMLElement, redraw: 
       }
     },
     dispose() {
+      stopTurning();
       themeWatch.disconnect();
       sizeWatch.disconnect();
       schemeQuery.removeEventListener('change', paint);

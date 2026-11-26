@@ -4,6 +4,7 @@
  * and a live region that says how it went. Without clipboard access it selects the text instead,
  * and says so. The message clears after a few seconds, so no stale "copied" stays for screen readers.
  */
+import '../../styles/buttons-quiet.css';
 interface Props {
   /** The text that gets copied and shown. */
   value: string;
@@ -21,7 +22,13 @@ const { value, href, copyLabel, copiedLabel, failedLabel } = Astro.props;
   <a class="address" href={href}>
     {value}
   </a>
-  <button type="button" class="btn" data-copy={value} data-done={copiedLabel} data-failed={failedLabel}>
+  <button
+    type="button"
+    class="btn btn-secondary"
+    data-copy={value}
+    data-done={copiedLabel}
+    data-failed={failedLabel}
+  >
     {copyLabel}
   </button>
   <span class="status" role="status" aria-live="polite"></span>
@@ -70,20 +77,6 @@ const { value, href, copyLabel, copiedLabel, failedLabel } = Astro.props;
     font-weight: 600;
     letter-spacing: -0.01em;
     overflow-wrap: anywhere;
-  }
-  .btn {
-    font: 600 var(--size-sm) var(--font-sans);
-    color: var(--color-ink);
-    background: var(--color-surface);
-    border: 1px solid var(--color-rule);
-    border-radius: var(--radius-control);
-    padding: 0 var(--space-4);
-    min-height: 44px;
-    cursor: pointer;
-    transition: border-color var(--motion-fast) var(--motion-ease-out);
-  }
-  .btn:hover {
-    border-color: var(--color-accent-ui);
   }
   .status {
     font: 500 var(--type-caption);
