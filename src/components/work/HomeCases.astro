@@ -45,9 +45,10 @@ const cases = await getCases(lang);
     text-decoration-color: var(--color-accent-ui);
     text-underline-offset: 4px;
   }
+  /* Two wide cards, side by side; one column on narrow screens. */
   .row {
     display: grid;
     gap: var(--space-6);
-    grid-template-columns: repeat(auto-fill, minmax(min(320px, 100%), 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(360px, 100%), 1fr));
   }
 </style>

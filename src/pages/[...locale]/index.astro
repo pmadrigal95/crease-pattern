@@ -6,12 +6,11 @@ import Byline from '../../components/site/Byline.astro';
 import CopyText from '../../components/site/CopyText.astro';
 import HeroFold from '../../components/site/HeroFold.astro';
 import HomePrecrease from '../../components/site/HomePrecrease.astro';
+import WorkReadout from '../../components/site/WorkReadout.astro';
 import WorkModel from '../../components/site/WorkModel.astro';
 import HomeCases from '../../components/work/HomeCases.astro';
 import { getProfile } from '../../lib/profile';
 import { copyFor, fill } from '../../i18n/dictionary';
-import { auditedPages, jsBudgetKb, themes } from '../../config/quality';
-import { allVisualDirections } from '../../config/visual-direction';
 import manifest from '../../generated/inspector.json';
 import { langOf, localeStaticPaths, localize } from '../../i18n/routing';
 import '../../styles/buttons-quiet.css';
@@ -21,29 +20,6 @@ const copy = copyFor(lang);
 const profile = await getProfile(Astro.currentLocale);
 const home = copy.home;
 const work = home.work;
-// "This site, measured" (decision 50). The first-load JavaScript is only known after the build:
-// the page renders a placeholder and scripts/stamp-site-metrics.ts fills it in dist.
-interface Metric {
-  value: string | null;
-  unit?: string;
-  label: string;
-  note: string;
-}
-const m = work.metrics;
-const metrics: Metric[] = [
-  { value: null, unit: m.js.unit, label: m.js.label, note: fill(m.js.note, { budget: jsBudgetKb.page }) },
-  {
-    value: '0',
-    label: fill(m.axe.label, {
-      pages: auditedPages.length,
-      identities: allVisualDirections.length,
-      themes: themes.length,
-    }),
-    note: m.axe.note,
-  },
-  { value: String(Object.keys(manifest.parts).length), label: m.parts.label, note: m.parts.note },
-  { value: String(allVisualDirections.length), label: m.identities.label, note: m.identities.note },
-];
 const commit = manifest.commit.slice(0, 7);
 
 /** This page in every language (src/i18n/routing.ts). */
@@ -94,20 +70,7 @@ export const getStaticPaths = localeStaticPaths;
         </div>
         <WorkModel />
       </div>
-      <dl class="readout">
-        {metrics.map((metric) => (
-          <div>
-            <dt>
-              {metric.label}
-              <span class="note">{metric.note}</span>
-            </dt>
-            <dd>
-              {metric.value === null ? <span data-metric="first-load-js">—</span> : metric.value}
-              {metric.unit && <span class="unit">{metric.unit}</span>}
-            </dd>
-          </div>
-        ))}
-      </dl>
+      <WorkReadout />
       <div class="source">
         <p>{fill(work.source, { commit })}</p>
         <p class="actions">
@@ -302,46 +265,6 @@ export const getStaticPaths = localeStaticPaths;
     font: var(--type-caption);
     color: var(--color-mute);
   }
-  .readout {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    margin: var(--space-12) 0 0;
-    border-top: var(--stroke-crease) solid var(--color-ink);
-  }
-  .readout > div {
-    display: flex;
-    flex-direction: column-reverse;
-    justify-content: flex-end;
-    gap: var(--space-2);
-    padding: var(--space-6) var(--space-6) 0 0;
-  }
-  .readout > div + div {
-    padding-left: var(--space-6);
-    border-left: 1px dashed var(--color-rule);
-  }
-  dt {
-    font: var(--type-caption);
-    color: var(--color-mute);
-  }
-  .note {
-    display: block;
-    margin-top: var(--space-2);
-    color: var(--color-second);
-  }
-  dd {
-    margin: 0;
-    font-size: clamp(2.25rem, 4.5vw, 3.5rem);
-    font-weight: 600;
-    line-height: 1;
-    letter-spacing: -0.03em;
-  }
-  .unit {
-    margin-left: var(--space-1);
-    font-size: 0.4em;
-    font-weight: 500;
-    letter-spacing: 0;
-    color: var(--color-mute);
-  }
   .source {
     display: flex;
     flex-wrap: wrap;
@@ -391,14 +314,6 @@ export const getStaticPaths = localeStaticPaths;
     }
     .hero-grid :global(.hero-fold) {
       max-width: 300px;
-    }
-    .readout {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      row-gap: var(--space-8);
-    }
-    .readout > div:nth-child(odd) {
-      padding-left: 0;
-      border-left: 0;
     }
   }
 </style>
