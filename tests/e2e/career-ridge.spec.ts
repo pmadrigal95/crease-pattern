@@ -72,7 +72,8 @@ test('inspecting shows the ridge as built: every height annotated, every fold an
   await expect.poll(() => plan.evaluate((el) => getComputedStyle(el).opacity)).toBe('1');
   await expect(plan.locator('line')).toHaveCount(3); // 1,000, 2,000 and 3,000 m
   await expect(plan.locator('.height')).toHaveText(['1,435 m', '2,708 m', '3,340 m', '3,432 m']);
-  await expect(page.locator(`${figure} svg.wide .contours line`).first()).toBeVisible();
+  // Drawn, not "visible": a level line has no height, which Playwright counts as hidden.
+  await expect(page.locator(`${figure} svg.wide .contours line`).first()).toHaveCSS('display', 'inline');
 });
 
 for (const [direction, ice, snow] of [
