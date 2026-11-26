@@ -115,7 +115,11 @@
     "notes": {
       "heading": "Precrease",
       "intro": "Notas sobre cómo se diseña y se construye software, desde la arquitectura hasta el trabajo con IA. Las escribo en público e incluyo lo que salió mal.",
-      "kicker": "{number} · {kind} · {date}",
+      "plan": {
+        "mountain": "Pliegue de montaña",
+        "valley": "Pliegue de valle",
+        "made": "Generada del nombre del post al publicar. Sin archivos de imagen."
+      },
       "latest": "Últimas entradas",
       "empty": "El primer pliegue está en proceso. Cuenta quién soy y de qué va a tratar este blog.",
       "all": "Leer Precrease"

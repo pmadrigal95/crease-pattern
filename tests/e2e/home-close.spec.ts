@@ -1,15 +1,39 @@
 import { expect, test } from '@playwright/test';
+import AxeBuilder from '@axe-core/playwright';
 
 // Design debt phase 4: Precrease on the home page in the zine's voice, a one-line Contact, the
 // footer on a crease, and a 404 that draws the map it talks about.
 
-test('the home page shows the latest Crease large, the earlier ones in a list', async ({ page }) => {
+test('the home page shows the latest Crease as a cover, the two before it as cards', async ({ page }) => {
   await page.goto('/');
   const section = page.locator('#precrease');
   await expect(section.getByRole('heading', { level: 2, name: 'Precrease' })).toBeVisible();
-  await expect(section.locator('.latest h3 a')).toHaveAttribute('href', /^\/precrease\/.+/);
-  await expect(section.locator('.latest .kicker')).toHaveText(/^Crease No\. \d{3} · .+ · .+\d{4}$/);
-  expect(await section.locator('.older li').count()).toBeLessThanOrEqual(2);
+  const cover = section.locator('.cover');
+  await expect(cover.locator('h3 a')).toHaveAttribute('href', /^\/precrease\/.+/);
+  // The number only with its label, on the cover's sheet; the rest say what each post is in words.
+  await expect(cover.locator('.stamp')).toHaveText(/^Crease No\. \d{3}$/);
+  await expect(cover.locator('.kind')).toHaveText(/^Essay · .+$/);
+  await expect(cover.locator('.meta')).toHaveText(/\d{4} · \d+ min read/);
+  const cards = section.locator('.card');
+  expect(await cards.count()).toBeLessThanOrEqual(2);
+  for (const card of await cards.all()) await expect(card).not.toContainText(/No\. \d|\b0\d\d\b/);
+});
+
+test('inspecting lays the cover sheet flat and names its folds', async ({ page }) => {
+  await page.goto('/');
+  const plan = page.locator('#precrease .cover .plan');
+  await expect(plan).toBeHidden();
+  await page.locator('[data-inspector-toggle]').click();
+  await page.locator('#precrease').scrollIntoViewIfNeeded();
+  await expect(plan).toBeVisible();
+  await expect(plan).toContainText('Mountain fold');
+  await expect(plan).toContainText('Valley fold');
+  await expect(page.locator('#precrease .cover .sheet')).toHaveCSS('transform', 'none');
+  const results = await new AxeBuilder({ page })
+    .include('#precrease')
+    .withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa'])
+    .analyze();
+  expect(results.violations).toEqual([]);
 });
 
 test('the serif loads only as Precrease approaches, never with the page', async ({ page }) => {

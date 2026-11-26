@@ -115,7 +115,11 @@
     "notes": {
       "heading": "Precrease",
       "intro": "Notes on how software gets designed and built, from architecture to working with AI. I write them in public and include what went wrong.",
-      "kicker": "{number} · {kind} · {date}",
+      "plan": {
+        "mountain": "Mountain fold",
+        "valley": "Valley fold",
+        "made": "Drawn from the post’s name at build time. No image files."
+      },
       "latest": "Latest posts",
       "empty": "The first crease is being folded. It introduces who I am and what this blog will cover.",
       "all": "Read Precrease"
