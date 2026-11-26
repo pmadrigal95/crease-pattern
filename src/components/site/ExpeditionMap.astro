@@ -8,7 +8,12 @@
  * Styled like a maps app: quiet terrain, one route of straight legs with a casing, round pins with a ring,
  * labels with a halo so they stay legible over the contours. Two drawings (wide and phone), one
  * shown by CSS. Static SVG, no JavaScript, no inline styles.
+ *
+ * On a wide screen whose device can run it, the drawing gives way to the places as paper models of
+ * their real terrain (ExpeditionRelief.astro); the drawing stays for everyone else, and is the
+ * first thing everyone sees.
  */
+import ExpeditionRelief from './ExpeditionRelief.astro';
 import { careerFor, climbs, places } from '../../lib/career';
 import { expeditionMap, type MapFrame } from '../../lib/terrain';
 import { copyFor, fill } from '../../i18n/dictionary';
@@ -106,7 +111,11 @@ const years = (major: number) => {
       })}
     </svg>
   ))}
-  <figcaption>{t.caption}</figcaption>
+  <ExpeditionRelief />
+  <figcaption>
+    <span class="caption-map">{t.caption}</span>
+    <span class="caption-relief">{t.relief.caption}</span>
+  </figcaption>
 </figure>
 
 <style>
@@ -133,6 +142,15 @@ const years = (major: number) => {
       display: block;
     }
   }
+  .caption-relief,
+  .relief-on .caption-map,
+  .relief-on .drawing {
+    display: none;
+  }
+  .relief-on .caption-relief {
+    display: inline;
+  }
+
   figcaption {
     padding: var(--space-3) var(--space-4);
     border-top: 1px solid var(--color-rule);
