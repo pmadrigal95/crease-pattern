@@ -107,7 +107,9 @@
       "profile": {
         "summary": "Mi carrera como perfil de altitud, de {from} a hoy: {releases}. Ahora voy en la versión {version}.",
         "release": "v{major} {codename}, {elevation}, {theme}",
-        "now": "v{version} · {codename} · HOY"
+        "now": "v{version} · {codename} · hoy",
+        "walk": "Recorre la ruta",
+        "label": "Mi carrera, de volcán en volcán. Usa las flechas para recorrerla."
       }
     },
     "notes": {
