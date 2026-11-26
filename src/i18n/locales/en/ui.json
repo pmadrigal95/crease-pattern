@@ -107,7 +107,9 @@
       "profile": {
         "summary": "My career as an elevation profile, from {from} to today: {releases}. I'm on version {version} now.",
         "release": "v{major} {codename}, {elevation}, {theme}",
-        "now": "v{version} · {codename} · NOW"
+        "now": "v{version} · {codename} · now",
+        "walk": "Walk the route",
+        "label": "My career, volcano by volcano. Use the arrow keys to walk it."
       }
     },
     "notes": {
