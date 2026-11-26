@@ -6,9 +6,9 @@
 //    nothing references never reach a visitor and don't count.
 //  - workModel: the Work section's Sonobe animator (src/components/site/work-model.ts), loaded on
 //    the home page as the section approaches.
-//  - scene3d: M4's 3D scenes, the hero's fox (src/components/inspector/scene3d.ts) and the Work
-//    star (src/components/site/work3d.ts), and what only they import (three.js, shared). They load
-//    only on the home page, on capable devices.
+//  - scene3d: the 3D scenes, the hero's fox (src/components/inspector/scene3d.ts), the Work star
+//    (src/components/site/work3d.ts) and the changelog's relief (src/components/site/changelog3d.ts),
+//    and what only they import (three.js, shared). They load only on capable devices.
 //  - commandMenu: the command menu (src/components/site/command-menu.ts), loaded on any page the
 //    first time a visitor opens it with Ctrl/Cmd+K or its button.
 //  - inspectorViews: the Inspector's folded views (src/components/inspector/fold.ts), loaded the
@@ -34,7 +34,7 @@ export const toKb = (bytes: number): number => Math.round((bytes / 1024) * 10) /
  * it counts here, not in the Inspector's onDemand (where it took 0.8 KB until 2026-11-20).
  */
 const isScene3d = (file: string): boolean =>
-  /^(scene3d|work3d|hero3d|scene3d-support)\.[\w-]+\.js$/.test(file);
+  /^(scene3d|work3d|changelog3d|hero3d|scene3d-support)\.[\w-]+\.js$/.test(file);
 /** The Work animator's entry chunk. */
 const isWorkModel = (file: string): boolean => /^work-model\.[\w-]+\.js$/.test(file);
 /** The command menu's entry chunk. */
