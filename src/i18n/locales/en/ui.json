@@ -60,19 +60,30 @@
         "js": {
           "unit": "KB",
           "label": "of JavaScript your browser runs for this page",
-          "note": "the limit is {budget} KB: less code loads faster, even on slow phones"
+          "note": "the limit is {budget} KB: less code loads faster, even on slow phones",
+          "spare": "to spare"
         },
         "axe": {
           "label": "accessibility errors found by automated checks, across {pages} pages, {identities} visual styles, light and dark",
-          "note": "run with axe on every change"
+          "note": "run with axe on every change",
+          "grid": "{pages} pages × {identities} styles × {themes} themes",
+          "clean": "{runs} of {runs} clean"
         },
         "parts": {
           "label": "parts of this site you can open and inspect",
-          "note": "each shows its code, design values and last change"
+          "note": "each shows its code, design values and last change",
+          "families": {
+            "pages": "Pages",
+            "site": "Site",
+            "precrease": "Precrease",
+            "sonobe": "Sonobe essay",
+            "threads": "Threads essay",
+            "work": "Cases"
+          }
         },
         "identities": {
           "label": "visual styles, one design system",
-          "note": "switch them in the Inspector; only the colors change"
+          "note": "switch them here or in the Inspector; only the colors change"
         }
       },
       "source": "Measured on version {commit} of this site, the one you're reading.",

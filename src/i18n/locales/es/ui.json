@@ -60,19 +60,30 @@
         "js": {
           "unit": "KB",
           "label": "de JavaScript que tu navegador ejecuta en esta página",
-          "note": "el límite es {budget} KB: menos código carga más rápido, incluso en teléfonos lentos"
+          "note": "el límite es {budget} KB: menos código carga más rápido, incluso en teléfonos lentos",
+          "spare": "de margen"
         },
         "axe": {
           "label": "errores de accesibilidad encontrados por revisiones automáticas, en {pages} páginas, {identities} estilos visuales, claro y oscuro",
-          "note": "se revisa con axe en cada cambio"
+          "note": "se revisa con axe en cada cambio",
+          "grid": "{pages} páginas × {identities} estilos × {themes} temas",
+          "clean": "{runs} de {runs} sin errores"
         },
         "parts": {
           "label": "partes de este sitio que puedes abrir e inspeccionar",
-          "note": "cada una muestra su código, sus valores de diseño y su último cambio"
+          "note": "cada una muestra su código, sus valores de diseño y su último cambio",
+          "families": {
+            "pages": "Páginas",
+            "site": "Sitio",
+            "precrease": "Precrease",
+            "sonobe": "Ensayo Sonobe",
+            "threads": "Ensayo de hilos",
+            "work": "Casos"
+          }
         },
         "identities": {
           "label": "estilos visuales, un solo sistema de diseño",
-          "note": "cámbialos en el Inspector; solo cambian los colores"
+          "note": "cámbialos aquí o en el Inspector; solo cambian los colores"
         }
       },
       "source": "Medido en la versión {commit} de este sitio, la que estás leyendo.",

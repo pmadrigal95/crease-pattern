@@ -11,6 +11,8 @@ const settleEntranceAnimations = async (page: Page) => {
       document
         .getAnimations()
         .filter((a) => a.timeline instanceof DocumentTimeline)
+        // A loop never finishes (the Work star floating, WorkModel.astro): it isn't waited for.
+        .filter((a) => a.effect?.getComputedTiming().endTime !== Infinity)
         .map((a) => a.finished.catch(() => undefined)),
     ),
   );
