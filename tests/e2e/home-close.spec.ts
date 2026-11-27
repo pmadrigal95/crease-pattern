@@ -55,6 +55,57 @@ test('Contact is one line, the address and a copy button', async ({ page }) => {
   await expect(contact.getByRole('link', { name: /@/ })).toHaveAttribute('href', /^mailto:/);
 });
 
+test('Contact is a postcard that turns over to the Irazú, and back', async ({ page }) => {
+  await page.goto('/');
+  const card = page.locator('[data-postcard]');
+  const front = card.locator('.front');
+  const turn = page.getByRole('button', { name: 'See the front' });
+  // The postmark's clock: the local time in Costa Rica.
+  await expect(card.locator('[data-clock]')).toHaveText(/^\d{1,2}:\d{2}/);
+  await expect(front).toHaveJSProperty('inert', true);
+  await turn.click();
+  await expect(page.getByRole('button', { name: 'See the back' })).toBeVisible();
+  await expect(front).toHaveJSProperty('inert', false);
+  await expect(card.locator('.back')).toHaveJSProperty('inert', true);
+  await expect(page.getByRole('img', { name: /Irazú volcano as contour lines/ })).toBeVisible();
+  await page.getByRole('button', { name: 'See the back' }).click();
+  await expect(card.getByRole('link', { name: /@/ })).toBeVisible();
+});
+
+test('copying the address stamps the postcard', async ({ page, context }) => {
+  await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+  await page.goto('/');
+  const card = page.locator('[data-postcard]');
+  await card.getByRole('button', { name: 'Copy email' }).click();
+  await expect(card).toHaveClass(/stamped/);
+  await expect(card.locator('.cancel')).toHaveCSS('opacity', '0.9');
+});
+
+test('without JavaScript the postcard keeps its address and copy button, and no turn', async ({
+  browser,
+}) => {
+  const context = await browser.newContext({ javaScriptEnabled: false });
+  const page = await context.newPage();
+  await page.goto('/');
+  const card = page.locator('[data-postcard]');
+  await expect(card.getByRole('link', { name: /@/ })).toHaveAttribute('href', /^mailto:/);
+  await expect(page.locator('[data-turn]')).toBeHidden();
+  await context.close();
+});
+
+test('inspecting names the print layers of the postcard', async ({ page }) => {
+  await page.goto('/?inspect');
+  const layers = page.locator('[data-postcard] .layer');
+  await page.locator('#contact').scrollIntoViewIfNeeded();
+  await expect(layers).toHaveCount(4);
+  for (const layer of await layers.all()) await expect(layer).toBeVisible();
+  const results = await new AxeBuilder({ page })
+    .include('#contact')
+    .withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa'])
+    .analyze();
+  expect(results.violations).toEqual([]);
+});
+
 test('the footer hangs on a crease with the figure, on every page', async ({ page }) => {
   for (const path of ['/', '/about', '/colophon']) {
     await page.goto(path);

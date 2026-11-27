@@ -129,7 +129,22 @@
       "intro": "Por correo me encuentras más rápido.",
       "copy": "Copiar el correo",
       "copied": "Correo copiado",
-      "copyFailed": "No se pudo copiar. La dirección quedó seleccionada para que la copies tú."
+      "copyFailed": "No se pudo copiar. La dirección quedó seleccionada para que la copies tú.",
+      "postcard": {
+        "to": "Para",
+        "greetings": "Saludos desde Costa Rica",
+        "place": "Costa Rica",
+        "picture": "Irazú · {elevation} m",
+        "front": "Ver el frente",
+        "back": "Ver el reverso",
+        "label": "El frente de la postal: el volcán Irazú en curvas de nivel, saludos desde Costa Rica",
+        "layers": {
+          "paper": "Papel · la superficie de la identidad",
+          "ink": "Tinta · Newsreader, la serif del sitio",
+          "stamp": "Estampilla · la figura de la identidad",
+          "postmark": "Matasellos · hora de tu navegador, zona de Costa Rica"
+        }
+      }
     }
   },
   "footer": {
