@@ -159,6 +159,7 @@
     }
   },
   "notFound": {
+    "eyebrow": "Error 404",
     "title": "This page isn't on the map.",
     "body": "The link may be outdated or mistyped.",
     "aside": "I've taken a few wrong trails myself. This one leads back home.",
@@ -166,8 +167,16 @@
     "map": {
       "label": "A contour map of the Irazú volcano, drawn from real elevation data. You are here, just outside its edge, and a dashed trail leads in to the summit.",
       "here": "You are here",
-      "note": "Irazú, {summit} m · contours every {interval} m"
-    }
+      "note": "Irazú, {summit} m · contours every {interval} m",
+      "off": "m · off the map",
+      "layers": {
+        "map": "contours · Copernicus GLO-30",
+        "trail": "trail",
+        "figure": "the identity's figure"
+      }
+    },
+    "pause": "Pause the figure",
+    "play": "Move the figure"
   },
   "changelogPage": {
     "title": "Changelog",

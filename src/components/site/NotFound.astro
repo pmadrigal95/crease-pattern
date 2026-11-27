@@ -1,0 +1,56 @@
+---
+/**
+ * The 404 page's content, in the page's language (doc 38). Two pages use it: src/pages/404.astro
+ * and src/pages/es/404.astro. Cloudflare answers a missing path with the nearest 404.html, so
+ * /es/… reads Spanish with no script.
+ */
+import NotFoundMap from './NotFoundMap.astro';
+import { copyFor } from '../../i18n/dictionary';
+import { langOf, localize } from '../../i18n/routing';
+const t = copyFor(Astro.currentLocale).notFound;
+const home = localize('/', langOf(Astro.currentLocale));
+---
+
+<div class="wrap nf">
+  <div>
+    <header class="page-head">
+      <p class="eyebrow">{t.eyebrow}</p>
+      <h1>{t.title}</h1>
+      <p>{t.body}</p>
+      <p class="aside">{t.aside}</p>
+    </header>
+    <p class="back">
+      <a href={home}>{t.action}</a>
+    </p>
+  </div>
+  <NotFoundMap />
+</div>
+
+<style>
+  /* The words on one side, the map they're about on the other (design debt phase 4). */
+  .nf {
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+    gap: var(--space-12);
+    align-items: center;
+    padding-block: var(--space-12) var(--space-24);
+  }
+  .aside {
+    margin-top: var(--space-2);
+  }
+  .back {
+    margin: 0;
+  }
+  @media (max-width: 860px) {
+    .nf {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+  .back a {
+    font-weight: 600;
+    color: var(--color-accent);
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+</style>

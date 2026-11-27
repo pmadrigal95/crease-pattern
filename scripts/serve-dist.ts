@@ -54,13 +54,23 @@ const fileFor = (path: string): string | null => {
   return null;
 };
 
+/** The nearest 404.html up the path, as Cloudflare's `not_found_handling: "404-page"` serves it. */
+const notFoundFor = (path: string): string => {
+  const parts = path.split('/').slice(1, -1);
+  for (let n = parts.length; n > 0; n--) {
+    const file = normalize(join(root, ...parts.slice(0, n), '404.html'));
+    if (file.startsWith(root) && existsSync(file)) return file;
+  }
+  return join(root, '404.html');
+};
+
 createServer((req, res) => {
   const path = new URL(req.url ?? '/', 'http://localhost').pathname;
   for (const rule of rules)
     if (matches(rule.path, path)) for (const [name, value] of rule.headers) res.setHeader(name, value);
   const file = fileFor(path);
   res.statusCode = file ? 200 : 404;
-  const served = file ?? join(root, '404.html');
+  const served = file ?? notFoundFor(path);
   res.setHeader('Content-Type', TYPES[extname(served)] ?? 'application/octet-stream');
   res.end(readFileSync(served));
 }).listen(port, '127.0.0.1', () => console.log(`dist/ with _headers on http://127.0.0.1:${port}`));
