@@ -71,3 +71,28 @@ test('the principles are cards, and Elsewhere is left to the footer', async ({ p
   await expect(story.getByRole('heading', { name: 'Elsewhere' })).toHaveCount(0);
   await expect(story.locator('.trail h2')).toHaveText('Away from the keyboard');
 });
+
+test('once in view the portrait hints at its second layer, then reading takes over', async ({ page }) => {
+  await wide(page);
+  const portrait = page.locator('[data-folded-portrait]');
+  await expect(portrait).toHaveClass(/is-hinting/);
+  // Mid-sweep the fold has moved toward the contours.
+  await expect
+    .poll(async () =>
+      Number(await portrait.evaluate((el) => getComputedStyle(el).getPropertyValue('--fold'))),
+    )
+    .toBeLessThan(70);
+  await expect(portrait).toHaveClass(/is-reading/, { timeout: 4000 });
+  await expect(portrait).not.toHaveClass(/is-hinting/);
+});
+
+test('on a phone the portrait opens when it is reached, not while the page loads', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/about');
+  const portrait = page.locator('[data-folded-portrait]');
+  await page.waitForTimeout(600);
+  await expect(portrait).not.toHaveClass(/is-opening/);
+  await portrait.scrollIntoViewIfNeeded();
+  await expect(portrait).toHaveClass(/is-opening/);
+  await expect(handle(page)).toHaveAttribute('aria-valuenow', '39', { timeout: 4000 });
+});

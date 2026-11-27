@@ -16,8 +16,10 @@
  * on the story, `--story`, where supported; still with reduced motion). The caption reads the
  * split. Moving the handle hands the fold back to the visitor for the rest of the visit.
  *
- * Without JavaScript the fold rests through the nose. Without scroll timelines it opens once per
- * page load (not under reduced motion) and then follows the handle: pointer or arrow keys.
+ * Once in view it shows its second layer: on wide screens a sweep toward the contours and back
+ * before reading takes over; elsewhere the original opening, top to bottom. Without JavaScript the
+ * fold rests through the nose; with reduced motion it rests there too, and follows the handle:
+ * pointer or arrow keys.
  */
 import { Picture } from 'astro:assets';
 import portrait from '../../assets/portrait/portrait.jpg';
@@ -31,7 +33,7 @@ const valueText = (fold: number) => fill(t.value, { photo: fold, contours: 100 -
 ---
 
 <figure class="figure" data-inspect="FoldedPortrait">
-  <div class="portrait" data-folded-portrait data-value-template={t.value}>
+  <div class="portrait" data-folded-portrait data-value-template={t.value} data-arrive>
     <div class="photo">
       <Picture
         src={portrait}
@@ -219,6 +221,20 @@ const valueText = (fold: number) => fill(t.value, { photo: fold, contours: 100 -
     display: block;
   }
 
+  /* The hint on wide screens: once in view, the fold sweeps toward the contours and back, to show
+     there is a second layer, before the story takes it over. */
+  .portrait:global(.is-hinting) {
+    animation: portrait-hint 1.6s var(--motion-ease-in-out) 200ms both;
+  }
+  @keyframes portrait-hint {
+    0%,
+    100% {
+      --fold: 85;
+    }
+    50% {
+      --fold: 40;
+    }
+  }
   .portrait:global(.is-opening) {
     animation: portrait-open var(--motion-portrait) var(--motion-ease-in-out) 250ms both;
   }
@@ -286,103 +302,8 @@ const valueText = (fold: number) => fill(t.value, { photo: fold, contours: 100 -
 </style>
 
 <script>
-  // Self-contained on purpose (ENGINEERING.md, "Browser scripts"): with no imports Astro inlines
-  // this script, and About's LCP doesn't wait for extra requests.
-
-  const MIN = 15;
-  const MAX = 85;
-  const REST = 39;
-
-  const start = () => {
-    for (const el of document.querySelectorAll<HTMLElement>('[data-folded-portrait]')) {
-      const handle = el.querySelector<HTMLElement>('.handle');
-      const template = el.dataset.valueTemplate ?? '';
-      if (!handle) continue;
-
-      const set = (value: number) => {
-        const fold = Math.round(Math.min(MAX, Math.max(MIN, value)));
-        // The visitor takes the fold from the story for the rest of the visit.
-        el.classList.remove('is-opening', 'is-reading');
-        el.style.setProperty('--fold', String(fold));
-        handle.setAttribute('aria-valuenow', String(fold));
-        handle.setAttribute(
-          'aria-valuetext',
-          template.replace('{photo}', String(fold)).replace('{contours}', String(100 - fold)),
-        );
-        say(fold);
-      };
-      const current = () => Number(handle.getAttribute('aria-valuenow')) || REST;
-
-      const caption = el.parentElement?.querySelector<HTMLElement>('[data-fold-value]');
-      const say = (fold: number) => {
-        if (caption)
-          caption.textContent = template
-            .replace('{photo}', String(fold))
-            .replace('{contours}', String(100 - fold));
-      };
-      el.classList.add('is-interactive');
-      const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
-      const reading =
-        !still &&
-        CSS.supports('animation-timeline: view()') &&
-        matchMedia('(min-width: 881px)').matches &&
-        Boolean(el.closest('[data-story]'));
-      if (reading) {
-        // The story drives the fold; the slider and the caption follow it.
-        el.classList.add('is-reading');
-        const follow = () => {
-          if (!el.classList.contains('is-reading')) return;
-          const fold = Math.round(Number(getComputedStyle(el).getPropertyValue('--fold')) || REST);
-          handle.setAttribute('aria-valuenow', String(fold));
-          handle.setAttribute(
-            'aria-valuetext',
-            template.replace('{photo}', String(fold)).replace('{contours}', String(100 - fold)),
-          );
-          say(fold);
-        };
-        let queued = false;
-        addEventListener(
-          'scroll',
-          () => {
-            if (queued) return;
-            queued = true;
-            requestAnimationFrame(() => {
-              queued = false;
-              follow();
-            });
-          },
-          { passive: true },
-        );
-        requestAnimationFrame(follow);
-      } else if (!still) {
-        el.classList.add('is-opening');
-        el.addEventListener('animationend', () => set(REST), { once: true });
-      }
-
-      let dragging = false;
-      handle.addEventListener('pointerdown', (e) => {
-        dragging = true;
-        handle.setPointerCapture(e.pointerId);
-      });
-      handle.addEventListener('pointerup', () => (dragging = false));
-      handle.addEventListener('pointercancel', () => (dragging = false));
-      handle.addEventListener('pointermove', (e) => {
-        if (!dragging) return;
-        const r = el.getBoundingClientRect();
-        const x = ((e.clientX - r.left) / r.width) * 100 - 50;
-        const y = ((e.clientY - r.top) / r.height) * 100 - 50;
-        set(50 + (x + y) / 2 / 0.71);
-      });
-      handle.addEventListener('keydown', (e) => {
-        const step = { ArrowRight: 4, ArrowDown: 4, ArrowLeft: -4, ArrowUp: -4, PageDown: 12, PageUp: -12 }[
-          e.key
-        ];
-        const edge = { Home: MIN, End: MAX }[e.key];
-        if (step === undefined && edge === undefined) return;
-        e.preventDefault();
-        set(edge ?? current() + (step ?? 0));
-      });
-    }
-  };
-  start();
+  // The tab, the reading fold and the hint (src/scripts/folded-portrait.ts). About's LCP is its title
+  // since the story comes first on phones, so this no longer has to be inlined.
+  import { initFoldedPortraits } from '../../scripts/folded-portrait';
+  initFoldedPortraits();
 </script>
