@@ -9,7 +9,7 @@ test.describe.configure({ timeout: 60_000 });
 const open = async (page: Page, path = '/') => {
   await page.goto(path);
   await page.locator('[data-inspector-toggle]').click();
-  await expect(page.locator('#inspector')).toBeVisible();
+  await expect(page.locator('#pm-inspector')).toBeVisible();
 };
 const choose = (page: Page, name: 'Layers' | 'Fold' | 'Pattern') =>
   page.getByRole('radio', { name, exact: true }).check();
@@ -116,7 +116,7 @@ test('closing the Inspector unfolds the page back where the visitor left it', as
   await page.mouse.wheel(0, 900);
   await expect.poll(() => page.evaluate(() => scrollY)).toBeGreaterThan(500);
   await page.locator('[data-inspector-toggle]').click();
-  await expect(page.locator('#inspector')).toBeVisible();
+  await expect(page.locator('#pm-inspector')).toBeVisible();
   const before = await page.evaluate(() => scrollY);
   await choose(page, 'Fold');
   await settled(page);

@@ -7,7 +7,7 @@ const ready = { timeout: 15_000 };
 
 const openInspector = async (page: Page) => {
   await page.locator('[data-inspector-toggle]').click();
-  await expect(page.locator('#inspector')).toBeVisible(ready);
+  await expect(page.locator('#pm-inspector')).toBeVisible(ready);
 };
 const pick = (page: Page, name: string) => page.locator(`input[name="${name}"]`);
 
@@ -44,7 +44,7 @@ test('away from home, a new figure brings a link to watch it fold there', async 
   await page.goto('/work');
   await openInspector(page);
   const link = page
-    .locator('#inspector')
+    .locator('#pm-inspector')
     .getByRole('link', { name: 'See the figure fold on the home page →' });
   await expect(link).toHaveCount(0);
   // Contour lines to Basalt & glacier: a new figure, the fox.
@@ -61,7 +61,7 @@ test('a theme change that keeps the figure brings no link', async ({ page }) => 
   await openInspector(page);
   await pick(page, 'inspector-theme').and(page.locator('[value="dark"]')).check({ force: true });
   await page.waitForTimeout(1500);
-  await expect(page.locator('#inspector').getByRole('link', { name: /figura doblarse/ })).toHaveCount(0);
+  await expect(page.locator('#pm-inspector').getByRole('link', { name: /figura doblarse/ })).toHaveCount(0);
 });
 
 test('?fold opens the home page with the figure flat, then folds it', async ({ page }) => {

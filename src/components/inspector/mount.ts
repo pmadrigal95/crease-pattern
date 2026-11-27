@@ -75,7 +75,7 @@ export const openInspector = async (
 ): Promise<InspectorHandle> => {
   const [manifest, css, strings] = await Promise.all([loadManifest(), loadStyles(), loadStrings()]);
   adoptStyles(css);
-  // A box-less wrapper: the panel (aside#inspector) and the part's outline render side by side in
+  // A box-less wrapper: the panel (aside#pm-inspector) and the part's outline render side by side in
   // it, so the outline never sits inside the panel's stacking context and paints over it.
   const host = document.createElement('div');
   host.className = 'inspector-root';

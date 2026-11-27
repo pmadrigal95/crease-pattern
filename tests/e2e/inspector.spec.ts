@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 
 // The Inspector (decision 44, M2a): opened with Shift+I, the Inspect button or ?inspect.
-const panel = '#inspector';
+const panel = '#pm-inspector';
 const toggle = '[data-inspector-toggle]';
 
 test('Shift+I opens the Inspector, moves focus in, and Esc returns it', async ({ page }) => {
@@ -174,7 +174,7 @@ test('reduced motion keeps the Inspector flat', async ({ browser }) => {
   const context = await browser.newContext({ reducedMotion: 'reduce' });
   const page = await context.newPage();
   await page.goto('/?inspect');
-  await expect(page.locator('#inspector')).toBeVisible();
+  await expect(page.locator('#pm-inspector')).toBeVisible();
   await expect(page.locator('html')).not.toHaveClass(/inspector-3d/);
   await expect(page.locator('main')).toHaveCSS('transform', 'none');
   await context.close();
@@ -183,7 +183,7 @@ test('reduced motion keeps the Inspector flat', async ({ browser }) => {
 test('phones keep the Inspector flat', async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 });
   await page.goto('/?inspect');
-  await expect(page.locator('#inspector')).toBeVisible();
+  await expect(page.locator('#pm-inspector')).toBeVisible();
   await expect(page.locator('html')).not.toHaveClass(/inspector-3d/);
 });
 
@@ -208,3 +208,21 @@ test('the Identity switcher applies a direction and a theme, and remembers them'
   await expect(page.locator('html')).not.toHaveAttribute('data-theme', /.+/);
   expect(await page.evaluate(() => localStorage.getItem('pm.theme'))).toBeNull();
 });
+
+// The panel shares the page: a page anchor named like the panel (the case plate #inspector) once
+// took on its styles and was left out of the measurements. Every id stays unique while inspecting.
+for (const path of ['/work/crease-pattern', '/es/work/crease-pattern', '/work/buo']) {
+  test(`${path} keeps every id unique while inspecting`, async ({ page }) => {
+    await page.goto(path);
+    await page.locator(toggle).click();
+    await expect(page.locator(panel)).toBeVisible();
+    const repeated = await page.evaluate(() => {
+      const ids = [...document.querySelectorAll('[id]')].map((el) => el.id);
+      return ids.filter((id, i) => ids.indexOf(id) !== i);
+    });
+    expect(repeated).toEqual([]);
+    // The plate named after the Inspector keeps its page width.
+    if (path.includes('crease-pattern'))
+      expect((await page.locator('article#inspector').boundingBox())?.width).toBeGreaterThan(600);
+  });
+}

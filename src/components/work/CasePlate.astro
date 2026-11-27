@@ -1,16 +1,19 @@
 ---
 /**
  * One plate of a case study (M6, direction D "plans + creases"): a sheet of plan paper with its
- * diagram, three numbered notes (goal, approach, result, the result weighted most) and a title
- * block. The sheet arrives folded and unfolds as it comes into view (the page's script); afterwards
- * its crease lines stay faintly on the paper, valley dashed and mountain dash-dot, like a sheet
- * that was folded once. Without JavaScript, or with reduced motion, it is simply open. The fold
- * moves the sheet only, never the text's opacity, so a plate not yet unfolded still reads at full
- * contrast.
+ * diagram drawn straight on the grid, three numbered notes (goal, approach, result, the result set
+ * as the plate's conclusion) and one line naming the sheet. The lead plate spans the page, its
+ * diagram above; the others alternate sides. The sheet arrives folded and unfolds as it comes into
+ * view (the page's script); afterwards its crease lines stay faintly on the paper, valley dashed and
+ * mountain dash-dot, like a sheet that was folded once. Without JavaScript, or with reduced motion,
+ * it is simply open. The fold moves the sheet only, never the text's opacity, so a plate not yet
+ * unfolded still reads at full contrast. Reading a note points at its part of the diagram
+ * (data-step, case-figure.css); the legend is read once, above the plates ([slug].astro).
  */
 import CaseFigure from './CaseFigure.astro';
 import type { Case } from '../../lib/cases';
 import { padNumber } from '../../lib/format';
+import { fill } from '../../i18n/dictionary';
 
 type Plate = Case['data']['plates'][number];
 interface Props {
@@ -18,27 +21,26 @@ interface Props {
   /** 1-based. */
   number: number;
   total: number;
-  company: string;
+  /** The diagram on the right instead of the left (every other plate after the lead). */
+  flip: boolean;
   t: {
     lead: string;
     goal: string;
     approach: string;
     result: string;
-    project: string;
-    plate: string;
-    author: string;
-    practice: string;
-    valley: string;
-    mountain: string;
-    built: string;
+    sheet: string;
   };
-  author: string;
 }
-const { plate, number, total, company, t, author } = Astro.props;
+const { plate, number, total, flip, t } = Astro.props;
+const steps = [
+  { step: 'goal', label: t.goal, text: plate.goal },
+  { step: 'approach', label: t.approach, text: plate.approach },
+  { step: 'result', label: t.result, text: plate.result },
+] as const;
 ---
 
 <article
-  class:list={['plate', { lead: plate.lead }]}
+  class:list={['plate', { lead: plate.lead, flip }]}
   id={plate.id}
   aria-labelledby={`t-${plate.id}`}
   data-plate
@@ -57,66 +59,28 @@ const { plate, number, total, company, t, author } = Astro.props;
       />
     </div>
     <div class="text">
-      {plate.lead && <p class="lead-tag">{t.lead}</p>}
-      <h2 id={`t-${plate.id}`}>{plate.title}</h2>
-      <ol class="notes">
-        <li>
-          <span class="n" aria-hidden="true">
-            1
+      <div class="title">
+        <p class="sheet">
+          {plate.lead && <span class="lead-tag">{t.lead}</span>}
+          <span>
+            {fill(t.sheet, { n: padNumber(number, 2), total: padNumber(total, 2) })} · {plate.practice}
           </span>
-          <div>
-            <span class="k">{t.goal}</span>
-            {plate.goal}
-          </div>
-        </li>
-        <li>
-          <span class="n" aria-hidden="true">
-            2
-          </span>
-          <div>
-            <span class="k">{t.approach}</span>
-            {plate.approach}
-          </div>
-        </li>
-        <li class="result">
-          <span class="n" aria-hidden="true">
-            3
-          </span>
-          <div>
-            <span class="k">{t.result}</span>
-            {plate.result}
-          </div>
-        </li>
-      </ol>
-      <div class="cajetin">
-        <dl>
-          <div class="project">
-            <dt>{t.project}</dt>
-            <dd>
-              {company} · {plate.short}
-            </dd>
-          </div>
-          <div>
-            <dt>{t.plate}</dt>
-            <dd>
-              {padNumber(number, 2)} / {padNumber(total, 2)}
-            </dd>
-          </div>
-          <div>
-            <dt>{t.author}</dt>
-            <dd>{author}</dd>
-          </div>
-          <div class="practice">
-            <dt>{t.practice}</dt>
-            <dd>{plate.practice}</dd>
-          </div>
-        </dl>
-        <p class="legend" aria-hidden="true">
-          <span class="v">{t.valley}</span>
-          <span class="m">{t.mountain}</span>
-          <span class="k">{t.built}</span>
         </p>
+        <h2 id={`t-${plate.id}`}>{plate.title}</h2>
       </div>
+      <ol class="notes">
+        {steps.map((s, i) => (
+          <li class={s.step} data-step={s.step}>
+            <span class="n" aria-hidden="true">
+              {i + 1}
+            </span>
+            <div>
+              <span class="k">{s.label}</span>
+              <p>{s.text}</p>
+            </div>
+          </li>
+        ))}
+      </ol>
     </div>
   </div>
 </article>
@@ -164,22 +128,42 @@ const { plate, number, total, company, t, author } = Astro.props;
   .body {
     position: relative;
     display: grid;
-    grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
-    gap: var(--space-8);
+    grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+    gap: var(--space-12);
     align-items: center;
   }
-  .lead .body {
-    grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+  .flip .fig {
+    order: 2;
   }
+  /* The lead plate spans the page: its diagram large above, the title and notes side by side below. */
+  .lead .body {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-8);
+  }
+  .lead .fig {
+    width: min(100%, 860px);
+    margin-inline: auto;
+  }
+  .lead .text {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+    gap: var(--space-12);
+    align-items: start;
+  }
+  /* The diagram is drawn on the plate's own grid, not on a card laid over it. */
   .fig {
-    padding: 20px;
-    border-radius: 12px;
-    background: var(--color-surface);
-    box-shadow: 0 1px 2px rgb(0 0 0 / 0.08);
+    min-width: 0;
+  }
+  .sheet {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2) var(--space-3);
+    margin: 0 0 var(--space-3);
+    font: var(--type-caption);
+    color: var(--color-mute);
   }
   .lead-tag {
-    display: inline-block;
-    margin: 0 0 var(--space-3);
     padding: 4px 10px;
     border-radius: var(--radius-pill);
     background: var(--color-ink);
@@ -194,7 +178,10 @@ const { plate, number, total, company, t, author } = Astro.props;
     text-wrap: balance;
   }
   .lead h2 {
-    font-size: clamp(1.875rem, 3.4vw, 2.75rem);
+    margin: 0;
+    font-size: clamp(2rem, 4vw, 3rem);
+    line-height: 1.04;
+    letter-spacing: -0.03em;
   }
   .notes {
     display: grid;
@@ -208,6 +195,9 @@ const { plate, number, total, company, t, author } = Astro.props;
     grid-template-columns: 2rem 1fr;
     gap: var(--space-2);
   }
+  .notes p {
+    margin: 0;
+  }
   .n {
     width: 24px;
     height: 24px;
@@ -217,6 +207,10 @@ const { plate, number, total, company, t, author } = Astro.props;
     place-items: center;
     font: 500 11px var(--font-mono);
     color: var(--color-mute);
+    transition: border-color 200ms var(--motion-ease-out);
+  }
+  .notes li:hover .n {
+    border-color: var(--color-accent-ui);
   }
   .k {
     display: block;
@@ -224,69 +218,24 @@ const { plate, number, total, company, t, author } = Astro.props;
     font: var(--type-caption);
     color: var(--color-mute);
   }
-  .result div {
+  /* The result is the plate's conclusion: larger, on a rule of the accent. */
+  .notes .result {
+    margin-top: var(--space-2);
+    padding-top: var(--space-4);
+    border-top: 2px solid var(--color-accent-ui);
+  }
+  .result p {
+    font-size: 1.1875rem;
     font-weight: 500;
+    line-height: 1.45;
+    color: var(--color-ink);
+  }
+  .result .k {
+    color: var(--color-accent);
   }
   .result .n {
     border-color: var(--color-ink);
     color: var(--color-ink);
-  }
-  .cajetin {
-    margin: var(--space-6) 0 0 auto;
-    width: min(420px, 100%);
-    border: 1px solid color-mix(in oklab, var(--color-ink) 35%, transparent);
-    border-radius: 6px;
-    overflow: hidden;
-    background: var(--color-surface);
-    font: 11px var(--font-mono);
-  }
-  .cajetin dl {
-    display: grid;
-    grid-template-columns: 1fr auto auto;
-    margin: 0;
-  }
-  .cajetin dl > div {
-    padding: 6px 10px;
-    border-left: 1px solid color-mix(in oklab, var(--color-ink) 20%, transparent);
-  }
-  .cajetin dl > div:first-child {
-    border-left: 0;
-  }
-  .cajetin dt {
-    color: var(--color-mute);
-    font-size: 9.5px;
-  }
-  .cajetin dd {
-    margin: 0;
-  }
-  .cajetin .practice {
-    grid-column: 1 / -1;
-    border-left: 0;
-    border-top: 1px solid color-mix(in oklab, var(--color-ink) 20%, transparent);
-  }
-  .legend {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px 14px;
-    margin: 0;
-    padding: 6px 10px;
-    border-top: 1px solid color-mix(in oklab, var(--color-ink) 20%, transparent);
-    color: var(--color-mute);
-  }
-  .legend span::before {
-    content: '';
-    display: inline-block;
-    width: 22px;
-    margin-right: 6px;
-    vertical-align: middle;
-    border-top: 1.5px dashed var(--color-mute);
-  }
-  .legend .m::before {
-    border-top-style: dotted;
-    border-color: var(--color-accent-ui);
-  }
-  .legend .k::before {
-    border-top: 2px solid var(--color-accent-ui);
   }
 
   /* The fold: only when the page's script says the plate may move (JavaScript on, motion allowed). */
@@ -313,18 +262,13 @@ const { plate, number, total, company, t, author } = Astro.props;
       border-radius: 10px;
     }
     .body,
-    .lead .body {
+    .lead .body,
+    .lead .text {
       grid-template-columns: 1fr;
+      gap: var(--space-6);
     }
-    .cajetin dl {
-      grid-template-columns: 1fr auto;
-    }
-    .cajetin .project {
-      grid-column: 1 / -1;
-      border-bottom: 1px solid color-mix(in oklab, var(--color-ink) 20%, transparent);
-    }
-    .cajetin dl > div:nth-child(2) {
-      border-left: 0;
+    .flip .fig {
+      order: 0;
     }
   }
 </style>

@@ -9,7 +9,7 @@ const card = '.cm-card';
 
 const start = async (page: Page) => {
   await page.locator('[data-inspector-toggle]').click();
-  await page.locator('#inspector .help').click();
+  await page.locator('#pm-inspector .help').click();
   await expect(page.locator(card)).toBeVisible(ready);
 };
 const stored = (page: Page) => page.evaluate(() => sessionStorage.getItem('pm.walkthrough'));
@@ -33,7 +33,7 @@ test('nothing starts on its own, and nothing is stored before it does', async ({
 test('the Inspector starts it; Escape ends it, forgets it and gives focus back', async ({ page }) => {
   await page.goto('/');
   await start(page);
-  await expect(page.locator('#inspector')).toBeHidden();
+  await expect(page.locator('#pm-inspector')).toBeHidden();
   await expect(page.locator(card)).toContainText('1 of 7');
   await expect(page.locator(`${card} h2`)).toBeFocused(ready);
   expect(await stored(page)).toBe('0');
@@ -84,7 +84,7 @@ for (const theme of ['light', 'dark'] as const) {
 test('the Inspector offers it to first-time users, and any time behind its "?"', async ({ page }) => {
   await page.goto('/about');
   await page.locator('[data-inspector-toggle]').click();
-  const panel = page.locator('#inspector');
+  const panel = page.locator('#pm-inspector');
   await expect(panel.getByRole('button', { name: /New here\? Take the one-minute walkthrough/ })).toBeVisible(
     ready,
   );

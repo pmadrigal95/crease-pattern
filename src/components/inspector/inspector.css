@@ -10,20 +10,20 @@
   display: contents;
 }
 
-#inspector {
+#pm-inspector {
   --panel-tile: url('/textures/contours.svg');
   --panel-tile-strength: 0.22;
 }
-:root[data-direction='basalt-glacier'] #inspector {
+:root[data-direction='basalt-glacier'] #pm-inspector {
   --panel-tile: url('/textures/basalt.svg');
   --panel-tile-strength: 0.2;
 }
-:root[data-direction='washi-asagi'] #inspector {
+:root[data-direction='washi-asagi'] #pm-inspector {
   --panel-tile: url('/textures/washi.svg');
   --panel-tile-strength: 0.28;
 }
 
-#inspector {
+#pm-inspector {
   position: fixed;
   top: 61px;
   right: 0;
@@ -599,7 +599,7 @@ main [data-inspect] {
 
 /* Washi & asagi: the panel is a sheet folded over the page, with a dashed crease and the fold's
    shadow on its edge and a dog-eared corner. */
-:root[data-direction='washi-asagi'] #inspector {
+:root[data-direction='washi-asagi'] #pm-inspector {
   border-left: 1px dashed var(--color-accent-ui);
   box-shadow:
     inset 14px 0 14px -12px rgb(0 0 0 / 0.22),
@@ -651,7 +651,7 @@ main [data-inspect] {
   .inspector-panel .top {
     margin-top: 0;
   }
-  :root[data-direction='washi-asagi'] #inspector {
+  :root[data-direction='washi-asagi'] #pm-inspector {
     border-left: 0;
     border-top: 1px dashed var(--color-accent-ui);
     box-shadow: 0 -12px 32px rgb(0 0 0 / 0.16);
@@ -659,7 +659,7 @@ main [data-inspect] {
   :root[data-direction='washi-asagi'] .inspector-panel .top::after {
     display: none;
   }
-  #inspector {
+  #pm-inspector {
     top: auto;
     left: 0;
     width: auto;
@@ -671,7 +671,7 @@ main [data-inspect] {
     box-shadow: 0 -12px 32px rgb(0 0 0 / 0.16);
     animation-name: inspector-up;
   }
-  #inspector[data-tall] {
+  #pm-inspector[data-tall] {
     max-height: 88vh;
   }
   @keyframes inspector-up {
@@ -683,7 +683,7 @@ main [data-inspect] {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  #inspector,
+  #pm-inspector,
   .highlight,
   main,
   main [data-inspect],

@@ -13,7 +13,7 @@ const l = (key: string): string => {
 ---
 
 <svg class="dg wide" viewBox="0 0 480 250" role="img" aria-label={description}>
-  <rect class="box" x="10" y="96" width="100" height="56" rx="6" />
+  <rect class="s-goal box" x="10" y="96" width="100" height="56" rx="6" />
   <text class="lbl" x="60" y="121" text-anchor="middle">
     {l('change')}
   </text>
@@ -37,20 +37,20 @@ const l = (key: string): string => {
     {l('team')}
   </text>
   <path class="ln key" d="M302 124 H356 M350 118 L356 124 L350 130" />
-  <rect class="box" x="362" y="96" width="108" height="56" rx="6" />
+  <rect class="s-result box" x="362" y="96" width="108" height="56" rx="6" />
   <text class="lbl" x="416" y="121" text-anchor="middle">
     {l('review')}
   </text>
   <text class="small" x="416" y="138" text-anchor="middle">
     {l('byTeam')}
   </text>
-  <path class="dim" d="M110 200 H356 M110 195 V205 M356 195 V205" />
+  <path class="s-result dim" d="M110 200 H356 M110 195 V205 M356 195 V205" />
   <text class="dimt" x="233" y="222" text-anchor="middle">
     {l('minutes')}
   </text>
 </svg>
 <svg class="dg tall" viewBox="0 0 320 330" role="img" aria-label={description}>
-  <rect class="box" x="70" y="16" width="160" height="50" rx="6" />
+  <rect class="s-goal box" x="70" y="16" width="160" height="50" rx="6" />
   <text class="lbl" x="150" y="38" text-anchor="middle">
     {l('change')}
   </text>
@@ -67,14 +67,14 @@ const l = (key: string): string => {
   </text>
   <text class="small" x="150" y="182" text-anchor="middle">{`${l('criteria')} · ${l('team')}`}</text>
   <path class="ln key" d="M150 194 V222 M144 216 L150 222 L156 216" />
-  <rect class="box" x="70" y="228" width="160" height="50" rx="6" />
+  <rect class="s-result box" x="70" y="228" width="160" height="50" rx="6" />
   <text class="lbl" x="150" y="250" text-anchor="middle">
     {l('review')}
   </text>
   <text class="small" x="150" y="267" text-anchor="middle">
     {l('byTeam')}
   </text>
-  <path class="dim" d="M270 41 V253 M265 41 H275 M265 253 H275" />
+  <path class="s-result dim" d="M270 41 V253 M265 41 H275 M265 253 H275" />
   <text class="dimt" x="292" y="147" text-anchor="middle" transform="rotate(-90 292 147)">
     {l('minutes')}
   </text>

@@ -75,7 +75,7 @@ const phone = matchMedia('(max-width: 720px)');
 const tall = ref(false);
 const toggleSheet = () => {
   tall.value = !tall.value;
-  document.getElementById('inspector')?.toggleAttribute('data-tall', tall.value);
+  document.getElementById('pm-inspector')?.toggleAttribute('data-tall', tall.value);
 };
 const part = (el: Element | null) => {
   const id = idOf(el);
@@ -117,7 +117,7 @@ const place = () => {
 const bringIntoView = (el: HTMLElement) => {
   const behavior = matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
   if (!phone.matches) return el.scrollIntoView({ block: 'nearest', behavior });
-  const sheet = document.getElementById('inspector')?.getBoundingClientRect().height ?? 0;
+  const sheet = document.getElementById('pm-inspector')?.getBoundingClientRect().height ?? 0;
   const rect = el.getBoundingClientRect();
   const free = innerHeight - sheet;
   scrollBy({ top: rect.top - Math.max(16, (free - rect.height) / 2), behavior });
@@ -147,14 +147,14 @@ const onListKey = (e: KeyboardEvent, index: number) => {
 // Inspect mode on the page itself: hovering previews a part, clicking pins it.
 const onPointerOver = (e: PointerEvent) => {
   const el = (e.target as Element).closest<HTMLElement>('[data-inspect]');
-  if (el && !el.closest('#inspector')) {
+  if (el && !el.closest('#pm-inspector')) {
     hovered.value = el;
     place();
   }
 };
 const onClick = (e: MouseEvent) => {
   const el = (e.target as Element).closest<HTMLElement>('[data-inspect]');
-  if (!el || el.closest('#inspector')) return;
+  if (!el || el.closest('#pm-inspector')) return;
   e.preventDefault();
   e.stopPropagation();
   hovered.value = null;
@@ -233,7 +233,8 @@ const metrics = computed(() => [
 </script>
 
 <template>
-  <aside id="inspector" :aria-label="t.title">
+  <!-- Prefixed: a page's own anchors are content (a case plate is #inspector), so the panel's id must not be one of them. -->
+  <aside id="pm-inspector" :aria-label="t.title">
     <div class="inspector-panel">
       <button
         type="button"
