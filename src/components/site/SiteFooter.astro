@@ -336,6 +336,21 @@ const columns = [
     box-shadow: none;
   }
 
+  /* While inspecting, the flap lies flat and plain: no 3D context, motion or surface of its own
+     inside the Inspector's tilted layers. With them, software rendering ran out of memory there
+     (CI, work-model's axe check in dark). */
+  :global(.inspecting) .hinge {
+    perspective: none;
+  }
+  :global(.inspecting) .panel {
+    animation: none;
+    transform: none;
+    opacity: 1;
+  }
+  :global(.inspecting) .panel::before {
+    display: none;
+  }
+
   /* The flap unfolds down from the crease as it comes into view. */
   @supports (animation-timeline: view()) {
     @media (prefers-reduced-motion: no-preference) {
