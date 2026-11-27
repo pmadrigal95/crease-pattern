@@ -94,7 +94,7 @@
 :root[data-direction='washi-asagi'] .btn-primary {
   box-shadow:
     0 1px 1px rgb(0 0 0 / 0.08),
-    0 10px 24px -16px color-mix(in oklab, var(--color-ink) 60%, transparent);
+    0 10px 24px -16px rgb(0 0 0 / 0.6);
 }
 :root[data-direction='washi-asagi'] :is(.btn-primary, .btn-secondary)::after {
   content: '';

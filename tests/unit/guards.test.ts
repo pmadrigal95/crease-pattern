@@ -9,6 +9,8 @@
  * - Debug leftovers: a stray console.log or debugger ships to every visitor.
  * - TypeScript only: the repository is 100% TypeScript, scripts and configs included. A .js file
  *   slipped back in twice before this guard existed.
+ * - Shadows are black: eight of them were mixed from --color-ink, which is light in the dark
+ *   themes, so paper, panels and buttons glowed instead of casting a shadow.
  */
 import { execFileSync } from 'node:child_process';
 import { readdirSync, readFileSync, statSync } from 'node:fs';
@@ -52,6 +54,26 @@ describe('guards', () => {
       found,
       'Use formatDate, formatMonth, formatNumber, formatList or padNumber from src/lib/format.ts',
     ).toEqual([]);
+  });
+
+  // A shadow layer that blurs (its third length isn't 0) in the ink color. A 1px ring in ink is a
+  // border, and stays allowed.
+  const BLURRED_INK =
+    /(?<=box-shadow:(?:[^;]*,)?\s*(?:inset\s+)?)-?\d+(?:px)?\s+-?\d+(?:px)?\s+[1-9]\d*px(?:\s+-?\d+px)?\s+(?:color-mix\(in \w+, )?var\(--color-ink\)/g;
+  test('shadows are never mixed from the ink color', () => {
+    const styled = function* (dir: string): Generator<string> {
+      for (const name of readdirSync(dir)) {
+        const path = join(dir, name);
+        if (statSync(path).isDirectory()) yield* styled(path);
+        else if (/\.(css|astro|vue)$/.test(name)) yield path;
+      }
+    };
+    const found = [...styled(SRC)].flatMap((path) =>
+      [...readFileSync(path, 'utf8').matchAll(BLURRED_INK)].map(() =>
+        relative(SRC, path).split(sep).join('/'),
+      ),
+    );
+    expect(found, 'Use rgb(0 0 0 / alpha): --color-ink is light in the dark themes').toEqual([]);
   });
 
   test('no debug code ships', () => {
