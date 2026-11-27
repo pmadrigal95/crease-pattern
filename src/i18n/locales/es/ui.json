@@ -152,7 +152,11 @@
     "colophon": "Colofón",
     "privacy": "Privacidad",
     "source": "Código en GitHub",
-    "email": "Correo"
+    "email": "Correo",
+    "columns": {
+      "site": "Sitio",
+      "thisSite": "Este sitio"
+    }
   },
   "notFound": {
     "title": "Esta página no está en el mapa.",
