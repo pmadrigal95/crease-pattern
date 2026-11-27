@@ -100,8 +100,8 @@
       "elevation": "{elevation} m",
       "present": "Hoy",
       "sections": {
-        "added": "Nuevo",
-        "changed": "Cambios"
+        "added": "Agregado",
+        "changed": "Cambiado"
       },
       "full": "Leer todas las notas de versión",
       "profile": {
@@ -178,9 +178,9 @@
       "pin": "v{major} {codename}, {elevation}, {years}. Ir a sus notas de versión.",
       "caption": "La Cordillera Volcánica Central de Costa Rica en coordenadas reales. Curvas de nivel cada 250 m; la ruta sigue las versiones en orden.",
       "relief": {
-        "route": "Recorrer la ruta",
-        "hint": "Arrastra o usa las flechas para recorrer la ruta",
-        "caption": "Relieve real de la elevación Copernicus GLO-30, unos 13 km alrededor de cada lugar, con alturas dibujadas a 2,2 veces su escala real. La ruta sigue las versiones en orden."
+        "prev": "Lugar anterior",
+        "next": "Lugar siguiente",
+        "caption": "Relieve real de la elevación Copernicus GLO-30, unos 13 km alrededor de cada lugar, cortado en papel cada 100 m, con alturas a 2,2 veces su escala real."
       }
     },
     "rail": {

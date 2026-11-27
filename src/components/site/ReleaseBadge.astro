@@ -1,0 +1,88 @@
+---
+/**
+ * A release's badge in the changelog's ascent log (ReleaseNotes.astro, doc 37): its place drawn in
+ * contour lines, every 200 m and every 1000 m stronger (light enough for four on one page), cut
+ * round as the 3D models above are.
+ * Drawn at build time from the same Copernicus grids (src/lib/relief.ts), traced with the 404 map's
+ * marching squares (src/lib/terrain.ts). Decorative: the release says its place in words.
+ */
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { RELIEF, resample } from '../../lib/relief';
+import { smooth } from '../../lib/irazu-map';
+import { march, polylines } from '../../lib/terrain';
+
+interface Props {
+  /** The release's major version: 0 base camp, 1 Poás, 2 Turrialba, 3 Irazú. */
+  major: number;
+}
+const { major } = Astro.props;
+const FILES = ['cartago', 'poas', 'turrialba', 'irazu'];
+const file = FILES[major];
+// A badge is 96px across: a 41-sample grid is detail enough, and keeps the page light.
+const n = 41;
+const CELL = 4;
+const size = (n - 1) * CELL;
+let lines: { major: boolean; d: string }[] = [];
+if (file) {
+  const raw = readFileSync(join(process.cwd(), `src/assets/scenes/${file}-dem.bin`));
+  const grid = new Uint16Array(raw.buffer, raw.byteOffset, raw.byteLength / 2);
+  const field = smooth(resample(grid, Math.round(Math.sqrt(grid.length)), n), n, 1, 1);
+  const flat = field.flat();
+  const low = Math.min(...flat);
+  const high = Math.max(...flat);
+  for (let level = Math.ceil(low / 200) * 200; level < high; level += 200) {
+    const d = polylines(march(field, level, CELL));
+    if (d) lines.push({ major: level % 1000 === 0, d });
+  }
+}
+const id = `badge-cut-${major}`;
+---
+
+{file && (
+  <svg class="badge" viewBox={`0 0 ${size} ${size}`} aria-hidden="true" focusable="false">
+    <defs>
+      <clipPath id={id}>
+        <circle cx={size / 2} cy={size / 2} r={size * RELIEF.cut} />
+      </clipPath>
+    </defs>
+    <circle class="disc" cx={size / 2} cy={size / 2} r={size * RELIEF.cut} />
+    <g clip-path={`url(#${id})`}>
+      {lines.map((l) => (
+        <path class:list={['line', { major: l.major }]} d={l.d} />
+      ))}
+    </g>
+  </svg>
+)}
+
+<style>
+  .badge {
+    display: block;
+    width: 96px;
+    height: 96px;
+    margin: 0 0 var(--space-3) auto;
+    filter: drop-shadow(0 10px 12px rgb(0 0 0 / 0.18));
+  }
+  .disc {
+    fill: var(--color-surface);
+    stroke: var(--color-rule);
+    stroke-width: 1.5;
+  }
+  .line {
+    fill: none;
+    stroke: var(--color-mute);
+    stroke-width: 1;
+    stroke-opacity: 0.55;
+    vector-effect: non-scaling-stroke;
+  }
+  .line.major {
+    stroke: var(--color-accent);
+    stroke-opacity: 1;
+    stroke-width: 1.4;
+  }
+  @media (max-width: 720px) {
+    .badge {
+      display: none;
+    }
+  }
+</style>

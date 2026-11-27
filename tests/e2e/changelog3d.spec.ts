@@ -38,9 +38,10 @@ const open = async (page: Page) => {
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto('/changelog');
 };
-const range = (page: Page) => page.getByRole('slider', { name: 'Walk the route' });
+const place = (page: Page, name: string) =>
+  page.getByRole('group', { name: 'Map of the volcanoes behind each release' }).getByRole('button', { name });
 
-test('on a capable device the relief replaces the drawing and climbs to now', async ({ page }) => {
+test('on a capable device the relief replaces the drawing and glides to now', async ({ page }) => {
   await withGl(page);
   const problems: string[] = [];
   page.on('console', (m) => {
@@ -56,33 +57,32 @@ test('on a capable device the relief replaces the drawing and climbs to now', as
   await expect(page.locator(`${map} canvas`)).toHaveCount(1);
   await expect(page.locator(`${map} svg.drawing`).first()).toBeHidden();
   await expect(page.getByText(/^Real relief from Copernicus GLO-30/)).toBeVisible();
-  // The climb ends on the Irazú, now.
-  await expect(range(page)).toHaveValue('1000', ready);
+  // From base camp, the camera glides to the Irazú, now.
+  await expect(place(page, 'Irazú')).toHaveAttribute('aria-pressed', 'true', ready);
   await expect(page.locator(`${map} [data-era="3"]`)).toBeVisible();
   await expect(page.locator(`${map} [data-era="0"]`)).toBeHidden();
   expect(problems).toEqual([]);
 });
 
-test('the slider walks the route from place to place, and says where it is', async ({ page }) => {
+test('a name or a step centres a place, and says where it is', async ({ page }) => {
   await withGl(page);
   await open(page);
-  await expect(range(page)).toHaveValue('1000', ready);
-  await range(page).focus();
-  await page.keyboard.press('PageDown');
+  await expect(place(page, 'Irazú')).toHaveAttribute('aria-pressed', 'true', ready);
+  await page.getByRole('button', { name: 'Previous place' }).click();
   await expect(page.locator(`${map} [data-relief-live]`)).toHaveText('v2 Turrialba, 3,340 m, 2021 – 2024');
   await expect(page.locator(`${map} [data-era="2"]`)).toBeVisible();
-  await page.keyboard.press('Home');
+  await place(page, 'Base camp').click();
   await expect(page.locator(`${map} [data-relief-live]`)).toHaveText(/^v0 Base camp, 1,435 m/);
+  await page.getByRole('button', { name: 'Previous place' }).click();
+  await expect(place(page, 'Irazú')).toHaveAttribute('aria-pressed', 'true');
 });
 
-test('each name under the relief goes to its release notes', async ({ page }) => {
+test('the place in view links to its release notes', async ({ page }) => {
   await withGl(page);
   await open(page);
-  await expect(page.locator(map)).toHaveClass(/relief-on/, ready);
-  const names = page.getByRole('navigation', { name: 'Map of the volcanoes behind each release' });
-  await expect(names.getByRole('link')).toHaveCount(4);
-  await names.getByRole('link', { name: /^v1 Poás/ }).click();
-  await expect(page).toHaveURL(/#release-1$/);
+  await expect(place(page, 'Irazú')).toHaveAttribute('aria-pressed', 'true', ready);
+  await page.locator(`${map} [data-era="3"] .tag a`).click();
+  await expect(page).toHaveURL(/#release-3$/);
 });
 
 test('without WebGL the drawing stays and nothing for the relief downloads', async ({ page }) => {
@@ -119,7 +119,7 @@ for (const theme of ['light', 'dark'] as const) {
     await withGl(page);
     await page.addInitScript((t) => localStorage.setItem('pm.theme', t), theme);
     await open(page);
-    await expect(range(page)).toHaveValue('1000', ready);
+    await expect(place(page, 'Irazú')).toHaveAttribute('aria-pressed', 'true', ready);
     const results = await new AxeBuilder({ page })
       .include(map)
       .withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa'])
