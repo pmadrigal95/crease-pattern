@@ -159,6 +159,7 @@
     }
   },
   "notFound": {
+    "eyebrow": "Error 404",
     "title": "Esta página no está en el mapa.",
     "body": "Puede que el enlace sea viejo o tenga un error.",
     "aside": "Yo también he tomado algún sendero equivocado. Este te lleva de vuelta al inicio.",
@@ -166,8 +167,16 @@
     "map": {
       "label": "Un mapa de curvas de nivel del volcán Irazú, dibujado con datos reales de elevación. Estás aquí, justo fuera del borde, y un sendero punteado sube hasta la cima.",
       "here": "Estás aquí",
-      "note": "Irazú, {summit} m · curvas cada {interval} m"
-    }
+      "note": "Irazú, {summit} m · curvas cada {interval} m",
+      "off": "m · fuera del mapa",
+      "layers": {
+        "map": "curvas · Copernicus GLO-30",
+        "trail": "sendero",
+        "figure": "figura de la identidad"
+      }
+    },
+    "pause": "Pausar la figura",
+    "play": "Mover la figura"
   },
   "changelogPage": {
     "title": "Versiones",

@@ -1,0 +1,11 @@
+---
+// The Spanish 404 (doc 38): Cloudflare answers a missing /es/… path with this, the nearest 404.html.
+import PageLayout from '../../layouts/PageLayout.astro';
+import NotFound from '../../components/site/NotFound.astro';
+import { copyFor } from '../../i18n/dictionary';
+const t = copyFor(Astro.currentLocale).notFound;
+---
+
+<PageLayout title={t.title} description={t.body}>
+  <NotFound />
+</PageLayout>

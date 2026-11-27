@@ -10,7 +10,7 @@ const dist = join(import.meta.dirname, '..', 'dist');
 const pages = readdirSync(dist, { recursive: true, encoding: 'utf8' })
   .map((f) => f.replaceAll('\\', '/'))
   // Pages only: the 404 page and anything Pagefind or Vite wrote are not places to index.
-  .filter((f) => f.endsWith('.html') && f !== '404.html' && !/^(_astro|pagefind)\//.test(f))
+  .filter((f) => f.endsWith('.html') && !/(^|\/)404\.html$/.test(f) && !/^(_astro|pagefind)\//.test(f))
   .flatMap((f) => {
     const page = readPage(readFileSync(join(dist, f), 'utf8'));
     return page ? [page] : [];
