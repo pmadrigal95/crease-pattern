@@ -148,7 +148,7 @@
   background: var(--color-surface);
   box-shadow:
     0 0 0 1px var(--color-rule),
-    0 10px 28px -16px color-mix(in oklab, var(--color-ink) 45%, transparent);
+    0 10px 28px -16px rgb(0 0 0 / 0.45);
 }
 :root[data-direction='washi-asagi'] .mast nav a[aria-current='page'] {
   background: color-mix(in oklab, var(--color-accent-ui) 14%, transparent);
@@ -236,7 +236,7 @@
     height: 52px;
     background: var(--color-surface);
     color: var(--color-ink);
-    box-shadow: 0 8px 24px -8px color-mix(in oklab, var(--color-ink) 45%, transparent);
+    box-shadow: 0 8px 24px -8px rgb(0 0 0 / 0.45);
   }
   .mast .commands .glass {
     width: 20px;

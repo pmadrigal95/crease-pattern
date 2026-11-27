@@ -11,7 +11,7 @@
   border-radius: 8px;
   background: var(--color-surface);
   color: var(--color-ink);
-  box-shadow: 0 24px 60px -24px color-mix(in oklab, var(--color-ink) 55%, transparent);
+  box-shadow: 0 24px 60px -24px rgb(0 0 0 / 0.55);
 }
 
 .cmdk[open] {
