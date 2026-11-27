@@ -549,7 +549,18 @@
       "project": "Proyecto propio · {year}",
       "earlier": {
         "title": "Trabajo anterior",
-        "intro": "Mis roles anteriores, en pocas líneas. Cada uno completo está en Versiones."
+        "intro": "Mis roles anteriores, en pocas líneas. Cada uno completo está en Versiones.",
+        "via": "{client} · vía {org}",
+        "year": "1 año",
+        "years": "{n} años",
+        "month": "1 mes",
+        "months": "{n} meses",
+        "and": "{years} y {months}",
+        "span": "{start} → {end} · {months}"
+      },
+      "plan": {
+        "plates": "CaseCard · {n} láminas, vistas desde arriba",
+        "sheet": "CaseCard · la hoja del sitio, doblada"
       }
     },
     "case": {

@@ -15,7 +15,8 @@ test('/work lists Buo first, this site second, then the earlier roles', async ({
   const roles = earlier.getByRole('listitem');
   // Finished roles at companies without a case of their own, newest first; never Buo.
   await expect(roles.first().getByRole('heading', { level: 3 })).toHaveText(/NICE Actimize/);
-  await expect(earlier).not.toContainText('Buo');
+  // Buo is not one of them: its ribbon only runs on into its case.
+  await expect(earlier.locator('.strips')).not.toContainText('Buo');
   await expect(earlier.getByRole('link', { name: /version by version/ })).toHaveAttribute(
     'href',
     '/changelog',
