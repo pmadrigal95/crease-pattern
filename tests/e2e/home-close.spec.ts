@@ -132,3 +132,21 @@ test('the 404 draws the Irazú, with you outside the map', async ({ page }) => {
   expect(await page.locator('.nf-map .contour').count()).toBeGreaterThan(10);
   await expect(page.locator('.nf-map .here')).toHaveText('You are here');
 });
+
+test('the closing pieces land once when in view, and a jump past them leaves none waiting', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.goto('/');
+  const card = page.locator('[data-postcard]');
+  await expect(card).not.toHaveClass(/arrived/);
+  await expect(card).not.toHaveCSS('translate', 'none');
+  await card.scrollIntoViewIfNeeded();
+  await expect(card).toHaveClass(/arrived/);
+  await expect(card).toHaveCSS('translate', 'none');
+  // A jump to the bottom carries past the cover and the readout: they arrive all the same.
+  await page.goto('/');
+  await page.evaluate(() => scrollTo(0, document.body.scrollHeight));
+  for (const selector of ['[data-readout]', '#precrease .cover', 'footer'])
+    await expect(page.locator(selector)).toHaveClass(/arrived/);
+});

@@ -5,7 +5,7 @@
  * coordinates and the local time there (Postmark.astro). Its front is the Irazú in contour lines
  * (PostcardFront.astro).
  *
- * - It lands on the table as it scrolls in (CSS scroll timeline, where supported).
+ * - It lands on the table once it is in view, the whole card at once (data-arrive, BaseLayout).
  * - A button turns it over to its front and back; with reduced motion it crossfades instead. The
  *   hidden face is inert, so focus and screen readers stay on the one shown. Without JavaScript
  *   the back stays, the button stays hidden, and the address and its copy button still work.
@@ -28,7 +28,7 @@ const p = t.postcard;
 const coords = coordsText(profile.city.lat, profile.city.lon, copy.home.hero.coords);
 ---
 
-<div class="postcard" data-inspect="ContactPostcard" data-postcard>
+<div class="postcard" data-inspect="ContactPostcard" data-postcard data-arrive>
   <div class="faces">
     <div class="face back">
       <div class="ink message">
@@ -347,25 +347,22 @@ const coords = coordsText(profile.city.lat, profile.city.lon, copy.home.hero.coo
   }
 
   /* It lands on the table as it scrolls in. */
-  @supports (animation-timeline: view()) {
-    @media (prefers-reduced-motion: no-preference) {
-      .postcard {
-        view-timeline-name: --postcard;
-      }
-      .face {
-        --land-timeline: --postcard;
-        animation-name: land;
-        animation-timing-function: linear;
-        animation-fill-mode: both;
-        animation-timeline: var(--land-timeline);
-        animation-range: entry 0% cover 35%;
-      }
+  /* It lands on the table once it's in view: the whole card, so its two faces stay one sheet. */
+  @media (prefers-reduced-motion: no-preference) {
+    .postcard {
+      transition:
+        translate 0.75s var(--ease),
+        rotate 0.75s var(--ease);
+    }
+    :global(:root[data-js]:not(.inspecting)) .postcard:not(:global(.arrived)) {
+      translate: 0 48px;
+      rotate: -5deg;
     }
   }
-  @keyframes land {
-    from {
-      translate: 0 40px;
-      rotate: -5deg;
+  /* On a phone the card is nearly as wide as the screen: turned 5° it would widen the page. */
+  @media (prefers-reduced-motion: no-preference) and (max-width: 760px) {
+    :global(:root[data-js]:not(.inspecting)) .postcard:not(:global(.arrived)) {
+      rotate: -1deg;
     }
   }
 

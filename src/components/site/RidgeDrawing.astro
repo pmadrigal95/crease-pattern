@@ -44,6 +44,7 @@ const snow = (y: number) => {
   aria-hidden="true"
   focusable="false"
   data-end={r.routeEnd.toFixed(1)}
+  data-arrive
 >
   <defs>
     {r.peaks.map((p) => (
@@ -341,33 +342,18 @@ const snow = (y: number) => {
   }
 
   /* The range rises as it scrolls into view, where the browser can tie that to the scroll. */
-  @supports (animation-timeline: view()) {
-    @media (prefers-reduced-motion: no-preference) {
-      .far {
-        --rise-far-timeline: view();
-        animation-name: rise-far;
-        animation-timing-function: linear;
-        animation-fill-mode: both;
-        animation-timeline: var(--rise-far-timeline);
-        animation-range: entry 0% cover 45%;
-      }
-      .peaks {
-        --rise-near-timeline: view();
-        animation-name: rise-near;
-        animation-timing-function: linear;
-        animation-fill-mode: both;
-        animation-timeline: var(--rise-near-timeline);
-        animation-range: entry 0% cover 40%;
-      }
+  /* Once in view the far range rises, then the peaks in front of it. */
+  @media (prefers-reduced-motion: no-preference) {
+    .far {
+      transition: transform 0.8s var(--motion-ease-out);
     }
-  }
-  @keyframes rise-far {
-    from {
+    .peaks {
+      transition: transform 0.9s var(--motion-ease-out) 0.12s;
+    }
+    :global(:root[data-js]:not(.inspecting)) svg:not(:global(.arrived)) .far {
       transform: translateY(26px);
     }
-  }
-  @keyframes rise-near {
-    from {
+    :global(:root[data-js]:not(.inspecting)) svg:not(:global(.arrived)) .peaks {
       transform: translateY(48px);
     }
   }
