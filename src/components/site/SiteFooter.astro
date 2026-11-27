@@ -2,8 +2,8 @@
 /**
  * The footer, on every page: the last fold (doc 34, direction B). A dashed valley fold crosses the
  * page with the identity's figure sitting on it, the site's thesis one last time; from that crease
- * hangs a panel, the sheet's last flap, which unfolds down as it comes into view (CSS scroll
- * timeline, where supported; still with reduced motion). On it: who this is, three labelled
+ * hangs a panel, the sheet's last flap, which unfolds down once the footer is in view (data-arrive,
+ * BaseLayout; still with reduced motion). On it: who this is, three labelled
  * columns (the site, elsewhere, this site), the language as a segmented control, and the licences.
  *
  * Like the masthead it takes each identity's material: the identity's surface rises faintly from
@@ -61,7 +61,7 @@ const columns = [
 ];
 ---
 
-<footer class="foot" data-inspect="SiteFooter" data-foot>
+<footer class="foot" data-inspect="SiteFooter" data-foot data-arrive>
   <div class="wrap">
     <div class="crease" aria-hidden="true">
       <span class="mark">
@@ -351,20 +351,14 @@ const columns = [
     display: none;
   }
 
-  /* The flap unfolds down from the crease as it comes into view. */
-  @supports (animation-timeline: view()) {
-    @media (prefers-reduced-motion: no-preference) {
-      .panel {
-        animation: unfold linear both;
-        animation-timeline: view();
-        animation-range: entry 0% entry 100%;
-      }
+  /* The flap unfolds down from the crease once the footer is in view. Folded no further than 25°
+     and only by transform: even before it opens, its links keep 24px targets and full contrast. */
+  @media (prefers-reduced-motion: no-preference) {
+    .panel {
+      transition: transform 0.8s var(--motion-ease-out);
     }
-  }
-  @keyframes unfold {
-    from {
-      transform: rotateX(-78deg);
-      opacity: 0.4;
+    :global(:root[data-js]:not(.inspecting)) .foot:not(:global(.arrived)) .panel {
+      transform: rotateX(-25deg);
     }
   }
 

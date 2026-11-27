@@ -208,9 +208,10 @@
     "vueYears": "{years} años",
     "portrait": {
       "alt": "Pablo Madrigal, de los hombros para arriba, con anteojos y camisa a rayas. Un pliegue en diagonal convierte parte de la foto en la misma cara dibujada con curvas de nivel.",
-      "caption": "Interfaz · arquitectura",
       "handle": "Doblar el retrato",
-      "value": "{photo}% foto, {contours}% curvas de nivel"
+      "value": "{photo}% foto, {contours}% curvas de nivel",
+      "interface": "Interfaz",
+      "architecture": "Arquitectura"
     }
   },
   "colophonPage": {

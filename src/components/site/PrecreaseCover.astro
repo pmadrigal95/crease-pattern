@@ -4,7 +4,7 @@
  * post's generated crease pattern (PostThumb), stamped with its number, labelled ("Crease No.
  * 003"); then what it is in words, its title, its dek, its date and reading time.
  *
- * As the cover scrolls into view the sheet lands and its mountain folds draw in. While inspecting,
+ * Once the cover is in view the sheet lands and its mountain folds draw in (data-arrive). While inspecting,
  * the sheet lies flat and a key names its folds and says how it's drawn, as the home's figure
  * unfolds and the ridge shows its plan.
  */
@@ -29,7 +29,7 @@ const copy = copyFor(Astro.currentLocale);
 const t = copy.home.notes;
 ---
 
-<article class="cover">
+<article class="cover" data-arrive>
   <div class="stage">
     <a class="sheet" href={postHref(post)} aria-hidden="true" tabindex="-1">
       <PostThumb slug={post.key} format={post.entry.data.format} />
@@ -183,47 +183,28 @@ const t = copy.home.notes;
   }
 
   /* Landing and drawing: a scroll timeline where supported; still with reduced motion. */
-  @supports (animation-timeline: view()) {
-    @media (prefers-reduced-motion: no-preference) {
-      .cover {
-        view-timeline-name: --cover;
-      }
-      .sheet,
-      .sheet :global(path) {
-        animation-timing-function: linear;
-        animation-fill-mode: both;
-        animation-timeline: --cover;
-      }
-      .sheet {
-        animation-name: land;
-        animation-range: entry 0% cover 40%;
-      }
-      .sheet :global(path[pathLength]) {
-        stroke-dasharray: 1;
-        animation-name: draw;
-        animation-range: entry 20% cover 45%;
-      }
-      .sheet :global(path:not([pathLength])) {
-        animation-name: appear;
-        animation-range: cover 25% cover 50%;
-      }
+  /* Once in view the sheet lands, then its mountain folds draw and its valley folds appear. */
+  @media (prefers-reduced-motion: no-preference) {
+    .sheet {
+      transition: transform 0.8s var(--ease);
     }
-  }
-  @keyframes land {
-    from {
+    .sheet :global(path[pathLength]) {
+      stroke-dasharray: 1;
+      transition: stroke-dashoffset 0.9s var(--ease) 0.25s;
+    }
+    .sheet :global(path:not([pathLength])) {
+      transition: opacity 0.5s ease-out 0.7s;
+    }
+    :global(:root[data-js]:not(.inspecting)) .cover:not(:global(.arrived)) .sheet {
       transform: rotateX(38deg) translateY(28px);
     }
-  }
-  @keyframes draw {
-    from {
+    :global(:root[data-js]:not(.inspecting)) .cover:not(:global(.arrived)) .sheet :global(path[pathLength]) {
       stroke-dashoffset: 1;
     }
-    to {
-      stroke-dashoffset: 0;
-    }
-  }
-  @keyframes appear {
-    from {
+    :global(:root[data-js]:not(.inspecting))
+      .cover:not(:global(.arrived))
+      .sheet
+      :global(path:not([pathLength])) {
       opacity: 0;
     }
   }

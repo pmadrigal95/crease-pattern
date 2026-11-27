@@ -116,10 +116,9 @@ for (const path of ['/es', '/es/about', '/es/precrease', '/es/precrease/el-traba
 test('the Spanish pages read in Spanish, the Inspector included', async ({ page }) => {
   await page.goto('/es/about');
   await expect(page.locator('main h1')).toHaveText('Ingeniero de sistemas. Arquitecto frontend.');
-  await expect(page.getByRole('link', { name: 'colofón', exact: true })).toHaveAttribute(
-    'href',
-    '/es/colophon',
-  );
+  await expect(
+    page.getByRole('navigation', { name: 'Este sitio' }).getByRole('link', { name: 'Colofón' }),
+  ).toHaveAttribute('href', '/es/colophon');
   await page.getByRole('button', { name: 'Inspeccionar' }).click();
   await expect(page.locator('#inspector')).toHaveAttribute('aria-label', 'Inspector');
   await expect(page.locator('#inspector')).toContainText('Capas');
