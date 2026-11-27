@@ -351,20 +351,23 @@ const columns = [
     display: none;
   }
 
-  /* The flap unfolds down from the crease as it comes into view. */
+  /* The flap unfolds down from the crease as it comes into view. Folded no further than 35°, and
+     only by transform: even before it opens, its links keep 24px targets and full contrast. */
   @supports (animation-timeline: view()) {
     @media (prefers-reduced-motion: no-preference) {
       .panel {
-        animation: unfold linear both;
-        animation-timeline: view();
+        --unfold-timeline: view();
+        animation-name: unfold;
+        animation-timing-function: linear;
+        animation-fill-mode: both;
+        animation-timeline: var(--unfold-timeline);
         animation-range: entry 0% entry 100%;
       }
     }
   }
   @keyframes unfold {
     from {
-      transform: rotateX(-78deg);
-      opacity: 0.4;
+      transform: rotateX(-35deg);
     }
   }
 

@@ -8,8 +8,16 @@
  * alpha matters, with edge pixels off by at most 13 of 255). The duotone is CSS: the identity's colors blended over a
  * grayscale photo (cut to the silhouette in dark themes), so it works on every identity and theme.
  *
- * Without JavaScript the fold rests through the nose. With it, the fold opens once per page
- * load (not under reduced motion) and then follows the handle: pointer or arrow keys.
+ * Drawn as paper (doc 35): the contour side is a flap, shaded along the fold; the fold casts its
+ * shadow; the handle is a paper tab; each side is named at its corner, interface and architecture.
+ *
+ * Reading unfolds it: on About's wide layout the portrait stays beside the story, and as the
+ * reader scrolls through it the fold sweeps from the photo to the contours (a CSS scroll timeline
+ * on the story, `--story`, where supported; still with reduced motion). The caption reads the
+ * split. Moving the handle hands the fold back to the visitor for the rest of the visit.
+ *
+ * Without JavaScript the fold rests through the nose. Without scroll timelines it opens once per
+ * page load (not under reduced motion) and then follows the handle: pointer or arrow keys.
  */
 import { Picture } from 'astro:assets';
 import portrait from '../../assets/portrait/portrait.jpg';
@@ -29,7 +37,7 @@ const valueText = (fold: number) => fill(t.value, { photo: fold, contours: 100 -
         src={portrait}
         formats={['avif', 'webp']}
         widths={[360, 720]}
-        sizes="(max-width: 880px) 360px, 300px"
+        sizes="(max-width: 880px) 360px, 460px"
         alt={t.alt}
         loading="eager"
         decoding="async"
@@ -38,18 +46,26 @@ const valueText = (fold: number) => fill(t.value, { photo: fold, contours: 100 -
     </div>
     <div class="contours" set:html={contours} />
     <div class="crease" aria-hidden="true"></div>
+    <span class="side interface" aria-hidden="true">
+      {t.interface}
+    </span>
+    <span class="side architecture" aria-hidden="true">
+      {t.architecture}
+    </span>
     <div
       class="handle"
       role="slider"
       tabindex="0"
       aria-label={t.handle}
-      aria-valuemin="8"
-      aria-valuemax="92"
+      aria-valuemin="15"
+      aria-valuemax="85"
       aria-valuenow={REST}
       aria-valuetext={valueText(REST)}
     ></div>
   </div>
-  <figcaption>{t.caption}</figcaption>
+  <figcaption aria-hidden="true" data-fold-value>
+    {valueText(REST)}
+  </figcaption>
 </figure>
 
 <style>
@@ -68,9 +84,12 @@ const valueText = (fold: number) => fill(t.value, { photo: fold, contours: 100 -
     --cx: calc(50 + (var(--fold) - 50) * 0.71);
     position: relative;
     aspect-ratio: 1;
-    max-width: 360px;
+    max-width: 460px;
     border: 1px solid var(--color-rule);
-    border-radius: var(--radius-panel);
+    border-radius: 6px;
+    box-shadow:
+      0 1px 2px rgb(0 0 0 / 0.08),
+      0 30px 50px -34px rgb(0 0 0 / 0.45);
     background: var(--color-surface);
     overflow: hidden;
     container-type: size;
@@ -118,10 +137,15 @@ const valueText = (fold: number) => fill(t.value, { photo: fold, contours: 100 -
   }
 
   /* Architecture: everything on the far side of the fold line. */
+  /* The flap: shaded where it turns at the fold, lighter as it lies flat. */
   .contours {
     position: absolute;
     inset: 0;
-    background: var(--color-surface);
+    background: linear-gradient(
+      135deg,
+      color-mix(in oklab, var(--color-ink) 10%, var(--color-surface)) calc(var(--cx) * 1%),
+      var(--color-surface) calc(var(--cx) * 1% + 22%)
+    );
     clip-path: polygon(
       calc((var(--cx) - 100) * 1%) calc((var(--cx) + 100) * 1%),
       calc((var(--cx) + 100) * 1%) calc((var(--cx) - 100) * 1%),
@@ -152,8 +176,8 @@ const valueText = (fold: number) => fill(t.value, { photo: fold, contours: 100 -
     left: 0;
     top: 0;
     width: 300cqw;
-    border-top: 2px dashed var(--color-ink);
-    opacity: 0.7;
+    border-top: 1.5px dashed var(--color-accent-ui);
+    box-shadow: 0 8px 14px -8px rgb(0 0 0 / 0.35);
     pointer-events: none;
     transform: translate(calc(var(--cx) * 1cqw), calc(var(--cx) * 1cqh)) translate(-50%, -1px) rotate(-45deg);
   }
@@ -164,23 +188,25 @@ const valueText = (fold: number) => fill(t.value, { photo: fold, contours: 100 -
     position: absolute;
     left: 0;
     top: 0;
-    width: 44px;
+    width: 56px;
     height: 44px;
-    margin: -22px;
-    border-radius: 50%;
+    margin: -22px -28px;
+    border-radius: 6px;
     border: 1px solid var(--color-rule);
     background: var(--color-surface);
-    box-shadow: 0 2px 10px rgb(0 0 0 / 0.14);
+    box-shadow:
+      0 1px 2px rgb(0 0 0 / 0.1),
+      0 8px 18px -8px rgb(0 0 0 / 0.35);
     cursor: grab;
-    transform: translate(calc(var(--cx) * 1cqw), calc(var(--cx) * 1cqh));
+    transform: translate(calc(var(--cx) * 1cqw), calc(var(--cx) * 1cqh)) rotate(-45deg);
   }
+  /* The tab's mark: the fold's two kinds, a mountain over a valley. */
   .handle::before {
     content: '';
     position: absolute;
-    inset: 15px;
-    border-top: 2px solid var(--color-mute);
-    border-bottom: 2px solid var(--color-mute);
-    transform: rotate(45deg);
+    inset: 15px 14px;
+    border-top: 1.5px solid var(--color-accent-ui);
+    border-bottom: 1.5px dashed var(--color-accent-ui);
   }
   .handle:active {
     cursor: grabbing;
@@ -205,10 +231,57 @@ const valueText = (fold: number) => fill(t.value, { photo: fold, contours: 100 -
     }
   }
 
+  /* Each side named at its corner. */
+  .side {
+    position: absolute;
+    z-index: 1;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: var(--color-surface);
+    box-shadow: inset 0 0 0 1px var(--color-rule);
+    font: 600 10px / 1.2 var(--font-mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-ink);
+    pointer-events: none;
+  }
+  .interface {
+    top: var(--space-3);
+    left: var(--space-3);
+  }
+  .architecture {
+    right: var(--space-3);
+    bottom: var(--space-3);
+    color: var(--color-accent);
+  }
   figcaption {
-    margin-top: var(--space-2);
+    margin-top: var(--space-3);
     font: 500 var(--type-caption);
     color: var(--color-mute);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Reading unfolds it: the story's scroll timeline drives the fold, photo to contours, between 85
+     and 15 so the tab always stays inside the frame, within reach. */
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) and (min-width: 881px) {
+      .portrait:global(.is-reading) {
+        --portrait-read-timeline: --story;
+        animation-name: portrait-read;
+        animation-timing-function: linear;
+        animation-fill-mode: both;
+        animation-timeline: var(--portrait-read-timeline);
+        animation-range: contain 0% contain 100%;
+      }
+    }
+  }
+  @keyframes portrait-read {
+    from {
+      --fold: 85;
+    }
+    to {
+      --fold: 15;
+    }
   }
 </style>
 
@@ -216,55 +289,100 @@ const valueText = (fold: number) => fill(t.value, { photo: fold, contours: 100 -
   // Self-contained on purpose (ENGINEERING.md, "Browser scripts"): with no imports Astro inlines
   // this script, and About's LCP doesn't wait for extra requests.
 
-  const MIN = 8;
-  const MAX = 92;
+  const MIN = 15;
+  const MAX = 85;
   const REST = 39;
 
-  for (const el of document.querySelectorAll<HTMLElement>('[data-folded-portrait]')) {
-    const handle = el.querySelector<HTMLElement>('.handle');
-    const template = el.dataset.valueTemplate ?? '';
-    if (!handle) continue;
+  const start = () => {
+    for (const el of document.querySelectorAll<HTMLElement>('[data-folded-portrait]')) {
+      const handle = el.querySelector<HTMLElement>('.handle');
+      const template = el.dataset.valueTemplate ?? '';
+      if (!handle) continue;
 
-    const set = (value: number) => {
-      const fold = Math.round(Math.min(MAX, Math.max(MIN, value)));
-      el.classList.remove('is-opening');
-      el.style.setProperty('--fold', String(fold));
-      handle.setAttribute('aria-valuenow', String(fold));
-      handle.setAttribute(
-        'aria-valuetext',
-        template.replace('{photo}', String(fold)).replace('{contours}', String(100 - fold)),
-      );
-    };
-    const current = () => Number(handle.getAttribute('aria-valuenow')) || REST;
+      const set = (value: number) => {
+        const fold = Math.round(Math.min(MAX, Math.max(MIN, value)));
+        // The visitor takes the fold from the story for the rest of the visit.
+        el.classList.remove('is-opening', 'is-reading');
+        el.style.setProperty('--fold', String(fold));
+        handle.setAttribute('aria-valuenow', String(fold));
+        handle.setAttribute(
+          'aria-valuetext',
+          template.replace('{photo}', String(fold)).replace('{contours}', String(100 - fold)),
+        );
+        say(fold);
+      };
+      const current = () => Number(handle.getAttribute('aria-valuenow')) || REST;
 
-    el.classList.add('is-interactive');
-    if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      el.classList.add('is-opening');
-      el.addEventListener('animationend', () => set(REST), { once: true });
+      const caption = el.parentElement?.querySelector<HTMLElement>('[data-fold-value]');
+      const say = (fold: number) => {
+        if (caption)
+          caption.textContent = template
+            .replace('{photo}', String(fold))
+            .replace('{contours}', String(100 - fold));
+      };
+      el.classList.add('is-interactive');
+      const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const reading =
+        !still &&
+        CSS.supports('animation-timeline: view()') &&
+        matchMedia('(min-width: 881px)').matches &&
+        Boolean(el.closest('[data-story]'));
+      if (reading) {
+        // The story drives the fold; the slider and the caption follow it.
+        el.classList.add('is-reading');
+        const follow = () => {
+          if (!el.classList.contains('is-reading')) return;
+          const fold = Math.round(Number(getComputedStyle(el).getPropertyValue('--fold')) || REST);
+          handle.setAttribute('aria-valuenow', String(fold));
+          handle.setAttribute(
+            'aria-valuetext',
+            template.replace('{photo}', String(fold)).replace('{contours}', String(100 - fold)),
+          );
+          say(fold);
+        };
+        let queued = false;
+        addEventListener(
+          'scroll',
+          () => {
+            if (queued) return;
+            queued = true;
+            requestAnimationFrame(() => {
+              queued = false;
+              follow();
+            });
+          },
+          { passive: true },
+        );
+        requestAnimationFrame(follow);
+      } else if (!still) {
+        el.classList.add('is-opening');
+        el.addEventListener('animationend', () => set(REST), { once: true });
+      }
+
+      let dragging = false;
+      handle.addEventListener('pointerdown', (e) => {
+        dragging = true;
+        handle.setPointerCapture(e.pointerId);
+      });
+      handle.addEventListener('pointerup', () => (dragging = false));
+      handle.addEventListener('pointercancel', () => (dragging = false));
+      handle.addEventListener('pointermove', (e) => {
+        if (!dragging) return;
+        const r = el.getBoundingClientRect();
+        const x = ((e.clientX - r.left) / r.width) * 100 - 50;
+        const y = ((e.clientY - r.top) / r.height) * 100 - 50;
+        set(50 + (x + y) / 2 / 0.71);
+      });
+      handle.addEventListener('keydown', (e) => {
+        const step = { ArrowRight: 4, ArrowDown: 4, ArrowLeft: -4, ArrowUp: -4, PageDown: 12, PageUp: -12 }[
+          e.key
+        ];
+        const edge = { Home: MIN, End: MAX }[e.key];
+        if (step === undefined && edge === undefined) return;
+        e.preventDefault();
+        set(edge ?? current() + (step ?? 0));
+      });
     }
-
-    let dragging = false;
-    handle.addEventListener('pointerdown', (e) => {
-      dragging = true;
-      handle.setPointerCapture(e.pointerId);
-    });
-    handle.addEventListener('pointerup', () => (dragging = false));
-    handle.addEventListener('pointercancel', () => (dragging = false));
-    handle.addEventListener('pointermove', (e) => {
-      if (!dragging) return;
-      const r = el.getBoundingClientRect();
-      const x = ((e.clientX - r.left) / r.width) * 100 - 50;
-      const y = ((e.clientY - r.top) / r.height) * 100 - 50;
-      set(50 + (x + y) / 2 / 0.71);
-    });
-    handle.addEventListener('keydown', (e) => {
-      const step = { ArrowRight: 4, ArrowDown: 4, ArrowLeft: -4, ArrowUp: -4, PageDown: 12, PageUp: -12 }[
-        e.key
-      ];
-      const edge = { Home: MIN, End: MAX }[e.key];
-      if (step === undefined && edge === undefined) return;
-      e.preventDefault();
-      set(edge ?? current() + (step ?? 0));
-    });
-  }
+  };
+  start();
 </script>

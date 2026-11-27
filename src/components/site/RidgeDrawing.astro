@@ -344,13 +344,19 @@ const snow = (y: number) => {
   @supports (animation-timeline: view()) {
     @media (prefers-reduced-motion: no-preference) {
       .far {
-        animation: rise-far linear both;
-        animation-timeline: view();
+        --rise-far-timeline: view();
+        animation-name: rise-far;
+        animation-timing-function: linear;
+        animation-fill-mode: both;
+        animation-timeline: var(--rise-far-timeline);
         animation-range: entry 0% cover 45%;
       }
       .peaks {
-        animation: rise-near linear both;
-        animation-timeline: view();
+        --rise-near-timeline: view();
+        animation-name: rise-near;
+        animation-timing-function: linear;
+        animation-fill-mode: both;
+        animation-timeline: var(--rise-near-timeline);
         animation-range: entry 0% cover 40%;
       }
     }
@@ -358,13 +364,11 @@ const snow = (y: number) => {
   @keyframes rise-far {
     from {
       transform: translateY(26px);
-      opacity: 0.2;
     }
   }
   @keyframes rise-near {
     from {
       transform: translateY(48px);
-      opacity: 0;
     }
   }
 </style>

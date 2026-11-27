@@ -52,15 +52,20 @@ export const getStaticPaths = localeStaticPaths;
     type="image/avif"
     href={portraitAvif.src}
     imagesrcset={portraitAvif.srcSet.attribute}
-    imagesizes="(max-width: 880px) 360px, 300px"
+    imagesizes="(max-width: 880px) 360px, 460px"
     fetchpriority="high"
   />
   <div class="wrap">
-    <header class="page-head" data-inspect="about#header">
-      <p class="eyebrow">{page.data.title}</p>
-      <h1>{t.title}</h1>
-    </header>
-    <div class="grid">
+    <div class="grid" data-story>
+      <div class="story">
+        <header class="page-head" data-inspect="about#header">
+          <p class="eyebrow">{page.data.title}</p>
+          <h1>{t.title}</h1>
+        </header>
+        <div class="prose" data-inspect="about#story">
+          <Content />
+        </div>
+      </div>
       <div class="side">
         <FoldedPortrait />
         <aside aria-label={t.factsLabel}>
@@ -74,48 +79,65 @@ export const getStaticPaths = localeStaticPaths;
           </dl>
         </aside>
       </div>
-      <div class="prose" data-inspect="about#story">
-        <Content />
-      </div>
     </div>
   </div>
 </PageLayout>
 
 <style>
+  /* Reading unfolds it (doc 35): the portrait and the facts stay beside the story, and the story's
+     scroll timeline drives the portrait's fold (FoldedPortrait.astro). */
   .grid {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 300px;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr);
     gap: var(--space-16);
     align-items: start;
     padding-bottom: var(--space-24);
+    view-timeline-name: --story;
   }
-  /* The side column comes first in the source, so focus reaches the portrait before the text
-     on phones, where it also appears first (WCAG 2.4.3). On wide screens it moves right. */
-  .side {
+  /* The story comes first in the source and on phones, where its title is the first thing to read
+     and paint (About's LCP: about 0.9 s instead of 2 s behind the portrait). On wide screens the
+     portrait takes the left column, beside the story it unfolds with. */
+  .story {
     grid-column: 2;
     grid-row: 1;
-    position: sticky;
-    top: 84px;
   }
-  .prose {
+  .side {
     grid-column: 1;
     grid-row: 1;
+    position: sticky;
+    top: 96px;
+    display: grid;
+    gap: var(--space-6);
   }
+  .page-head {
+    padding-top: 0;
+  }
+  /* Beside the portrait the column is narrower: the title a step smaller, in two lines. */
+  .page-head :global(h1) {
+    font-size: clamp(2.25rem, 4vw, 3.5rem);
+  }
+
+  /* The facts as instruments: two columns of labelled readings, the last across. */
   .facts {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     margin: 0;
-    border: 1px solid var(--color-rule);
-    border-radius: var(--radius-panel);
-    background: var(--color-surface);
-    padding: var(--space-2) var(--space-6);
+    border-block: 1px solid var(--color-rule);
   }
   .facts div {
     display: grid;
     gap: 2px;
-    padding: var(--space-4) 0;
+    padding: var(--space-4) var(--space-4) var(--space-4) 0;
+  }
+  .facts div:nth-child(even) {
+    padding-left: var(--space-4);
+    border-left: 1px solid var(--color-rule);
+  }
+  .facts div:nth-child(n + 3) {
     border-top: 1px solid var(--color-rule);
   }
-  .facts div:first-child {
-    border-top: 0;
+  .facts div:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
   }
   dt {
     font: 500 var(--type-caption);
@@ -125,13 +147,79 @@ export const getStaticPaths = localeStaticPaths;
     margin: 0;
     font-weight: 600;
   }
+
+  /* The story: its opening paragraph as the lead. */
+  .prose > :global(p:first-child) {
+    font-size: clamp(1.25rem, 1.9vw, 1.5rem);
+    line-height: 1.45;
+    color: var(--color-ink);
+    text-wrap: pretty;
+  }
+  .prose :global(h2) {
+    margin-top: var(--space-16);
+  }
+  /* How I work: each principle a card under its crease. */
+  .prose :global(ul) {
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: var(--space-4);
+    margin: var(--space-6) 0 0;
+    padding: 0;
+  }
+  .prose :global(ul > li) {
+    position: relative;
+    margin: 0;
+    padding: var(--space-6);
+    border: 1px solid var(--color-rule);
+    border-radius: 6px;
+    background: var(--color-surface);
+    box-shadow: 0 18px 30px -28px rgb(0 0 0 / 0.45);
+    line-height: 1.5;
+  }
+  .prose :global(ul > li::before) {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: var(--space-6);
+    left: var(--space-6);
+    border-top: 1.5px dashed var(--color-accent-ui);
+  }
+  .prose :global(ul > li strong) {
+    display: block;
+    margin-bottom: var(--space-2);
+    font-size: var(--size-md);
+    color: var(--color-ink);
+  }
+  /* Away from the keyboard: the contour lines it talks about, rising behind it. */
+  .prose :global(.trail) {
+    position: relative;
+    isolation: isolate;
+    padding-bottom: var(--space-12);
+  }
+  .prose :global(.trail::before) {
+    content: '';
+    position: absolute;
+    inset: 0 0 0 calc(-1 * var(--space-8));
+    z-index: -1;
+    background: var(--color-accent-ui);
+    opacity: 0.12;
+    pointer-events: none;
+    mask-image: url('/textures/contours.svg'), linear-gradient(to top, #000 20%, transparent 90%);
+    mask-size:
+      600px 600px,
+      100% 100%;
+    mask-repeat: repeat, no-repeat;
+    mask-composite: intersect;
+  }
+
   @media (max-width: 880px) {
     .grid {
       grid-template-columns: minmax(0, 1fr);
       gap: var(--space-8);
     }
-    .side,
-    .prose {
+    .story,
+    .side {
       grid-column: auto;
       grid-row: auto;
     }

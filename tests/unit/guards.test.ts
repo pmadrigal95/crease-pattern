@@ -9,6 +9,9 @@
  * - Debug leftovers: a stray console.log or debugger ships to every visitor.
  * - TypeScript only: the repository is 100% TypeScript, scripts and configs included. A .js file
  *   slipped back in twice before this guard existed.
+ * - Scroll timelines go through a variable: the CSS minifier folds `animation` and a literal
+ *   `animation-timeline` into one shorthand, which browsers reject (the shorthand only resets the
+ *   timeline), so five scroll-driven animations never ran. `var(--x-timeline)` keeps them apart.
  * - Shadows are black: eight of them were mixed from --color-ink, which is light in the dark
  *   themes, so paper, panels and buttons glowed instead of casting a shadow.
  */
@@ -74,6 +77,26 @@ describe('guards', () => {
       ),
     );
     expect(found, 'Use rgb(0 0 0 / alpha): --color-ink is light in the dark themes').toEqual([]);
+  });
+
+  test('scroll timelines are set through a variable', () => {
+    const styled = function* (dir: string): Generator<string> {
+      for (const name of readdirSync(dir)) {
+        const path = join(dir, name);
+        if (statSync(path).isDirectory()) yield* styled(path);
+        else if (/\.(css|astro|vue)$/.test(name)) yield path;
+      }
+    };
+    const found = [...styled(SRC)].flatMap((path) =>
+      readFileSync(path, 'utf8')
+        .split('\n')
+        .flatMap((line, i) =>
+          /^\s*animation-timeline:(?!\s*var\()/.test(line)
+            ? [`${relative(SRC, path).split(sep).join('/')}:${i + 1}  ${line.trim()}`]
+            : [],
+        ),
+    );
+    expect(found, 'Set it as --name-timeline and use animation-timeline: var(--name-timeline)').toEqual([]);
   });
 
   test('no debug code ships', () => {

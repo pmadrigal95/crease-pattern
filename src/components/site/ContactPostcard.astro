@@ -353,8 +353,11 @@ const coords = coordsText(profile.city.lat, profile.city.lon, copy.home.hero.coo
         view-timeline-name: --postcard;
       }
       .face {
-        animation: land linear both;
-        animation-timeline: --postcard;
+        --land-timeline: --postcard;
+        animation-name: land;
+        animation-timing-function: linear;
+        animation-fill-mode: both;
+        animation-timeline: var(--land-timeline);
         animation-range: entry 0% cover 35%;
       }
     }

@@ -388,15 +388,17 @@ const total = Object.keys(manifest.parts).length;
   @supports (animation-timeline: view()) {
     @media (prefers-reduced-motion: no-preference) {
       .viz {
-        animation: draw-in linear both;
-        animation-timeline: view();
+        --draw-in-timeline: view();
+        animation-name: draw-in;
+        animation-timing-function: linear;
+        animation-fill-mode: both;
+        animation-timeline: var(--draw-in-timeline);
         animation-range: entry 0% entry 70%;
       }
     }
   }
   @keyframes draw-in {
     from {
-      opacity: 0;
       translate: 0 12px;
     }
   }
