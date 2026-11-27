@@ -106,13 +106,21 @@ test('inspecting names the print layers of the postcard', async ({ page }) => {
   expect(results.violations).toEqual([]);
 });
 
-test('the footer hangs on a crease with the figure, on every page', async ({ page }) => {
+test('the footer hangs on a crease with the figure, its last flap in three columns, on every page', async ({
+  page,
+}) => {
   for (const path of ['/', '/about', '/colophon']) {
     await page.goto(path);
-    await expect(page.locator('footer .crease .origami-mark')).toHaveCount(1);
-    await expect(
-      page.locator('footer').getByRole('list', { name: 'Elsewhere' }).getByRole('link'),
-    ).toHaveCount(6);
+    const footer = page.locator('footer');
+    await expect(footer.locator('.crease .origami-mark')).toHaveCount(1);
+    await expect(footer.getByRole('navigation', { name: 'Site', exact: true }).getByRole('link')).toHaveCount(
+      4,
+    );
+    await expect(footer.getByRole('navigation', { name: 'Elsewhere' }).getByRole('link')).toHaveCount(3);
+    await expect(footer.getByRole('navigation', { name: 'This site' }).getByRole('link')).toHaveCount(3);
+    await expect(footer.getByRole('list', { name: 'Language' }).locator('[aria-current]')).toHaveText(
+      'English',
+    );
   }
 });
 
