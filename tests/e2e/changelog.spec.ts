@@ -35,3 +35,17 @@ test('on a phone the map keeps every summit and its link', async ({ page }) => {
   await expect(map.getByRole('link')).toHaveCount(4);
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
 });
+
+test('the ascent log: each release has its badge, each change its kind, the stack its chips, each entry its length', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.goto('/changelog');
+  await expect(page.locator('.camp:not(.next) .badge')).toHaveCount(4);
+  const site = page.locator('.entry', { hasText: 'crease-pattern' });
+  await expect(site.locator('.chip')).toContainText(['Astro', 'TypeScript']);
+  await expect(site.locator('.changes .kind').first()).toHaveText('Added');
+  await expect(page.locator('.entry', { hasText: 'Frontend Consultant' }).locator('.lasted')).toHaveText(
+    '8 months',
+  );
+});

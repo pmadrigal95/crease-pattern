@@ -178,9 +178,9 @@
       "pin": "v{major} {codename}, {elevation}, {years}. Go to its release notes.",
       "caption": "Costa Rica's Central Volcanic Range at real coordinates. Contour lines every 250 m; the route follows the releases in order.",
       "relief": {
-        "route": "Walk the route",
-        "hint": "Drag, or use the arrow keys, to walk the route",
-        "caption": "Real relief from Copernicus GLO-30 elevation, about 13 km around each place, heights drawn at 2.2 times their true scale. The route follows the releases in order."
+        "prev": "Previous place",
+        "next": "Next place",
+        "caption": "Real relief from Copernicus GLO-30 elevation, about 13 km around each place, cut in paper every 100 m, heights drawn at 2.2 times their true scale."
       }
     },
     "rail": {
