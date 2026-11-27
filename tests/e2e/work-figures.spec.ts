@@ -1,41 +1,50 @@
 import { expect, test, type Page } from '@playwright/test';
 
 // Every word of a case figure (src/components/work/figures) reads whole: inside the box it labels,
-// with room to spare, and inside its drawing. Measured in the browser with the real fonts, in both
-// languages, in the wide drawing (desktop) and the tall one (phone): a longer word in one language
-// or a wider font once pushed "several threads" through its box's border.
+// with room to spare, inside its drawing, and clear of the other words. Measured in the browser
+// with the real fonts, in both languages, in the wide drawing (desktop) and the tall one (phone):
+// a longer word once pushed "several threads" through its box's border.
 const PAD = 3;
 
-/** Words that overflow, as "figure: word" lines. */
+/** Words that don't read whole, as "plate: word …" lines. */
 const overflowing = (page: Page, drawing: 'wide' | 'tall') =>
   page.evaluate(
     ([kind, pad]) => {
+      type Box = { x: number; y: number; width: number; height: number };
+      /** Whether `a` lies within `b`, keeping `margin` from its sides. */
+      const within = (a: Box, b: Box, margin: number) =>
+        a.x >= b.x + margin &&
+        a.y >= b.y - 0.5 &&
+        a.x + a.width <= b.x + b.width - margin &&
+        a.y + a.height <= b.y + b.height + 0.5;
+      const overlaps = (a: Box, b: Box) =>
+        a.x < b.x + b.width && b.x < a.x + a.width && a.y < b.y + b.height && b.y < a.y + a.height;
+      /** The smallest box the point falls in: the one a word labels. */
+      const boxAt = (boxes: Box[], x: number, y: number) =>
+        boxes
+          .filter((b) => x > b.x && x < b.x + b.width && y > b.y && y < b.y + b.height)
+          .sort((a, b) => a.width * a.height - b.width * b.height)[0];
+
       const problems: string[] = [];
       for (const svg of document.querySelectorAll<SVGSVGElement>(`.case-figure svg.${kind}`)) {
         const name = svg.closest('[data-plate]')?.id ?? '?';
         const view = svg.viewBox.baseVal;
         const boxes = [...svg.querySelectorAll<SVGGraphicsElement>('.box')].map((b) => b.getBBox());
-        for (const text of svg.querySelectorAll<SVGTextElement>('text')) {
-          const t = text.getBBox();
-          const word = text.textContent?.trim() ?? '';
-          if (t.x < view.x - 0.5 || t.y < view.y - 0.5 || t.x + t.width > view.x + view.width + 0.5 || t.y + t.height > view.y + view.height + 0.5)
-            problems.push(`${name}: "${word}" leaves the drawing`);
-          const cx = t.x + t.width / 2;
-          const cy = t.y + t.height / 2;
-          // The box this word labels: the smallest one its centre falls in.
-          const box = boxes
-            .filter((b) => cx > b.x && cx < b.x + b.width && cy > b.y && cy < b.y + b.height)
-            .sort((a, b) => a.width * a.height - b.width * b.height)[0];
-          if (box && (t.x < box.x + pad || t.x + t.width > box.x + box.width - pad))
-            problems.push(`${name}: "${word}" touches its box (${Math.round(t.width)} in ${Math.round(box.width)})`);
+        const words = [...svg.querySelectorAll<SVGTextElement>('text')].map((x) => ({
+          w: x.textContent?.trim() ?? '',
+          b: x.getBBox(),
+        }));
+        for (const { w, b } of words) {
+          if (!within(b, view, -0.5)) problems.push(`${name}: "${w}" leaves the drawing`);
+          const box = boxAt(boxes, b.x + b.width / 2, b.y + b.height / 2);
+          if (box && !within(b, box, pad))
+            problems.push(
+              `${name}: "${w}" touches its box (${Math.round(b.width)} in ${Math.round(box.width)})`,
+            );
         }
-        // Words outside boxes must not run into one another.
-        const loose = [...svg.querySelectorAll<SVGTextElement>('text')].map((x) => ({ w: x.textContent?.trim(), b: x.getBBox() }));
-        loose.forEach((a, i) =>
-          loose.slice(i + 1).forEach((b) => {
-            const overlap =
-              a.b.x < b.b.x + b.b.width && b.b.x < a.b.x + a.b.width && a.b.y < b.b.y + b.b.height && b.b.y < a.b.y + a.b.height;
-            if (overlap) problems.push(`${name}: "${a.w}" runs into "${b.w}"`);
+        words.forEach((a, i) =>
+          words.slice(i + 1).forEach((b) => {
+            if (overlaps(a.b, b.b)) problems.push(`${name}: "${a.w}" runs into "${b.w}"`);
           }),
         );
       }
