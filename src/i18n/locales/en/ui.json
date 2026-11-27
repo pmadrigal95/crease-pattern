@@ -549,7 +549,18 @@
       "project": "Personal project · {year}",
       "earlier": {
         "title": "Earlier work",
-        "intro": "My earlier roles, in a few lines. Each one is in full in the Changelog."
+        "intro": "My earlier roles, in a few lines. Each one is in full in the Changelog.",
+        "via": "{client} · via {org}",
+        "year": "1 year",
+        "years": "{n} years",
+        "month": "1 month",
+        "months": "{n} months",
+        "and": "{years} and {months}",
+        "span": "{start} → {end} · {months}"
+      },
+      "plan": {
+        "plates": "CaseCard · {n} plates, seen from above",
+        "sheet": "CaseCard · the site's sheet, folded"
       }
     },
     "case": {

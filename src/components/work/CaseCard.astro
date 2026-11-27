@@ -5,8 +5,10 @@
  * seen from above, the lead one in accent, so every card says "a set of plates" without a picture;
  * for Pablo's own projects, a sheet with its crease. It folds when the card is hovered or focused:
  * the plates line up into one system, the sheet folds in half. The card takes the identity's
- * material, as the buttons do (src/styles/buttons.css).
+ * material, as the buttons do (src/styles/buttons.css). While inspecting it shows its plan: folded as
+ * on hover, and named after what it is drawn from (doc 36).
  */
+import { copyFor, fill } from '../../i18n/dictionary';
 interface Props {
   href: string;
   meta: string;
@@ -18,6 +20,7 @@ interface Props {
   headingLevel?: 'h2' | 'h3';
 }
 const { href, meta, title, summary, link, plates, headingLevel: Heading = 'h2' } = Astro.props;
+const plan = copyFor(Astro.currentLocale).cases.index.plan;
 // The plates, from above: the lead one tall, the others alternately shorter (lined up on hover,
 // every one as tall as the lead and on its baseline: CSS below).
 const sheets = Array.from({ length: plates }, (_, i) => ({
@@ -30,6 +33,9 @@ const sheets = Array.from({ length: plates }, (_, i) => ({
 ---
 
 <a class="case-card" href={href} data-inspect="CaseCard">
+  <span class="plan" aria-hidden="true">
+    {plates > 0 ? fill(plan.plates, { n: plates }) : plan.sheet}
+  </span>
   <svg class="thumb" viewBox="0 0 320 150" aria-hidden="true" focusable="false">
     {plates > 0 ? (
       sheets.map((s) => (
@@ -64,6 +70,7 @@ const sheets = Array.from({ length: plates }, (_, i) => ({
 
 <style>
   .case-card {
+    position: relative;
     display: grid;
     grid-template-rows: auto 1fr;
     overflow: hidden;
@@ -75,6 +82,27 @@ const sheets = Array.from({ length: plates }, (_, i) => ({
     transition:
       transform var(--motion-base) var(--motion-ease-out),
       box-shadow var(--motion-base) var(--motion-ease-out);
+  }
+  /* While inspecting: the card folded, and named after what it is drawn from. */
+  .plan {
+    display: none;
+    position: absolute;
+    top: var(--space-3);
+    left: var(--space-4);
+    z-index: 1;
+    padding: 3px 8px;
+    border: 1px dashed var(--color-accent);
+    border-radius: 4px;
+    background: var(--color-bg);
+    font: 500 10px / 1.3 var(--font-mono);
+    color: var(--color-accent);
+  }
+  :global(.inspecting) .plan {
+    display: block;
+  }
+  :global(.inspecting) .case-card {
+    outline: 1px dashed color-mix(in oklab, var(--color-accent) 50%, transparent);
+    outline-offset: 6px;
   }
   .case-card:focus-visible {
     outline: 2px solid var(--color-accent-ui);
@@ -157,10 +185,12 @@ const sheets = Array.from({ length: plates }, (_, i) => ({
   /* Hovered or focused, the drawing folds: the plates line up on the lead's baseline (its bottom
      is 10 px lower) at its height (92 against 72, or 58 for the shorter ones), one after another;
      the sheet folds in half along its crease. */
-  .case-card:is(:hover, :focus-visible) .sheet:not(.lead) {
+  .case-card:is(:hover, :focus-visible) .sheet:not(.lead),
+  :global(.inspecting) .case-card .sheet:not(.lead) {
     transform: translateY(10px) scaleY(1.278);
   }
-  .case-card:is(:hover, :focus-visible) .sheet.short {
+  .case-card:is(:hover, :focus-visible) .sheet.short,
+  :global(.inspecting) .case-card .sheet.short {
     transform: translateY(10px) scaleY(1.586);
   }
   .sheet:nth-child(3) {
@@ -172,7 +202,8 @@ const sheets = Array.from({ length: plates }, (_, i) => ({
   .sheet:nth-child(5) {
     transition-delay: 135ms;
   }
-  .case-card:is(:hover, :focus-visible) .half.fold {
+  .case-card:is(:hover, :focus-visible) .half.fold,
+  :global(.inspecting) .case-card .half.fold {
     transform: scaleX(-1);
   }
   @media (hover: hover) {

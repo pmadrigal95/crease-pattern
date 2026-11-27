@@ -1,59 +1,189 @@
 ---
 /**
- * Earlier work (M6): the roles before the case studies, in a few lines each, at the end of /work.
- * Read from the career changelog (src/lib/career.ts), never written again here, so it only says
- * what the Changelog already publishes: every finished job or assignment at a company that has no
- * case of its own, newest first, linking to the full log.
+ * Earlier work (M6; doc 36): the roles before the case studies, at the end of /work. Read from the
+ * career changelog (src/lib/career.ts), never written again here: every finished job, assignment
+ * or contract at a company with no case of its own, linking to the full log.
+ *
+ * On a wide screen, a timeline first (src/lib/earlier-timeline.ts): a ruler of years with each role
+ * as a ribbon from its start month to its end, overlapping ones on lanes of their own (an
+ * assignment is named after its client: it was another company's job), and the next company's
+ * ribbon running on into its case. Then each role as a strip of paper that unfolds to its lines; a
+ * ribbon and its strip light together, and a ribbon opens its strip. The timeline is SVG (positions
+ * as attributes, no inline styles), hidden from screen readers, which get it all from the strips.
+ * While inspecting, each ribbon and strip shows its dimension: start, end and months.
  */
-import { copyFor } from '../../i18n/dictionary';
+import { copyFor, fill } from '../../i18n/dictionary';
 import { langOf, localize } from '../../i18n/routing';
 import { careerFor } from '../../lib/career';
+import { formatMonth } from '../../lib/format';
+import { howLong, monthIndex, monthsOf, timeline } from '../../lib/earlier-timeline';
 
 interface Props {
-  /** Companies with a case study of their own, left out here. */
-  exclude: string[];
+  /** Companies with a case study of their own, left out here; the first by date runs on into its case. */
+  cases: { company: string; href: string }[];
 }
-const { exclude } = Astro.props;
+const { cases } = Astro.props;
 const lang = langOf(Astro.currentLocale);
 const copy = copyFor(lang);
 const t = copy.cases.index.earlier;
+const exclude = cases.map((c) => c.company);
 const year = (yearMonth: string) => yearMonth.slice(0, 4);
-const roles = careerFor(lang)
-  .entries.filter(
-    (e) => ['role', 'assignment', 'contract'].includes(e.kind) && e.end && !exclude.includes(e.org),
-  )
+const career = careerFor(lang).entries.filter((e) => ['role', 'assignment', 'contract'].includes(e.kind));
+const roles = career
+  .filter((e) => e.end && !exclude.includes(e.org))
+  .map((e) => ({ ...e, end: e.end! }))
   .toSorted((a, b) => b.start.localeCompare(a.start));
 const period = (start: string, end: string) =>
   year(start) === year(end) ? year(start) : `${year(start)}–${year(end)}`;
+const months = (n: number) => (n === 1 ? t.month : fill(t.months, { n }));
+const duration = (n: number) => howLong(n, t);
+const span = (r: { start: string; end: string }) =>
+  fill(t.span, {
+    start: formatMonth(r.start, lang),
+    end: formatMonth(r.end, lang),
+    months: months(monthsOf(r)),
+  });
+const company = (r: { org: string; client?: string | undefined }) =>
+  r.client ? fill(t.via, { client: r.client, org: r.org }) : r.org;
+const anchor = (version: string) => `role-${version.replaceAll('.', '-')}`;
+
+// The timeline, 1000 units wide: a ruler, then a lane per row of ribbons, then the next case.
+const W = 1000;
+const LANE = 44;
+const TOP = 40;
+const line = timeline(roles);
+const next = career
+  .filter((e) => exclude.includes(e.org))
+  .toSorted((a, b) => a.start.localeCompare(b.start))[0];
+const nextCase = next && cases.find((c) => c.company === next.org);
+const height = TOP + (line.lanes + (nextCase ? 1 : 0)) * LANE;
+const x = (f: number) => (f * W).toFixed(1);
 ---
 
-<section class="earlier" aria-labelledby="t-earlier" data-inspect="EarlierWork">
+<section class="earlier" aria-labelledby="t-earlier" data-inspect="EarlierWork" data-earlier>
   <h2 id="t-earlier">{t.title}</h2>
   <p class="intro">{t.intro}</p>
-  <ol class="roles">
-    {roles.map((r) => (
-      <li>
-        <p class="when">
-          <span>{period(r.start, r.end ?? r.start)}</span>
-          <span class="v">v{r.version}</span>
-        </p>
-        <div>
-          <h3>{r.title}</h3>
-          <p class="org">{r.org}</p>
-          {r.added?.map((line) => (
-            <p class="line">{line}</p>
-          ))}
-        </div>
-      </li>
-    ))}
+  <figure class="chart" aria-hidden="true">
+    <svg viewBox={`0 0 ${W} ${height}`} focusable="false">
+      <line class="axis" x1="0" x2={W} y1="24" y2="24" />
+      {line.years.map((y, i) => (
+        <g class="year">
+          <line x1={x(y.at)} x2={x(y.at)} y1="24" y2="30" />
+          <text class:list={{ first: i === 0 }} x={x(y.at)} y="14">
+            {y.year}
+          </text>
+        </g>
+      ))}
+      {line.ribbons.map((r) => {
+        const y = TOP + r.lane * LANE;
+        const left = Number(x(r.from));
+        const width = Math.max(10, Number(x(r.to)) - left);
+        return (
+          <a href={`#${anchor(r.role.version)}`} tabindex="-1" data-ribbon={r.role.version}>
+            <rect class="ribbon" x={left} y={y} width={width} height="30" rx="6" />
+            <rect class="edge" x={left} y={y} width="3" height="30" />
+            <text
+              class:list={['name', { outside: r.outside }]}
+              x={r.outside ? left + width + 10 : left + 12}
+              y={y + 20}
+            >
+              {r.role.client ?? r.role.org}
+            </text>
+            <text class="dim" x={left} y={y - 4}>
+              {span(r.role)}
+            </text>
+          </a>
+        );
+      })}
+      {nextCase && next && (
+        <a href={nextCase.href} tabindex="-1">
+          <rect
+            class="next"
+            x={x(line.at(monthIndex(next.start)))}
+            y={TOP + line.lanes * LANE}
+            width={W - Number(x(line.at(monthIndex(next.start))))}
+            height="30"
+            rx="6"
+          />
+          <text
+            class="next-name"
+            x={Number(x(line.at(monthIndex(next.start)))) + 12}
+            y={TOP + line.lanes * LANE + 20}
+          >
+            {next.org} →
+          </text>
+        </a>
+      )}
+    </svg>
+  </figure>
+  <ol class="strips">
+    {roles.map((r) => {
+      const head = (
+        <>
+          <span class="when">
+            {period(r.start, r.end)}
+            <span class="v">v{r.version}</span>
+          </span>
+          <span class="what">
+            <h3 class="title">{r.title}</h3>
+            <span class="org">{company(r)}</span>
+          </span>
+          <span class="long">
+            {duration(monthsOf(r))}
+            <span class="dim">{span(r)}</span>
+          </span>
+        </>
+      );
+      return (
+        <li id={anchor(r.version)} data-strip={r.version}>
+          {r.added?.length ? (
+            <details>
+              <summary>{head}</summary>
+              <div class="panel">
+                {r.added.map((l) => (
+                  <p>{l}</p>
+                ))}
+              </div>
+            </details>
+          ) : (
+            <div class="flat">{head}</div>
+          )}
+        </li>
+      );
+    })}
   </ol>
   <a class="more" href={localize('/changelog', lang)}>
     {copy.cases.case.career} →
   </a>
 </section>
 
+<script>
+  // Self-contained (ENGINEERING.md, "Browser scripts"): a ribbon and its strip light together, and
+  // a ribbon opens its strip.
+  for (const box of document.querySelectorAll<HTMLElement>('[data-earlier]')) {
+    const pair = (v: string) => [
+      box.querySelector(`[data-ribbon="${v}"]`),
+      box.querySelector(`[data-strip="${v}"]`),
+    ];
+    const light = (v: string, on: boolean) => pair(v).forEach((el) => el?.classList.toggle('on', on));
+    for (const el of box.querySelectorAll<HTMLElement>('[data-ribbon], [data-strip]')) {
+      const v = el.dataset.ribbon ?? el.dataset.strip ?? '';
+      el.addEventListener('pointerenter', () => light(v, true));
+      el.addEventListener('pointerleave', () => light(v, false));
+    }
+    for (const ribbon of box.querySelectorAll<SVGAElement>('[data-ribbon]'))
+      ribbon.addEventListener('click', () => {
+        const strip = box.querySelector(`[data-strip="${ribbon.dataset.ribbon}"]`);
+        const details = strip?.querySelector('details');
+        if (details) details.open = true;
+        strip?.querySelector<HTMLElement>('summary')?.focus({ preventScroll: true });
+      });
+  }
+</script>
+
 <style>
   .earlier {
+    --ease: cubic-bezier(0.16, 1, 0.3, 1);
     padding-bottom: var(--space-24);
   }
   h2 {
@@ -62,64 +192,229 @@ const period = (start: string, end: string) =>
     letter-spacing: -0.01em;
   }
   .intro {
-    margin: 0 0 var(--space-6);
-    color: var(--color-mute);
-  }
-  .roles {
-    margin: 0;
-    padding: 0;
-    list-style: none;
-    border-top: 1px solid var(--color-rule);
-  }
-  .roles li {
-    display: grid;
-    grid-template-columns: 10rem minmax(0, 1fr);
-    gap: var(--space-6);
-    padding-block: var(--space-6);
-    border-bottom: 1px solid var(--color-rule);
-  }
-  .when {
-    display: grid;
-    align-content: start;
-    gap: var(--space-1);
-    margin: 0;
-    font: var(--type-caption);
-    font-family: var(--font-mono);
+    margin: 0 0 var(--space-8);
     color: var(--color-mute);
   }
   .v {
+    font: 600 11px / 1 var(--font-mono);
+    letter-spacing: 0.04em;
     color: var(--color-accent);
   }
-  h3 {
-    margin: 0;
-    font-size: var(--size-lg);
-    line-height: 1.25;
+  .dim {
+    display: none;
   }
-  .org {
-    margin: var(--space-1) 0 0;
+  :global(.inspecting) .dim {
+    display: block;
+  }
+
+  /* The timeline. */
+  .chart {
+    margin: 0 0 var(--space-8);
+  }
+  .chart svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+  .axis,
+  .year line {
+    stroke: var(--color-rule);
+    stroke-width: 1;
+  }
+  .year text {
+    font: 500 12px var(--font-mono);
+    fill: var(--color-mute);
+    text-anchor: middle;
+  }
+  .year text.first {
+    text-anchor: start;
+  }
+  .ribbon {
+    fill: var(--color-surface);
+    stroke: var(--color-rule);
+    transition: stroke 0.3s var(--ease);
+  }
+  .edge {
+    fill: var(--color-accent-ui);
+  }
+  .name {
+    font: 600 13px var(--font-sans);
+    fill: var(--color-ink);
+  }
+  [data-ribbon]:global(.on) .ribbon,
+  [data-ribbon]:hover .ribbon {
+    stroke: var(--color-accent-ui);
+    stroke-width: 1.5;
+  }
+  .next {
+    fill: none;
+    stroke: color-mix(in oklab, var(--color-accent-ui) 60%, var(--color-rule));
+    stroke-dasharray: 5 4;
+  }
+  .next-name {
+    font: 500 13px var(--font-sans);
+    fill: var(--color-accent);
+  }
+  .chart .dim {
+    font: 500 10px var(--font-mono);
+    fill: var(--color-accent);
+  }
+  :global(.inspecting) .ribbon {
+    stroke: var(--color-accent);
+    stroke-dasharray: 3 3;
+  }
+
+  /* The strips: paper that unfolds to its lines. */
+  .strips {
+    display: grid;
+    gap: var(--space-3);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .strips li {
+    border-radius: 8px;
+    background: var(--color-surface);
+    box-shadow:
+      inset 0 0 0 1px var(--color-rule),
+      0 16px 28px -26px rgb(0 0 0 / 0.5);
+    perspective: 900px;
+    scroll-margin-top: 96px;
+    transition: box-shadow 0.3s var(--ease);
+  }
+  .strips li:global(.on) {
+    box-shadow:
+      inset 0 0 0 1.5px var(--color-accent-ui),
+      0 16px 28px -26px rgb(0 0 0 / 0.5);
+  }
+  summary,
+  .flat {
+    position: relative;
+    display: grid;
+    grid-template-columns: 7rem minmax(0, 1fr) auto 12px;
+    gap: var(--space-6);
+    align-items: center;
+    padding: var(--space-6);
+  }
+  summary {
+    cursor: pointer;
+    list-style: none;
+  }
+  summary::-webkit-details-marker {
+    display: none;
+  }
+  summary::after {
+    content: '';
+    width: 9px;
+    height: 9px;
+    margin-top: -6px;
+    border-right: 1.5px solid var(--color-mute);
+    border-bottom: 1.5px solid var(--color-mute);
+    rotate: 45deg;
+    transition: rotate 0.3s var(--ease);
+  }
+  details[open] summary::after {
+    rotate: 225deg;
+    margin-top: 4px;
+  }
+  /* Open, the strip shows its crease. */
+  details[open] summary::before {
+    content: '';
+    position: absolute;
+    right: var(--space-6);
+    bottom: 0;
+    left: var(--space-6);
+    border-top: 1.5px dashed var(--color-accent-ui);
+  }
+  .when {
+    display: grid;
+    gap: var(--space-1);
+    font: 500 12px / 1.4 var(--font-mono);
     color: var(--color-mute);
   }
-  .line {
-    margin: var(--space-3) 0 0;
+  .what {
+    display: grid;
+    gap: 2px;
+  }
+  .title {
+    margin: 0;
+    font-size: var(--size-lg);
+    font-weight: 600;
+    line-height: 1.25;
+    color: var(--color-ink);
+  }
+  .org {
+    font-size: var(--size-sm);
+    color: var(--color-mute);
+  }
+  .long {
+    display: grid;
+    gap: var(--space-1);
+    justify-items: end;
+    font: 500 12px var(--font-mono);
+    color: var(--color-mute);
+    text-align: right;
+  }
+  .long .dim {
+    font-size: 10px;
+    color: var(--color-accent);
+  }
+  .panel {
+    padding: var(--space-6) var(--space-6) var(--space-6) calc(7rem + var(--space-12));
+    transform-origin: 50% 0;
+  }
+  .panel p {
     max-width: 68ch;
+    margin: 0 0 var(--space-2);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    details[open] .panel {
+      animation: unfold-panel 0.6s var(--ease) both;
+    }
+  }
+  @keyframes unfold-panel {
+    from {
+      transform: rotateX(-70deg);
+    }
   }
   .more {
     display: inline-flex;
     align-items: center;
     min-height: 24px;
-    margin-top: var(--space-6);
+    margin-top: var(--space-8);
     font-weight: 600;
     color: var(--color-accent);
   }
-  @media (max-width: 640px) {
-    .roles li {
-      grid-template-columns: minmax(0, 1fr);
-      gap: var(--space-2);
+  @media (max-width: 719px) {
+    .chart {
+      display: none;
+    }
+    summary,
+    .flat {
+      grid-template-columns: minmax(0, 1fr) 12px;
+      gap: var(--space-2) var(--space-4);
     }
     .when {
       grid-auto-flow: column;
       justify-content: start;
       gap: var(--space-3);
+    }
+    .when,
+    .what,
+    .long {
+      grid-column: 1;
+    }
+    .long {
+      justify-items: start;
+      text-align: left;
+    }
+    summary::after {
+      grid-column: 2;
+      grid-row: 1 / span 3;
+    }
+    .panel {
+      padding-left: var(--space-6);
     }
   }
 </style>
