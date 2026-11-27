@@ -6,13 +6,12 @@
  */
 import { getProfile } from '../../lib/profile';
 import { copyFor, fill } from '../../i18n/dictionary';
+import { coordsText } from '../../lib/coords';
 
 const profile = await getProfile(Astro.currentLocale);
 const c = copyFor(Astro.currentLocale).home.hero.coords;
 const { lat, lon } = profile.city;
-const degrees = (v: number, plus: string, minus: string) =>
-  `${Math.abs(v).toFixed(2)}° ${v < 0 ? minus : plus}`;
-const coords = `${degrees(lat, c.north, c.south)} · ${degrees(lon, c.east, c.west)}`;
+const coords = coordsText(lat, lon, c);
 const map = `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lon}#map=13/${lat}/${lon}`;
 ---
 

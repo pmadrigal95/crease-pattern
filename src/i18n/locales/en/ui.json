@@ -129,7 +129,22 @@
       "intro": "Email reaches me fastest.",
       "copy": "Copy email address",
       "copied": "Email address copied",
-      "copyFailed": "Couldn't copy it. The address is selected, so you can copy it yourself."
+      "copyFailed": "Couldn't copy it. The address is selected, so you can copy it yourself.",
+      "postcard": {
+        "to": "To",
+        "greetings": "Greetings from Costa Rica",
+        "place": "Costa Rica",
+        "picture": "Irazú · {elevation} m",
+        "front": "See the front",
+        "back": "See the back",
+        "label": "The postcard's front: the Irazú volcano as contour lines, greetings from Costa Rica",
+        "layers": {
+          "paper": "Paper · the identity's surface",
+          "ink": "Ink · Newsreader, the site's serif",
+          "stamp": "Stamp · the identity's figure",
+          "postmark": "Postmark · time from your browser, Costa Rica's zone"
+        }
+      }
     }
   },
   "footer": {

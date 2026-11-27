@@ -1,0 +1,61 @@
+---
+/**
+ * The contact postcard's postmark (ContactPostcard.astro): a ring with the place and its
+ * coordinates, the local time in the middle (filled in by the postcard's script, `data-clock`), and
+ * the wavy cancellation lines. Decorative: the postcard says all of it in words elsewhere.
+ */
+interface Props {
+  /** The ring's words, as printed: "COSTA RICA · 9.86° N · 83.92° W ·". */
+  ring: string;
+}
+const { ring } = Astro.props;
+const path = 'M66 66m-50 0a50 50 0 1 1 100 0a50 50 0 1 1-100 0';
+---
+
+<svg class="postmark" viewBox="0 0 220 132" aria-hidden="true" data-inspect="Postmark">
+  <defs>
+    <path id="postmark-ring" d={path}></path>
+  </defs>
+  <circle cx="66" cy="66" r="60"></circle>
+  <circle cx="66" cy="66" r="38"></circle>
+  <text>
+    <textPath href="#postmark-ring" textLength="300" lengthAdjust="spacing">
+      {ring}
+    </textPath>
+  </text>
+  <text class="time" x="66" y="71" text-anchor="middle" data-clock></text>
+  {[0, 1, 2, 3].map((k) => (
+    <path class="wave" d={`M128 ${48 + k * 12}q10 -6 20 0t20 0t20 0t20 0`} />
+  ))}
+</svg>
+
+<style>
+  .postmark {
+    width: 200px;
+    color: var(--color-accent);
+    opacity: 0.85;
+  }
+  circle,
+  .wave {
+    fill: none;
+    stroke: currentColor;
+  }
+  circle {
+    stroke-width: 1.5;
+  }
+  .wave {
+    stroke-width: 1.4;
+  }
+  text {
+    font: 600 8.5px var(--font-mono);
+    fill: currentColor;
+  }
+  .time {
+    font-size: 15px;
+  }
+  @media (max-width: 760px) {
+    .wave {
+      display: none;
+    }
+  }
+</style>

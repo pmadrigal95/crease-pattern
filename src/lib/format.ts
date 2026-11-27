@@ -33,9 +33,17 @@ const oneDecimal = lazy(
   (l) => new Intl.NumberFormat(l, { minimumFractionDigits: 1, maximumFractionDigits: 1 }),
 );
 const andList = lazy((l) => new Intl.ListFormat(l, { type: 'conjunction' }));
+// The owner's clock: Costa Rica keeps one zone all year, with no daylight saving.
+const costaRicaTime = lazy(
+  (l) => new Intl.DateTimeFormat(l, { hour: 'numeric', minute: '2-digit', timeZone: 'America/Costa_Rica' }),
+);
 
 /** "November 11, 2026". */
 export const formatDate = (date: Date, lang: Lang = DEFAULT_LANG): string => longDate(lang).format(date);
+
+/** The time it is now where the owner lives: "5:49 PM", "17:49". */
+export const formatOwnerTime = (now: Date, lang: Lang = DEFAULT_LANG): string =>
+  costaRicaTime(lang).format(now);
 
 /** "Sep 2019" from `2019-09`; a bare year stays as it is. */
 export const formatMonth = (value: string, lang: Lang = DEFAULT_LANG): string => {
