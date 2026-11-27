@@ -1,0 +1,310 @@
+/*
+ * Between pages: "fold and continuity" (doc 39). One grammar, chosen by where the visitor goes
+ * (src/scripts/page-reveal.ts names it as the transition's type, before the first frame):
+ *
+ * - open:  a card (a case, a post) opens into its page: the page grows out of the card's place.
+ * - close: back to a list with that card in view: the page closes into its card.
+ * - in:    a deeper page with no card: the old sheet folds back on a crease under the masthead,
+ *          the new one rises, and the crease draws itself.
+ * - back:  the browser's back or a shallower page: the reverse, the new sheet unfolds forward.
+ * - next / prev: another section of the menu: a short slide in the menu's direction, and the
+ *          menu's mark slides from one section to the other.
+ * - lang:  the same page in the other language: only a quick fade.
+ *
+ * The old page leaves in the first 40 % and the new one appears from 25 %, so the two are never
+ * seen on top of each other for long. Every identity keeps the grammar and changes its material:
+ * duration, curve, the crease's line and the card's corners. The masthead stays put; a click is
+ * never swallowed. A same-document transition (a change of identity) has no type and none of
+ * this applies to it. Reduced motion: pages swap at once.
+ */
+@view-transition {
+  navigation: auto;
+}
+@media (prefers-reduced-motion: reduce) {
+  @view-transition {
+    navigation: none;
+  }
+}
+
+/* ---------- the material, per identity ---------- */
+:root {
+  --vt-duration: var(--motion-page);
+  --vt-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --vt-tilt: 8deg;
+  --vt-lift: 10px;
+  --vt-slide: 16px;
+  --vt-dim: 1;
+  --vt-radius: 14px;
+}
+/* Basalt & glacier: a heavy plate. Shorter and firm; the sheet darkens as it tips. */
+:root[data-direction='basalt-glacier'] {
+  --vt-duration: 260ms;
+  --vt-ease: cubic-bezier(0.3, 0.9, 0.25, 1);
+  --vt-tilt: 6deg;
+  --vt-dim: 0.9;
+  --vt-radius: 8px;
+}
+/* Washi & asagi: paper with fibre. Longer and softer. */
+:root[data-direction='washi-asagi'] {
+  --vt-duration: 360ms;
+  --vt-ease: cubic-bezier(0.25, 0.85, 0.3, 1);
+  --vt-tilt: 10deg;
+  --vt-radius: 18px;
+}
+
+/* Never swallow a click while a transition plays: the next navigation simply starts. */
+::view-transition {
+  pointer-events: none;
+}
+
+/* ---------- the sheets ---------- */
+:root:active-view-transition-type(in, back, open, close, next, prev, lang)::view-transition-old(root),
+:root:active-view-transition-type(in, back, open, close, next, prev, lang)::view-transition-new(root) {
+  mix-blend-mode: normal;
+  animation-duration: var(--vt-duration);
+  animation-timing-function: var(--vt-ease);
+  animation-fill-mode: both;
+}
+:root:active-view-transition-type(in)::view-transition-old(root) {
+  transform-origin: 50% 0;
+  animation-name: vt-fold-away;
+}
+:root:active-view-transition-type(in)::view-transition-new(root) {
+  animation-name: vt-rise;
+}
+:root:active-view-transition-type(back)::view-transition-old(root) {
+  animation-name: vt-drop;
+}
+:root:active-view-transition-type(back)::view-transition-new(root) {
+  transform-origin: 50% 0;
+  animation-name: vt-unfold;
+}
+:root:active-view-transition-type(next)::view-transition-old(root) {
+  animation-name: vt-out-left;
+}
+:root:active-view-transition-type(next)::view-transition-new(root) {
+  animation-name: vt-in-right;
+}
+:root:active-view-transition-type(prev)::view-transition-old(root) {
+  animation-name: vt-out-right;
+}
+:root:active-view-transition-type(prev)::view-transition-new(root) {
+  animation-name: vt-in-left;
+}
+:root:active-view-transition-type(lang)::view-transition-old(root) {
+  animation: vt-fade-out calc(var(--vt-duration) * 0.6) linear both;
+}
+:root:active-view-transition-type(lang)::view-transition-new(root) {
+  animation: vt-fade-in calc(var(--vt-duration) * 0.6) linear both;
+}
+
+/* A card opens into its page. Its place arrives as --vt-t/r/b/l (page-reveal.ts). */
+:root:active-view-transition-type(open)::view-transition-old(root) {
+  z-index: 1;
+  transform-origin: 50% 0;
+  animation-name: vt-recede;
+}
+:root:active-view-transition-type(open)::view-transition-new(root) {
+  z-index: 2;
+  animation-name: vt-open;
+}
+:root:active-view-transition-type(close)::view-transition-old(root) {
+  z-index: 2;
+  animation-name: vt-close;
+}
+:root:active-view-transition-type(close)::view-transition-new(root) {
+  z-index: 1;
+  transform-origin: 50% 0;
+  animation-name: vt-settle;
+}
+
+@keyframes vt-fold-away {
+  40% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 0;
+    transform: perspective(1600px) rotateX(var(--vt-tilt)) translateY(calc(var(--vt-lift) * -1));
+    filter: brightness(var(--vt-dim));
+  }
+}
+@keyframes vt-rise {
+  0%,
+  25% {
+    opacity: 0;
+    transform: translateY(var(--vt-lift));
+  }
+}
+@keyframes vt-drop {
+  40% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(var(--vt-lift));
+  }
+}
+@keyframes vt-unfold {
+  0%,
+  25% {
+    opacity: 0;
+    transform: perspective(1600px) rotateX(var(--vt-tilt)) translateY(calc(var(--vt-lift) * -1));
+  }
+}
+@keyframes vt-out-left {
+  40% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(calc(var(--vt-slide) * -1));
+  }
+}
+@keyframes vt-out-right {
+  40% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(var(--vt-slide));
+  }
+}
+@keyframes vt-in-right {
+  0%,
+  25% {
+    opacity: 0;
+    transform: translateX(var(--vt-slide));
+  }
+}
+@keyframes vt-in-left {
+  0%,
+  25% {
+    opacity: 0;
+    transform: translateX(calc(var(--vt-slide) * -1));
+  }
+}
+@keyframes vt-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes vt-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes vt-open {
+  0% {
+    clip-path: inset(var(--vt-t) var(--vt-r) var(--vt-b) var(--vt-l) round var(--vt-radius));
+    opacity: 0.35;
+  }
+  30% {
+    opacity: 1;
+  }
+  100% {
+    clip-path: inset(0 0 0 0 round 0);
+  }
+}
+@keyframes vt-recede {
+  100% {
+    opacity: 0.4;
+    transform: scale(0.97);
+    filter: brightness(var(--vt-dim));
+  }
+}
+@keyframes vt-close {
+  35% {
+    opacity: 1;
+  }
+  100% {
+    clip-path: inset(var(--vt-t) var(--vt-r) var(--vt-b) var(--vt-l) round var(--vt-radius));
+    opacity: 0;
+  }
+}
+@keyframes vt-settle {
+  0% {
+    opacity: 0.4;
+    transform: scale(0.97);
+  }
+}
+
+/* ---------- the masthead stays put ---------- */
+.mast {
+  view-transition-name: masthead;
+}
+::view-transition-group(masthead) {
+  animation: none;
+  z-index: 3;
+}
+::view-transition-old(masthead) {
+  display: none;
+}
+::view-transition-new(masthead) {
+  animation: none;
+}
+
+/* ---------- the menu's mark slides to the new section (Masthead.astro, masthead.css) ---------- */
+.mast .nav-mark {
+  view-transition-name: nav-mark;
+}
+::view-transition-group(nav-mark) {
+  z-index: 4;
+  animation-duration: var(--vt-duration);
+  animation-timing-function: var(--vt-ease);
+}
+::view-transition-old(nav-mark),
+::view-transition-new(nav-mark) {
+  height: 100%;
+  animation-duration: var(--vt-duration);
+}
+
+/* ---------- the crease: one line under the masthead, the fold's axis (in and back only) ---------- */
+.vt-crease {
+  display: none;
+  position: fixed;
+  /* Under the masthead (min-height 60px, masthead.css). */
+  inset: 60px 0 auto;
+  z-index: 40;
+  height: 1px;
+  pointer-events: none;
+  background: var(--color-accent-ui);
+  transform-origin: 0 50%;
+  view-transition-name: vt-crease;
+}
+:root:active-view-transition-type(in, back).vt-fold .vt-crease {
+  display: block;
+  animation: vt-crease var(--vt-duration) var(--vt-ease) both;
+}
+:root[data-direction='basalt-glacier'] .vt-crease {
+  height: 2px;
+  background: var(--color-ink);
+}
+:root[data-direction='washi-asagi'] .vt-crease {
+  background: repeating-linear-gradient(90deg, var(--color-accent-ui) 0 6px, transparent 6px 10px);
+}
+:root[data-direction='contour-lines'] .vt-crease {
+  height: 8px;
+  margin-top: -4px;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='8'%3E%3Cpath d='M0 4 Q7.5 0.5 15 4 T30 4 T45 4 T60 4' fill='none' stroke='black' stroke-width='1.3'/%3E%3C/svg%3E")
+    repeat-x center / 30px 8px;
+}
+@keyframes vt-crease {
+  0% {
+    transform: scaleX(0);
+  }
+  55% {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scaleX(1);
+    opacity: 0;
+  }
+}
+::view-transition-group(vt-crease) {
+  z-index: 4;
+  animation: none;
+}
+::view-transition-new(vt-crease) {
+  animation: none;
+}
