@@ -1,0 +1,344 @@
+/*
+ * The privacy page as "what travels" (doc 40; privacy.astro, src/components/privacy/). Global
+ * because the stamps, the map and the tags sit inside MDX.
+ */
+.prose.body {
+  padding-bottom: var(--space-24);
+}
+
+/* The stamps and the map span the page; everything else keeps the reading measure. */
+.prose.body {
+  max-width: none;
+}
+.prose.body > :not(.stamps, .routes) {
+  max-width: 66ch;
+}
+
+/* ---------- the short version, as stamps ---------- */
+.prose ul.stamps {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: var(--space-3);
+  margin-bottom: var(--space-12);
+  padding: 0;
+  list-style: none;
+}
+.stamp {
+  display: grid;
+  align-content: start;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border: 1.5px solid var(--color-ink);
+  border-radius: 10px;
+  background: var(--color-surface);
+}
+.stamp .big {
+  font: 700 clamp(2.4rem, 4vw, 3.25rem) / 1 var(--font-sans);
+  letter-spacing: -0.04em;
+  color: var(--color-accent);
+}
+.stamp .label {
+  font: 600 var(--size-xs) var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.stamp .words p {
+  margin: 0;
+  font-size: var(--size-sm);
+  line-height: 1.45;
+  color: var(--color-mute);
+}
+.stamp .words strong {
+  color: var(--color-ink);
+}
+
+/* ---------- the routes ---------- */
+.routes {
+  margin-bottom: var(--space-12);
+  padding: var(--space-6);
+  border: 1px solid var(--color-rule);
+  border-radius: 12px;
+  background-color: var(--color-bg);
+  background-image:
+    linear-gradient(color-mix(in oklab, var(--color-rule) 45%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in oklab, var(--color-rule) 45%, transparent) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+.prose .routes h2 {
+  margin: 0 0 var(--space-2);
+}
+.routes > p {
+  margin: 0 0 var(--space-4);
+  color: var(--color-mute);
+}
+.routes svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.routes .place rect {
+  fill: var(--color-surface);
+  stroke: var(--color-ink);
+  stroke-width: 1.5;
+}
+.routes .place.you rect {
+  fill: color-mix(in oklab, var(--color-accent-ui) 16%, var(--color-surface));
+  stroke: var(--color-accent-ui);
+  stroke-width: 2;
+}
+.routes .place.never rect {
+  stroke: var(--color-mute);
+  stroke-dasharray: 3 3;
+}
+.routes .place.off rect {
+  stroke: var(--color-mute);
+  stroke-dasharray: 3 3;
+}
+.routes text {
+  font: 500 11px var(--font-mono);
+  fill: var(--color-ink);
+}
+.routes text.t {
+  font: 600 13px var(--font-sans);
+}
+.routes text.s {
+  font-size: 10px;
+  fill: var(--color-mute);
+}
+.routes .route {
+  fill: none;
+  stroke: var(--color-accent-ui);
+  stroke-width: 2;
+}
+.routes .route.action {
+  stroke-dasharray: 6 5;
+}
+.routes .route:is(.never, .off) {
+  stroke: var(--color-mute);
+  stroke-dasharray: 2 5;
+}
+.routes .cross {
+  stroke: var(--color-ink);
+  stroke-width: 2;
+}
+/* Each identity's material: Contour rings around the browser, Washi's soft line ends, Basalt's
+   squarer places. */
+.routes .ring {
+  display: none;
+  fill: none;
+  stroke: var(--color-accent-ui);
+  stroke-width: 1;
+  opacity: 0.45;
+}
+:root[data-direction='contour-lines'] .routes .ring {
+  display: block;
+}
+:root[data-direction='washi-asagi'] .routes .route {
+  stroke-linecap: round;
+}
+:root[data-direction='basalt-glacier'] .routes .place rect {
+  rx: 2px;
+}
+
+.routes .list {
+  display: none;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.routes .list li {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) auto;
+  gap: var(--space-3);
+  align-items: center;
+  padding: var(--space-3) 0;
+  border-top: 1px dashed var(--color-rule);
+}
+.routes .list .line {
+  border-top: 2px solid var(--color-accent-ui);
+}
+.routes .list .action .line {
+  border-top-style: dashed;
+}
+.routes .list :is(.never, .off) .line {
+  border-top: 2px dotted var(--color-mute);
+}
+.routes .list b {
+  display: block;
+  font-size: var(--size-sm);
+}
+.routes .list small {
+  font: 11px var(--font-mono);
+  color: var(--color-mute);
+}
+
+.routes .legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-6);
+  margin: var(--space-4) 0 0;
+  font: var(--type-caption);
+  color: var(--color-mute);
+}
+.routes .legend span::before {
+  content: '';
+  display: inline-block;
+  width: 24px;
+  margin-right: 8px;
+  vertical-align: middle;
+  border-top: 2px solid var(--color-accent-ui);
+}
+.routes .legend .action::before {
+  border-top-style: dashed;
+}
+.routes .legend .never::before {
+  border-top: 2px dotted var(--color-mute);
+}
+
+/* Inspecting: what this page asked for, on the route it declares. */
+.routes .seen,
+.routes .list .n,
+.routes .audit {
+  display: none;
+}
+:root.inspecting .routes .seen {
+  display: block;
+}
+:root.inspecting .routes .list .n {
+  display: inline-block;
+}
+.routes .seen rect {
+  fill: var(--color-ink);
+  stroke: none;
+}
+.routes .seen text {
+  font: 600 10px var(--font-mono);
+  fill: var(--color-bg);
+}
+.routes .list .n {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--color-ink);
+  color: var(--color-bg);
+  font: 600 10px var(--font-mono);
+}
+:root.inspecting .routes .audit {
+  display: block;
+  margin: var(--space-4) 0 0;
+  padding: var(--space-3) var(--space-4);
+  border-radius: 8px;
+  background: var(--color-ink);
+  color: var(--color-bg);
+  font: 500 12px/1.5 var(--font-mono);
+}
+@media (prefers-reduced-motion: no-preference) {
+  :root.inspecting .routes .route:not(.action, .never, .off) {
+    stroke-dasharray: 600;
+    animation: route-draw 1200ms var(--motion-ease-out) both;
+  }
+  :root.inspecting .routes .seen {
+    animation: seen-in 400ms 700ms var(--motion-ease-out) both;
+  }
+}
+@keyframes route-draw {
+  from {
+    stroke-dashoffset: 600;
+  }
+}
+@keyframes seen-in {
+  from {
+    opacity: 0;
+  }
+}
+
+/* ---------- each paragraph's kind of route ---------- */
+.route-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-right: 8px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  box-shadow: inset 0 0 0 1px var(--color-rule);
+  font: 500 11px var(--font-mono);
+  color: var(--color-mute);
+  vertical-align: 2px;
+}
+.route-tag::before {
+  content: '';
+  width: 16px;
+  border-top: 2px solid var(--color-accent-ui);
+}
+.route-tag.action::before {
+  border-top-style: dashed;
+}
+.route-tag.device::before {
+  width: 8px;
+  height: 8px;
+  border: 2px solid var(--color-accent-ui);
+  border-radius: 50%;
+}
+
+/* ---------- the live check ---------- */
+.live .caption {
+  margin: 0 0 var(--space-2);
+  font: var(--type-caption);
+  color: var(--color-mute);
+}
+.prose .live ul {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border: 1px solid var(--color-rule);
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--color-surface);
+}
+.live li {
+  display: grid;
+  grid-template-columns: 1.5rem minmax(0, 1fr) auto;
+  gap: var(--space-3);
+  align-items: baseline;
+  padding: var(--space-3) var(--space-4);
+  border-top: 1px dashed var(--color-rule);
+}
+.live li:first-child {
+  border-top: 0;
+}
+.live .ok {
+  color: var(--color-accent);
+  font-weight: 700;
+}
+.live small {
+  display: block;
+  font-size: var(--size-xs);
+  color: var(--color-mute);
+  overflow-wrap: anywhere;
+}
+.live b {
+  font: 600 12px var(--font-mono);
+  text-align: right;
+}
+
+/* ---------- narrow screens ---------- */
+@media (max-width: 960px) {
+  .prose ul.stamps {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 720px) {
+  .prose ul.stamps {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .routes {
+    padding: var(--space-4);
+  }
+  .routes svg {
+    display: none;
+  }
+  .routes .list {
+    display: block;
+  }
+}

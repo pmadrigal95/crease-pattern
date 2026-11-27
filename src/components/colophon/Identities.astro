@@ -1,0 +1,61 @@
+---
+/**
+ * The colophon's three identities, each as its origami figure folded from the same sheet and its
+ * light palette (src/generated/tokens.json). A click switches the site to it with the Inspector's
+ * own code, loaded on the first click (as the home page's papers do, WorkReadout.astro).
+ */
+import tokens from '../../generated/tokens.json';
+import { copyFor } from '../../i18n/dictionary';
+import { spriteHref } from '../../lib/origami/sprite';
+import { VIEWBOX } from '../../lib/origami/marks';
+import type { ModelId } from '../../lib/origami/models';
+
+const t = copyFor(Astro.currentLocale).colophonPage.ids;
+const ids: { id: keyof typeof tokens.directions; name: string; figure: ModelId; what: string }[] = [
+  { id: 'contour-lines', name: 'Contour lines', figure: 'morpho', what: t.contour },
+  { id: 'basalt-glacier', name: 'Basalt & glacier', figure: 'fox', what: t.basalt },
+  { id: 'washi-asagi', name: 'Washi & asagi', figure: 'crane', what: t.washi },
+];
+const dots = (id: keyof typeof tokens.directions) => {
+  const c = tokens.directions[id].light;
+  return [c.bg, c.ink, c.accent, c.second];
+};
+---
+
+<p class="ids-intro">{t.intro}</p>
+<div class="ids" data-inspect="Identities">
+  {ids.map((i) => (
+    <button class="id" type="button" data-identity={i.id} aria-pressed="false">
+      <svg class="fig" viewBox={VIEWBOX} aria-hidden="true" focusable="false">
+        <use href={spriteHref(i.figure)} />
+      </svg>
+      <b>{i.name}</b>
+      <svg class="dots" viewBox="0 0 68 14" aria-hidden="true" focusable="false">
+        {dots(i.id).map((c, k) => (
+          <circle cx={7 + k * 18} cy="7" r="6.5" fill={c} />
+        ))}
+      </svg>
+      <span class="what">{i.what}</span>
+    </button>
+  ))}
+</div>
+
+<script>
+  import type { VisualDirection } from '../../config/visual-direction';
+  const cards = document.querySelectorAll<HTMLButtonElement>('[data-identity]');
+  const show = () => {
+    const current = document.documentElement.getAttribute('data-direction');
+    for (const card of cards) card.setAttribute('aria-pressed', String(card.dataset.identity === current));
+  };
+  for (const card of cards)
+    card.addEventListener('click', (e) => {
+      void import('../inspector/identity').then((m) =>
+        m.setDirection(card.dataset.identity as VisualDirection, { x: e.clientX, y: e.clientY }),
+      );
+    });
+  new MutationObserver(show).observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ['data-direction'],
+  });
+  show();
+</script>

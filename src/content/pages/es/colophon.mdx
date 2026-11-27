@@ -3,13 +3,24 @@ title: Colofón
 description: Cómo se construye, se prueba y se publica este sitio.
 ---
 
+import Sheet from '../../../components/colophon/Sheet.astro';
+import Identities from '../../../components/colophon/Identities.astro';
+import TypeSpecimen from '../../../components/colophon/TypeSpecimen.astro';
+import QualityGauges from '../../../components/colophon/QualityGauges.astro';
+
 Cada dato de esta página se puede comprobar en [el repositorio](https://github.com/pmadrigal95/crease-pattern).
+
+<Sheet n={1} back="architecture">
 
 ## Arquitectura
 
 - **[Astro](https://astro.build/)** genera cada página como HTML estático al compilar. Una página no carga
   JavaScript de ningún framework a menos que uno de sus componentes lo necesite.
 - **TypeScript** en su configuración más estricta, desde los esquemas de contenido hasta los componentes.
+
+</Sheet>
+
+<Sheet n={2} back="design">
 
 ## Sistema de diseño
 
@@ -24,6 +35,14 @@ Cada dato de esta página se puede comprobar en [el repositorio](https://github.
 - Detrás del inicio, cada identidad tiene su propia superficie: curvas de nivel, juntas de basalto o fibras de
   washi. Un script dibuja cada una como un mosaico SVG continuo de pocos kilobytes, y usa una imagen hecha con IA
   solo como referencia.
+
+<Identities />
+
+<TypeSpecimen />
+
+</Sheet>
+
+<Sheet n={3} back="scene">
 
 ## La escena 3D
 
@@ -47,6 +66,10 @@ datos reales de elevación, con una curva cada 100 m.
   using Copernicus WorldDEM-30 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under
   COPERNICUS by the European Union and ESA; all rights reserved.
 
+</Sheet>
+
+<Sheet n={4} back="portrait">
+
 ## El retrato
 
 El retrato de [Sobre mí](/es/about) es una sola foto real, sin tocar con IA generativa, mostrada de dos formas.
@@ -59,25 +82,32 @@ El retrato de [Sobre mí](/es/about) es una sola foto real, sin tocar con IA gen
   en mi computadora, y un script de marching squares lo traza en un SVG de 11 KB.
 - Arrastra el control, o enfócalo y usa las flechas del teclado, para mover el pliegue.
 
+</Sheet>
+
+<Sheet n={5} back="quality">
+
 ## Controles de calidad
 
 Un cambio no se puede fusionar hasta pasar formato, linting, revisión de tipos, pruebas unitarias, un escaneo
 de accesibilidad con axe en cada identidad y tema, y los presupuestos de Lighthouse:
 
-| Presupuesto              | Umbral          |
-| ------------------------ | --------------- |
-| Rendimiento              | 95 o más        |
-| Accesibilidad            | 100             |
-| Buenas prácticas         | 100             |
-| SEO                      | 100             |
-| Largest Contentful Paint | menos de 1.85 s |
-| Cumulative Layout Shift  | menos de 0.05   |
+<QualityGauges />
+
+</Sheet>
+
+<Sheet n={6} back="hosting">
 
 ## Hosting
 
 Archivos estáticos en **Cloudflare Workers**, publicados automáticamente desde la rama `main`.
 
+</Sheet>
+
+<Sheet n={7} back="licences" seal>
+
 ## Licencias
 
 El código es MIT. Los textos son CC BY-NC-ND 4.0. La identidad visual y los medios tienen todos los derechos
 reservados.
+
+</Sheet>

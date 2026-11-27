@@ -78,7 +78,9 @@
             "precrease": "Precrease",
             "sonobe": "Ensayo Sonobe",
             "threads": "Ensayo de hilos",
-            "work": "Casos"
+            "work": "Casos",
+            "colophon": "Colofón",
+            "privacy": "Privacidad"
           }
         },
         "identities": {
@@ -224,10 +226,148 @@
     }
   },
   "colophonPage": {
-    "title": "Cómo está hecho este sitio."
+    "title": "Cómo está hecho este sitio.",
+    "block": {
+      "label": "Sobre este build",
+      "project": "Proyecto",
+      "author": "Autor",
+      "version": "Versión",
+      "built": "Build",
+      "pages": "Páginas HTML",
+      "sheets": "Láminas",
+      "licences": "Licencias",
+      "licencesValue": "Código MIT · Textos CC BY-NC-ND 4.0"
+    },
+    "back": "El reverso de la lámina {n}",
+    "turn": "Señala la lámina para darle vuelta.",
+    "plan": {
+      "title": "La hoja, desplegada",
+      "label": "El plano de esta página, una región por sección",
+      "mountain": "montaña",
+      "valley": "valle"
+    },
+    "backs": {
+      "architecture": {
+        "pages": "Páginas HTML",
+        "components": "Componentes",
+        "modules": "Módulos TypeScript",
+        "js": "JavaScript en la home"
+      },
+      "design": {
+        "tokens": "Tokens compilados",
+        "base": "Tokens base",
+        "colors": "Tokens de color por identidad",
+        "themes": "{count} × {themes} temas",
+        "surfaces": "Superficies"
+      },
+      "scene": {
+        "dem": "Malla de elevación del Irazú",
+        "figures": "Figuras",
+        "figuresValue": "{count}, una hoja cada una",
+        "three": "three.js",
+        "threeValue": "solo al abrir el Inspector"
+      },
+      "portrait": {
+        "photo": "La foto",
+        "contours": "Sus curvas",
+        "silhouette": "Su silueta",
+        "ai": "IA generativa en la foto",
+        "none": "ninguna"
+      },
+      "quality": {
+        "unit": "Archivos de pruebas unitarias",
+        "e2e": "Specs end-to-end",
+        "axe": "Pasadas de axe por cambio",
+        "lighthouse": "Páginas × corridas de Lighthouse"
+      },
+      "hosting": {
+        "runtime": "Plataforma",
+        "files": "Servido como archivos",
+        "filesValue": "todas las páginas",
+        "code": "Código por petición",
+        "codeValue": "solo /api/*",
+        "deploys": "Se publica desde"
+      },
+      "licences": {
+        "code": "Código",
+        "writing": "Textos",
+        "identity": "Identidad y medios",
+        "reserved": "reservados"
+      }
+    },
+    "ids": {
+      "intro": "Las tres identidades, cada una doblada de la misma hoja. Elige una para ver el sitio en ella.",
+      "contour": "Morpho de día, rana de noche",
+      "basalt": "Zorro ártico",
+      "washi": "Grulla"
+    },
+    "type": {
+      "sans": "Interfaz y títulos",
+      "mono": "Datos, etiquetas y código",
+      "serif": "Titulares de Precrease"
+    },
+    "gauges": {
+      "performance": "Rendimiento",
+      "accessibility": "Accesibilidad",
+      "bestPractices": "Buenas prácticas",
+      "seo": "SEO",
+      "lcp": "Largest Contentful Paint",
+      "cls": "Cumulative Layout Shift",
+      "threshold": "umbral {value}",
+      "measured": "Medido en esta página por Lighthouse el {date}, la mediana de {runs} corridas. La marca es el umbral que todo cambio debe pasar."
+    }
   },
   "privacyPage": {
-    "title": "Lo que este sitio sabe de ti."
+    "title": "Lo que este sitio sabe de ti.",
+    "block": {
+      "label": "Este sitio de un vistazo",
+      "cookies": "Cookies",
+      "accounts": "Cuentas",
+      "forms": "Formularios",
+      "trackers": "Rastreadores",
+      "none": "ninguno"
+    },
+    "tags": {
+      "always": "siempre",
+      "posts": "en los posts",
+      "click": "si haces clic",
+      "open": "si los abres",
+      "device": "en tu dispositivo"
+    },
+    "map": {
+      "title": "Lo que viaja",
+      "intro": "Cada ruta que puede tomar la información desde esta página. Abre el Inspector para ver las peticiones que hizo esta página, cada una sobre la ruta que la declara.",
+      "label": "Mapa de a dónde puede viajar información desde tu navegador",
+      "you": ["Tu navegador", "donde quedan tus elecciones"],
+      "site": ["Este sitio", "páginas, fuentes, scripts"],
+      "analytics": ["Web Analytics", "cloudflareinsights.com"],
+      "off": "no se cargó: tu navegador envió una señal de privacidad",
+      "stats": ["/api/stats", "3 totales por post"],
+      "comments": ["giscus · GitHub", "solo si abres los comentarios"],
+      "share": ["LinkedIn · X · Bluesky", "solo si compartes"],
+      "never": ["Cookies · rastreadores", "nunca"],
+      "legend": {
+        "always": "siempre, en cada visita",
+        "action": "solo si tú actúas",
+        "never": "nunca, o apagado"
+      },
+      "ok": "{count} peticiones desde esta página, todas por una ruta declarada. Nada fue a otro lugar.",
+      "bad": "{count} peticiones. Algunas fueron a un lugar que esta página no declara: {hosts}. Es un bug: avísame, por favor."
+    },
+    "live": {
+      "caption": "Comprobado ahora mismo, en tu navegador. Nada de esto se envía a ningún lado.",
+      "cookies": "Cookies",
+      "cookiesNote": "puestas por este sitio o lo que cargó",
+      "storage": "Almacenamiento local",
+      "storageNone": "nada guardado",
+      "signal": "Tu señal de privacidad",
+      "signalSent": "enviada: analíticas y conteos se quedan apagados",
+      "signalNone": "no enviada",
+      "analytics": "Script de analíticas",
+      "loaded": "cargado",
+      "notLoaded": "no cargado",
+      "notLoadedNote": "no se cargó en esta visita"
+    }
   },
   "inspector": {
     "open": "Inspeccionar",

@@ -1,0 +1,100 @@
+---
+/**
+ * "Check it yourself", done in the visitor's browser (doc 40): the cookies, the site's keys in
+ * local storage, the browser's privacy signal and whether the analytics script loaded, read on the
+ * device and shown, never sent. Without a script the list says what to look for, as the words
+ * above it do.
+ */
+import { copyFor } from '../../i18n/dictionary';
+const t = copyFor(Astro.currentLocale).privacyPage.live;
+---
+
+<div class="live" data-inspect="LiveCheck" hidden>
+  <p class="caption">{t.caption}</p>
+  <ul>
+    <li data-check="cookies">
+      <span class="ok" aria-hidden="true">
+        ✓
+      </span>
+      <span>
+        {t.cookies}
+        <small>{t.cookiesNote}</small>
+      </span>
+      <b></b>
+    </li>
+    <li data-check="storage" data-none={t.storageNone}>
+      <span class="ok" aria-hidden="true">
+        ✓
+      </span>
+      <span>
+        {t.storage}
+        <small></small>
+      </span>
+      <b></b>
+    </li>
+    <li data-check="signal" data-sent={t.signalSent} data-none={t.signalNone}>
+      <span class="ok" aria-hidden="true">
+        ✓
+      </span>
+      <span>
+        {t.signal}
+        <small></small>
+      </span>
+      <b></b>
+    </li>
+    <li data-check="analytics" data-loaded={t.loaded} data-not={t.notLoaded} data-note={t.notLoadedNote}>
+      <span class="ok" aria-hidden="true">
+        ✓
+      </span>
+      <span>
+        {t.analytics}
+        <small></small>
+      </span>
+      <b></b>
+    </li>
+  </ul>
+</div>
+
+<script>
+  const live = document.querySelector<HTMLElement>('.live');
+  if (live) {
+    const row = (name: string) => live.querySelector<HTMLElement>(`[data-check="${name}"]`);
+    const set = (name: string, value: string, note?: string) => {
+      const r = row(name);
+      const b = r?.querySelector('b');
+      const small = r?.querySelector('small');
+      if (b) b.textContent = value;
+      if (small && note !== undefined) small.textContent = note;
+    };
+    const cookies = document.cookie ? document.cookie.split(';').filter(Boolean).length : 0;
+    set('cookies', String(cookies));
+    let keys: string[] = [];
+    try {
+      keys = Object.keys(localStorage)
+        .filter((k) => k.startsWith('pm.'))
+        .sort();
+    } catch {
+      /* storage blocked: nothing stored */
+    }
+    set('storage', String(keys.length), keys.length ? keys.join(' · ') : row('storage')?.dataset.none);
+    const gpc = (navigator as Navigator & { globalPrivacyControl?: boolean }).globalPrivacyControl === true;
+    const dnt = navigator.doNotTrack === '1';
+    const s = row('signal')?.dataset;
+    set('signal', gpc ? 'GPC' : dnt ? 'DNT' : '—', gpc || dnt ? s?.sent : s?.none);
+    const a = row('analytics')?.dataset;
+    const check = () => {
+      const loaded = performance
+        .getEntriesByType('resource')
+        .some((e) => /cloudflareinsights\.com/.test(e.name));
+      set(
+        'analytics',
+        (loaded ? a?.loaded : a?.not) ?? '',
+        loaded ? 'static.cloudflareinsights.com' : a?.note,
+      );
+    };
+    check();
+    // The analytics script loads after the page: look again once everything has.
+    addEventListener('load', () => setTimeout(check, 1500), { once: true });
+    live.hidden = false;
+  }
+</script>

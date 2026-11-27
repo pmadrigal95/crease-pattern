@@ -1,0 +1,22 @@
+---
+/** One stamp of the short version (Stamps.astro): the figure, what it counts, and the page's words. */
+interface Props {
+  /** The figure: 0, 3, GPC. */
+  big: string;
+  /** What it counts, as the label under it. */
+  label: string;
+}
+const { big, label } = Astro.props;
+---
+
+<li class="stamp">
+  <span class="big" aria-hidden="true">
+    {big}
+  </span>
+  <span class="label" aria-hidden="true">
+    {label}
+  </span>
+  <div class="words">
+    <slot />
+  </div>
+</li>
