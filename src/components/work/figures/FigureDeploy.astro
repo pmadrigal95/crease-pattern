@@ -20,7 +20,7 @@ const l = (key: string): string => {
   <path class="ln key" d="M106 120 H150 M144 114 L150 120 L144 126" />
   {[40, 100, 160].map((y, i) => (
     <>
-      <rect class="box" x="156" y={y} width="120" height="40" rx="6" />
+      <rect class="s-goal box" x="156" y={y} width="120" height="40" rx="6" />
       <text x="216" y={y + 25} text-anchor="middle">{`${l('app')} ${['1', '2', 'n'][i]}`}</text>
     </>
   ))}
@@ -36,20 +36,20 @@ const l = (key: string): string => {
   <text class="dimt" x="216" y="15" text-anchor="middle">
     {l('each')}
   </text>
-  <path class="ln soft valley" d="M60 262 H420" />
-  <circle class="dot" cx="80" cy="262" r="5" />
+  <path class="s-result ln soft valley" d="M60 262 H420" />
+  <circle class="s-result dot" cx="80" cy="262" r="5" />
   <text class="small" x="80" y="288" text-anchor="middle">
     {l('pilot')}
   </text>
-  <circle class="dot soft" cx="250" cy="262" r="5" />
+  <circle class="s-result dot soft" cx="250" cy="262" r="5" />
   <text class="small" x="250" y="288" text-anchor="middle">
     {l('oneByOne')}
   </text>
-  <circle class="dot soft" cx="420" cy="262" r="5" />
+  <circle class="s-result dot soft" cx="420" cy="262" r="5" />
   <text class="small" x="420" y="288" text-anchor="middle">
     {l('all')}
   </text>
-  <path class="ln soft valley" d="M245 254 C 200 234, 130 234, 88 254" />
+  <path class="s-result ln soft valley" d="M245 254 C 200 234, 130 234, 88 254" />
   <text class="small" x="166" y="228" text-anchor="middle">
     {l('back')}
   </text>
@@ -65,7 +65,7 @@ const l = (key: string): string => {
   <path class="ln key" d="M160 64 V84 M154 78 L160 84 L166 78" />
   {[90, 130, 170].map((y, i) => (
     <>
-      <rect class="box" x="60" y={y} width="200" height="32" rx="6" />
+      <rect class="s-goal box" x="60" y={y} width="200" height="32" rx="6" />
       <text x="160" y={y + 21} text-anchor="middle">{`${l('app')} ${['1', '2', 'n'][i]}`}</text>
     </>
   ))}
@@ -77,20 +77,20 @@ const l = (key: string): string => {
   <text class="small" x="160" y="271" text-anchor="middle">
     {l('auto')}
   </text>
-  <path class="ln soft valley" d="M30 340 H290" />
-  <circle class="dot" cx="40" cy="340" r="5" />
+  <path class="s-result ln soft valley" d="M30 340 H290" />
+  <circle class="s-result dot" cx="40" cy="340" r="5" />
   <text class="small" x="40" y="364" text-anchor="middle">
     {l('pilot')}
   </text>
-  <circle class="dot soft" cx="160" cy="340" r="5" />
+  <circle class="s-result dot soft" cx="160" cy="340" r="5" />
   <text class="small" x="160" y="364" text-anchor="middle">
     {l('oneByOne')}
   </text>
-  <circle class="dot soft" cx="280" cy="340" r="5" />
+  <circle class="s-result dot soft" cx="280" cy="340" r="5" />
   <text class="small" x="280" y="364" text-anchor="middle">
     {l('all')}
   </text>
-  <path class="ln soft valley" d="M155 332 C 125 312, 75 312, 45 332" />
+  <path class="s-result ln soft valley" d="M155 332 C 125 312, 75 312, 45 332" />
   <text class="small" x="100" y="306" text-anchor="middle">
     {l('back')}
   </text>

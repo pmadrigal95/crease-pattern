@@ -579,16 +579,16 @@
       "goal": "goal",
       "approach": "approach",
       "result": "result",
-      "project": "project",
-      "plate": "plate",
-      "author": "author",
       "practice": "practice",
       "valley": "valley",
       "mountain": "mountain",
       "built": "what I built",
       "back": "Back to case studies",
       "career": "See my career, version by version",
-      "colophon": "See how it's built, in the colophon"
+      "colophon": "See how it's built, in the colophon",
+      "next": "Next case study",
+      "legend": "How to read a plate",
+      "sheet": "plate {n} of {total}"
     }
   },
   "commands": {

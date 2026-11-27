@@ -18,7 +18,7 @@
   }
   .case-figure .tall {
     display: block;
-    max-width: 360px;
+    max-width: 420px;
     margin-inline: auto;
   }
 }
@@ -86,4 +86,15 @@
 .plates.will-unfold .unfolded .case-figure .ln.key,
 .plates.will-unfold .unfolded .case-figure .box.key {
   stroke-dashoffset: 0;
+}
+/* Reading a note points at its part of the drawing ([slug].astro sets data-focus on the plate):
+   the goal at where it starts (.s-goal), the approach at what Pablo built (.key), the result at
+   what it gave (.s-result). The rest steps back; the words stay at full contrast. */
+.case-figure :is(.box, .ln, .dim, .dot) {
+  transition: opacity 200ms var(--motion-ease-out);
+}
+[data-focus='goal'] .case-figure :is(.box, .ln, .dim, .dot):not(.s-goal),
+[data-focus='approach'] .case-figure :is(.box, .ln, .dim, .dot):not(.key),
+[data-focus='result'] .case-figure :is(.box, .ln, .dim, .dot):not(.s-result) {
+  opacity: 0.22;
 }

@@ -14,12 +14,12 @@ const sheets = ['interface', 'components', 'metrics'].map(l);
 ---
 
 <svg class="dg wide" viewBox="0 0 480 300" role="img" aria-label={description}>
-  <rect class="box" x="10" y="112" width="100" height="56" rx="6" />
+  <rect class="s-goal box" x="10" y="112" width="100" height="56" rx="6" />
   <text class="lbl" x="60" y="145" text-anchor="middle">
     {l('page')}
   </text>
   <path class="ln key" d="M110 140 H160 M154 134 L160 140 L154 146" />
-  <path class="ln soft valley" d="M190 40 V180 M330 40 V180 M370 80 V220" />
+  <path class="s-result ln soft valley" d="M190 40 V180 M330 40 V180 M370 80 V220" />
   {[40, 110, 180].map((y, i) => (
     <>
       <path
@@ -31,7 +31,7 @@ const sheets = ['interface', 'components', 'metrics'].map(l);
       </text>
     </>
   ))}
-  <path class="dim" d="M392 40 V220 M387 40 H397 M387 220 H397" />
+  <path class="s-result dim" d="M392 40 V220 M387 40 H397 M387 220 H397" />
   <text class="dimt" x="404" y="134">
     {l('layers')}
   </text>
@@ -40,12 +40,12 @@ const sheets = ['interface', 'components', 'metrics'].map(l);
   </text>
 </svg>
 <svg class="dg tall" viewBox="0 0 320 380" role="img" aria-label={description}>
-  <rect class="box" x="100" y="10" width="120" height="44" rx="6" />
+  <rect class="s-goal box" x="100" y="10" width="120" height="44" rx="6" />
   <text class="lbl" x="160" y="37" text-anchor="middle">
     {l('page')}
   </text>
   <path class="ln key" d="M160 54 V86 M154 80 L160 86 L166 80" />
-  <path class="ln soft valley" d="M50 92 V224 M210 92 V224 M250 128 V260" />
+  <path class="s-result ln soft valley" d="M50 92 V224 M210 92 V224 M250 128 V260" />
   {[92, 158, 224].map((y, i) => (
     <>
       <path

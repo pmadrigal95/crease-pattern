@@ -579,16 +579,16 @@
       "goal": "objetivo",
       "approach": "enfoque",
       "result": "resultado",
-      "project": "proyecto",
-      "plate": "lámina",
-      "author": "autor",
       "practice": "práctica",
       "valley": "valle",
       "mountain": "montaña",
       "built": "lo que construí",
       "back": "Volver a los casos",
       "career": "Ver mi trayectoria, versión por versión",
-      "colophon": "Ver cómo está hecho, en el colofón"
+      "colophon": "Ver cómo está hecho, en el colofón",
+      "next": "Siguiente caso",
+      "legend": "Cómo leer una lámina",
+      "sheet": "lámina {n} de {total}"
     }
   },
   "commands": {

@@ -14,7 +14,7 @@ const checks = ['tests', 'a11y', 'perf', 'weight'].map(l);
 ---
 
 <svg class="dg wide" viewBox="0 0 480 300" role="img" aria-label={description}>
-  <rect class="box" x="10" y="104" width="96" height="56" rx="6" />
+  <rect class="s-goal box" x="10" y="104" width="96" height="56" rx="6" />
   <text class="lbl" x="58" y="137" text-anchor="middle">
     {l('change')}
   </text>
@@ -32,20 +32,20 @@ const checks = ['tests', 'a11y', 'perf', 'weight'].map(l);
     {l('source')}
   </text>
   <path class="ln key" d="M286 132 H322 M316 126 L322 132 L316 138" />
-  <rect class="box key fillkey" x="328" y="100" width="140" height="64" rx="6" />
+  <rect class="s-result box key fillkey" x="328" y="100" width="140" height="64" rx="6" />
   <text class="lbl" x="398" y="127" text-anchor="middle">
     {l('publish')}
   </text>
   <text class="small" x="398" y="145" text-anchor="middle">
     {l('auto')}
   </text>
-  <path class="ln soft valley" d="M221 208 C 221 258, 58 258, 58 164" />
+  <path class="s-result ln soft valley" d="M221 208 C 221 258, 58 258, 58 164" />
   <text class="small" x="140" y="286" text-anchor="middle">
     {l('blocked')}
   </text>
 </svg>
 <svg class="dg tall" viewBox="0 0 320 380" role="img" aria-label={description}>
-  <rect class="box" x="100" y="10" width="120" height="40" rx="6" />
+  <rect class="s-goal box" x="100" y="10" width="120" height="40" rx="6" />
   <text class="lbl" x="160" y="35" text-anchor="middle">
     {l('change')}
   </text>
@@ -62,14 +62,14 @@ const checks = ['tests', 'a11y', 'perf', 'weight'].map(l);
     </>
   ))}
   <path class="ln key" d="M160 214 V242 M154 236 L160 242 L166 236" />
-  <rect class="box key fillkey" x="80" y="248" width="160" height="52" rx="6" />
+  <rect class="s-result box key fillkey" x="80" y="248" width="160" height="52" rx="6" />
   <text class="lbl" x="160" y="271" text-anchor="middle">
     {l('publish')}
   </text>
   <text class="small" x="160" y="289" text-anchor="middle">
     {l('auto')}
   </text>
-  <path class="ln soft valley" d="M60 200 C 24 200, 24 30, 100 30" />
+  <path class="s-result ln soft valley" d="M60 200 C 24 200, 24 30, 100 30" />
   <text class="small" x="160" y="340" text-anchor="middle">
     {l('blocked')}
   </text>

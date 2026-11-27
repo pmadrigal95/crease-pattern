@@ -110,7 +110,7 @@ export const accessibilityOutline = (): { landmarks: OutlineItem[]; headings: Ou
   const landmarks = [
     ...document.querySelectorAll('header.mast, nav, main, aside, footer, section[aria-labelledby]'),
   ]
-    .filter((el) => !el.closest('#inspector'))
+    .filter((el) => !el.closest('#pm-inspector'))
     .map((el) => {
       const named =
         el.getAttribute('aria-label') ??
@@ -118,7 +118,7 @@ export const accessibilityOutline = (): { landmarks: OutlineItem[]; headings: Ou
       return { label: `${roles[el.tagName] ?? 'region'}${named ? ` · ${named}` : ''}` };
     });
   const headings = [...document.querySelectorAll('h1, h2, h3')]
-    .filter((el) => !el.closest('#inspector'))
+    .filter((el) => !el.closest('#pm-inspector'))
     .map((el) => ({
       label: el.textContent?.trim().replace(/\s+/g, ' ') ?? '',
       level: Number(el.tagName[1]),

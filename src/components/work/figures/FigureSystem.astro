@@ -19,7 +19,7 @@ const identities = ['idA', 'idB', 'idC'].map(l);
   </text>
   {[10, 170, 330].map((x, i) => (
     <>
-      <rect class="box" x={x} y="24" width="140" height="44" rx="6" />
+      <rect class="s-goal box" x={x} y="24" width="140" height="44" rx="6" />
       <text x={x + 70} y="51" text-anchor="middle">
         {identities[i]}
       </text>
@@ -34,11 +34,11 @@ const identities = ['idA', 'idB', 'idC'].map(l);
     {l('same')}
   </text>
   <path class="ln key" d="M240 176 V204 M234 198 L240 204 L246 198" />
-  <rect class="box" x="150" y="210" width="180" height="44" rx="6" />
+  <rect class="s-result box" x="150" y="210" width="180" height="44" rx="6" />
   <text class="lbl" x="240" y="237" text-anchor="middle">
     {l('components')}
   </text>
-  <circle class="dot" cx="176" cy="282" r="5" />
+  <circle class="s-result dot" cx="176" cy="282" r="5" />
   <text class="small" x="188" y="286">
     {l('contrast')}
   </text>
@@ -49,7 +49,7 @@ const identities = ['idA', 'idB', 'idC'].map(l);
   </text>
   {[24, 62, 100].map((y, i) => (
     <>
-      <rect class="box" x="50" y={y} width="220" height="32" rx="6" />
+      <rect class="s-goal box" x="50" y={y} width="220" height="32" rx="6" />
       <text x="160" y={y + 21} text-anchor="middle">
         {identities[i]}
       </text>
@@ -64,11 +64,11 @@ const identities = ['idA', 'idB', 'idC'].map(l);
     {l('same')}
   </text>
   <path class="ln key" d="M160 226 V254 M154 248 L160 254 L166 248" />
-  <rect class="box" x="70" y="260" width="180" height="44" rx="6" />
+  <rect class="s-result box" x="70" y="260" width="180" height="44" rx="6" />
   <text class="lbl" x="160" y="287" text-anchor="middle">
     {l('components')}
   </text>
-  <circle class="dot" cx="86" cy="346" r="5" />
+  <circle class="s-result dot" cx="86" cy="346" r="5" />
   <text class="small" x="98" y="350">
     {l('contrast')}
   </text>

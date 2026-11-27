@@ -1,15 +1,16 @@
 ---
 /**
- * A case study (M6): its head (title, lede, facts), a local index that stays in view, four plates
- * (the lead one first and larger), a short closing plate and the way back. The plates unfold as
- * they come into view; the index marks the one being read. Both are progressive: without
- * JavaScript the page reads the same, open and still.
+ * A case study (M6): its head (title, lede, facts), a local index that stays in view, the plan's
+ * legend once, four plates (the lead one first, across the page; the others alternating sides), a
+ * closing sheet, the next case study and the way back. The plates unfold as they come into view;
+ * the index marks the one being read; reading a note points at its part of the diagram. All
+ * progressive: without JavaScript the page reads the same, open and still.
  */
 import PageLayout from '../../../layouts/PageLayout.astro';
 import CasePlate from '../../../components/work/CasePlate.astro';
-import { copyFor } from '../../../i18n/dictionary';
+import CaseNext from '../../../components/work/CaseNext.astro';
+import { copyFor, fill } from '../../../i18n/dictionary';
 import { padNumber } from '../../../lib/format';
-import { getProfile } from '../../../lib/profile';
 import { LANGS, DEFAULT_LANG, langOf, localize } from '../../../i18n/routing';
 import { caseSlug, getCases, type Case } from '../../../lib/cases';
 import '../../../styles/buttons-quiet.css';
@@ -33,7 +34,9 @@ const { entry } = Astro.props;
 const { data } = entry;
 const lang = langOf(Astro.currentLocale);
 const t = copyFor(lang).cases.case;
-const profile = await getProfile(lang);
+// The next case study, round the list: every case leads to another.
+const all = await getCases(lang);
+const next = all[(all.findIndex((c) => caseSlug(c) === caseSlug(entry)) + 1) % all.length];
 const total = data.plates.length + 1;
 // The lead plate comes first whatever order the file lists them in.
 const plates = data.plates.toSorted((a, b) => Number(b.lead) - Number(a.lead));
@@ -76,15 +79,14 @@ const plates = data.plates.toSorted((a, b) => Number(b.lead) - Number(a.lead));
   </nav>
 
   <div class="wrap plates" data-plates>
+    <p class="legend">
+      <span class="sr-only">{t.legend}:</span>
+      <span class="v">{t.valley}</span>
+      <span class="m">{t.mountain}</span>
+      <span class="b">{t.built}</span>
+    </p>
     {plates.map((plate, i) => (
-      <CasePlate
-        plate={plate}
-        number={i + 1}
-        total={total}
-        company={data.company}
-        t={t}
-        author={profile.name}
-      />
+      <CasePlate plate={plate} number={i + 1} total={total} flip={!plate.lead && i % 2 === 0} t={t} />
     ))}
     <section
       class="plate-brief"
@@ -93,6 +95,7 @@ const plates = data.plates.toSorted((a, b) => Number(b.lead) - Number(a.lead));
       data-plate
       data-inspect="[slug]#case-base"
     >
+      <p class="sheet">{fill(t.sheet, { n: padNumber(total, 2), total: padNumber(total, 2) })}</p>
       <h2 id="t-base">{data.brief.title}</h2>
       <div class="brief">
         {data.brief.items.map((item) => (
@@ -104,6 +107,8 @@ const plates = data.plates.toSorted((a, b) => Number(b.lead) - Number(a.lead));
       </div>
     </section>
   </div>
+
+  {next && caseSlug(next) !== caseSlug(entry) && <CaseNext entry={next} label={t.next} lang={lang} />}
 
   <div class="wrap foot">
     <a class="action back" href={localize('/work', lang)}>
@@ -184,8 +189,12 @@ const plates = data.plates.toSorted((a, b) => Number(b.lead) - Number(a.lead));
     top: calc(var(--sticky-offset) - var(--space-3));
     z-index: 5;
     border-block: 1px solid var(--color-rule);
-    background: color-mix(in oklab, var(--color-bg) 92%, transparent);
-    backdrop-filter: blur(8px);
+    /* Matte: an opaque band, no blur. */
+    background: var(--color-bg);
+  }
+  /* While inspecting, the page comes apart in layers: a band fixed over them would cut across. */
+  :global(.inspecting) .toc {
+    position: static;
   }
   .toc ol {
     display: flex;
@@ -211,7 +220,7 @@ const plates = data.plates.toSorted((a, b) => Number(b.lead) - Number(a.lead));
     color: var(--color-ink);
     box-shadow: inset 0 0 0 1px var(--color-accent-ui);
   }
-  .toc a[aria-current='true'] {
+  .toc a[aria-current='location'] {
     background: var(--color-ink);
     color: var(--color-bg);
     box-shadow: none;
@@ -223,10 +232,44 @@ const plates = data.plates.toSorted((a, b) => Number(b.lead) - Number(a.lead));
     /* A plate still folded leans out in perspective; it must not widen the page. */
     overflow-x: clip;
   }
+  /* The plan's legend, read once for every plate. */
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: var(--space-2) var(--space-6);
+    margin: 0 0 calc(var(--space-16) * -1);
+    font: var(--type-caption);
+    color: var(--color-mute);
+  }
+  .legend span:not(.sr-only)::before {
+    content: '';
+    display: inline-block;
+    width: 22px;
+    margin-right: var(--space-2);
+    vertical-align: middle;
+    border-top: 1.5px dashed var(--color-mute);
+  }
+  .legend .m::before {
+    border-top-style: dotted;
+    border-color: var(--color-accent-ui);
+  }
+  .legend .b::before {
+    border-top: 2px solid var(--color-accent-ui);
+  }
+  /* The closing sheet: the foundation under every plate, numbered as the last of the set. */
   .plate-brief {
     scroll-margin-top: calc(var(--sticky-offset) + 64px);
-    padding-top: var(--space-6);
-    border-top: 1.5px dashed var(--color-accent-ui);
+    padding: var(--space-12) 40px;
+    border: 1px solid var(--color-rule);
+    border-top: 2px solid var(--color-accent-ui);
+    border-radius: 12px;
+    background: var(--color-surface);
+  }
+  .plate-brief .sheet {
+    margin: 0 0 var(--space-3);
+    font: var(--type-caption);
+    color: var(--color-mute);
   }
   .plate-brief h2 {
     margin: 0 0 var(--space-6);
@@ -237,6 +280,10 @@ const plates = data.plates.toSorted((a, b) => Number(b.lead) - Number(a.lead));
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: var(--space-8);
+  }
+  .brief > div {
+    padding-top: var(--space-4);
+    border-top: 1px dashed var(--color-rule);
   }
   .brief h3 {
     margin: 0 0 var(--space-2);
@@ -261,6 +308,13 @@ const plates = data.plates.toSorted((a, b) => Number(b.lead) - Number(a.lead));
     .brief {
       grid-template-columns: 1fr;
     }
+    .legend {
+      justify-content: flex-start;
+      margin-bottom: calc(var(--space-12) * -1);
+    }
+    .plate-brief {
+      padding: 20px;
+    }
   }
 </style>
 
@@ -284,14 +338,38 @@ const plates = data.plates.toSorted((a, b) => Number(b.lead) - Number(a.lead));
       );
       sheets.forEach((s) => unfold.observe(s));
     }
+    // The index marks the plate crossing the middle of the view. Above the first plate none is
+    // being read, so none is marked.
+    const mark = (id: string | null) =>
+      links.forEach((a) => {
+        if (a.hash === `#${id}`) a.setAttribute('aria-current', 'location');
+        else a.removeAttribute('aria-current');
+      });
+    const reading = new Set<Element>();
     const spy = new IntersectionObserver(
-      (entries) =>
-        entries.forEach((e) => {
-          if (!e.isIntersecting) return;
-          links.forEach((a) => a.setAttribute('aria-current', String(a.hash === `#${e.target.id}`)));
-        }),
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) {
+            reading.add(e.target);
+            mark(e.target.id);
+          } else reading.delete(e.target);
+        }
+        const first = sheets[0];
+        if (!reading.size && first && first.getBoundingClientRect().top > innerHeight * 0.45) mark(null);
+      },
       { rootMargin: '-45% 0px -50% 0px' },
     );
     sheets.forEach((s) => spy.observe(s));
+
+    // Reading a note points at its part of the diagram (case-figure.css).
+    for (const note of plates.querySelectorAll<HTMLElement>('[data-step]')) {
+      const plate = note.closest<HTMLElement>('[data-plate]');
+      note.addEventListener('pointerenter', () => {
+        if (plate) plate.dataset.focus = note.dataset.step ?? '';
+      });
+      note.addEventListener('pointerleave', () => {
+        if (plate) delete plate.dataset.focus;
+      });
+    }
   }
 </script>

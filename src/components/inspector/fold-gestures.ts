@@ -57,7 +57,7 @@ export const foldGestures = (surface: HTMLElement, shape: Shape, change: (live: 
     change(false);
   };
   const key = (e: KeyboardEvent) => {
-    if (typing(e.target) || (e.target instanceof Element && e.target.closest('#inspector'))) return;
+    if (typing(e.target) || (e.target instanceof Element && e.target.closest('#pm-inspector'))) return;
     const steps: Record<string, () => void> = {
       ArrowUp: () => (shape.squeeze = clamp(shape.squeeze - SQUEEZE.perKey, SQUEEZE.min, SQUEEZE.max)),
       ArrowDown: () => (shape.squeeze = clamp(shape.squeeze + SQUEEZE.perKey, SQUEEZE.min, SQUEEZE.max)),
