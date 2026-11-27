@@ -77,8 +77,13 @@ const coords = coordsText(profile.city.lat, profile.city.lon, copy.home.hero.coo
   </div>
 </div>
 <p class="turn">
-  <button type="button" class="btn btn-secondary" data-turn data-front={p.front} data-back={p.back} hidden>
-    {p.front}
+  <button type="button" class="action" data-turn hidden>
+    <svg class="glyph" viewBox="0 0 16 16" aria-hidden="true">
+      <path d="M13 8a5 5 0 1 1-1.5-3.6M13 2.5v2.6h-2.6"></path>
+    </svg>
+    <span data-front={p.front} data-back={p.back}>
+      {p.front}
+    </span>
   </button>
 </p>
 
@@ -102,7 +107,8 @@ const coords = coordsText(profile.city.lat, profile.city.lon, copy.home.hero.coo
         const flipped = card.classList.toggle('flipped');
         front.inert = !flipped;
         back.inert = flipped;
-        turn.textContent = (flipped ? turn.dataset.back : turn.dataset.front) ?? '';
+        const label = turn.querySelector<HTMLElement>('[data-front]');
+        if (label) label.textContent = (flipped ? label.dataset.back : label.dataset.front) ?? '';
       });
     }
 
@@ -140,9 +146,12 @@ const coords = coordsText(profile.city.lat, profile.city.lon, copy.home.hero.coo
     background: var(--color-surface);
     border: 1px solid var(--color-rule);
     border-radius: 6px;
+    /* Paper on the table: black shadows only (the ink token is light in the dark theme). */
     box-shadow:
-      0 1px 0 var(--color-rule),
-      0 36px 50px -36px color-mix(in oklab, var(--color-ink) 55%, transparent);
+      inset 0 1px 0 rgb(255 255 255 / 0.04),
+      0 1px 2px rgb(0 0 0 / 0.1),
+      0 12px 24px -14px rgb(0 0 0 / 0.22),
+      0 40px 56px -36px rgb(0 0 0 / 0.4);
     backface-visibility: hidden;
   }
   .back {
@@ -254,8 +263,31 @@ const coords = coordsText(profile.city.lat, profile.city.lon, copy.home.hero.coo
     }
   }
 
+  /* Turning it over: a quiet text action under the card's right edge, so it never competes with
+     the copy button on the card. */
   .turn {
-    margin: var(--space-6) 0 0;
+    max-width: 820px;
+    margin: var(--space-8) 0 0;
+    text-align: right;
+  }
+  .turn .action {
+    border: 0;
+    background: none;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .glyph {
+    width: 16px;
+    height: 16px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    transition: rotate 0.6s var(--ease);
+  }
+  .turn .action:hover .glyph {
+    rotate: 90deg;
   }
 
   /* Inspecting: the back comes apart into its print layers, each named. Transforms only. */
