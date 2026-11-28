@@ -1,8 +1,14 @@
 ---
 /**
- * The footer, on every page (design debt phase 4, option A): it hangs from a valley fold, a dashed
- * crease across the page with the fox folded on it, the site's thesis one last time. Below it,
- * who this is and where else to find them, then the licences.
+ * The footer, on every page: the last fold (doc 34, direction B). A dashed valley fold crosses the
+ * page with the identity's figure sitting on it, the site's thesis one last time; from that crease
+ * hangs a panel, the sheet's last flap, which unfolds down once the footer is in view (data-arrive,
+ * BaseLayout; still with reduced motion). On it: who this is, three labelled
+ * columns (the site, elsewhere, this site), the language as a segmented control, and the licences.
+ *
+ * Like the masthead it takes each identity's material: the identity's surface rises faintly from
+ * the bottom (the hero's tiles, fetched only as the footer approaches), Basalt as a plate, Washi
+ * as paper with a dashed rule, Contour lines as a ring.
  */
 import site from '../../../site.config';
 import OrigamiMark from './OrigamiMark.astro';
@@ -25,79 +31,135 @@ const path = publicPath(Astro.url.pathname);
 // Each language by its own name, the current one marked (M5).
 const languages = languageLinks(path, translations, lang).map((l) => ({ ...l, name: LOCALES[l.lang].name }));
 const year = new Date().getFullYear();
+const t = copy.footer;
+const columns = [
+  {
+    title: t.columns.site,
+    links: [
+      { href: localize('/work', lang), text: copy.nav.work },
+      { href: localize('/changelog', lang), text: copy.nav.changelog },
+      { href: localize('/precrease', lang), text: copy.nav.precrease },
+      { href: localize('/about', lang), text: copy.nav.about },
+    ],
+  },
+  {
+    title: copy.labels.elsewhere,
+    links: [
+      { href: `mailto:${contact.email}`, text: t.email },
+      { href: contact.linkedin, text: 'LinkedIn' },
+      { href: contact.github, text: 'GitHub' },
+    ],
+  },
+  {
+    title: t.columns.thisSite,
+    links: [
+      { href: localize('/colophon', lang), text: t.colophon },
+      { href: localize('/privacy', lang), text: t.privacy },
+      { href: site.repository, text: t.source },
+    ],
+  },
+];
 ---
 
-<footer class="foot" data-inspect="SiteFooter">
+<footer class="foot" data-inspect="SiteFooter" data-foot data-arrive>
   <div class="wrap">
     <div class="crease" aria-hidden="true">
       <span class="mark">
         <OrigamiMark size={40} />
       </span>
     </div>
-    <div class="grid">
-      <p class="who">
-        <strong>{name}</strong>
-        <span>
-          {role} · {location}
-        </span>
-      </p>
-      <ul class="links" aria-label={copy.labels.elsewhere}>
-        <li>
-          <a href={`mailto:${contact.email}`}>{copy.footer.email}</a>
-        </li>
-        <li>
-          <a href={contact.linkedin}>LinkedIn</a>
-        </li>
-        <li>
-          <a href={contact.github}>GitHub</a>
-        </li>
-        <li>
-          <a href={localize('/colophon', lang)}>{copy.footer.colophon}</a>
-        </li>
-        <li>
-          <a href={localize('/privacy', lang)}>{copy.footer.privacy}</a>
-        </li>
-        <li>
-          <a href={site.repository}>{copy.footer.source}</a>
-        </li>
-      </ul>
+    <div class="hinge">
+      <div class="panel">
+        <div class="grid">
+          <p class="who">
+            <strong>{name}</strong>
+            <span>
+              {role} · {location}
+            </span>
+          </p>
+          <div class="cols">
+            {columns.map((c) => (
+              <nav aria-label={c.title}>
+                <p class="head" aria-hidden="true">
+                  {c.title}
+                </p>
+                <ul>
+                  {c.links.map((l) => (
+                    <li>
+                      <a href={l.href}>{l.text}</a>
+                    </li>
+                  ))}
+                </ul>
+              </nav>
+            ))}
+          </div>
+        </div>
+        <div class="bottom">
+          <ul class="langs" aria-label={copy.lang.label}>
+            {languages.map((l) => (
+              <li>
+                {l.current ? (
+                  <a href={l.href} lang={l.lang} aria-current="true">
+                    {l.name}
+                  </a>
+                ) : (
+                  <a href={l.href} lang={l.lang} hreflang={l.lang} data-lang-switch={l.lang}>
+                    {l.name}
+                  </a>
+                )}
+              </li>
+            ))}
+          </ul>
+          <p class="legal">
+            <span>
+              © {year} {name}
+            </span>
+            <span aria-hidden="true"> · </span>
+            <a href={`${site.repository}/blob/main/LICENSE.md`}>{t.license}</a>
+          </p>
+        </div>
+      </div>
     </div>
-    <ul class="langs" aria-label={copy.lang.label}>
-      {languages.map((l) => (
-        <li>
-          {l.current ? (
-            <a href={l.href} lang={l.lang} aria-current="true">
-              {l.name}
-            </a>
-          ) : (
-            <a href={l.href} lang={l.lang} hreflang={l.lang} data-lang-switch={l.lang}>
-              {l.name}
-            </a>
-          )}
-        </li>
-      ))}
-    </ul>
-    <p class="legal">
-      <span>
-        © {year} {name}
-      </span>
-      <span aria-hidden="true"> · </span>
-      <a href={`${site.repository}/blob/main/LICENSE.md`}>{copy.footer.license}</a>
-    </p>
   </div>
 </footer>
 
+<script>
+  // Self-contained (ENGINEERING.md, "Browser scripts"): the identity's surface is decoration, so
+  // its tile is fetched only as the footer approaches.
+  const foot = document.querySelector<HTMLElement>('[data-foot]');
+  if (foot)
+    new IntersectionObserver(
+      ([entry], observer) => {
+        if (!entry?.isIntersecting) return;
+        observer.disconnect();
+        foot.setAttribute('data-near', '');
+      },
+      { rootMargin: '0px 0px 400px 0px' },
+    ).observe(foot);
+</script>
+
 <style>
   .wrap {
-    padding-block: var(--space-12) var(--space-12);
+    padding-block: var(--space-12);
     font-size: var(--size-sm);
     color: var(--color-mute);
   }
-  /* The valley fold: dashed, in the fold colour, with the fox sitting on it. */
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+  a:hover {
+    color: var(--color-ink);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    text-decoration-color: var(--color-accent-ui);
+  }
+
+  /* The valley fold: dashed, in the fold colour, with the figure sitting on it. */
   .crease {
     position: relative;
+    z-index: 1;
     height: 1px;
-    margin-bottom: var(--space-12);
     background: repeating-linear-gradient(90deg, var(--color-accent-ui) 0 7px, transparent 7px 13px);
   }
   .mark {
@@ -109,15 +171,61 @@ const year = new Date().getFullYear();
     background: var(--color-bg);
     transform: translate(-50%, -50%);
   }
+
+  /* The last flap, hanging from the crease. */
+  .hinge {
+    perspective: 1400px;
+  }
+  .panel {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    padding: var(--space-12) var(--space-8) var(--space-6);
+    background: var(--color-surface);
+    border: 1px solid var(--color-rule);
+    border-top: 0;
+    border-radius: 0 0 14px 14px;
+    box-shadow: 0 30px 50px -40px rgb(0 0 0 / 0.5);
+    transform-origin: 50% 0;
+  }
+  /* The identity's surface, rising faintly from the bottom (the hero's tiles). */
+  .panel::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: var(--color-accent-ui);
+    opacity: 0;
+    pointer-events: none;
+    mask-size:
+      600px 600px,
+      100% 100%;
+    mask-repeat: repeat, no-repeat;
+    mask-composite: intersect;
+    transition: opacity var(--motion-stage) var(--motion-ease-out);
+  }
+  [data-near] .panel::before {
+    --tile: url('/textures/contours.svg');
+    opacity: 0.1;
+    mask-image: var(--tile), linear-gradient(to top, #000 10%, transparent 85%);
+  }
+  :global(:root[data-direction='basalt-glacier']) [data-near] .panel::before {
+    --tile: url('/textures/basalt.svg');
+  }
+  :global(:root[data-direction='washi-asagi']) [data-near] .panel::before {
+    --tile: url('/textures/washi.svg');
+    opacity: 0.14;
+  }
+
   .grid {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    gap: var(--space-6) var(--space-12);
-    align-items: start;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr);
+    gap: var(--space-12);
   }
   .who {
     display: grid;
     gap: var(--space-1);
+    align-content: start;
     margin: 0;
   }
   .who strong {
@@ -125,65 +233,145 @@ const year = new Date().getFullYear();
     font-weight: 600;
     font-size: var(--size-md);
   }
-  .links {
+  .cols {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-8);
+  }
+  .head {
+    margin: 0 0 var(--space-2);
+    font: 600 11px / 1 var(--font-mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-ink);
+  }
+  .cols ul,
+  .langs {
     list-style: none;
     margin: 0;
     padding: 0;
-    display: grid;
-    grid-template-columns: repeat(3, auto);
-    gap: 0 var(--space-8);
   }
-  .links a {
-    min-height: 44px;
+  .cols a {
     display: inline-flex;
     align-items: center;
-    text-decoration: none;
+    min-height: 36px;
   }
-  .links a:hover,
-  .legal a:hover {
-    color: var(--color-ink);
-    text-decoration: underline;
-    text-underline-offset: 4px;
-  }
-  .langs {
-    list-style: none;
-    margin: var(--space-6) 0 0;
-    padding: 0;
+
+  .bottom {
     display: flex;
-    gap: var(--space-6);
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4) var(--space-8);
+    margin-top: var(--space-8);
+    padding-top: var(--space-6);
+    border-top: 1px solid var(--color-rule);
+  }
+  /* The language as a segmented control. */
+  .langs {
+    display: inline-flex;
+    padding: 3px;
+    border-radius: var(--radius-pill);
+    background: color-mix(in oklab, var(--color-ink) 6%, var(--color-bg));
+    box-shadow: inset 0 0 0 1px var(--color-rule);
   }
   .langs a {
-    min-height: 44px;
     display: inline-flex;
     align-items: center;
-    text-decoration: none;
+    min-height: 38px;
+    padding: 0 var(--space-4);
+    border-radius: var(--radius-pill);
+    font-weight: 500;
   }
   .langs a:hover {
-    color: var(--color-ink);
+    text-decoration: none;
   }
   .langs a[aria-current] {
+    background: var(--color-surface);
     color: var(--color-ink);
-    text-decoration: underline;
-    text-decoration-color: var(--color-accent-ui);
-    text-decoration-thickness: 2px;
-    text-underline-offset: 6px;
+    box-shadow:
+      0 1px 2px rgb(0 0 0 / 0.12),
+      inset 0 0 0 1px var(--color-rule);
   }
   .legal {
-    margin: var(--space-2) 0 0;
+    margin: 0;
     font: var(--size-xs) var(--font-mono);
   }
   .legal a {
     display: inline-flex;
     min-height: 44px;
     align-items: center;
+    text-decoration: underline;
+    text-underline-offset: 3px;
   }
-  @media (max-width: 720px) {
+
+  /* Each identity's material, as the masthead's. */
+  :global(:root[data-direction='basalt-glacier']) .panel {
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.06),
+      0 30px 50px -40px rgb(0 0 0 / 0.55);
+  }
+  :global(:root[data-direction='basalt-glacier']) .langs {
+    border-radius: 10px;
+  }
+  :global(:root[data-direction='basalt-glacier']) .langs a {
+    border-radius: 8px;
+  }
+  :global(:root[data-direction='washi-asagi']) .panel {
+    border-radius: 0 0 4px 4px;
+  }
+  :global(:root[data-direction='washi-asagi']) .bottom {
+    border-top-style: dashed;
+  }
+  :global(:root[data-direction='contour-lines']) .panel {
+    background: transparent;
+    border-color: color-mix(in oklab, var(--color-accent-ui) 30%, var(--color-rule));
+  }
+  :global(:root[data-direction='contour-lines']) .langs {
+    background: transparent;
+    box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--color-accent-ui) 45%, var(--color-rule));
+  }
+  :global(:root[data-direction='contour-lines']) .langs a[aria-current] {
+    background: color-mix(in oklab, var(--color-accent-ui) 18%, transparent);
+    box-shadow: none;
+  }
+
+  /* While inspecting, the flap lies flat and plain: no 3D context, motion or surface of its own
+     inside the Inspector's tilted layers. With them, software rendering ran out of memory there
+     (CI, work-model's axe check in dark). */
+  :global(.inspecting) .hinge {
+    perspective: none;
+  }
+  :global(.inspecting) .panel {
+    animation: none;
+    transform: none;
+    opacity: 1;
+  }
+  :global(.inspecting) .panel::before {
+    display: none;
+  }
+
+  /* The flap unfolds down from the crease once the footer is in view. Folded no further than 25°
+     and only by transform: even before it opens, its links keep 24px targets and full contrast. */
+  @media (prefers-reduced-motion: no-preference) {
+    .panel {
+      transition: transform 0.8s var(--motion-ease-out);
+    }
+    :global(:root[data-js]:not(.inspecting)) .foot:not(:global(.arrived)) .panel {
+      transform: rotateX(-25deg);
+    }
+  }
+
+  @media (max-width: 860px) {
     .grid {
       grid-template-columns: minmax(0, 1fr);
+      gap: var(--space-8);
     }
-    .links {
-      grid-template-columns: repeat(2, auto);
-      justify-content: start;
+    .panel {
+      padding-inline: var(--space-6);
+    }
+    .cols {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
 </style>

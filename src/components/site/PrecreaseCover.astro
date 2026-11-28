@@ -1,0 +1,221 @@
+---
+/**
+ * The latest Crease as a cover on the home page (HomePrecrease.astro, doc 32): its sheet, the
+ * post's generated crease pattern (PostThumb), stamped with its number, labelled ("Crease No.
+ * 003"); then what it is in words, its title, its dek, its date and reading time.
+ *
+ * Once the cover is in view the sheet lands and its mountain folds draw in (data-arrive). While inspecting,
+ * the sheet lies flat and a key names its folds and says how it's drawn, as the home's figure
+ * unfolds and the ridge shows its plan.
+ */
+import PostThumb from '../precrease/PostThumb.astro';
+import { copyFor } from '../../i18n/dictionary';
+import { formatDate } from '../../lib/format';
+import { creaseNumber, postHref, postKind, type PostSummary } from '../../lib/precrease';
+import { langOf } from '../../i18n/routing';
+
+interface Props {
+  post: PostSummary;
+  /** Its branch of the topic tree: "Systems › Concurrency". */
+  branch: string;
+  /** "5 min read". */
+  minutes: string;
+  /** The post's language, when it isn't the page's yet. */
+  otherLang?: string | undefined;
+}
+const { post, branch, minutes, otherLang } = Astro.props;
+const lang = langOf(Astro.currentLocale);
+const copy = copyFor(Astro.currentLocale);
+const t = copy.home.notes;
+---
+
+<article class="cover" data-arrive>
+  <div class="stage">
+    <a class="sheet" href={postHref(post)} aria-hidden="true" tabindex="-1">
+      <PostThumb slug={post.key} format={post.entry.data.format} />
+      <span class="stamp">{creaseNumber(post.number, lang)}</span>
+    </a>
+  </div>
+  <div>
+    <p class="kind">
+      {postKind(post.entry, lang)} · {branch}
+    </p>
+    <h3>
+      <a href={postHref(post)} lang={otherLang}>
+        {post.entry.data.title}
+      </a>
+    </h3>
+    <p class="dek" lang={otherLang}>
+      {post.entry.data.description}
+    </p>
+    <p class="meta">
+      {formatDate(post.entry.data.date, lang)} · {minutes}
+      {otherLang && <> · {copy.precrease.untranslated}</>}
+    </p>
+    <div class="plan">
+      <ul>
+        <li class="mountain">{t.plan.mountain}</li>
+        <li class="valley">{t.plan.valley}</li>
+      </ul>
+      <p>{t.plan.made}</p>
+    </div>
+  </div>
+</article>
+
+<style>
+  .cover {
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    gap: var(--space-12);
+    align-items: center;
+    padding-block: var(--space-12);
+    border-bottom: 1px solid var(--color-rule);
+  }
+  .stage {
+    max-width: 340px;
+    perspective: 1100px;
+  }
+  .sheet {
+    position: relative;
+    display: block;
+    transform-origin: 50% 100%;
+    box-shadow:
+      0 1px 0 var(--color-rule),
+      0 26px 40px -28px var(--lift);
+    transition:
+      transform 0.6s var(--ease),
+      box-shadow 0.6s var(--ease);
+  }
+  .cover:hover .sheet {
+    transform: translateY(-6px) rotateX(5deg);
+  }
+  .stamp {
+    position: absolute;
+    top: var(--space-4);
+    left: -1px;
+    padding: 6px 10px;
+    background: var(--color-ink);
+    color: var(--color-bg);
+    font: 600 var(--size-xs) / 1 var(--font-mono);
+    letter-spacing: 0.04em;
+  }
+  .kind {
+    margin: 0;
+    font: 600 var(--size-xs) / 1.4 var(--font-mono);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+  }
+  h3 {
+    margin: var(--space-3) 0 var(--space-4);
+    font: 600 clamp(2.25rem, 4.2vw, 3.5rem) / 1.02 var(--serif);
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+  h3 a {
+    text-decoration: none;
+  }
+  h3 a:hover {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.18em;
+    text-decoration-color: var(--color-accent-ui);
+  }
+  .dek {
+    max-width: 52ch;
+    margin: 0 0 var(--space-4);
+    font-size: var(--size-lg);
+    line-height: 1.5;
+    color: var(--color-mute);
+    text-wrap: pretty;
+  }
+  .meta {
+    margin: 0;
+    font-size: var(--size-xs);
+    color: var(--color-mute);
+  }
+
+  /* While inspecting: flat, its folds named beside it. The key sits with the text, not under the
+     sheet, and short (both keys on one line): taller, or under the sheet, it shifted the tilted
+     layers to where axe's contrast check never finished (work-model and scene3d specs). */
+  .plan {
+    display: none;
+    margin-top: var(--space-4);
+    font: 500 var(--size-xs) / 1.5 var(--font-mono);
+    color: var(--color-mute);
+  }
+  .plan ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1) var(--space-6);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  /* Each fold's key: a short line before its name, solid or dashed as on the sheet. */
+  .plan li::before {
+    content: '';
+    display: inline-block;
+    width: 28px;
+    margin-right: var(--space-2);
+    vertical-align: middle;
+    border-top: 2px solid var(--color-accent);
+  }
+  .plan .valley::before {
+    border-top-style: dashed;
+  }
+  .plan p {
+    margin: var(--space-1) 0 0;
+  }
+  :global(.inspecting) .plan {
+    display: block;
+  }
+  :global(.inspecting) .sheet {
+    transform: none;
+    box-shadow: none;
+    animation: none;
+  }
+  :global(.inspecting) .sheet :global(path) {
+    animation: none;
+  }
+  :global(.inspecting) .sheet :global(path[stroke-dasharray='4 3']) {
+    stroke-width: 2.4;
+  }
+
+  /* Landing and drawing: a scroll timeline where supported; still with reduced motion. */
+  /* Once in view the sheet lands, then its mountain folds draw and its valley folds appear. */
+  @media (prefers-reduced-motion: no-preference) {
+    .sheet {
+      transition: transform 0.8s var(--ease);
+    }
+    .sheet :global(path[pathLength]) {
+      stroke-dasharray: 1;
+      transition: stroke-dashoffset 0.9s var(--ease) 0.25s;
+    }
+    .sheet :global(path:not([pathLength])) {
+      transition: opacity 0.5s ease-out 0.7s;
+    }
+    :global(:root[data-js]:not(.inspecting)) .cover:not(:global(.arrived)) .sheet {
+      transform: rotateX(38deg) translateY(28px);
+    }
+    :global(:root[data-js]:not(.inspecting)) .cover:not(:global(.arrived)) .sheet :global(path[pathLength]) {
+      stroke-dashoffset: 1;
+    }
+    :global(:root[data-js]:not(.inspecting))
+      .cover:not(:global(.arrived))
+      .sheet
+      :global(path:not([pathLength])) {
+      opacity: 0;
+    }
+  }
+
+  @media (max-width: 860px) {
+    .cover {
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--space-6);
+    }
+    .stage {
+      max-width: 220px;
+    }
+  }
+</style>

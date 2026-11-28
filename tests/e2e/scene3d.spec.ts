@@ -4,7 +4,7 @@ import AxeBuilder from '@axe-core/playwright';
 // The hero's 3D figure (src/scripts/hero3d.ts, src/components/inspector/scene3d.ts): on devices
 // that can run it, the hero's square turns 3D at the visitor's first move; the Inspector takes the
 // same scene apart.
-const panel = '#inspector';
+const panel = '#pm-inspector';
 const canvas = '[data-hero-fold] [data-stage] canvas';
 // SwiftShader renders on the CPU, so on a busy runner the scene's first frame, and the pages
 // around it, can take a few seconds.

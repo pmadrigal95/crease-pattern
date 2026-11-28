@@ -3,6 +3,7 @@ import '@fontsource-variable/schibsted-grotesk';
 import '@fontsource-variable/jetbrains-mono';
 import '../styles/tokens.css';
 import '../styles/base.css';
+import '../styles/transitions.css';
 import '../styles/origami.css';
 import '../styles/buttons.css';
 import site from '../../site.config';
@@ -100,5 +101,26 @@ const profile = await getProfile(Astro.currentLocale);
     <slot />
     <div class="vt-crease" aria-hidden="true"></div>
     <WebAnalytics />
+    <script>
+      // Arrivals: an element marked data-arrive gets .arrived once a third of it is in view, and its
+      // own styles turn that into a one-time landing. Before it, with JavaScript and motion allowed,
+      // it waits in its starting pose; without them everything simply sits in place.
+      const arrivals = document.querySelectorAll('[data-arrive]');
+      if (arrivals.length) {
+        const seen = new IntersectionObserver(
+          (entries) => {
+            for (const entry of entries) {
+              if (!entry.isIntersecting) continue;
+              entry.target.classList.add('arrived');
+              seen.unobserve(entry.target);
+            }
+          },
+          // The root reaches far above the screen, so whatever a jump or a fast scroll carried
+          // past counts as arrived too, and never waits in its starting pose.
+          { threshold: 0.3, rootMargin: '100000px 0px 0px 0px' },
+        );
+        for (const el of arrivals) seen.observe(el);
+      }
+    </script>
   </body>
 </html>

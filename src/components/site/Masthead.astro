@@ -55,14 +55,16 @@ const here = unlocalize(path);
       <span>{name}</span>
     </a>
     <nav aria-label={copy.labels.main}>
-      {links.map((l) => (
-        <a
-          href={l.href}
-          aria-current={l.match && (here === l.match || here.startsWith(`${l.match}/`)) ? 'page' : undefined}
-        >
-          {l.label}
-        </a>
-      ))}
+      {links.map((l) => {
+        const current = !!l.match && (here === l.match || here.startsWith(`${l.match}/`));
+        return (
+          <a href={l.href} aria-current={current ? 'page' : undefined}>
+            {l.label}
+            {/* The current section's mark, its own element so it can slide to the next (transitions.css). */}
+            {current && <span class="nav-mark" aria-hidden="true" />}
+          </a>
+        );
+      })}
     </nav>
     <div class="acts">
       <!-- The command menu (M4.7). Phones: the same button, floating in the bottom corner. -->

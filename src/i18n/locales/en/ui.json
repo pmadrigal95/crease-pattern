@@ -78,7 +78,9 @@
             "precrease": "Precrease",
             "sonobe": "Sonobe essay",
             "threads": "Threads essay",
-            "work": "Cases"
+            "work": "Cases",
+            "colophon": "Colophon",
+            "privacy": "Privacy"
           }
         },
         "identities": {
@@ -115,7 +117,11 @@
     "notes": {
       "heading": "Precrease",
       "intro": "Notes on how software gets designed and built, from architecture to working with AI. I write them in public and include what went wrong.",
-      "kicker": "{number} · {kind} · {date}",
+      "plan": {
+        "mountain": "Mountain fold",
+        "valley": "Valley fold",
+        "made": "Drawn from the post’s name at build time. No image files."
+      },
       "latest": "Latest posts",
       "empty": "The first crease is being folded. It introduces who I am and what this blog will cover.",
       "all": "Read Precrease"
@@ -125,7 +131,22 @@
       "intro": "Email reaches me fastest.",
       "copy": "Copy email address",
       "copied": "Email address copied",
-      "copyFailed": "Couldn't copy it. The address is selected, so you can copy it yourself."
+      "copyFailed": "Couldn't copy it. The address is selected, so you can copy it yourself.",
+      "postcard": {
+        "to": "To",
+        "greetings": "Greetings from Costa Rica",
+        "place": "Costa Rica",
+        "picture": "Irazú · {elevation} m",
+        "front": "See the front",
+        "back": "See the back",
+        "label": "The postcard's front: the Irazú volcano as contour lines, greetings from Costa Rica",
+        "layers": {
+          "paper": "Paper · the identity's surface",
+          "ink": "Ink · Newsreader, the site's serif",
+          "stamp": "Stamp · the identity's figure",
+          "postmark": "Postmark · time from your browser, Costa Rica's zone"
+        }
+      }
     }
   },
   "footer": {
@@ -133,9 +154,14 @@
     "colophon": "Colophon",
     "privacy": "Privacy",
     "source": "Source on GitHub",
-    "email": "Email"
+    "email": "Email",
+    "columns": {
+      "site": "Site",
+      "thisSite": "This site"
+    }
   },
   "notFound": {
+    "eyebrow": "Error 404",
     "title": "This page isn't on the map.",
     "body": "The link may be outdated or mistyped.",
     "aside": "I've taken a few wrong trails myself. This one leads back home.",
@@ -143,8 +169,16 @@
     "map": {
       "label": "A contour map of the Irazú volcano, drawn from real elevation data. You are here, just outside its edge, and a dashed trail leads in to the summit.",
       "here": "You are here",
-      "note": "Irazú, {summit} m · contours every {interval} m"
-    }
+      "note": "Irazú, {summit} m · contours every {interval} m",
+      "off": "m · off the map",
+      "layers": {
+        "map": "contours · Copernicus GLO-30",
+        "trail": "trail",
+        "figure": "the identity's figure"
+      }
+    },
+    "pause": "Pause the figure",
+    "play": "Move the figure"
   },
   "changelogPage": {
     "title": "Changelog",
@@ -153,7 +187,12 @@
     "map": {
       "label": "Map of the volcanoes behind each release",
       "pin": "v{major} {codename}, {elevation}, {years}. Go to its release notes.",
-      "caption": "Costa Rica's Central Volcanic Range at real coordinates. Contour lines every 250 m; the route follows the releases in order."
+      "caption": "Costa Rica's Central Volcanic Range at real coordinates. Contour lines every 250 m; the route follows the releases in order.",
+      "relief": {
+        "prev": "Previous place",
+        "next": "Next place",
+        "caption": "Real relief from Copernicus GLO-30 elevation, about 13 km around each place, cut in paper every 100 m, heights drawn at 2.2 times their true scale."
+      }
     },
     "rail": {
       "next": "Next",
@@ -180,16 +219,155 @@
     "vueYears": "{years} years",
     "portrait": {
       "alt": "Pablo Madrigal, head and shoulders, in glasses and a striped shirt. A diagonal fold turns part of the photo into the same face drawn as contour lines.",
-      "caption": "Interface · architecture",
       "handle": "Fold the portrait",
-      "value": "{photo}% photo, {contours}% contour lines"
+      "value": "{photo}% photo, {contours}% contour lines",
+      "interface": "Interface",
+      "architecture": "Architecture"
     }
   },
   "colophonPage": {
-    "title": "How this site is built."
+    "title": "How this site is built.",
+    "block": {
+      "label": "About this build",
+      "project": "Project",
+      "author": "Author",
+      "version": "Version",
+      "built": "Built",
+      "pages": "HTML pages",
+      "sheets": "Sheets",
+      "licences": "Licences",
+      "licencesValue": "Code MIT · Writing CC BY-NC-ND 4.0"
+    },
+    "back": "The back of sheet {n}",
+    "turn": "Point at the sheet to turn it back.",
+    "plan": {
+      "title": "The sheet, unfolded",
+      "label": "The plan of this page, one region per section",
+      "mountain": "mountain",
+      "valley": "valley"
+    },
+    "backs": {
+      "architecture": {
+        "pages": "HTML pages",
+        "components": "Components",
+        "modules": "TypeScript modules",
+        "js": "JavaScript on the home page"
+      },
+      "design": {
+        "tokens": "Compiled tokens",
+        "base": "Base tokens",
+        "colors": "Colour tokens per identity",
+        "themes": "{count} × {themes} themes",
+        "surfaces": "Surfaces"
+      },
+      "scene": {
+        "dem": "Irazú elevation grid",
+        "figures": "Figures",
+        "figuresValue": "{count}, one sheet each",
+        "three": "three.js",
+        "threeValue": "only when the Inspector opens"
+      },
+      "portrait": {
+        "photo": "The photo",
+        "contours": "Its contours",
+        "silhouette": "Its silhouette",
+        "ai": "Generative AI on the photo",
+        "none": "none"
+      },
+      "quality": {
+        "unit": "Unit test files",
+        "e2e": "End-to-end specs",
+        "axe": "axe runs per change",
+        "lighthouse": "Lighthouse pages × runs"
+      },
+      "hosting": {
+        "runtime": "Runtime",
+        "files": "Served as files",
+        "filesValue": "every page",
+        "code": "Code that runs per request",
+        "codeValue": "only /api/*",
+        "deploys": "Deploys from"
+      },
+      "licences": {
+        "code": "Code",
+        "writing": "Writing",
+        "identity": "Identity and media",
+        "reserved": "reserved"
+      }
+    },
+    "ids": {
+      "intro": "The three identities, each folded from the same sheet. Pick one to see the site in it.",
+      "contour": "Morpho by day, frog by night",
+      "basalt": "Arctic fox",
+      "washi": "Crane"
+    },
+    "type": {
+      "sans": "Interface and headings",
+      "mono": "Data, labels and code",
+      "serif": "Precrease headlines"
+    },
+    "gauges": {
+      "performance": "Performance",
+      "accessibility": "Accessibility",
+      "bestPractices": "Best practices",
+      "seo": "SEO",
+      "lcp": "Largest Contentful Paint",
+      "cls": "Cumulative Layout Shift",
+      "threshold": "threshold {value}",
+      "measured": "Measured on this page by Lighthouse on {date}, the median of {runs} runs. The tick is the bar every change must clear."
+    }
   },
   "privacyPage": {
-    "title": "What this site knows about you."
+    "title": "What this site knows about you.",
+    "block": {
+      "label": "This site at a glance",
+      "cookies": "Cookies",
+      "accounts": "Accounts",
+      "forms": "Forms",
+      "trackers": "Trackers",
+      "none": "none"
+    },
+    "tags": {
+      "always": "always",
+      "posts": "on posts",
+      "click": "if you click",
+      "open": "if you open them",
+      "device": "on your device"
+    },
+    "map": {
+      "title": "What travels",
+      "intro": "Every route data can take from this page. Open the Inspector to see the requests this page made, each on the route it declares.",
+      "label": "Map of where data can travel from your browser",
+      "you": ["Your browser", "where your choices stay"],
+      "site": ["This site", "pages, fonts, scripts"],
+      "analytics": ["Web Analytics", "cloudflareinsights.com"],
+      "off": "not loaded: your browser sent a privacy signal",
+      "stats": ["/api/stats", "3 totals per post"],
+      "comments": ["giscus · GitHub", "only if you open comments"],
+      "share": ["LinkedIn · X · Bluesky", "only if you click to share"],
+      "never": ["Cookies · trackers", "never"],
+      "legend": {
+        "always": "always, on every visit",
+        "action": "only if you act",
+        "never": "never, or switched off"
+      },
+      "ok": "{count} requests from this page, all on a declared route. Nothing went anywhere else.",
+      "bad": "{count} requests. Some went somewhere this page doesn’t declare: {hosts}. That’s a bug: please tell me."
+    },
+    "live": {
+      "caption": "Checked just now, in your browser. Nothing here is sent anywhere.",
+      "cookies": "Cookies",
+      "cookiesNote": "set by this site or anything it loaded",
+      "storage": "Local storage",
+      "storageNone": "nothing stored",
+      "signal": "Your privacy signal",
+      "signalSent": "sent: analytics and post counts stay off",
+      "signalNone": "not sent",
+      "analytics": "Analytics script",
+      "loaded": "loaded",
+      "notLoaded": "not loaded",
+      "notLoadedNote": "not loaded on this visit"
+    }
   },
   "inspector": {
     "open": "Inspect",
@@ -520,7 +698,18 @@
       "project": "Personal project · {year}",
       "earlier": {
         "title": "Earlier work",
-        "intro": "My earlier roles, in a few lines. Each one is in full in the Changelog."
+        "intro": "My earlier roles, in a few lines. Each one is in full in the Changelog.",
+        "via": "{client} · via {org}",
+        "year": "1 year",
+        "years": "{n} years",
+        "month": "1 month",
+        "months": "{n} months",
+        "and": "{years} and {months}",
+        "span": "{start} → {end} · {months}"
+      },
+      "plan": {
+        "plates": "CaseCard · {n} plates, seen from above",
+        "sheet": "CaseCard · the site's sheet, folded"
       }
     },
     "case": {
@@ -530,16 +719,16 @@
       "goal": "goal",
       "approach": "approach",
       "result": "result",
-      "project": "project",
-      "plate": "plate",
-      "author": "author",
       "practice": "practice",
       "valley": "valley",
       "mountain": "mountain",
       "built": "what I built",
       "back": "Back to case studies",
       "career": "See my career, version by version",
-      "colophon": "See how it's built, in the colophon"
+      "colophon": "See how it's built, in the colophon",
+      "next": "Next case study",
+      "legend": "How to read a plate",
+      "sheet": "plate {n} of {total}"
     }
   },
   "commands": {

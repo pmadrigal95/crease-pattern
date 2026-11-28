@@ -26,7 +26,7 @@ test('the Inspector and its folded views write nothing unguarded', async ({ page
   const found = await violations(page);
   await page.goto('/');
   await page.locator('[data-inspector-toggle]').click();
-  await expect(page.locator('#inspector')).toBeVisible();
+  await expect(page.locator('#pm-inspector')).toBeVisible();
   await page.getByRole('radio', { name: 'Pattern', exact: true }).check();
   await expect(page.locator('html')).toHaveClass(/fold-settled/, { timeout: 5_000 });
   expect(found).toEqual([]);

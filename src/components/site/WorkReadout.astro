@@ -33,7 +33,7 @@ const runs = allVisualDirections.flatMap((direction) => themes.map((theme) => ({
 const runCount = auditedPages.length * runs.length;
 
 // The parts by family: the folder under src/components, or the page that holds them.
-const order = ['pages', 'site', 'precrease', 'sonobe', 'threads', 'work'] as const;
+const order = ['pages', 'site', 'precrease', 'sonobe', 'threads', 'work', 'colophon', 'privacy'] as const;
 type Family = (typeof order)[number];
 const families = new Map<Family, string[]>(order.map((f) => [f, []]));
 for (const [part, file] of Object.entries(manifest.parts)) {
@@ -45,7 +45,7 @@ const parts = [...families].filter(([, list]) => list.length).sort((a, b) => b[1
 const total = Object.keys(manifest.parts).length;
 ---
 
-<dl class="readout" data-readout>
+<dl class="readout" data-readout data-arrive>
   <div>
     <dt>
       {m.js.label}
@@ -385,18 +385,21 @@ const total = Object.keys(manifest.parts).length;
   }
 
   /* The drawings come in as they scroll into view, where the browser can tie that to the scroll. */
-  @supports (animation-timeline: view()) {
-    @media (prefers-reduced-motion: no-preference) {
-      .viz {
-        animation: draw-in linear both;
-        animation-timeline: view();
-        animation-range: entry 0% entry 70%;
-      }
+  /* Once in view each figure settles into place, one after the other. */
+  @media (prefers-reduced-motion: no-preference) {
+    .viz {
+      transition: translate 0.7s var(--motion-ease-out);
     }
-  }
-  @keyframes draw-in {
-    from {
-      opacity: 0;
+    .readout > div:nth-child(2) .viz {
+      transition-delay: 0.08s;
+    }
+    .readout > div:nth-child(3) .viz {
+      transition-delay: 0.16s;
+    }
+    .readout > div:nth-child(4) .viz {
+      transition-delay: 0.24s;
+    }
+    :global(:root[data-js]:not(.inspecting)) .readout:not(:global(.arrived)) .viz {
       translate: 0 12px;
     }
   }

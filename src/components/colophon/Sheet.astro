@@ -1,0 +1,142 @@
+---
+/**
+ * One sheet of the colophon (doc 40): its section on the front and, on the back, the files that
+ * build it and what they measure, counted from the repository at build time (src/lib/build-facts.ts).
+ * While inspecting, every sheet turns over, one after another, to show its back; pointing at one
+ * turns it back (colophon.css). The back repeats what the front's files measure, so it is hidden
+ * from screen readers. With reduced motion the sheets simply swap.
+ */
+import { buildFacts } from '../../lib/build-facts';
+import { copyFor, fill } from '../../i18n/dictionary';
+import { langOf } from '../../i18n/routing';
+import { formatDecimal, formatNumber, padNumber } from '../../lib/format';
+
+type Back = 'architecture' | 'design' | 'scene' | 'portrait' | 'quality' | 'hosting' | 'licences';
+interface Props {
+  /** 1-based, in reading order. */
+  n: number;
+  back: Back;
+  /** The licences' seal, in the sheet's corner. */
+  seal?: boolean;
+}
+const { n, back, seal = false } = Astro.props;
+const lang = langOf(Astro.currentLocale);
+const t = copyFor(lang).colophonPage;
+const b = t.backs;
+const f = buildFacts();
+const kb = (v: number) => `${formatDecimal(v, lang)} KB`;
+const num = (v: number) => formatNumber(v, lang);
+
+/** Each back: the files that build the section, and what they measure. */
+const backs: Record<Back, { file: string; rows: { k: string; v: string; metric?: string }[] }> = {
+  architecture: {
+    file: 'astro.config.ts',
+    rows: [
+      { k: b.architecture.pages, v: '—', metric: 'html-pages' },
+      { k: b.architecture.components, v: `${num(f.components)} .astro` },
+      { k: b.architecture.modules, v: num(f.modules) },
+      { k: b.architecture.js, v: '—', metric: 'first-load-js' },
+    ],
+  },
+  design: {
+    file: 'tokens/*.json → src/styles/tokens.css',
+    rows: [
+      { k: b.design.tokens, v: kb(f.tokensKb) },
+      { k: b.design.base, v: num(f.baseTokens) },
+      { k: b.design.colors, v: fill(b.design.themes, { count: f.colorTokens, themes: f.themes }) },
+      {
+        k: b.design.surfaces,
+        v:
+          Object.entries(f.surfacesKb)
+            .map(([name, size]) => `${name} ${formatDecimal(size, lang)}`)
+            .join(' · ') + ' KB',
+      },
+    ],
+  },
+  scene: {
+    file: 'src/components/inspector/ · src/assets/scenes/',
+    rows: [
+      { k: b.scene.dem, v: `${kb(f.demKb)} · ${f.demSize} × ${f.demSize}` },
+      { k: b.scene.figures, v: fill(b.scene.figuresValue, { count: f.figures }) },
+      { k: b.scene.three, v: b.scene.threeValue },
+    ],
+  },
+  portrait: {
+    file: 'src/assets/portrait/',
+    rows: [
+      { k: b.portrait.photo, v: kb(f.portraitKb.photo) },
+      { k: b.portrait.contours, v: kb(f.portraitKb.contours) },
+      { k: b.portrait.silhouette, v: kb(f.portraitKb.silhouette) },
+      { k: b.portrait.ai, v: b.portrait.none },
+    ],
+  },
+  quality: {
+    file: 'tests/ · lighthouserc.json',
+    rows: [
+      { k: b.quality.unit, v: num(f.unitTests) },
+      { k: b.quality.e2e, v: num(f.e2eSpecs) },
+      { k: b.quality.axe, v: f.axeRuns.join(' × ') },
+      { k: b.quality.lighthouse, v: f.lighthouse.join(' × ') },
+    ],
+  },
+  hosting: {
+    file: 'wrangler.jsonc',
+    rows: [
+      { k: b.hosting.runtime, v: 'Cloudflare Workers' },
+      { k: b.hosting.files, v: b.hosting.filesValue },
+      { k: b.hosting.code, v: b.hosting.codeValue },
+      { k: b.hosting.deploys, v: 'main' },
+    ],
+  },
+  licences: {
+    file: 'LICENSE',
+    rows: [
+      { k: b.licences.code, v: 'MIT' },
+      { k: b.licences.writing, v: 'CC BY-NC-ND 4.0' },
+      { k: b.licences.identity, v: b.licences.reserved },
+    ],
+  },
+};
+const { file, rows } = backs[back];
+---
+
+<section class="sheet" data-sheet data-inspect="Sheet">
+  <div class="face front">
+    {seal && (
+      <svg class="seal" viewBox="0 0 112 112" aria-hidden="true" focusable="false">
+        <defs>
+          <path id="seal-ring" d="M56 56 m-42 0 a42 42 0 1 1 84 0 a42 42 0 1 1 -84 0" />
+        </defs>
+        <circle cx="56" cy="56" r="54" stroke-width="1.5" />
+        <circle cx="56" cy="56" r="34" stroke-width="1" stroke-dasharray="4 3" />
+        <text>
+          <textPath href="#seal-ring">CREASE-PATTERN · MIT · CC BY-NC-ND 4.0 ·</textPath>
+        </text>
+        <text x="56" y="60" text-anchor="middle">
+          {f.version}
+        </text>
+      </svg>
+    )}
+    <slot />
+  </div>
+  <div class="face back" aria-hidden="true">
+    <p class="k">{fill(t.back, { n: padNumber(n, 2) })}</p>
+    <p class="file">{file}</p>
+    <ul>
+      {rows.map((r) => (
+        <li>
+          <span>{r.k}</span>
+          {r.metric ? (
+            <b>
+              <span data-metric={r.metric}>{r.v}</span>
+              {r.metric === 'first-load-js' && ' KB'}
+            </b>
+          ) : (
+            <b>{r.v}</b>
+          )}
+        </li>
+      ))}
+    </ul>
+    <p class="k">{t.turn}</p>
+  </div>
+</section>

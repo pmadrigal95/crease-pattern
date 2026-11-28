@@ -3,6 +3,17 @@ import { expect, test } from '@playwright/test';
 // The changelog page (design debt phase 2): the map of the volcanoes is the page's navigation.
 // Each summit is a link to its release notes, reachable with the keyboard.
 test('each summit on the map goes to its release notes', async ({ page }) => {
+  // The drawing, as everyone without the 3D relief sees it (changelog3d.spec.ts): no WebGL here.
+  await page.addInitScript(() => {
+    const getContext = HTMLCanvasElement.prototype.getContext;
+    HTMLCanvasElement.prototype.getContext = function (
+      this: HTMLCanvasElement,
+      type: string,
+      options?: object,
+    ) {
+      return type === 'webgl2' ? null : getContext.call(this, type, options);
+    } as typeof getContext;
+  });
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto('/changelog');
   const map = page.getByRole('group', { name: 'Map of the volcanoes behind each release' });
@@ -23,4 +34,18 @@ test('on a phone the map keeps every summit and its link', async ({ page }) => {
   const map = page.getByRole('group', { name: 'Map of the volcanoes behind each release' });
   await expect(map.getByRole('link')).toHaveCount(4);
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
+});
+
+test('the ascent log: each release has its badge, each change its kind, the stack its chips, each entry its length', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.goto('/changelog');
+  await expect(page.locator('.camp:not(.next) .badge')).toHaveCount(4);
+  const site = page.locator('.entry', { hasText: 'crease-pattern' });
+  await expect(site.locator('.chip')).toContainText(['Astro', 'TypeScript']);
+  await expect(site.locator('.changes .kind').first()).toHaveText('Added');
+  await expect(page.locator('.entry', { hasText: 'Frontend Consultant' }).locator('.lasted')).toHaveText(
+    '8 months',
+  );
 });

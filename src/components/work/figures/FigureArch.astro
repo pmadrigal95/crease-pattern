@@ -15,7 +15,7 @@ const l = (key: string): string => {
 <svg class="dg wide" viewBox="0 0 640 330" role="img" aria-label={description}>
   {[20, 180, 340, 500].map((x) => (
     <>
-      <rect class="box" x={x} y="24" width="120" height="48" rx="6" />
+      <rect class="s-goal box" x={x} y="24" width="120" height="48" rx="6" />
       <text class="lbl" x={x + 60} y="53" text-anchor="middle">
         {l('app')}
       </text>
@@ -33,19 +33,19 @@ const l = (key: string): string => {
   <text class="small" x="20" y="198">
     {l('inside')}
   </text>
-  <rect class="box" x="20" y="206" width="400" height="34" rx="6" />
+  <rect class="s-result box" x="20" y="206" width="400" height="34" rx="6" />
   <text x="220" y="228" text-anchor="middle">
     {l('ui')}
   </text>
-  <rect class="box" x="20" y="246" width="400" height="34" rx="6" />
+  <rect class="s-result box" x="20" y="246" width="400" height="34" rx="6" />
   <text x="220" y="268" text-anchor="middle">
     {l('rules')}
   </text>
-  <rect class="box" x="20" y="286" width="400" height="34" rx="6" />
+  <rect class="s-result box" x="20" y="286" width="400" height="34" rx="6" />
   <text x="220" y="308" text-anchor="middle">
     {l('data')}
   </text>
-  <path class="dim" d="M440 206 V320 M435 206 H445 M435 320 H445" />
+  <path class="s-result dim" d="M440 206 V320 M435 206 H445 M435 320 H445" />
   <text class="dimt" x="452" y="268">
     {l('pattern')}
   </text>
@@ -61,7 +61,7 @@ const l = (key: string): string => {
     [170, 80],
   ].map(([x, y]) => (
     <>
-      <rect class="box" x={x} y={y} width="130" height="40" rx="6" />
+      <rect class="s-goal box" x={x} y={y} width="130" height="40" rx="6" />
       <text class="lbl" x={(x ?? 0) + 65} y={(y ?? 0) + 25} text-anchor="middle">
         {l('app')}
       </text>
@@ -78,19 +78,19 @@ const l = (key: string): string => {
   <text class="small" x="20" y="228">
     {l('inside')}
   </text>
-  <rect class="box" x="20" y="236" width="280" height="32" rx="6" />
+  <rect class="s-result box" x="20" y="236" width="280" height="32" rx="6" />
   <text x="160" y="257" text-anchor="middle">
     {l('ui')}
   </text>
-  <rect class="box" x="20" y="274" width="280" height="32" rx="6" />
+  <rect class="s-result box" x="20" y="274" width="280" height="32" rx="6" />
   <text x="160" y="295" text-anchor="middle">
     {l('rules')}
   </text>
-  <rect class="box" x="20" y="312" width="280" height="32" rx="6" />
+  <rect class="s-result box" x="20" y="312" width="280" height="32" rx="6" />
   <text x="160" y="333" text-anchor="middle">
     {l('data')}
   </text>
-  <path class="dim" d="M20 362 H300 M20 357 V367 M300 357 V367" />
+  <path class="s-result dim" d="M20 362 H300 M20 357 V367 M300 357 V367" />
   <text class="dimt" x="160" y="382" text-anchor="middle">
     {l('pattern')}
   </text>

@@ -1,7 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
 import { tipSeen } from './tests/tip-seen';
 
-// End-to-end tests for interactive essays (tests/essay). They need two things the main suite's
+// End-to-end tests for interactive essays and page transitions (tests/essay). They need two things the main suite's
 // server lacks: drafts (a preview build, PRECREASE_PREVIEW=1) and public/_headers applied, so the
 // page is cross-origin isolated and real Web Workers share memory (scripts/serve-dist.ts).
 // The build replaces dist/ with the preview one, so CI runs this after Lighthouse.

@@ -1,0 +1,187 @@
+---
+/**
+ * The 3D relief of /changelog's map (ExpeditionMap.astro): the career's places as paper models of
+ * their real terrain (changelog3d.ts, geometry and data in src/lib/relief.ts), on a wide screen
+ * whose device can run it (src/lib/scene3d-support.ts), loaded as the map approaches. This is its
+ * readout (its tag a link to the place's release, as the map's pins are), the names that choose
+ * a place and the previous and next steps, hidden until the scene is built; then the map's drawing
+ * gives way to it.
+ */
+import { careerFor, climbs, places } from '../../lib/career';
+import { copyFor, fill } from '../../i18n/dictionary';
+import { formatNumber } from '../../lib/format';
+import { langOf } from '../../i18n/routing';
+const lang = langOf(Astro.currentLocale);
+const copy = copyFor(Astro.currentLocale);
+
+const t = copy.changelogPage.map;
+const elevation = (m: number) => fill(copy.home.changelog.elevation, { elevation: formatNumber(m, lang) });
+const career = careerFor(lang);
+const spans = new Map(climbs(career).map((c, i, all) => [c.major, { c, current: i === all.length - 1 }]));
+const themes = new Map(career.releases.map((r) => [r.major, r.theme]));
+const data = places(career);
+const years = (major: number) => {
+  const { c, current } = spans.get(major)!;
+  return `${Math.floor(c.start)} – ${current ? copy.home.changelog.present : Math.floor(c.end)}`;
+};
+---
+
+<div class="relief" data-relief hidden>
+  <div class="readout">
+    {data.map((p) => (
+      <div
+        class:list={['head', { away: !spans.get(p.major)!.current }]}
+        data-era={p.major}
+        data-said={`v${p.major} ${p.codename}, ${elevation(p.elevationM)}, ${years(p.major)}`}
+      >
+        <p class="tag">
+          <a href={`#release-${p.major}`}>
+            v{p.major} · {p.codename}
+          </a>
+        </p>
+        <p class="alt">{elevation(p.elevationM)}</p>
+        <p class="theme">
+          {themes.get(p.major)} · {years(p.major)}
+        </p>
+      </div>
+    ))}
+  </div>
+  <div class="relief-stage" data-relief-stage></div>
+  <div class="bar">
+    <button type="button" class="step" data-relief-step="-1" aria-label={t.relief.prev}>
+      <span aria-hidden="true">←</span>
+    </button>
+    <div class="names" role="group" aria-label={t.label}>
+      {data.map((p) => (
+        <button
+          type="button"
+          data-place={p.major}
+          aria-pressed={spans.get(p.major)!.current ? 'true' : 'false'}
+        >
+          {p.codename}
+        </button>
+      ))}
+    </div>
+    <button type="button" class="step" data-relief-step="1" aria-label={t.relief.next}>
+      <span aria-hidden="true">→</span>
+    </button>
+  </div>
+  <p class="sr-only" aria-live="polite" data-relief-live></p>
+</div>
+
+<script>
+  // Brings the 3D relief up (changelog3d.ts) as the map approaches, on a wide screen whose device
+  // can run it. Anything that fails leaves the drawing, a complete map on its own.
+  for (const relief of document.querySelectorAll<HTMLElement>('[data-relief]')) {
+    const figure = relief.closest('figure')!;
+    const wide = matchMedia('(min-width: 720px)');
+    const near = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry?.isIntersecting || !wide.matches) return;
+        near.disconnect();
+        void import('../../lib/scene3d-support')
+          .then(({ canRun3D, detectDevice }) =>
+            canRun3D(detectDevice()) ? import('./changelog3d').then((m) => m.mountRelief(figure)) : undefined,
+          )
+          .catch(() => undefined);
+      },
+      { rootMargin: '200px 0px' },
+    );
+    near.observe(figure);
+  }
+</script>
+
+<style>
+  /* A readout of the place in view, the models, the names and steps. */
+  .relief {
+    padding: var(--space-6) var(--space-6) var(--space-4);
+  }
+  .readout {
+    display: grid;
+  }
+  .head {
+    grid-area: 1 / 1;
+    transition: opacity 0.2s ease-out;
+  }
+  .head.away {
+    visibility: hidden;
+    opacity: 0;
+  }
+  .head p {
+    margin: 0;
+  }
+  .tag {
+    font: 600 var(--size-xs) / 1 var(--font-mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+  }
+  .head .alt {
+    margin-top: var(--space-2);
+    font: 600 clamp(2.5rem, 5vw, 4rem) / 1 var(--font-sans);
+    letter-spacing: -0.04em;
+  }
+  .head .theme {
+    margin-top: var(--space-2);
+    color: var(--color-mute);
+  }
+  .tag a {
+    color: inherit;
+    text-decoration: none;
+  }
+  .tag a:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  /* The models stand on the page's paper. */
+  .relief-stage {
+    position: relative;
+    margin-top: var(--space-4);
+    height: clamp(360px, 44vw, 540px);
+    border-radius: calc(var(--radius-panel) - 2px);
+    overflow: hidden;
+    background: var(--color-surface);
+    box-shadow: inset 0 0 0 1px var(--color-rule);
+  }
+  /* Choosing a place: its name, or a step either way. */
+  .bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    margin-top: var(--space-4);
+  }
+  .names {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-1);
+  }
+  .names button,
+  .step {
+    min-height: 44px;
+    padding: 0 var(--space-4);
+    border: 0;
+    border-radius: var(--radius-pill);
+    background: transparent;
+    font: 500 var(--size-sm) var(--font-sans);
+    color: var(--color-mute);
+    cursor: pointer;
+  }
+  .names button:hover,
+  .step:hover {
+    color: var(--color-ink);
+  }
+  .names button[aria-pressed='true'] {
+    background: var(--color-surface);
+    color: var(--color-ink);
+    box-shadow:
+      inset 0 0 0 1px var(--color-rule),
+      0 1px 2px rgb(0 0 0 / 0.1);
+  }
+  .step {
+    min-width: 44px;
+    font-size: var(--size-md);
+    box-shadow: inset 0 0 0 1px var(--color-rule);
+  }
+</style>

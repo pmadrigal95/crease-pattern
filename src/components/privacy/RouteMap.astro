@@ -1,0 +1,151 @@
+---
+/**
+ * Every route data can take from the privacy page (doc 40): the visitor's browser in the middle
+ * and a line to each place. Solid: always. Dashed: only if the visitor acts. Dotted and crossed:
+ * never. With a privacy signal (GPC or DNT) the analytics route is drawn switched off. On a narrow
+ * screen the same routes are a list.
+ *
+ * While inspecting, each place shows how many requests this page made to it, from the browser's
+ * own record of them, and a line says whether any went somewhere the page doesn't declare: the
+ * page's promise ("if anything doesn't match, that's a bug"), checked in front of the visitor.
+ */
+import { copyFor } from '../../i18n/dictionary';
+const t = copyFor(Astro.currentLocale).privacyPage.map;
+
+type Kind = 'always' | 'action' | 'never';
+const places: { key: string; x: number; y: number; words: string[]; kind: Kind }[] = [
+  { key: 'site', x: 20, y: 20, words: t.site, kind: 'always' },
+  { key: 'analytics', x: 520, y: 20, words: t.analytics, kind: 'always' },
+  { key: 'stats', x: 20, y: 280, words: t.stats, kind: 'always' },
+  { key: 'comments', x: 520, y: 150, words: t.comments, kind: 'action' },
+  { key: 'share', x: 520, y: 280, words: t.share, kind: 'action' },
+  { key: 'never', x: 20, y: 150, words: t.never, kind: 'never' },
+];
+const you = { x: 285, y: 150, w: 190, h: 60 };
+const cx = you.x + you.w / 2;
+const cy = you.y + you.h / 2;
+const route = (p: (typeof places)[number]) => {
+  const dx = p.x + 110;
+  const dy = p.y + 30;
+  const mx = (cx + dx) / 2;
+  return `M${cx} ${cy} C ${mx} ${cy}, ${mx} ${dy}, ${dx} ${dy}`;
+};
+---
+
+<section
+  class="routes"
+  aria-labelledby="routes-title"
+  data-inspect="RouteMap"
+  data-ok={t.ok}
+  data-bad={t.bad}
+  data-off={t.off}
+>
+  <h2 id="routes-title">{t.title}</h2>
+  <p>{t.intro}</p>
+  <svg viewBox="0 0 760 360" role="img" aria-label={t.label} focusable="false">
+    {places.map((p) => (
+      <path class:list={['route', p.kind]} d={route(p)} data-route={p.key} />
+    ))}
+    {places.map((p) => (
+      <g class:list={['place', p.kind]} data-place={p.key}>
+        <rect x={p.x} y={p.y} width="220" height="60" rx="10" />
+        <text class="t" x={p.x + 14} y={p.y + 26}>
+          {p.words[0]}
+        </text>
+        <text class="s" x={p.x + 14} y={p.y + 44}>
+          {p.words[1]}
+        </text>
+        {p.kind === 'never' && <path class="cross" d={`M${p.x + 190} ${p.y + 14} l16 16 m0 -16 l-16 16`} />}
+        <g class="seen" transform={`translate(${p.x + 128} ${p.y - 12})`}>
+          <rect width="92" height="20" rx="10" />
+          <text x="46" y="14" text-anchor="middle" data-seen={p.key} />
+        </g>
+      </g>
+    ))}
+    <g class="place you">
+      <circle class="ring" cx={cx} cy={cy} r="70" />
+      <circle class="ring" cx={cx} cy={cy} r="92" />
+      <rect x={you.x} y={you.y} width={you.w} height={you.h} rx="12" />
+      <text class="t" x={cx} y={cy - 2} text-anchor="middle">
+        {t.you[0]}
+      </text>
+      <text class="s" x={cx} y={cy + 16} text-anchor="middle">
+        {t.you[1]}
+      </text>
+    </g>
+  </svg>
+  <ul class="list">
+    {places.map((p) => (
+      <li class={p.kind} data-place={p.key}>
+        <span class="line" aria-hidden="true" />
+        <span>
+          <b>{p.words[0]}</b>
+          <small>{p.words[1]}</small>
+        </span>
+        <span class="n" data-seen={p.key} />
+      </li>
+    ))}
+  </ul>
+  <p class="legend" aria-hidden="true">
+    <span class="always">{t.legend.always}</span>
+    <span class="action">{t.legend.action}</span>
+    <span class="never">{t.legend.never}</span>
+  </p>
+  <p class="audit" aria-live="polite"></p>
+</section>
+
+<script>
+  import { fill } from '../../lib/template';
+  const map = document.querySelector<HTMLElement>('.routes');
+  if (map) {
+    const root = document.documentElement;
+    // A privacy signal: the analytics script is never loaded, so its route is drawn switched off.
+    const signal =
+      (navigator as Navigator & { globalPrivacyControl?: boolean }).globalPrivacyControl === true ||
+      navigator.doNotTrack === '1';
+    if (signal) {
+      map
+        .querySelectorAll('[data-place="analytics"], [data-route="analytics"]')
+        .forEach((el) => el.classList.add('off'));
+      map
+        .querySelectorAll('[data-place="analytics"] :is(.s, small)')
+        .forEach((el) => (el.textContent = map.dataset.off ?? ''));
+    }
+    /** The declared route a request took, or null for a place the page doesn't declare. */
+    const routeOf = (url: string): string | null => {
+      const { hostname, pathname } = new URL(url, location.href);
+      if (hostname === location.hostname) return pathname.startsWith('/api/') ? 'stats' : 'site';
+      if (/(^|\.)cloudflareinsights\.com$/.test(hostname)) return 'analytics';
+      if (/(^|\.)(giscus\.app|github\.com|githubusercontent\.com)$/.test(hostname)) return 'comments';
+      return null;
+    };
+    /** Where each request this page made went, by declared route. */
+    const audit = () => {
+      const urls = [location.href, ...performance.getEntriesByType('resource').map((e) => e.name)];
+      const seen = new Map<string, number>();
+      const elsewhere = new Set<string>();
+      for (const url of urls) {
+        const route = routeOf(url);
+        if (route) seen.set(route, (seen.get(route) ?? 0) + 1);
+        else elsewhere.add(new URL(url, location.href).hostname);
+      }
+      for (const el of map.querySelectorAll<HTMLElement | SVGElement>('[data-seen]')) {
+        const n = seen.get(el.dataset.seen ?? '') ?? 0;
+        el.textContent = n ? `${n} ✓` : '0';
+      }
+      const line = map.querySelector('.audit');
+      const hosts = [...elsewhere].join(', ');
+      if (line)
+        line.textContent = fill((hosts ? map.dataset.bad : map.dataset.ok) ?? '', {
+          count: urls.length,
+          hosts,
+        });
+      map.classList.toggle('elsewhere', elsewhere.size > 0);
+    };
+    const watch = () => {
+      if (root.classList.contains('inspecting')) audit();
+    };
+    new MutationObserver(watch).observe(root, { attributes: true, attributeFilter: ['class'] });
+    watch();
+  }
+</script>

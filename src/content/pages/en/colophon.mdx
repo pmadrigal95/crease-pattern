@@ -3,13 +3,24 @@ title: Colophon
 description: How this site is built, tested and shipped.
 ---
 
+import Sheet from '../../../components/colophon/Sheet.astro';
+import Identities from '../../../components/colophon/Identities.astro';
+import TypeSpecimen from '../../../components/colophon/TypeSpecimen.astro';
+import QualityGauges from '../../../components/colophon/QualityGauges.astro';
+
 Every claim on this page can be checked in [the repository](https://github.com/pmadrigal95/crease-pattern).
+
+<Sheet n={1} back="architecture">
 
 ## Architecture
 
 - **[Astro](https://astro.build/)** renders every page to static HTML at build time. A page ships no framework
   JavaScript unless one of its components needs it.
 - **TypeScript** in its strictest configuration, from content schemas to components.
+
+</Sheet>
+
+<Sheet n={2} back="design">
 
 ## Design system
 
@@ -22,6 +33,14 @@ Every claim on this page can be checked in [the repository](https://github.com/p
   self-hosted.
 - Behind the home hero, each identity has its own surface: contour lines, basalt joints or washi fibers. A
   script draws each one as a seamless SVG tile of a few kilobytes, using an AI image only as a reference.
+
+<Identities />
+
+<TypeSpecimen />
+
+</Sheet>
+
+<Sheet n={3} back="scene">
 
 ## The 3D scene
 
@@ -36,9 +55,15 @@ Irazú volcano from real elevation data, with a contour every 100 m.
 - [three.js](https://threejs.org/) draws it. It loads only when the Inspector opens, and only on devices with
   hardware graphics, WebGL 2, enough memory and no request for reduced motion. Everywhere else, the drawing stays.
 - The Irazú comes from the Copernicus GLO-30 elevation model, cropped to about 13 km around the summit and
-  averaged into a grid of 161 × 161 points. Heights are drawn at twice their true scale. Produced using
+  averaged into a grid of 161 × 161 points. Heights are drawn at twice their true scale. On a wide screen, the
+  [changelog](/changelog) shows the same grid, sampled down to 97 × 97, beside three more from the same model
+  around Cartago, the Poás and the Turrialba, as paper models at 2.2 times their true height. Produced using
   Copernicus WorldDEM-30 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under
   COPERNICUS by the European Union and ESA; all rights reserved.
+
+</Sheet>
+
+<Sheet n={4} back="portrait">
 
 ## The portrait
 
@@ -51,24 +76,31 @@ The portrait on [About](/about) is one real photo, untouched by generative AI, s
   my machine, and a marching-squares script traces it into an 11 KB SVG.
 - Drag the handle, or focus it and use the arrow keys, to move the fold.
 
+</Sheet>
+
+<Sheet n={5} back="quality">
+
 ## Quality gates
 
 A change can't merge until it passes formatting, linting, type checks, unit tests, an axe accessibility scan
 in every identity and theme, and Lighthouse budgets:
 
-| Budget                   | Threshold    |
-| ------------------------ | ------------ |
-| Performance              | 95 or higher |
-| Accessibility            | 100          |
-| Best practices           | 100          |
-| SEO                      | 100          |
-| Largest Contentful Paint | under 1.85 s |
-| Cumulative Layout Shift  | under 0.05   |
+<QualityGauges />
+
+</Sheet>
+
+<Sheet n={6} back="hosting">
 
 ## Hosting
 
 Static files on **Cloudflare Workers**, deployed automatically from the `main` branch.
 
+</Sheet>
+
+<Sheet n={7} back="licences" seal>
+
 ## Licenses
 
 Code is MIT. Writing is CC BY-NC-ND 4.0. The visual identity and media are reserved.
+
+</Sheet>

@@ -1,0 +1,54 @@
+---
+/**
+ * The colophon's plan (doc 40): the page as one square sheet unfolded, a region per sheet with its
+ * mountain and valley creases. Each region links to its sheet; the one being read is filled
+ * (colophon.astro's script marks it).
+ */
+import { copyFor } from '../../i18n/dictionary';
+import { padNumber } from '../../lib/format';
+
+interface Props {
+  /** The sheets' headings, in order: their anchors and words. */
+  sheets: { slug: string; text: string }[];
+}
+const { sheets } = Astro.props;
+const t = copyFor(Astro.currentLocale).colophonPage.plan;
+/** Seven regions of a 300 sheet, x y w h, in reading order: two, one across, two, two. */
+const REGIONS = [
+  [0, 0, 150, 90],
+  [150, 0, 150, 90],
+  [0, 90, 300, 80],
+  [0, 170, 150, 70],
+  [150, 170, 150, 70],
+  [0, 240, 150, 60],
+  [150, 240, 150, 60],
+] as const;
+const regions = sheets.slice(0, REGIONS.length).map((s, i) => {
+  const [x, y, w, h] = REGIONS[i]!;
+  return { ...s, x, y, w, h, n: padNumber(i + 1, 2), mountain: i % 2 === 1 };
+});
+---
+
+<aside class="plan" aria-label={t.label} data-inspect="ColophonPlan">
+  <p class="k">{t.title}</p>
+  <svg viewBox="-1 -1 302 302" focusable="false">
+    {regions.map((r) => (
+      <a href={`#${r.slug}`} data-plan={r.slug}>
+        <rect class="cell" x={r.x} y={r.y} width={r.w} height={r.h} />
+        <path class={r.mountain ? 'm' : 'v'} d={`M${r.x} ${r.y} L${r.x + r.w} ${r.y + r.h}`} />
+        <path class={r.mountain ? 'v' : 'm'} d={`M${r.x + r.w} ${r.y} L${r.x} ${r.y + r.h}`} />
+        <rect class="edge" x={r.x} y={r.y} width={r.w} height={r.h} />
+        <text class="n" x={r.x + 8} y={r.y + 16}>
+          {r.n}
+        </text>
+        <text x={r.x + 8} y={r.y + 29}>
+          {r.text}
+        </text>
+      </a>
+    ))}
+  </svg>
+  <p class="legend" aria-hidden="true">
+    <span class="m">{t.mountain}</span>
+    <span class="v">{t.valley}</span>
+  </p>
+</aside>

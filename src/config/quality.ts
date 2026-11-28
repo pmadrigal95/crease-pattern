@@ -65,8 +65,8 @@ export const jsBudgetKb = {
    */
   workModel: 8,
   /**
-   * M4's 3D scenes, the hero's fox and the Work star, which share one three.js. They load only on
-   * the home page, on a device that can run them (src/lib/scene3d-support.ts). Set at 180 KB in
+   * The 3D scenes, the hero's fox, the Work star and the changelog's relief, which share one
+   * three.js. They load only on a device that can run them (src/lib/scene3d-support.ts). Set at 180 KB in
    * the M4 plan; about 100 KB at M4.1. Their loader (hero3d.ts and its device check) counts here
    * too since 2026-11-20; it used to be measured with the Inspector's onDemand.
    */
@@ -88,8 +88,10 @@ export const jsBudgetKb = {
    */
   coachmarkStyles: 2,
   /**
-   * The 3D scenes' data, fetched with the scene: today the Irazú's height grid from Copernicus
-   * GLO-30 (src/assets/scenes/irazu-dem.bin), 28.5 KB. The M4 plan capped it at 150 KB.
+   * The 3D scenes' data, fetched with the scene: height grids from Copernicus GLO-30
+   * (src/assets/scenes/*-dem.bin), the Irazú's (28.5 KB, shared by the hero and /changelog) and
+   * base camp's, the Poás' and the Turrialba's for /changelog (35 KB together) since 2026-11-26.
+   * The M4 plan capped it at 150 KB.
    */
   sceneData: 150,
   /**

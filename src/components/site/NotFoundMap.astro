@@ -1,9 +1,15 @@
 ---
 /**
- * The 404 page's map (design debt phase 4): "This page isn't on the map", drawn literally. The
- * Irazú's real contours (src/lib/irazu-map.ts, from the 3D scene's Copernicus grid), with the
- * visitor's pin just outside the map's edge and a dashed trail leading in to the site's origami
- * figure on the summit (the one of the visitor's identity, src/styles/origami.css). Drawn at build time: plain SVG, no script.
+ * The 404 page's map (design debt phase 4, doc 38): "This page isn't on the map", drawn literally.
+ * The Irazú's real contours (src/lib/irazu-map.ts, from the 3D scene's Copernicus grid), with the
+ * visitor's pin just outside the map's edge, a dashed trail leading in to the summit, and the 404
+ * set large as the map's own label ("404 m · off the map").
+ *
+ * The site's origami figure (the one of the visitor's identity, src/styles/origami.css) stands on
+ * the summit. With a script and motion allowed it walks down to the edge, looks around and climbs
+ * back (src/scripts/notfound-walk.ts), for three walks, with a button to pause it (WCAG 2.2.2).
+ * With reduced motion it waits at the edge, by the pin. While inspecting, the map comes apart into
+ * its layers, each named.
  */
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -19,6 +25,7 @@ const lang = langOf(Astro.currentLocale);
 const copy = copyFor(Astro.currentLocale);
 
 const t = copy.notFound.map;
+// The big 404 is the map's label; screen readers hear it in the eyebrow above the title.
 const file = readFileSync(join(process.cwd(), 'src/assets/scenes/irazu-dem.bin'));
 const { size, lines, summit } = irazuMap(new Uint16Array(file.buffer, file.byteOffset, file.byteLength / 2));
 
@@ -34,35 +41,72 @@ const trail = `M${here.x} ${here.y}C${here.x - 30} ${here.y - 14} ${size - 70} $
         <rect width={size} height={size}></rect>
       </clipPath>
     </defs>
-    <rect class="frame" width={size} height={size}></rect>
-    <g clip-path="url(#nf-map-frame)">
-      {lines.map((l) => (
-        <path class:list={['contour', { major: l.major }]} d={l.d} />
-      ))}
+    <g class="lay lay-map">
+      <rect class="frame" width={size} height={size}></rect>
+      <g clip-path="url(#nf-map-frame)">
+        {lines.map((l) => (
+          <path class:list={['contour', { major: l.major }]} d={l.d} />
+        ))}
+      </g>
+      <text class="note" x="0" y={size + 18}>
+        {fill(t.note, { summit: formatNumber(IRAZU.summit, lang), interval: IRAZU.interval })}
+      </text>
+      <text class="layer-tag" x="0" y={size + 32}>
+        {t.layers.map}
+      </text>
     </g>
-    <path class="trail" d={trail}></path>
-    <svg
-      class="origami"
-      x={summit.x - 14}
-      y={summit.y - 22}
-      width="28"
-      height="28"
-      viewBox={VIEWBOX}
-      aria-hidden="true"
-    >
-      {MODEL_IDS.map((id) => (
-        <use class={`o-model o-${id}`} href={spriteHref(id)} />
-      ))}
-    </svg>
+    <g class="lay lay-trail">
+      <path class="trail" d={trail}></path>
+      <path class="walked" d={trail} pathLength="1" stroke-dasharray="0 1"></path>
+      <text class="layer-tag" x={(summit.x + size) / 2 + 12} y={(summit.y + size) / 2}>
+        {t.layers.trail}
+      </text>
+    </g>
     <circle class="ring" cx={here.x} cy={here.y} r="11"></circle>
     <circle class="pin" cx={here.x} cy={here.y} r="4.5"></circle>
     <text class="here" x={here.x - 20} y={here.y + 4} text-anchor="end">
       {t.here}
     </text>
-    <text class="note" x="0" y={size + 18}>
-      {fill(t.note, { summit: formatNumber(IRAZU.summit, lang), interval: IRAZU.interval })}
-    </text>
+    <g class="lay lay-figure">
+      <ellipse class="shadow" cx={summit.x} cy={summit.y + 9} rx="9" ry="2.6"></ellipse>
+      <g class="turn">
+        <svg
+          class="origami"
+          x={summit.x - 14}
+          y={summit.y - 22}
+          width="28"
+          height="28"
+          viewBox={VIEWBOX}
+          aria-hidden="true"
+        >
+          {MODEL_IDS.map((id) => (
+            <use class={`o-model o-${id}`} href={spriteHref(id)} />
+          ))}
+        </svg>
+      </g>
+      <text class="layer-tag figure-tag" x={summit.x - 18} y={summit.y - 6} text-anchor="end">
+        {t.layers.figure}
+      </text>
+    </g>
+    <g class="lay lay-big">
+      <text class="big" x="14" y="104">
+        404
+      </text>
+      <text class="off" x="18" y="124">
+        {t.off}
+      </text>
+    </g>
   </svg>
+  <button
+    class="pause"
+    type="button"
+    aria-pressed="false"
+    data-pause={copy.notFound.pause}
+    data-play={copy.notFound.play}
+    hidden
+  >
+    {copy.notFound.pause}
+  </button>
 </figure>
 
 <style>
@@ -119,4 +163,94 @@ const trail = `M${here.x} ${here.y}C${here.x - 30} ${here.y - 14} ${size - 70} $
     font: 9px var(--font-mono);
     fill: var(--color-mute);
   }
+  /* The walked part of the trail, drawn solid over the dashes (pathLength 1, src/scripts/notfound-walk.ts). */
+  .walked {
+    fill: none;
+    stroke: var(--color-accent);
+    stroke-width: 2.4;
+    stroke-linecap: round;
+  }
+  .shadow {
+    fill: var(--color-ink);
+    opacity: 0.16;
+  }
+  /* The 404 as the map's own label: outlined, so the contours still read through it. */
+  .big {
+    font: 600 118px/1 var(--font-sans);
+    letter-spacing: -0.05em;
+    fill: color-mix(in oklab, var(--color-surface) 78%, transparent);
+    stroke: var(--color-ink);
+    stroke-width: 1.6px;
+    stroke-linejoin: round;
+  }
+  .off {
+    font: 500 10px var(--font-mono);
+    fill: var(--color-mute);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .pause {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    margin-top: var(--space-2);
+    padding: 0 14px;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    box-shadow: inset 0 0 0 1px var(--color-rule);
+    font: 500 var(--size-xs) var(--font-mono);
+    color: var(--color-mute);
+    cursor: pointer;
+  }
+  .pause[hidden] {
+    display: none;
+  }
+  .pause:hover {
+    color: var(--color-ink);
+  }
+  .pause:focus-visible {
+    outline: 2px solid var(--color-accent-ui);
+    outline-offset: 3px;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .ring {
+      transform-box: fill-box;
+      transform-origin: center;
+      animation: breathe 2.4s ease-in-out infinite;
+    }
+    .lay {
+      transition: translate 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+  }
+  @keyframes breathe {
+    50% {
+      scale: 1.6;
+      opacity: 0.12;
+    }
+  }
+  /* Inspecting: the map comes apart into its layers, each named. */
+  .layer-tag {
+    display: none;
+    font: 500 9px var(--font-mono);
+    fill: var(--color-accent);
+  }
+  :global(.inspecting) .layer-tag {
+    display: block;
+  }
+  :global(.inspecting) .lay-map {
+    translate: -14px 14px;
+  }
+  :global(.inspecting) .lay-figure {
+    translate: 14px -14px;
+  }
+  :global(.inspecting) .lay-big {
+    translate: 28px -28px;
+  }
 </style>
+
+<script>
+  // The walk (src/scripts/notfound-walk.ts): only on this page, and only with a script.
+  import { initNotFoundWalk } from '../../scripts/notfound-walk';
+  initNotFoundWalk();
+</script>

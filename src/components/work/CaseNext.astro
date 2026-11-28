@@ -1,0 +1,90 @@
+---
+/**
+ * The way on from a case study ([slug].astro): the next one, as a sheet of the same plan paper,
+ * larger than the way back. Every case leads to another, round the list.
+ */
+import { caseHref, caseSlug, type Case } from '../../lib/cases';
+import type { Lang } from '../../i18n/config';
+
+interface Props {
+  entry: Case;
+  /** "Next case study". */
+  label: string;
+  lang: Lang;
+}
+const { entry, label, lang } = Astro.props;
+---
+
+<div class="wrap">
+  <a class="next" href={caseHref(caseSlug(entry), lang)} data-inspect="CaseNext">
+    <span class="k">{label}</span>
+    <span class="next-title">{entry.data.title}</span>
+    <span class="next-lede">{entry.data.lede}</span>
+    <span class="arrow" aria-hidden="true">
+      →
+    </span>
+  </a>
+</div>
+
+<style>
+  /* The next case study: the way on, larger than the way back. */
+  .next {
+    position: relative;
+    display: grid;
+    gap: var(--space-2);
+    margin-bottom: var(--space-12);
+    padding: var(--space-8) calc(40px + 3rem) var(--space-8) 40px;
+    border: 1px solid var(--color-rule);
+    border-radius: 12px;
+    background-color: var(--color-bg);
+    background-image:
+      linear-gradient(color-mix(in oklab, var(--color-rule) 45%, transparent) 1px, transparent 1px),
+      linear-gradient(90deg, color-mix(in oklab, var(--color-rule) 45%, transparent) 1px, transparent 1px);
+    background-size: 24px 24px;
+    color: var(--color-ink);
+    text-decoration: none;
+    transition: border-color var(--motion-base) var(--motion-ease-out);
+  }
+  .next:hover {
+    border-color: var(--color-accent-ui);
+  }
+  .next:focus-visible {
+    outline: 2px solid var(--color-accent-ui);
+    outline-offset: 3px;
+  }
+  .next .k {
+    font: var(--type-caption);
+    color: var(--color-accent);
+  }
+  .next-title {
+    font-size: clamp(1.625rem, 3vw, 2.25rem);
+    font-weight: 600;
+    line-height: 1.1;
+    letter-spacing: -0.022em;
+    text-wrap: balance;
+  }
+  .next-lede {
+    max-width: 60ch;
+    color: var(--color-mute);
+  }
+  .next .arrow {
+    position: absolute;
+    right: 40px;
+    top: 50%;
+    translate: 0 -50%;
+    font-size: 1.75rem;
+    color: var(--color-accent);
+    transition: translate var(--motion-base) var(--motion-ease-out);
+  }
+  .next:hover .arrow {
+    translate: 6px -50%;
+  }
+  @media (max-width: 860px) {
+    .next {
+      padding: 20px calc(20px + 2.5rem) 20px 20px;
+    }
+    .next .arrow {
+      right: 20px;
+    }
+  }
+</style>

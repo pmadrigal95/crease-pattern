@@ -41,7 +41,8 @@ const crease = (rand: () => number): string => {
     for (let x = 0; x < n; x++) {
       const X = x * s;
       const Y = y * s;
-      const dash = rand() < 0.5 ? ' stroke-dasharray="4 3"' : '';
+      // Valley folds dashed; mountain folds solid, measured as 1 so a page can draw them in.
+      const dash = rand() < 0.5 ? ' stroke-dasharray="4 3"' : ' pathLength="1"';
       const d = rand() < 0.5 ? `M${X} ${Y}L${X + s} ${Y + s}` : `M${X + s} ${Y}L${X} ${Y + s}`;
       out += `<path d="${d}" stroke="currentColor" stroke-width="1.8"${dash}/>`;
     }

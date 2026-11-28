@@ -7,5 +7,16 @@
 // No file system here: the layout imports this at build time from inside Astro's bundle.
 import { stripTypeScriptTypes } from 'node:module';
 
-/** TypeScript source → the JavaScript to inline (types erased, nothing else changed). */
-export const toInlineScript = (source: string): string => stripTypeScriptTypes(source).trim();
+/**
+ * TypeScript source → the JavaScript to inline: types and comments erased, lines joined, so HTML
+ * compression can't change the bytes (and with them the CSP hash). Safe because these sources use
+ * block comments only, never `/*` inside a string, and end every statement with a semicolon
+ * (tests/unit/csp.test.ts).
+ */
+export const toInlineScript = (source: string): string =>
+  stripTypeScriptTypes(source)
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    .split('\n')
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .join(' ');

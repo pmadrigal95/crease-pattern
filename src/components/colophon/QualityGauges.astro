@@ -1,0 +1,79 @@
+---
+/**
+ * The colophon's quality gates as instruments (doc 40): each Lighthouse figure measured on this
+ * page against the threshold every change must clear. The thresholds are the ones CI asserts
+ * (lighthouserc.json); the measurement is the last one recorded (src/data/lighthouse.json,
+ * `pnpm lighthouse:record`), with its date, since Lighthouse runs after the build.
+ */
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import measured from '../../data/lighthouse.json';
+import { copyFor, fill } from '../../i18n/dictionary';
+import { langOf } from '../../i18n/routing';
+import { formatDate, formatNumber } from '../../lib/format';
+
+const lang = langOf(Astro.currentLocale);
+const t = copyFor(lang).colophonPage.gauges;
+type Assertion = [string, { minScore?: number; maxNumericValue?: number }];
+const rc = JSON.parse(readFileSync(join(process.cwd(), 'lighthouserc.json'), 'utf8')) as {
+  ci: { assert: { assertions: Record<string, Assertion> } };
+};
+const at = (key: string) => rc.ci.assert.assertions[key]?.[1] ?? {};
+const score = (key: string) => Math.round((at(`categories:${key}`).minScore ?? 0) * 100);
+const lcpLimit = at('largest-contentful-paint').maxNumericValue ?? 0;
+const clsLimit = at('cumulative-layout-shift').maxNumericValue ?? 0;
+
+/** label, value shown, share of the bar, share where the threshold sits, threshold in words. */
+const gauges = [
+  [t.performance, measured.performance, 100, score('performance'), `≥ ${score('performance')}`],
+  [t.accessibility, measured.accessibility, 100, score('accessibility'), String(score('accessibility'))],
+  [t.bestPractices, measured.bestPractices, 100, score('best-practices'), String(score('best-practices'))],
+  [t.seo, measured.seo, 100, score('seo'), String(score('seo'))],
+].map(([label, value, max, limit, words]) => ({
+  label: String(label),
+  shown: String(value),
+  share: Number(value) / Number(max),
+  tick: Number(limit) / Number(max),
+  words: String(words),
+}));
+// Times and shifts: the bar spans twice the threshold, so the tick sits halfway.
+gauges.push(
+  {
+    label: t.lcp,
+    shown: `${formatNumber(measured.lcpMs, lang)} ms`,
+    share: measured.lcpMs / (lcpLimit * 2),
+    tick: 0.5,
+    words: `< ${formatNumber(lcpLimit, lang)} ms`,
+  },
+  {
+    label: t.cls,
+    shown: String(measured.cls),
+    share: measured.cls / (clsLimit * 2),
+    tick: 0.5,
+    words: `< ${clsLimit}`,
+  },
+);
+---
+
+<ul class="gauges" data-inspect="QualityGauges">
+  {gauges.map((g) => (
+    <li>
+      <span class="top">
+        <span class="k">{g.label}</span>
+        <span class="val">{g.shown}</span>
+      </span>
+      <svg class="bar" viewBox="0 0 100 8" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+        <rect class="track" width="100" height="8" rx="4" />
+        <rect class="fill" width={Math.min(100, g.share * 100)} height="8" rx="4" />
+        <rect class="tick" x={g.tick * 100 - 0.6} y="0" width="1.2" height="8" />
+      </svg>
+      <span class="k">{fill(t.threshold, { value: g.words })}</span>
+    </li>
+  ))}
+</ul>
+<p class="measured">
+  {fill(t.measured, {
+    date: formatDate(new Date(`${measured.measuredOn}T12:00:00Z`), lang),
+    runs: measured.runs,
+  })}
+</p>

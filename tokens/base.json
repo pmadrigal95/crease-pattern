@@ -70,7 +70,11 @@
     "base": { "$type": "duration", "$value": "200ms", "$description": "Component states, panels" },
     "exit": { "$type": "duration", "$value": "250ms", "$description": "Leaving the inspector" },
     "stage": { "$type": "duration", "$value": "650ms", "$description": "Entering the inspector" },
-    "page": { "$type": "duration", "$value": "460ms", "$description": "Page-to-page fold (decision 42)" },
+    "page": {
+      "$type": "duration",
+      "$value": "300ms",
+      "$description": "Page-to-page transition, before each identity adjusts it (doc 39)"
+    },
     "intro": {
       "$type": "duration",
       "$value": "420ms",

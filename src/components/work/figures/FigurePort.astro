@@ -13,7 +13,7 @@ const l = (key: string): string => {
 ---
 
 <svg class="dg wide" viewBox="0 0 480 260" role="img" aria-label={description}>
-  <rect class="box soft" x="10" y="100" width="124" height="60" rx="6" />
+  <rect class="s-goal box soft" x="10" y="100" width="124" height="60" rx="6" />
   <text class="lbl" x="72" y="127" text-anchor="middle">
     {l('source')}
   </text>
@@ -29,13 +29,13 @@ const l = (key: string): string => {
   <text class="lbl" x="256" y="135" text-anchor="middle">
     {l('browser')}
   </text>
-  <path class="ln key" d="M316 130 C 340 130, 340 80, 364 80 M316 130 C 340 130, 340 180, 364 180" />
-  <rect class="box" x="370" y="60" width="100" height="40" rx="6" />
-  <text x="420" y="85" text-anchor="middle">
+  <path class="ln key" d="M316 130 C 340 130, 336 80, 350 80 M316 130 C 340 130, 336 180, 350 180" />
+  <rect class="s-result box" x="350" y="60" width="126" height="40" rx="6" />
+  <text x="413" y="85" text-anchor="middle">
     {l('serial')}
   </text>
-  <rect class="box" x="370" y="160" width="100" height="40" rx="6" />
-  <text x="420" y="185" text-anchor="middle">
+  <rect class="s-result box" x="350" y="160" width="126" height="40" rx="6" />
+  <text x="413" y="185" text-anchor="middle">
     {l('parallel')}
   </text>
   <path class="dim" d="M10 216 H316 M10 211 V221 M316 211 V221" />
@@ -44,7 +44,7 @@ const l = (key: string): string => {
   </text>
 </svg>
 <svg class="dg tall" viewBox="0 0 320 360" role="img" aria-label={description}>
-  <rect class="box soft" x="90" y="10" width="140" height="56" rx="6" />
+  <rect class="s-goal box soft" x="90" y="10" width="140" height="56" rx="6" />
   <text class="lbl" x="160" y="35" text-anchor="middle">
     {l('source')}
   </text>
@@ -60,11 +60,11 @@ const l = (key: string): string => {
     {l('browser')}
   </text>
   <path class="ln key" d="M160 176 C 160 200, 90 200, 90 226 M160 176 C 160 200, 230 200, 230 226" />
-  <rect class="box" x="30" y="232" width="120" height="40" rx="6" />
+  <rect class="s-result box" x="30" y="232" width="120" height="40" rx="6" />
   <text x="90" y="257" text-anchor="middle">
     {l('serial')}
   </text>
-  <rect class="box" x="170" y="232" width="120" height="40" rx="6" />
+  <rect class="s-result box" x="170" y="232" width="120" height="40" rx="6" />
   <text x="230" y="257" text-anchor="middle">
     {l('parallel')}
   </text>

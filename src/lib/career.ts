@@ -35,6 +35,8 @@ const factsSchema = z.strictObject({
       kind: z.enum(['education', 'role', 'assignment', 'contract', 'project']),
       start: yearMonth,
       end: yearMonth.nullable().optional(),
+      /** The company an assignment worked for, through `org` (outsourcing): its own name on /work. */
+      client: text.optional(),
       stack: z.array(text).optional(),
     }),
   ),

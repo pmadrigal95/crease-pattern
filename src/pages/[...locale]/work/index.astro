@@ -38,7 +38,7 @@ export const getStaticPaths = localeStaticPaths;
         />
       ))}
     </div>
-    <EarlierWork exclude={cases.map((c) => c.data.company)} />
+    <EarlierWork cases={cases.map((c) => ({ company: c.data.company, href: caseHref(caseSlug(c), lang) }))} />
   </div>
 </PageLayout>
 

@@ -5,9 +5,15 @@
  * down the left with a node at each release, and each release's altitude stays pinned beside it
  * while its entries scroll past. Each release heading is a target of the map above
  * (#release-N).
+ *
+ * An ascent log (doc 37): each release opens with a badge of its place in contour lines beside its
+ * altitude (ReleaseBadge.astro); each change says its kind in words; the stack is a row of chips;
+ * each entry says how long it lasted.
  */
+import ReleaseBadge from './ReleaseBadge.astro';
+import { howLong, monthsOf } from '../../lib/earlier-timeline';
 import { careerFor, releasesNewestFirst } from '../../lib/career';
-import { formatList, formatNumber, formatRange } from '../../lib/format';
+import { formatList, formatNumber, formatRange, padNumber } from '../../lib/format';
 import { copyFor, fill } from '../../i18n/dictionary';
 import { langOf } from '../../i18n/routing';
 const lang = langOf(Astro.currentLocale);
@@ -18,6 +24,16 @@ const releases = releasesNewestFirst(career);
 const current = releases[0]?.major;
 const t = copy.home.changelog;
 const page = copy.changelogPage;
+const lengths = copy.cases.index.earlier;
+/** "Built with", the words around the stack. */
+const builtWith = page.built.replace('{stack}', '').trim();
+const now = new Date();
+const thisMonth = `${now.getUTCFullYear()}-${padNumber(now.getUTCMonth() + 1, 2)}`;
+/** How long an entry lasted, when its dates are months; to now while it lasts. */
+const lasted = (e: { start: string; end?: string | null | undefined }) =>
+  e.start.includes('-') && (e.end ?? thisMonth).includes('-')
+    ? howLong(monthsOf({ start: e.start, end: e.end ?? thisMonth }), lengths)
+    : undefined;
 ---
 
 <div class="ascent" data-inspect="ReleaseNotes">
@@ -43,6 +59,7 @@ const page = copy.changelogPage;
   {releases.map((r) => (
     <section class={r.major === current ? 'camp current' : 'camp'} aria-labelledby={`release-${r.major}`}>
       <p class="rail">
+        <ReleaseBadge major={r.major} />
         <span class="rail-value">{formatNumber(r.elevationM, lang)}</span>
         <span class="rail-unit"> m</span>
         {r.major === current && <span class="rail-label">{page.rail.now}</span>}
@@ -59,24 +76,35 @@ const page = copy.changelogPage;
               <p class="meta">
                 <code>{e.version}</code>
                 <span>{formatRange(e.start, e.end, t.present, lang)}</span>
+                {lasted(e) && <span class="lasted">{lasted(e)}</span>}
               </p>
               <div class="body">
                 <h3>
                   {e.title} <span class="org">· {e.org}</span>
                 </h3>
-                {e.stack && <p class="built">{fill(page.built, { stack: formatList(e.stack, lang) })}</p>}
+                {e.stack && (
+                  <p class="built">
+                    <span class="sr-only">{fill(page.built, { stack: formatList(e.stack, lang) })}</span>
+                    <span class="with" aria-hidden="true">
+                      {builtWith}
+                    </span>
+                    {e.stack.map((item) => (
+                      <span class="chip" aria-hidden="true">
+                        {item}
+                      </span>
+                    ))}
+                  </p>
+                )}
                 {(e.added || e.changed) && (
                   <ul class="changes">
                     {e.added?.map((line) => (
                       <li class="add">
-                        <span class="sr-only">{t.sections.added}: </span>
-                        {line}
+                        <span class="kind">{t.sections.added}</span> {line}
                       </li>
                     ))}
                     {e.changed?.map((line) => (
                       <li class="chg">
-                        <span class="sr-only">{t.sections.changed}: </span>
-                        {line}
+                        <span class="kind">{t.sections.changed}</span> {line}
                       </li>
                     ))}
                   </ul>
@@ -230,10 +258,29 @@ const page = copy.changelogPage;
     font-weight: 400;
     color: var(--color-mute);
   }
+  /* The stack, as chips. */
   .built {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
     margin: 0;
-    font: var(--type-caption);
+  }
+  .with {
+    margin-right: 2px;
+    font: 500 11px var(--font-mono);
     color: var(--color-mute);
+  }
+  .chip {
+    padding: 2px 9px;
+    border-radius: var(--radius-pill);
+    background: var(--color-surface);
+    box-shadow: inset 0 0 0 1px var(--color-rule);
+    font: 500 12px var(--font-sans);
+    color: var(--color-ink);
+  }
+  .lasted {
+    color: var(--color-accent);
   }
   .changes {
     list-style: none;
@@ -242,21 +289,34 @@ const page = copy.changelogPage;
     display: grid;
     gap: var(--space-2);
   }
+  /* What's next is a plain list of what's coming. */
+  .next .changes {
+    padding-left: 1.1rem;
+    list-style: disc;
+  }
+  .next .changes li::marker {
+    color: var(--color-mute);
+  }
+  /* Each change says its kind in words, on a small tag above it. */
   .changes li {
-    display: grid;
-    grid-template-columns: 1.25rem minmax(0, 1fr);
     max-width: 66ch;
   }
-  .changes li::before {
-    font: 600 var(--size-sm) / 1.55 var(--font-mono);
+  .kind {
+    display: table;
+    margin-bottom: 4px;
+    padding: 1px 7px;
+    border-radius: 4px;
+    font: 600 10px / 1.6 var(--font-mono);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
   }
-  .changes li.add::before {
-    content: '+';
+  .add .kind {
     color: var(--color-second);
+    box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--color-second) 50%, transparent);
   }
-  .changes li.chg::before {
-    content: '~';
+  .chg .kind {
     color: var(--color-accent);
+    box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--color-accent) 50%, transparent);
   }
 
   /* Phones: the trail moves to the edge and the altitude sits above the release name. */

@@ -5,7 +5,7 @@ import { tipSeen } from './tests/tip-seen';
 // reuseExistingServer would otherwise test that other build.
 const port = Number(process.env.E2E_PORT ?? 4321);
 const origin = `http://localhost:${port}`;
-const softwareGl = /(scene3d|hero-pointer|work-model)\.spec\.ts$/;
+const softwareGl = /(scene3d|hero-pointer|work-model|changelog3d)\.spec\.ts$/;
 
 export default defineConfig({
   testDir: 'tests/e2e',

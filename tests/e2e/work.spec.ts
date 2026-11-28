@@ -15,7 +15,8 @@ test('/work lists Buo first, this site second, then the earlier roles', async ({
   const roles = earlier.getByRole('listitem');
   // Finished roles at companies without a case of their own, newest first; never Buo.
   await expect(roles.first().getByRole('heading', { level: 3 })).toHaveText(/NICE Actimize/);
-  await expect(earlier).not.toContainText('Buo');
+  // Buo is not one of them: its ribbon only runs on into its case.
+  await expect(earlier.locator('.strips')).not.toContainText('Buo');
   await expect(earlier.getByRole('link', { name: /version by version/ })).toHaveAttribute(
     'href',
     '/changelog',
@@ -37,4 +38,33 @@ test('the site case has four plates, a closing one and a link to the colophon', 
   await expect(page.getByRole('link', { name: /See how it's built/ })).toHaveAttribute('href', '/colophon');
   // Every figure has a wide and a tall drawing, each read aloud by its plate's title.
   await expect(page.locator('.case-figure svg[role="img"]')).toHaveCount(8);
+});
+
+test('a case leads on to the next one, and the index marks only the plate being read', async ({ page }) => {
+  await page.goto('/work/buo');
+  await expect(page.getByRole('link', { name: /Next case study/ })).toHaveAttribute(
+    'href',
+    '/work/crease-pattern',
+  );
+  const index = page.getByRole('navigation', { name: 'Plates' });
+  await expect(index.locator('[aria-current]')).toHaveCount(0);
+  await page.locator('#publishing').scrollIntoViewIfNeeded();
+  await expect(index.locator('[aria-current="location"]')).toHaveText(/Publishing/);
+  // Back above the plates, none is being read.
+  await page.evaluate(() => scrollTo(0, 0));
+  await expect(index.locator('[aria-current]')).toHaveCount(0);
+  await page.goto('/work/crease-pattern');
+  await expect(page.getByRole('link', { name: /Next case study/ })).toHaveAttribute('href', '/work/buo');
+});
+
+test('reading a note points at its part of the diagram', async ({ page }) => {
+  await page.goto('/work/buo');
+  const plate = page.locator('#publishing');
+  await plate.scrollIntoViewIfNeeded();
+  await plate.locator('[data-step="result"]').hover();
+  await expect(plate).toHaveAttribute('data-focus', 'result');
+  await expect(plate.locator('.case-figure .wide .s-result').first()).toHaveCSS('opacity', '1');
+  await expect(plate.locator('.case-figure .wide .box.key').first()).not.toHaveCSS('opacity', '1');
+  await page.mouse.move(0, 0);
+  await expect(plate).not.toHaveAttribute('data-focus');
 });
