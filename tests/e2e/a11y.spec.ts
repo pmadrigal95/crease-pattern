@@ -1,5 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
+import { holdStill } from '../hold-still';
 import { auditedPages, themes } from '../../src/config/quality';
 import { allVisualDirections } from '../../src/config/visual-direction';
 
@@ -34,6 +35,7 @@ for (const path of auditedPages) {
         await page.goto(path);
         await expect(page.locator('html')).toHaveAttribute('data-direction', direction);
         await settleEntranceAnimations(page);
+        await holdStill(page);
         const results = await new AxeBuilder({ page })
           .withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa'])
           .analyze();
