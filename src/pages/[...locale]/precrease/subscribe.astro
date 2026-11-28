@@ -1,19 +1,21 @@
 ---
 /**
  * How to follow Precrease, for readers who have never used RSS: the "Subscribe" link lands here
- * instead of on the raw feed, which a browser shows as XML. The newsletter joins this page in M8,
- * with the domain (decision 49).
+ * instead of on the raw feed, which a browser shows as XML. The feed as a ticket in the step that
+ * asks for it, what a reader receives, and every topic's own feed (doc 41). The newsletter joins
+ * this page in M8, with the domain (decision 49).
  */
 import PrecreaseLayout from '../../../layouts/PrecreaseLayout.astro';
-import CopyText from '../../../components/site/CopyText.astro';
-import { copyFor, fill } from '../../../i18n/dictionary';
-import { langOf, localeStaticPaths, localize } from '../../../i18n/routing';
+import FeedTicket from '../../../components/precrease/FeedTicket.astro';
+import FeedPreview from '../../../components/precrease/FeedPreview.astro';
+import TopicFeeds from '../../../components/precrease/TopicFeeds.astro';
+import { copyFor } from '../../../i18n/dictionary';
+import { langOf, localeStaticPaths } from '../../../i18n/routing';
 import { feedHref } from '../../../lib/precrease-feed';
 const copy = copyFor(Astro.currentLocale);
 
 const t = copy.precrease.subscribe;
 const feed = new URL(feedHref(langOf(Astro.currentLocale)), Astro.site).href;
-const [before, after] = fill(t.topics, { map: '\u0000' }).split('\u0000');
 
 /** This page in every language (src/i18n/routing.ts). */
 export const getStaticPaths = localeStaticPaths;
@@ -30,25 +32,16 @@ export const getStaticPaths = localeStaticPaths;
         <li>{t.steps.reader}</li>
         <li>
           {t.steps.add}
-          <CopyText
-            value={feed}
-            href={feed}
-            copyLabel={t.copy}
-            copiedLabel={t.copied}
-            failedLabel={t.copyFailed}
-          />
+          <FeedTicket feed={feed} />
         </li>
         <li>{t.steps.done}</li>
       </ol>
 
-      <h2>{t.topicsTitle}</h2>
-      <p>
-        {before}
-        <a href={localize('/precrease/map', langOf(Astro.currentLocale))}>{t.mapLink}</a>
-        {after}
-      </p>
-
       <p class="note">{t.email}</p>
+    </div>
+    <div class="more">
+      <FeedPreview />
+      <TopicFeeds />
     </div>
   </div>
 </PrecreaseLayout>
@@ -56,7 +49,7 @@ export const getStaticPaths = localeStaticPaths;
 <style>
   .page {
     max-width: 64ch;
-    padding-block: var(--space-12) var(--space-24);
+    padding-block: var(--space-12);
   }
   h1 {
     margin: 0;
@@ -80,11 +73,17 @@ export const getStaticPaths = localeStaticPaths;
     margin: 0;
     padding-left: var(--space-6);
   }
-  .steps :global(.copy-text) {
-    margin-top: var(--space-3);
+  .more {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: var(--space-12);
+    align-items: start;
+    padding-bottom: var(--space-24);
   }
-  .steps :global(.address) {
-    font: 500 var(--size-sm) var(--font-mono);
+  @media (max-width: 900px) {
+    .more {
+      grid-template-columns: minmax(0, 1fr);
+    }
   }
   .note {
     margin: var(--space-12) 0 0;

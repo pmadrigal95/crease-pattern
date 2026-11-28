@@ -2,10 +2,11 @@
 import PrecreaseLayout from '../../../layouts/PrecreaseLayout.astro';
 import FoldTitle from '../../../components/precrease/FoldTitle.astro';
 import PostThumb from '../../../components/precrease/PostThumb.astro';
-import PostCard from '../../../components/precrease/PostCard.astro';
+import PostPiece from '../../../components/precrease/PostPiece.astro';
+import PostBranches from '../../../components/precrease/PostBranches.astro';
 import TopicChips from '../../../components/precrease/TopicChips.astro';
 import { copyFor, fill } from '../../../i18n/dictionary';
-import { formatDate } from '../../../lib/format';
+import { formatCount, formatDate } from '../../../lib/format';
 import { creaseNumber, getPosts, postHref, postKind } from '../../../lib/precrease';
 import { readingMinutes } from '../../../lib/reading';
 import { LOCALES, langOf, localeStaticPaths } from '../../../i18n/routing';
@@ -15,6 +16,10 @@ const copy = copyFor(Astro.currentLocale);
 const t = copy.precrease;
 const posts = await getPosts(lang);
 const [featured, ...rest] = posts;
+// The collection in words (doc 41): its order said, and what it holds; never a rank.
+const c = t.collection;
+const topicsUsed = new Set(posts.flatMap((p) => p.entry.data.topics)).size;
+const oldest = posts.map((p) => p.date).toSorted((a, b) => a.getTime() - b.getTime())[0];
 // Not yet in this page's language: the original shows, marked as such.
 const featuredLang = featured && featured.lang !== lang ? LOCALES[featured.lang].htmlLang : undefined;
 
@@ -27,11 +32,18 @@ export const getStaticPaths = localeStaticPaths;
     {featured && (
       <div class="filters">
         <TopicChips posts={posts} />
+        <p class="series">
+          <b>{c.order}</b>
+          <span>{formatCount(posts.length, { one: c.postsOne, many: c.posts }, lang)}</span>
+          <span>{formatCount(topicsUsed, { one: c.topicsOne, many: c.topics }, lang)}</span>
+          {oldest && <span>{fill(c.since, { date: formatDate(oldest, lang) })}</span>}
+        </p>
       </div>
     )}
     {featured ? (
       <section class="featured fold-host" aria-labelledby="featured-title">
         <div class="text">
+          <PostBranches topics={featured.entry.data.topics} />
           <p class="kicker">
             {creaseNumber(featured.number, lang)} · {postKind(featured.entry, lang)} ·{' '}
             {fill(t.minutes, { minutes: readingMinutes(featured.entry.body ?? '') })}
@@ -67,11 +79,12 @@ export const getStaticPaths = localeStaticPaths;
         <h2 id="latest-title" class="sr-only">
           {t.latestHeading}
         </h2>
-        <div class="grid">
+        <ul class="collection">
           {rest.map((post) => (
-            <PostCard post={post} headingLevel="h3" />
+            <PostPiece post={post} />
           ))}
-        </div>
+        </ul>
+        <p class="origin-note">{c.origin}</p>
       </section>
     )}
   </div>
@@ -107,17 +120,45 @@ export const getStaticPaths = localeStaticPaths;
   .thumb {
     display: block;
   }
-  .grid {
+  .series {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-6);
+    margin: var(--space-4) 0 0;
+    font: 500 var(--size-xs) var(--font-mono);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-mute);
+  }
+  .series b {
+    font-weight: 600;
+    color: var(--color-ink);
+  }
+  .featured :global(.post-branches) {
+    margin-bottom: var(--space-3);
+  }
+  .latest {
+    padding-bottom: var(--space-24);
+  }
+  .collection {
     display: grid;
-    grid-template-columns: repeat(6, minmax(0, 1fr));
-    gap: var(--space-12) var(--space-6);
-    padding-block: var(--space-12) var(--space-24);
+    margin: var(--space-8) 0 0;
+    padding: 0;
+    list-style: none;
+    border-top: 2px solid var(--color-ink);
   }
-  .grid > :global(*) {
-    grid-column: span 2;
+  /* Inspecting: why no picture here is a file. */
+  .origin-note {
+    display: none;
+    margin: var(--space-4) 0 0;
+    padding: var(--space-3) var(--space-4);
+    border-radius: 8px;
+    background: var(--color-ink);
+    color: var(--color-bg);
+    font: 500 12px / 1.5 var(--font-mono);
   }
-  .grid > :global(*:nth-child(-n + 2)) {
-    grid-column: span 3;
+  :global(.inspecting) .origin-note {
+    display: block;
   }
   .empty {
     padding-block: var(--space-12) var(--space-24);
@@ -133,13 +174,6 @@ export const getStaticPaths = localeStaticPaths;
     }
     .thumb {
       max-width: 320px;
-    }
-    .grid {
-      grid-template-columns: 1fr;
-    }
-    .grid > :global(*),
-    .grid > :global(*:nth-child(-n + 2)) {
-      grid-column: auto;
     }
   }
 </style>

@@ -1,0 +1,297 @@
+---
+/**
+ * The topic map as one sheet (doc 41): each topic a region sized by its posts (src/lib/treemap.ts),
+ * its subtopics regions inside it, and a topic without posts left as paper still to be folded.
+ * Each region links to its topic and is named by its whole branch, so no one gets lost between
+ * topics. Static SVG, drawn at build time. The list below it (map.astro) says the same in words.
+ * While inspecting, each topic shows its posts and its subtopics, and the creases draw themselves.
+ */
+import { copyFor, fill } from '../../i18n/dictionary';
+import { langOf } from '../../i18n/routing';
+import { formatCount } from '../../lib/format';
+import { topicHref } from '../../lib/precrease';
+import { treemap } from '../../lib/treemap';
+
+export interface SheetTopic {
+  id: string;
+  label: string;
+  count: number;
+  children: SheetTopic[];
+}
+interface Props {
+  topics: SheetTopic[];
+  /** Posts in the whole blog (a post in two topics counts once). */
+  posts: number;
+}
+const { topics, posts } = Astro.props;
+const lang = langOf(Astro.currentLocale);
+const copy = copyFor(lang).precrease;
+const t = copy.sheet;
+const W = 720;
+const H = 520;
+// A topic with posts takes room by its posts; one without keeps a sliver, so it still shows.
+const weight = (topic: SheetTopic) => (topic.count ? topic.count * 2 + 1.5 : 1);
+const sized = (list: SheetTopic[]) =>
+  list.map((topic) => ({ ...topic, weight: weight(topic) })).toSorted((a, b) => b.weight - a.weight);
+/** A name on one line, or two when it doesn't fit its region (17px serif, about 8.6px a letter). */
+const lines = (label: string, width: number): string[] => {
+  if (label.length * 8.6 <= width - 24) return [label];
+  const words = label.split(' ');
+  const half = Math.ceil(words.length / 2);
+  return [words.slice(0, half).join(' '), words.slice(half).join(' ')];
+};
+const posted = (n: number) =>
+  n ? formatCount(n, { one: copy.map.countOne, many: copy.map.count }, lang) : t.toFold;
+
+const regions = treemap(sized(topics), { x: 0, y: 0, w: W, h: H }).map((r) => {
+  const name = lines(r.item.label, r.w);
+  const top = name.length > 1 ? 72 : 52;
+  const pad = 10;
+  const subs = treemap(sized(r.item.children), {
+    x: r.x + pad,
+    y: r.y + top,
+    w: r.w - pad * 2,
+    h: r.h - top - pad,
+  });
+  const badge = r.item.children.length
+    ? `${posted(r.item.count)} · ${formatCount(r.item.children.length, { one: copy.map.subtopicsOne, many: copy.map.subtopics }, lang)}`
+    : posted(r.item.count);
+  return { ...r, name, subs, badge };
+});
+const empty = topics.filter((topic) => !topic.count).length;
+---
+
+<section class="topic-sheet" aria-label={t.label} data-inspect="TopicSheet">
+  <svg viewBox={`-2 -2 ${W + 4} ${H + 4}`} role="group" aria-label={t.label} focusable="false">
+    {regions.map((r) => (
+      <g class:list={['region', { empty: !r.item.count }]}>
+        <a href={topicHref(r.item.id, lang)} aria-label={`${r.item.label}, ${posted(r.item.count)}`}>
+          <rect class="area" x={r.x} y={r.y} width={r.w} height={r.h} />
+          {r.item.count > 0 && (
+            <>
+              <path class="m" d={`M${r.x} ${r.y}L${r.x + r.w} ${r.y + r.h}`} />
+              <path class="v" d={`M${r.x + r.w} ${r.y}L${r.x} ${r.y + r.h}`} />
+            </>
+          )}
+          {r.name.map((line, i) => (
+            <text class="t" x={r.x + 12} y={r.y + 24 + i * 20}>
+              {line}
+            </text>
+          ))}
+          <text class="c" x={r.x + 12} y={r.y + 20 + r.name.length * 20}>
+            {posted(r.item.count)}
+          </text>
+        </a>
+        {r.subs.map((s) => (
+          <a
+            class:list={['sub', { empty: !s.item.count }]}
+            href={topicHref(s.item.id, lang)}
+            aria-label={`${r.item.label} › ${s.item.label}, ${posted(s.item.count)}`}
+          >
+            <rect x={s.x + 2} y={s.y + 2} width={Math.max(0, s.w - 4)} height={Math.max(0, s.h - 4)} rx="3" />
+            <text class="s" x={s.x + 10} y={s.y + 20}>
+              {s.item.label}
+            </text>
+          </a>
+        ))}
+        <g class="badge" transform={`translate(${r.x + r.w - 14 - r.badge.length * 6.2} ${r.y + 10})`}>
+          <rect width={r.badge.length * 6.2 + 8} height="18" rx="9" />
+          <text x="4" y="13">
+            {r.badge}
+          </text>
+        </g>
+      </g>
+    ))}
+  </svg>
+  <aside>
+    <p class="k">{t.legend}</p>
+    <ul class="legend">
+      <li>
+        <i aria-hidden="true"></i>
+        {t.folded}
+      </li>
+      <li>
+        <i class="inside" aria-hidden="true"></i>
+        {t.inside}
+      </li>
+      <li>
+        <i class="unfolded" aria-hidden="true"></i>
+        {t.unfolded}
+      </li>
+    </ul>
+    <p class="k">{fill(t.summary, { topics: topics.length, posts, empty })}</p>
+    <p class="inspect-note">{t.inspect}</p>
+  </aside>
+</section>
+
+<style>
+  .topic-sheet {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 280px;
+    gap: var(--space-8);
+    align-items: start;
+    margin: 0 0 var(--space-12);
+  }
+  svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    border: 1.5px solid var(--color-ink);
+    border-radius: 6px;
+    background-color: var(--color-bg);
+    background-image:
+      linear-gradient(color-mix(in oklab, var(--color-rule) 45%, transparent) 1px, transparent 1px),
+      linear-gradient(90deg, color-mix(in oklab, var(--color-rule) 45%, transparent) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+  .area {
+    fill: var(--color-surface);
+    stroke: var(--color-ink);
+    stroke-width: 1.5;
+    transition: fill 250ms var(--motion-ease-out);
+  }
+  .empty .area {
+    fill: transparent;
+    stroke: var(--color-mute);
+    stroke-dasharray: 4 4;
+  }
+  a:is(:hover, :focus-visible) > .area {
+    fill: color-mix(in oklab, var(--color-accent-ui) 14%, var(--color-surface));
+  }
+  a:focus-visible {
+    outline: none;
+  }
+  a:focus-visible > :is(.area, rect) {
+    stroke: var(--color-accent-ui);
+    stroke-width: 3;
+  }
+  .m {
+    fill: none;
+    stroke: var(--color-accent-ui);
+    stroke-width: 1;
+    opacity: 0.35;
+  }
+  .v {
+    fill: none;
+    stroke: var(--color-mute);
+    stroke-dasharray: 5 4;
+    opacity: 0.35;
+  }
+  .sub rect {
+    fill: color-mix(in oklab, var(--color-accent-ui) 8%, transparent);
+    stroke: var(--color-accent-ui);
+    stroke-dasharray: 6 3 2 3;
+  }
+  .sub.empty rect {
+    fill: transparent;
+    stroke: var(--color-mute);
+    stroke-dasharray: 3 3;
+  }
+  .sub:is(:hover, :focus-visible) rect {
+    fill: color-mix(in oklab, var(--color-accent-ui) 18%, transparent);
+  }
+  text {
+    fill: var(--color-ink);
+    pointer-events: none;
+  }
+  .t {
+    font: 500 17px var(--font-serif);
+  }
+  .c {
+    font: 500 10px var(--font-mono);
+    fill: var(--color-mute);
+  }
+  .s {
+    font: 500 11px var(--font-sans);
+  }
+  .badge {
+    display: none;
+  }
+  .badge rect {
+    fill: var(--color-ink);
+  }
+  .badge text {
+    font: 600 10px var(--font-mono);
+    fill: var(--color-bg);
+  }
+  :global(.inspecting) .badge {
+    display: block;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    :global(.inspecting) .m {
+      stroke-dasharray: 400;
+      animation: crease-in 1000ms var(--motion-ease-out) both;
+    }
+  }
+  @keyframes crease-in {
+    from {
+      stroke-dashoffset: 400;
+    }
+  }
+  aside {
+    position: sticky;
+    top: calc(var(--sticky-offset) + 8px);
+    display: grid;
+    gap: var(--space-4);
+  }
+  aside p {
+    margin: 0;
+  }
+  .k {
+    font: var(--type-caption);
+    color: var(--color-mute);
+  }
+  .legend {
+    display: grid;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font: var(--type-caption);
+    color: var(--color-mute);
+  }
+  .legend li {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+  .legend i {
+    width: 28px;
+    height: 14px;
+    border: 1.5px solid var(--color-ink);
+    background: var(--color-surface);
+  }
+  .legend .inside {
+    border: 1px dashed var(--color-accent-ui);
+    background: color-mix(in oklab, var(--color-accent-ui) 8%, transparent);
+  }
+  .legend .unfolded {
+    border: 1.5px dashed var(--color-mute);
+    background: transparent;
+  }
+  .inspect-note {
+    display: none;
+    padding: var(--space-3) var(--space-4);
+    border-radius: 8px;
+    background: var(--color-ink);
+    color: var(--color-bg);
+    font: 500 12px / 1.5 var(--font-mono);
+  }
+  :global(.inspecting) .inspect-note {
+    display: block;
+  }
+  /* On a phone the list below says it all: the sheet would be too small to read. */
+  @media (max-width: 720px) {
+    .topic-sheet {
+      display: none;
+    }
+  }
+  @media (max-width: 900px) {
+    .topic-sheet {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    aside {
+      position: static;
+    }
+  }
+</style>

@@ -1,0 +1,94 @@
+---
+/**
+ * Every topic with posts and its own feed (doc 41), named by its branch so no one gets lost among
+ * topics, each with the address to copy. Replaces "open a topic from the map and find its link".
+ */
+import site from '../../../site.config';
+import CopyText from '../site/CopyText.astro';
+import { copyFor, fill } from '../../i18n/dictionary';
+import { langOf } from '../../i18n/routing';
+import { formatCount } from '../../lib/format';
+import { getPosts } from '../../lib/precrease';
+import { feedHref } from '../../lib/precrease-feed';
+import { pathTo, postsUnder } from '../../lib/precrease-tree';
+import { topicsFor } from '../../lib/taxonomy';
+
+const lang = langOf(Astro.currentLocale);
+const copy = copyFor(lang).precrease;
+const t = copy.subscribe;
+const tree = topicsFor(lang);
+const posts = await getPosts(lang);
+const feeds = tree
+  .map((topic) => ({ topic, count: postsUnder(tree, posts, topic.id).length }))
+  .filter(({ count }) => count > 0)
+  .map(({ topic, count }) => ({
+    label: topic.label,
+    branch: pathTo(tree, topic.id)
+      .map((n) => n.label)
+      .join(' › '),
+    count: formatCount(count, { one: copy.map.countOne, many: copy.map.count }, lang),
+    url: new URL(feedHref(lang, topic.id), site.url).href,
+  }));
+---
+
+<section class="feeds" aria-labelledby="feeds-title" data-inspect="TopicFeeds">
+  <h2 id="feeds-title">{t.topicsTitle}</h2>
+  <p class="k">{copy.feeds.topicsNote}</p>
+  <ul>
+    {feeds.map((f) => (
+      <li>
+        <b>{f.label}</b>
+        <small>
+          {f.branch} · {f.count}
+        </small>
+        <CopyText
+          value={f.url}
+          href={f.url}
+          copyLabel={copy.feeds.copy}
+          copyName={fill(copy.feeds.copyTopic, { topic: f.label })}
+          copiedLabel={copy.feeds.copied}
+          failedLabel={t.copyFailed}
+        />
+      </li>
+    ))}
+  </ul>
+</section>
+
+<style>
+  h2 {
+    margin: 0 0 var(--space-2);
+    font-size: var(--size-lg);
+    font-weight: 600;
+  }
+  .k {
+    margin: 0 0 var(--space-4);
+    font: var(--type-caption);
+    color: var(--color-mute);
+  }
+  ul {
+    display: grid;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  li {
+    display: grid;
+    gap: 2px;
+    padding: var(--space-3) 0;
+    border-top: 1px dashed var(--color-rule);
+  }
+  b {
+    font: 500 var(--size-md) var(--font-serif);
+  }
+  small {
+    font: 11px var(--font-mono);
+    color: var(--color-mute);
+  }
+  li :global(.copy-text) {
+    margin-top: var(--space-2);
+  }
+  li :global(.address) {
+    font: 500 var(--size-xs) var(--font-mono);
+    color: var(--color-mute);
+  }
+</style>

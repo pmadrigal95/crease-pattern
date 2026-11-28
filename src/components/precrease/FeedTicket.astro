@@ -1,0 +1,83 @@
+---
+/**
+ * The feed as a ticket (doc 41): the address to copy, in the step that asks for it, with a stamp
+ * that says what following Precrease never asks for.
+ */
+import CopyText from '../site/CopyText.astro';
+import { copyFor } from '../../i18n/dictionary';
+
+interface Props {
+  feed: string;
+}
+const { feed } = Astro.props;
+const copy = copyFor(Astro.currentLocale).precrease;
+const t = copy.subscribe;
+---
+
+<section class="ticket" aria-label={copy.feeds.ticket} data-inspect="FeedTicket">
+  <div>
+    <p class="k">{copy.feeds.ticket}</p>
+    <CopyText value={feed} href={feed} copyLabel={t.copy} copiedLabel={t.copied} failedLabel={t.copyFailed} />
+  </div>
+  <svg class="stamp" viewBox="0 0 120 120" aria-hidden="true" focusable="false">
+    <defs>
+      <path id="ticket-ring" d="M60 60 m-44 0 a44 44 0 1 1 88 0 a44 44 0 1 1 -88 0" />
+    </defs>
+    <circle cx="60" cy="60" r="58" stroke-width="1.5" />
+    <circle cx="60" cy="60" r="36" stroke-width="1" stroke-dasharray="4 3" />
+    <text>
+      <textPath href="#ticket-ring">{copy.feeds.stamp}</textPath>
+    </text>
+    <text class="rss" x="60" y="68" text-anchor="middle">
+      RSS
+    </text>
+  </svg>
+</section>
+
+<style>
+  .ticket {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: var(--space-6);
+    align-items: center;
+    margin-top: var(--space-4);
+    padding: var(--space-8);
+    border: 1.5px solid var(--color-ink);
+    border-radius: 12px;
+    background: var(--color-surface);
+  }
+  .k {
+    margin: 0 0 var(--space-2);
+    font: var(--type-caption);
+    color: var(--color-mute);
+  }
+  .ticket :global(.address) {
+    font: 600 clamp(0.95rem, 1.6vw, 1.15rem) / 1.4 var(--font-mono);
+  }
+  .stamp {
+    width: 120px;
+    height: 120px;
+  }
+  .stamp circle {
+    fill: none;
+    stroke: var(--color-accent);
+  }
+  .stamp text {
+    font: 600 9px var(--font-mono);
+    fill: var(--color-accent);
+    letter-spacing: 0.12em;
+  }
+  .stamp .rss {
+    font: 700 22px var(--font-mono);
+    letter-spacing: 0;
+  }
+  @media (max-width: 720px) {
+    .ticket {
+      grid-template-columns: minmax(0, 1fr);
+      padding: var(--space-6) 20px;
+    }
+    .stamp {
+      display: none;
+    }
+  }
+</style>

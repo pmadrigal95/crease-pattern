@@ -131,7 +131,7 @@ test('the Spanish changelog and topic map use Spanish data', async ({ page }) =>
   await expect(page.locator('main')).toContainText('Arquitecto frontend líder');
   await page.goto('/es/precrease/map');
   await expect(page.locator('main')).toContainText('Arquitectura y diseño');
-  await expect(page.getByRole('link', { name: 'Arquitectura y diseño' })).toHaveAttribute(
+  await expect(page.getByRole('link', { name: 'Arquitectura y diseño', exact: true })).toHaveAttribute(
     'href',
     '/es/precrease/topics/architecture',
   );
