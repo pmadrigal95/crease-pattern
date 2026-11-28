@@ -420,46 +420,6 @@
   color: var(--color-bg);
 }
 
-/* The identity transition (decision 42): the new colors rise like terrain from the chosen
-   control, edged with contour lines; the masks live in public/topo. The masthead joins the page
-   here, since its colors change too. */
-.vt-identity .mast {
-  view-transition-name: none;
-}
-
-:root.vt-identity::view-transition-old(root) {
-  z-index: 1;
-  clip-path: none;
-  animation: none;
-}
-
-:root.vt-identity::view-transition-new(root) {
-  z-index: 2;
-  mask: url('/topo/mask.svg') no-repeat;
-  animation: terrain-rise 1100ms var(--motion-ease-in-out) both;
-}
-
-.topo-rings {
-  position: fixed;
-  inset: 0;
-  z-index: 70;
-  pointer-events: none;
-  background: var(--color-accent-ui);
-  mask: url('/topo/rings.svg') no-repeat;
-  animation: terrain-rise 1100ms var(--motion-ease-in-out) both;
-}
-
-@keyframes terrain-rise {
-  from {
-    mask-size: 0 0;
-    mask-position: var(--vx) var(--vy);
-  }
-  to {
-    mask-size: 420vmax 420vmax;
-    mask-position: calc(var(--vx) - 210vmax) calc(var(--vy) - 210vmax);
-  }
-}
-
 /* The outline drawn over the hovered or pinned part, in the DevTools content color. */
 .highlight {
   position: fixed;

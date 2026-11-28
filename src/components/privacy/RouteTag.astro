@@ -1,0 +1,12 @@
+---
+/** A paragraph's kind of route, drawn as on the map (RouteMap.astro): always, only if you act, or on your device. */
+import { copyFor } from '../../i18n/dictionary';
+interface Props {
+  kind: 'always' | 'posts' | 'click' | 'open' | 'device';
+}
+const { kind } = Astro.props;
+const t = copyFor(Astro.currentLocale).privacyPage.tags;
+const line = kind === 'click' || kind === 'open' ? 'action' : kind === 'device' ? 'device' : 'always';
+---
+
+<span class:list={['route-tag', line]}>{t[kind]}</span>

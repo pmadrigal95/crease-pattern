@@ -1,0 +1,27 @@
+---
+/** The colophon's type, set in itself: each family with its role and its characters (doc 40). */
+import { copyFor } from '../../i18n/dictionary';
+const t = copyFor(Astro.currentLocale).colophonPage.type;
+const faces = [
+  { name: 'Schibsted Grotesk', role: t.sans, face: 'sans' },
+  { name: 'JetBrains Mono', role: t.mono, face: 'mono' },
+  { name: 'Newsreader', role: t.serif, face: 'serif' },
+];
+---
+
+<ul class="type" data-inspect="TypeSpecimen">
+  {faces.map((f) => (
+    <li class={f.face}>
+      <span class="aa" aria-hidden="true">
+        Aa
+      </span>
+      <span class="about">
+        <b>{f.name}</b>
+        {f.role}
+        <span class="glyphs" aria-hidden="true">
+          ABCDEFG abcdefg 0123456789 ñ á → ·
+        </span>
+      </span>
+    </li>
+  ))}
+</ul>

@@ -33,7 +33,7 @@ const runs = allVisualDirections.flatMap((direction) => themes.map((theme) => ({
 const runCount = auditedPages.length * runs.length;
 
 // The parts by family: the folder under src/components, or the page that holds them.
-const order = ['pages', 'site', 'precrease', 'sonobe', 'threads', 'work'] as const;
+const order = ['pages', 'site', 'precrease', 'sonobe', 'threads', 'work', 'colophon', 'privacy'] as const;
 type Family = (typeof order)[number];
 const families = new Map<Family, string[]>(order.map((f) => [f, []]));
 for (const [part, file] of Object.entries(manifest.parts)) {

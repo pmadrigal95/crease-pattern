@@ -168,6 +168,26 @@
     max-width: 52ch;
     margin: var(--space-4) 0 0;
   }
+  /* A page header with a title block beside the title (TitleBlock.astro): Colophon, Privacy. */
+  .sheet-head {
+    display: grid;
+    grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+    gap: var(--space-8);
+    align-items: end;
+    padding-block: var(--space-16) var(--space-8);
+  }
+  .sheet-head h1 {
+    margin: 0;
+    font-size: clamp(2.4rem, 5.4vw, 4.2rem);
+    line-height: 1.03;
+    letter-spacing: -0.03em;
+    text-wrap: balance;
+  }
+  @media (max-width: 720px) {
+    .sheet-head {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
   .eyebrow {
     font: 500 var(--size-sm) var(--font-mono);
     color: var(--color-mute);

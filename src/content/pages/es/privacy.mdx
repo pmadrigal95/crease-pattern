@@ -3,6 +3,12 @@ title: Privacidad
 description: Qué recoge este sitio, qué no recoge y cómo comprobarlo tú mismo.
 ---
 
+import Stamps from '../../../components/privacy/Stamps.astro';
+import Stamp from '../../../components/privacy/Stamp.astro';
+import RouteMap from '../../../components/privacy/RouteMap.astro';
+import RouteTag from '../../../components/privacy/RouteTag.astro';
+import LiveCheck from '../../../components/privacy/LiveCheck.astro';
+
 _Última actualización: 18 de noviembre de 2026. Cada cambio a esta página está en [su historial en GitHub](https://github.com/pmadrigal95/crease-pattern/commits/main/src/content/pages/es/privacy.mdx)._
 
 Este es el sitio personal de Pablo Madrigal, una persona que vive en Costa Rica. No vende nada, no tiene
@@ -11,24 +17,48 @@ página.
 
 ## En resumen
 
-- **Sin cookies.** Este sitio no guarda ninguna, y nada de lo que carga tampoco.
-- **Sin perfiles.** Las visitas se cuentan en conjunto. Nada aquí puede saber si dos visitas vienen de la misma
-  persona.
-- **Los contadores de las entradas son totales.** Cada entrada de Precrease muestra cuántas veces se abrió, se
-  leyó hasta el final y se marcó como útil. Solo se guardan esos tres números.
-- **Sin anuncios, sin rastreadores de terceros, sin datos vendidos ni compartidos** con fines de marketing.
-- **Se respetan las señales de privacidad de tu navegador.** Con Global Privacy Control o Do Not Track
-  activados, el script de analítica nunca se carga y las entradas no reportan tu visita ni tu lectura.
+<Stamps>
+<Stamp big="0" label="cookies">
+
+**Sin cookies.** Este sitio no guarda ninguna, y nada de lo que carga tampoco.
+
+</Stamp>
+<Stamp big="0" label="perfiles">
+
+**Sin perfiles.** Las visitas se cuentan en conjunto. Nada aquí puede saber si dos visitas vienen de la misma
+persona.
+
+</Stamp>
+<Stamp big="3" label="números por entrada">
+
+**Los contadores de las entradas son totales.** Cada entrada de Precrease muestra cuántas veces se abrió, se
+leyó hasta el final y se marcó como útil. Solo se guardan esos tres números.
+
+</Stamp>
+<Stamp big="0" label="rastreadores">
+
+**Sin anuncios, sin rastreadores de terceros, sin datos vendidos ni compartidos** con fines de marketing.
+
+</Stamp>
+<Stamp big="GPC" label="respetada">
+
+**Se respetan las señales de privacidad de tu navegador.** Con Global Privacy Control o Do Not Track
+activados, el script de analítica nunca se carga y las entradas no reportan tu visita ni tu lectura.
+
+</Stamp>
+</Stamps>
+
+<RouteMap />
 
 ## Qué pasa cuando visitas el sitio
 
-**Hosting.** El sitio lo sirve [Cloudflare](https://www.cloudflare.com/). Como cualquier servidor web,
-Cloudflare recibe los datos técnicos que lleva cada solicitud, como tu dirección IP, tu navegador y la página
-que pediste, y los procesa para entregar y proteger el sitio según la
-[Política de privacidad de Cloudflare](https://www.cloudflare.com/privacypolicy/). Este sitio no guarda
-registros propios de las solicitudes.
+<RouteTag kind="always" /> **Hosting.** El sitio lo sirve [Cloudflare](https://www.cloudflare.com/). Como
+cualquier servidor web, Cloudflare recibe los datos técnicos que lleva cada solicitud, como tu dirección IP,
+tu navegador y la página que pediste, y los procesa para entregar y proteger el sitio según la [Política de
+privacidad de Cloudflare](https://www.cloudflare.com/privacypolicy/). Este sitio no guarda registros propios
+de las solicitudes.
 
-**Analítica.** Para saber qué páginas se leen y si el sitio carga rápido, uso
+<RouteTag kind="always" /> **Analítica.** Para saber qué páginas se leen y si el sitio carga rápido, uso
 [Cloudflare Web Analytics](https://www.cloudflare.com/web-analytics/). Cuando la página termina de cargar, un
 pequeño script de `static.cloudflareinsights.com` envía un reporte a `cloudflareinsights.com` con:
 
@@ -41,8 +71,8 @@ visitantes. Yo solo veo totales, como visitas por página o por país, y no los 
 Cloudflare es una empresa de Estados Unidos y puede procesar estos datos fuera de tu país, como explica su
 política de privacidad.
 
-**Contadores de las entradas.** En una entrada de Precrease, la página le avisa al servidor de este sitio
-(`/api/stats`) tres cosas, cada una como un evento suelto sin ningún identificador:
+<RouteTag kind="posts" /> **Contadores de las entradas.** En una entrada de Precrease, la página le avisa al
+servidor de este sitio (`/api/stats`) tres cosas, cada una como un evento suelto sin ningún identificador:
 
 - que se abrió la entrada;
 - que llegaste al final después de pasar un rato en ella;
@@ -54,29 +84,34 @@ Cloudflare mira tu dirección IP en memoria durante cerca de un minuto y la desc
 lado. Los totales son públicos, debajo de cada entrada. Con Global Privacy Control o Do Not Track activados, los
 dos primeros eventos no se envían.
 
-**Compartir.** Los botones de LinkedIn, X y Bluesky debajo de una entrada son enlaces simples. Nada de esos
-servicios se carga hasta que haces clic en uno, y desde ese momento estás en su sitio, bajo su política de
-privacidad.
+<RouteTag kind="click" /> **Compartir.** Los botones de LinkedIn, X y Bluesky debajo de una entrada son
+enlaces simples. Nada de esos servicios se carga hasta que haces clic en uno, y desde ese momento estás en su
+sitio, bajo su política de privacidad.
 
-**Comentarios.** Las entradas tienen un botón "Comentarios". Hasta que lo pulsas, no se carga nada relacionado
-con los comentarios. Cuando lo haces, la página carga [giscus](https://giscus.app/), que muestra el hilo de la
-entrada desde GitHub Discussions de este sitio: tu navegador se conecta entonces con `giscus.app` y GitHub,
-según la
-[Declaración de privacidad de GitHub](https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement).
-Para leer no hace falta una cuenta. Para comentar inicias sesión con GitHub, y giscus mantiene esa sesión dentro
-de su propio marco de comentarios, no en este sitio. Tu comentario es público, en GitHub, con tu nombre de
-GitHub. Algunas entradas interactivas que ejecutan código en varios hilos no pueden incrustar ese marco; ahí,
+<RouteTag kind="open" /> **Comentarios.** Las entradas tienen un botón "Comentarios". Hasta que lo pulsas, no
+se carga nada relacionado con los comentarios. Cuando lo haces, la página carga [giscus](https://giscus.app/),
+que muestra el hilo de la entrada desde GitHub Discussions de este sitio: tu navegador se conecta entonces con
+`giscus.app` y GitHub, según la [Declaración de privacidad de
+GitHub](https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement). Para leer
+no hace falta una cuenta. Para comentar inicias sesión con GitHub, y giscus mantiene esa sesión dentro de su
+propio marco de comentarios, no en este sitio. Tu comentario es público, en GitHub, con tu nombre de GitHub.
+Algunas entradas interactivas que ejecutan código en varios hilos no pueden incrustar ese marco; ahí,
 "Comentarios" es un enlace simple al hilo en GitHub.
 
-**Preferencias.** El sitio lee siete valores del almacenamiento local de tu navegador: `pm.direction` y `pm.theme`, para mostrar la identidad visual y el tema que elegiste; `pm.pointer`, el efecto del puntero que elegiste en el Inspector; `pm.lang`, el idioma que elegiste con el
-selector de idioma, para que el inicio se abra en ese idioma; `pm.langHint`, para que la sugerencia de leer una
-página en el idioma de tu navegador no vuelva a aparecer después de cerrarla; y `pm.helped`, las entradas en las
-que pulsaste "Me sirvió", para que el botón no te cuente dos veces; y `pm.tips`, para que la sugerencia de hacer el recorrido aparezca una sola vez. Solo se escriben cuando haces esas cosas, nunca salen de tu dispositivo y se borran cuando borras los datos del sitio. Mientras haces el recorrido, `pm.walkthrough` en el almacenamiento de sesión recuerda en qué parada vas de una página a otra; desaparece cuando el recorrido termina o cierras la pestaña. Para hacer esa sugerencia, la
-página compara su idioma con la configuración de idioma de tu navegador en tu dispositivo; nada de eso se envía
-a ningún lado.
+<RouteTag kind="device" /> **Preferencias.** El sitio lee siete valores del almacenamiento local de tu
+navegador: `pm.direction` y `pm.theme`, para mostrar la identidad visual y el tema que elegiste; `pm.pointer`,
+el efecto del puntero que elegiste en el Inspector; `pm.lang`, el idioma que elegiste con el selector de
+idioma, para que el inicio se abra en ese idioma; `pm.langHint`, para que la sugerencia de leer una página en
+el idioma de tu navegador no vuelva a aparecer después de cerrarla; y `pm.helped`, las entradas en las que
+pulsaste "Me sirvió", para que el botón no te cuente dos veces; y `pm.tips`, para que la sugerencia de hacer
+el recorrido aparezca una sola vez. Solo se escriben cuando haces esas cosas, nunca salen de tu dispositivo y
+se borran cuando borras los datos del sitio. Mientras haces el recorrido, `pm.walkthrough` en el
+almacenamiento de sesión recuerda en qué parada vas de una página a otra; desaparece cuando el recorrido
+termina o cierras la pestaña. Para hacer esa sugerencia, la página compara su idioma con la configuración de
+idioma de tu navegador en tu dispositivo; nada de eso se envía a ningún lado.
 
-**Las fuentes y todo lo demás** se sirven desde este mismo sitio. No se contacta a ningún otro tercero a menos
-que abras los comentarios o sigas un enlace para compartir.
+<RouteTag kind="always" /> **Las fuentes y todo lo demás** se sirven desde este mismo sitio. No se contacta a
+ningún otro tercero a menos que abras los comentarios o sigas un enlace para compartir.
 
 ## Por qué, y tus derechos
 
@@ -97,5 +132,7 @@ Abre las herramientas de desarrollo de tu navegador en cualquier página:
 - **Network:** solicitudes a este sitio, incluida `/api/stats` en las entradas, más
   `static.cloudflareinsights.com` y `cloudflareinsights.com` salvo que tu navegador envíe una señal de
   privacidad.
+
+<LiveCheck />
 
 Si algo de lo que ves no coincide con esta página, es un error. Por favor, avísame.

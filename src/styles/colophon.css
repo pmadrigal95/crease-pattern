@@ -1,0 +1,414 @@
+/*
+ * The colophon as a technical sheet (doc 40; colophon.astro, src/components/colophon/). Global
+ * because the sheets wrap MDX: the words come from the content file, the shape from here.
+ */
+
+/* ---------- the sheets beside the plan ---------- */
+.sheet-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: var(--space-12);
+  align-items: start;
+  padding-bottom: var(--space-24);
+}
+.prose.sheets {
+  max-width: none;
+}
+.sheets > p:first-child {
+  margin-bottom: var(--space-8);
+  font-size: var(--size-lg);
+  color: var(--color-mute);
+}
+.sheets > .sheet + .sheet {
+  margin-top: var(--space-8);
+}
+
+.sheet {
+  position: relative;
+  display: grid;
+  perspective: 1800px;
+}
+.sheet .face {
+  grid-area: 1 / 1;
+  padding: var(--space-8);
+  border: 1px solid var(--color-rule);
+  border-radius: 12px;
+  backface-visibility: hidden;
+}
+.sheet .front {
+  min-height: 230px;
+  background: var(--color-surface);
+}
+.sheet .front > :last-child {
+  margin-bottom: 0;
+}
+.sheet h2 {
+  margin-top: 0;
+  scroll-margin-top: calc(var(--sticky-offset) + 16px);
+}
+/* The sheet's number, from its place: 01, 02… */
+.sheets {
+  counter-reset: sheet;
+}
+.sheet {
+  counter-increment: sheet;
+}
+.sheet h2::before {
+  content: counter(sheet, decimal-leading-zero);
+  margin-right: var(--space-3);
+  font: 500 var(--size-xs) var(--font-mono);
+  color: var(--color-accent);
+  vertical-align: 0.4em;
+}
+
+/* The back: the files that build the section, on the plan's grid. It fits inside the front. */
+.sheet .back {
+  position: absolute;
+  inset: 0;
+  overflow: auto;
+  display: grid;
+  align-content: start;
+  gap: var(--space-3);
+  border-color: color-mix(in oklab, var(--color-accent-ui) 55%, transparent);
+  background-color: var(--color-bg);
+  background-image:
+    linear-gradient(color-mix(in oklab, var(--color-rule) 45%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in oklab, var(--color-rule) 45%, transparent) 1px, transparent 1px);
+  background-size: 24px 24px;
+  transform: rotateY(180deg);
+  font-size: var(--size-sm);
+}
+.sheet .back p {
+  margin: 0;
+}
+.sheet .back .k {
+  font: var(--type-caption);
+  color: var(--color-mute);
+}
+.sheet .back .file {
+  font: 600 13px var(--font-mono);
+  color: var(--color-accent);
+}
+.sheet .back ul {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.sheet .back li {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding-bottom: 6px;
+  border-bottom: 1px dashed var(--color-rule);
+  font: 12px var(--font-mono);
+}
+.sheet .back b {
+  font-weight: 600;
+  text-align: right;
+}
+
+/* Inspecting: every sheet turns over, one after another, to show its back. Pointing at one, or
+   moving into it with the keyboard, turns it back. */
+@media (prefers-reduced-motion: no-preference) {
+  .sheet .face {
+    transition: transform 700ms var(--motion-ease-out);
+  }
+  .sheet:nth-child(2) .face {
+    transition-delay: 70ms;
+  }
+  .sheet:nth-child(3) .face {
+    transition-delay: 140ms;
+  }
+  .sheet:nth-child(4) .face {
+    transition-delay: 210ms;
+  }
+  .sheet:nth-child(5) .face {
+    transition-delay: 280ms;
+  }
+  .sheet:nth-child(6) .face {
+    transition-delay: 350ms;
+  }
+  .sheet:nth-child(7) .face {
+    transition-delay: 420ms;
+  }
+  .sheet:nth-child(n + 8) .face {
+    transition-delay: 490ms;
+  }
+}
+:root.inspecting .sheet .front {
+  transform: rotateY(-180deg);
+}
+:root.inspecting .sheet .back {
+  transform: rotateY(0deg);
+}
+:root.inspecting .sheet:is(:hover, :focus-within) .front {
+  transform: rotateY(0deg);
+  transition-delay: 0ms;
+}
+:root.inspecting .sheet:is(:hover, :focus-within) .back {
+  transform: rotateY(180deg);
+  transition-delay: 0ms;
+}
+
+/* The licences' seal, in the sheet's corner. */
+.sheet .seal {
+  float: right;
+  width: 112px;
+  height: 112px;
+  margin: 0 0 var(--space-4) var(--space-4);
+}
+.sheet .seal circle {
+  fill: none;
+  stroke: var(--color-accent);
+}
+.sheet .seal text {
+  font: 600 8.5px var(--font-mono);
+  fill: var(--color-accent);
+  letter-spacing: 0.12em;
+}
+
+/* ---------- the plan ---------- */
+.plan {
+  position: sticky;
+  top: calc(var(--sticky-offset) + 8px);
+  display: grid;
+  gap: var(--space-3);
+}
+.plan p {
+  margin: 0;
+}
+.plan .k {
+  font: var(--type-caption);
+  color: var(--color-mute);
+}
+.plan svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--color-rule);
+  border-radius: 10px;
+  background-color: var(--color-bg);
+  background-image:
+    linear-gradient(color-mix(in oklab, var(--color-rule) 45%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in oklab, var(--color-rule) 45%, transparent) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+.plan .cell {
+  fill: transparent;
+  transition: fill 300ms var(--motion-ease-out);
+}
+.plan a:is(:hover, :focus-visible) .cell {
+  fill: color-mix(in oklab, var(--color-accent-ui) 10%, transparent);
+}
+.plan a.on .cell {
+  fill: color-mix(in oklab, var(--color-accent-ui) 20%, transparent);
+}
+.plan a:focus-visible {
+  outline: none;
+}
+.plan a:focus-visible .edge {
+  stroke: var(--color-accent-ui);
+  stroke-width: 3;
+}
+.plan .edge {
+  fill: none;
+  stroke: var(--color-ink);
+  stroke-width: 1.5;
+}
+.plan path.m {
+  fill: none;
+  stroke: var(--color-accent-ui);
+  stroke-dasharray: 8 3 2 3;
+  opacity: 0.7;
+}
+.plan path.v {
+  fill: none;
+  stroke: var(--color-mute);
+  stroke-dasharray: 5 4;
+  opacity: 0.6;
+}
+.plan text {
+  font: 500 9px var(--font-mono);
+  fill: var(--color-ink);
+}
+.plan text.n {
+  fill: var(--color-accent);
+}
+.plan .legend {
+  display: flex;
+  gap: var(--space-4);
+  font: var(--type-caption);
+  color: var(--color-mute);
+}
+.plan .legend span::before {
+  content: '';
+  display: inline-block;
+  width: 20px;
+  margin-right: 6px;
+  vertical-align: middle;
+  border-top: 1.5px dashed var(--color-mute);
+}
+.plan .legend .m::before {
+  border-top-style: dotted;
+  border-color: var(--color-accent-ui);
+}
+
+/* ---------- the identities ---------- */
+.ids-intro {
+  font: var(--type-caption);
+  color: var(--color-mute);
+}
+.ids {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+.ids .id {
+  display: grid;
+  gap: var(--space-2);
+  justify-items: start;
+  padding: var(--space-4);
+  border: 1px solid var(--color-rule);
+  border-radius: 10px;
+  background: var(--color-bg);
+  color: var(--color-ink);
+  font: inherit;
+  font-size: var(--size-sm);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color var(--motion-base) var(--motion-ease-out);
+}
+.ids .id:hover {
+  border-color: var(--color-accent-ui);
+}
+.ids .id:focus-visible {
+  outline: 2px solid var(--color-accent-ui);
+  outline-offset: 2px;
+}
+.ids .id[aria-pressed='true'] {
+  border: 1.5px solid var(--color-ink);
+}
+.ids .fig {
+  width: 56px;
+  height: 56px;
+}
+.ids .dots {
+  width: 68px;
+  height: 14px;
+}
+/* A ring on every swatch, so the ink still shows on a dark page and the paper on a light one. */
+.ids .dots circle {
+  stroke: color-mix(in oklab, var(--color-ink) 35%, transparent);
+  stroke-width: 1;
+}
+.ids .what {
+  font: var(--type-caption);
+  color: var(--color-mute);
+}
+
+/* ---------- the type ---------- */
+.prose ul.type {
+  display: grid;
+  gap: var(--space-3);
+  padding: 0;
+  list-style: none;
+}
+.type li {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
+  gap: var(--space-4);
+  align-items: center;
+  padding-top: var(--space-3);
+  border-top: 1px dashed var(--color-rule);
+  color: var(--color-mute);
+}
+.type .aa {
+  font-size: 56px;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: var(--color-ink);
+}
+.type b {
+  display: block;
+  color: var(--color-ink);
+}
+.type .glyphs {
+  display: block;
+  overflow-wrap: anywhere;
+}
+.type .sans {
+  font-family: var(--font-sans);
+}
+.type .mono {
+  font-family: var(--font-mono);
+}
+.type .serif {
+  font-family: 'Newsreader', Georgia, serif;
+}
+
+/* ---------- the instruments ---------- */
+.prose ul.gauges {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4) var(--space-6);
+  padding: 0;
+  list-style: none;
+}
+.gauges li {
+  display: grid;
+  gap: 6px;
+}
+.gauges .top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+.gauges .k {
+  font: var(--type-caption);
+  color: var(--color-mute);
+}
+.gauges .val {
+  font: 600 1.375rem/1 var(--font-sans);
+  letter-spacing: -0.02em;
+}
+.gauges .bar {
+  display: block;
+  width: 100%;
+  height: 8px;
+  overflow: visible;
+}
+.gauges .track {
+  fill: color-mix(in oklab, var(--color-ink) 8%, transparent);
+}
+.gauges .fill {
+  fill: var(--color-accent-ui);
+}
+.gauges .tick {
+  fill: var(--color-ink);
+}
+.sheets .measured {
+  font: var(--type-caption);
+  color: var(--color-mute);
+}
+
+/* ---------- narrow screens ---------- */
+@media (max-width: 960px) {
+  .sheet-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .plan {
+    display: none;
+  }
+}
+@media (max-width: 720px) {
+  .ids,
+  .prose ul.gauges {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .sheet .face {
+    padding: var(--space-6) 20px;
+  }
+}

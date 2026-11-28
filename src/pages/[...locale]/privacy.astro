@@ -1,10 +1,19 @@
 ---
+/**
+ * The privacy page as "what travels" (doc 40): a title block of what the site keeps, the short
+ * version as stamps, a map of every route data can take, each paragraph tagged with its kind of
+ * route, and the check done live in the visitor's browser. While inspecting, the map shows the
+ * requests this page made, each on the route it declares (src/components/privacy/).
+ */
 import { render } from 'astro:content';
 import { getPage } from '../../lib/pages';
 import PageLayout from '../../layouts/PageLayout.astro';
+import TitleBlock from '../../components/site/TitleBlock.astro';
 import { copyFor } from '../../i18n/dictionary';
 import { localeStaticPaths } from '../../i18n/routing';
+import '../../styles/privacy.css';
 const copy = copyFor(Astro.currentLocale);
+const t = copy.privacyPage.block;
 
 const page = await getPage('privacy', Astro.currentLocale);
 const { Content } = await render(page);
@@ -15,18 +24,23 @@ export const getStaticPaths = localeStaticPaths;
 
 <PageLayout title={page.data.title} description={page.data.description}>
   <div class="wrap">
-    <header class="page-head" data-inspect="privacy#header">
-      <p class="eyebrow">{page.data.title}</p>
-      <h1>{copy.privacyPage.title}</h1>
+    <header class="sheet-head" data-inspect="privacy#header">
+      <div>
+        <p class="eyebrow">{page.data.title}</p>
+        <h1>{copy.privacyPage.title}</h1>
+      </div>
+      <TitleBlock
+        label={t.label}
+        rows={[
+          { label: t.cookies, value: '0' },
+          { label: t.trackers, value: '0' },
+          { label: t.accounts, value: t.none },
+          { label: t.forms, value: t.none },
+        ]}
+      />
     </header>
     <div class="prose body" data-inspect="privacy#body">
       <Content />
     </div>
   </div>
 </PageLayout>
-
-<style>
-  .body {
-    padding-bottom: var(--space-24);
-  }
-</style>
