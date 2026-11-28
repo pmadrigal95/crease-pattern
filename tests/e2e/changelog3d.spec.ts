@@ -1,5 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
+import { holdStill } from '../hold-still';
 
 // The changelog's 3D relief (src/components/site/ExpeditionRelief.astro, changelog3d.ts): on a wide
 // screen whose device can run it, the map's drawing gives way to the places as paper models of
@@ -114,12 +115,28 @@ test('reduced motion and phones keep the drawing', async ({ browser }) => {
   }
 });
 
+test('the relief takes the drawing’s place at its size, so nothing on the page moves', async ({ page }) => {
+  await withGl(page);
+  await open(page);
+  const drawing = page.locator(`${map} .drawing.wide`);
+  const before = await drawing.boundingBox();
+  const caption = await page.locator(`${map} figcaption`).boundingBox();
+  await expect(page.locator(map)).toHaveClass(/relief-on/, ready);
+  const relief = await page.locator(`${map} [data-relief]`).boundingBox();
+  expect(relief?.width).toBeCloseTo(before?.width ?? 0, 0);
+  expect(relief?.height).toBeCloseTo(before?.height ?? 0, 0);
+  expect((await page.locator(`${map} figcaption`).boundingBox())?.y).toBeCloseTo(caption?.y ?? 0, 0);
+  // The drawing fades out under it and then leaves the page's reading order.
+  await expect(drawing).toBeHidden();
+});
+
 for (const theme of ['light', 'dark'] as const) {
   test(`the relief has no axe violations · ${theme}`, async ({ page }) => {
     await withGl(page);
     await page.addInitScript((t) => localStorage.setItem('pm.theme', t), theme);
     await open(page);
     await expect(place(page, 'Irazú')).toHaveAttribute('aria-pressed', 'true', ready);
+    await holdStill(page);
     const results = await new AxeBuilder({ page })
       .include(map)
       .withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa'])
