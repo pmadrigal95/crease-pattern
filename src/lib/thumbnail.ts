@@ -17,13 +17,22 @@ export type Family = 'crease' | 'truchet' | 'corner' | 'cells';
 
 const SIZE = 120;
 
-/** Deterministic random numbers from a string (cyrb-style hash feeding a xorshift-like mixer). */
-export const seeded = (text: string): (() => number) => {
+/** A string's hash: the seed every thumbnail grows from (cyrb-style). */
+const hashOf = (text: string): number => {
   let h = 1779033703 ^ text.length;
   for (const c of text) {
     h = Math.imul(h ^ c.charCodeAt(0), 3432918353);
     h = (h << 13) | (h >>> 19);
   }
+  return h;
+};
+
+/** The seed as the Inspector shows it: 8 hex digits. */
+export const seedOf = (text: string): string => `0000000${(hashOf(text) >>> 0).toString(16)}`.slice(-8);
+
+/** Deterministic random numbers from a string (its hash feeding a xorshift-like mixer). */
+export const seeded = (text: string): (() => number) => {
+  let h = hashOf(text);
   return () => {
     h = Math.imul(h ^ (h >>> 16), 2246822507);
     h = Math.imul(h ^ (h >>> 13), 3266489909);
@@ -33,19 +42,39 @@ export const seeded = (text: string): (() => number) => {
 
 const r1 = (n: number) => Math.round(n * 10) / 10;
 
+/** One cell of a crease thumbnail: a valley fold or a mountain fold, on one of its diagonals. */
+export interface CreaseCell {
+  valley: boolean;
+  /** Top-left to bottom-right (╲), or top-right to bottom-left (╱). */
+  backslash: boolean;
+}
+const CREASE_N = 4;
+
+/** The cells of a 4 × 4 crease sheet, row by row, as the random numbers decide them. */
+const creaseCellsFrom = (rand: () => number): CreaseCell[] =>
+  Array.from({ length: CREASE_N * CREASE_N }, () => ({ valley: rand() < 0.5, backslash: rand() < 0.5 }));
+
+/**
+ * What a crease thumbnail is made of, for the Inspector: the seed its post's slug gives, and the
+ * 16 cells that seed decides. The drawing below reads the same sequence, so the two can't differ.
+ */
+export const creaseCells = (slug: string): { seed: string; cells: CreaseCell[] } => ({
+  seed: seedOf(slug),
+  cells: creaseCellsFrom(seeded(slug)),
+});
+
 const crease = (rand: () => number): string => {
-  const n = 4;
+  const n = CREASE_N;
   const s = SIZE / n;
   let out = `<rect x="1" y="1" width="${SIZE - 2}" height="${SIZE - 2}" fill="none" stroke="currentColor" stroke-width="1.5"/>`;
-  for (let y = 0; y < n; y++)
-    for (let x = 0; x < n; x++) {
-      const X = x * s;
-      const Y = y * s;
-      // Valley folds dashed; mountain folds solid, measured as 1 so a page can draw them in.
-      const dash = rand() < 0.5 ? ' stroke-dasharray="4 3"' : ' pathLength="1"';
-      const d = rand() < 0.5 ? `M${X} ${Y}L${X + s} ${Y + s}` : `M${X + s} ${Y}L${X} ${Y + s}`;
-      out += `<path d="${d}" stroke="currentColor" stroke-width="1.8"${dash}/>`;
-    }
+  creaseCellsFrom(rand).forEach(({ valley, backslash }, i) => {
+    const X = (i % n) * s;
+    const Y = Math.floor(i / n) * s;
+    // Valley folds dashed; mountain folds solid, measured as 1 so a page can draw them in.
+    const dash = valley ? ' stroke-dasharray="4 3"' : ' pathLength="1"';
+    const d = backslash ? `M${X} ${Y}L${X + s} ${Y + s}` : `M${X + s} ${Y}L${X} ${Y + s}`;
+    out += `<path d="${d}" stroke="currentColor" stroke-width="1.8"${dash}/>`;
+  });
   for (let i = 1; i < n; i++) {
     const dash = rand() < 0.5 ? ' stroke-dasharray="4 3"' : '';
     out += `<path d="M${i * s} 0V${SIZE}M0 ${i * s}H${SIZE}" stroke="currentColor" stroke-width="1" opacity=".55"${dash}/>`;

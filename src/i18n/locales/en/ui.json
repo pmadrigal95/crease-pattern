@@ -685,6 +685,41 @@
         "folded": "Units folded",
         "caption": "The same unit every time. What changes is how many, and where they meet."
       }
+    },
+    "collection": {
+      "order": "Newest first",
+      "posts": "{count} posts",
+      "postsOne": "1 post",
+      "topics": "{count} topics",
+      "topicsOne": "1 topic",
+      "since": "since {date}",
+      "branches": "Topics",
+      "seed": "seed",
+      "valley": "valley",
+      "mountain": "mountain",
+      "origin": "No picture here is a file. Each pattern is its post’s address folded: the slug becomes a seed, and the seed decides each of the 16 cells, mountain (solid) or valley (dashed), and the diagonal it folds on."
+    },
+    "sheet": {
+      "label": "The topics as one sheet: each region a topic, sized by its posts",
+      "legend": "How to read the sheet",
+      "folded": "a topic with posts, folded",
+      "inside": "a smaller topic inside it",
+      "unfolded": "a topic still to be folded",
+      "toFold": "to be folded",
+      "summary": "{topics} topics · {posts} posts · {empty} still to be folded. A post can sit in more than one topic.",
+      "inspect": "Each topic counts every post below it, so a post shows up in its topic and in each topic above it.",
+      "listTitle": "Every topic, as a list"
+    },
+    "feeds": {
+      "ticket": "Your feed",
+      "stamp": "NO ACCOUNT · NO EMAIL · NO TRACKING ·",
+      "previewTitle": "What arrives in your reader",
+      "previewNote": "The three newest posts, as your reader will show them.",
+      "xml": "The XML your reader receives for the newest post",
+      "topicsNote": "Every topic with posts has its own feed.",
+      "copy": "Copy",
+      "copyTopic": "Copy the {topic} feed",
+      "copied": "Feed address copied"
     }
   },
   "cases": {

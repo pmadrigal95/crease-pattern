@@ -685,6 +685,41 @@
         "folded": "Unidades dobladas",
         "caption": "Siempre la misma unidad. Lo que cambia es cuántas hay y dónde se juntan."
       }
+    },
+    "collection": {
+      "order": "Más reciente primero",
+      "posts": "{count} entradas",
+      "postsOne": "1 entrada",
+      "topics": "{count} temas",
+      "topicsOne": "1 tema",
+      "since": "desde el {date}",
+      "branches": "Temas",
+      "seed": "semilla",
+      "valley": "valle",
+      "mountain": "montaña",
+      "origin": "Ninguna imagen aquí es un archivo. Cada patrón es la dirección de su entrada, doblada: el slug se vuelve una semilla, y la semilla decide cada una de las 16 celdas, montaña (continua) o valle (punteada), y en qué diagonal se dobla."
+    },
+    "sheet": {
+      "label": "Los temas como una hoja: cada región es un tema, del tamaño de sus entradas",
+      "legend": "Cómo leer la hoja",
+      "folded": "un tema con entradas, doblado",
+      "inside": "un tema más pequeño dentro",
+      "unfolded": "un tema por doblar",
+      "toFold": "por doblar",
+      "summary": "{topics} temas · {posts} entradas · {empty} por doblar. Una entrada puede estar en más de un tema.",
+      "inspect": "Cada tema cuenta todas las entradas que tiene debajo, así que una entrada aparece en su tema y en cada tema por encima.",
+      "listTitle": "Todos los temas, en lista"
+    },
+    "feeds": {
+      "ticket": "Tu feed",
+      "stamp": "SIN CUENTA · SIN CORREO · SIN RASTREO ·",
+      "previewTitle": "Lo que llega a tu lector",
+      "previewNote": "Las tres entradas más recientes, como las mostrará tu lector.",
+      "xml": "El XML que recibe tu lector de la entrada más reciente",
+      "topicsNote": "Cada tema con entradas tiene su propio feed.",
+      "copy": "Copiar",
+      "copyTopic": "Copiar el feed de {topic}",
+      "copied": "Dirección del feed copiada"
     }
   },
   "cases": {

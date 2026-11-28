@@ -17,6 +17,15 @@ export const feedHref = (lang: Lang, topic?: string): string =>
 export const feedPosts = async (lang: Lang): Promise<PostSummary[]> =>
   (await getPosts(lang)).filter((p) => p.lang === lang);
 
+/** One post as a feed item: what a reader app receives (the feed below, and Subscribe's preview). */
+export const feedItem = (p: PostSummary, lang: Lang) => ({
+  title: `${creaseNumber(p.number, lang)} · ${p.entry.data.title}`,
+  description: p.entry.data.description,
+  pubDate: p.entry.data.date,
+  link: postHref(p),
+  categories: p.entry.data.topics,
+});
+
 export const feed = (posts: PostSummary[], lang: Lang, title: string, description: string) => {
   return rss({
     title,
@@ -25,13 +34,7 @@ export const feed = (posts: PostSummary[], lang: Lang, title: string, descriptio
     // never end in a slash (astro.config.ts, trailingSlash).
     site: new URL(localize('/precrease', lang), site.url).href,
     trailingSlash: false,
-    items: posts.map((p) => ({
-      title: `${creaseNumber(p.number, lang)} · ${p.entry.data.title}`,
-      description: p.entry.data.description,
-      pubDate: p.entry.data.date,
-      link: postHref(p),
-      categories: p.entry.data.topics,
-    })),
+    items: posts.map((p) => feedItem(p, lang)),
     customData: `<language>${LOCALES[lang].htmlLang}</language>`,
   });
 };

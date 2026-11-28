@@ -1,0 +1,55 @@
+---
+/**
+ * Where a post sits in the topic tree, one branch per topic it carries: "Systems › Concurrency".
+ * A list places posts by their branch, never by a bare number (doc 32, the decision of #125; doc 41).
+ */
+import { copyFor } from '../../i18n/dictionary';
+import { langOf } from '../../i18n/routing';
+import { pathTo } from '../../lib/precrease-tree';
+import { topicsFor } from '../../lib/taxonomy';
+
+interface Props {
+  topics: readonly string[];
+}
+const lang = langOf(Astro.currentLocale);
+const tree = topicsFor(lang);
+const branches = Astro.props.topics.map((id) => pathTo(tree, id).map((t) => t.label));
+---
+
+<ul
+  class="post-branches"
+  aria-label={copyFor(lang).precrease.collection.branches}
+  data-inspect="PostBranches"
+>
+  {branches.map((names) => (
+    <li>
+      {names.map((name, i) => (
+        <>
+          {i > 0 && <span aria-hidden="true">›</span>}
+          {i === names.length - 1 ? <b>{name}</b> : <span>{name}</span>}
+        </>
+      ))}
+    </li>
+  ))}
+</ul>
+
+<style>
+  .post-branches {
+    display: grid;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font: 500 var(--size-xs) / 1.35 var(--font-mono);
+    color: var(--color-mute);
+  }
+  li {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  b {
+    font-weight: 600;
+    color: var(--color-accent);
+  }
+</style>
