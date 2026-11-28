@@ -1,11 +1,13 @@
 ---
 /**
- * The whole topic tree, folded: each branch is a <details> element, so it opens and closes
- * without JavaScript and with the keyboard. Counts include every post below a branch.
+ * The whole topic tree: first as one folded sheet (TopicSheet.astro, doc 41), then as a list in
+ * which each branch is a <details> element, so it opens and closes without JavaScript and with
+ * the keyboard. Counts include every post below a branch.
  */
 import PrecreaseLayout from '../../../layouts/PrecreaseLayout.astro';
 import { topicsFor, type Topic } from '../../../lib/taxonomy';
 import TopicBranch, { type Branch } from '../../../components/precrease/TopicBranch.astro';
+import TopicSheet from '../../../components/precrease/TopicSheet.astro';
 import { copyFor } from '../../../i18n/dictionary';
 import { getPosts } from '../../../lib/precrease';
 import { childrenOf, postsUnder } from '../../../lib/precrease-tree';
@@ -34,6 +36,8 @@ export const getStaticPaths = localeStaticPaths;
       <h1>{t.map.title}</h1>
       <p class="intro">{t.map.intro}</p>
     </header>
+    <TopicSheet topics={tree} posts={posts.length} />
+    <h2 class="list-title">{t.sheet.listTitle}</h2>
     <ul class="tree">
       {tree.map((root) => (
         <TopicBranch branch={root}>
@@ -59,6 +63,11 @@ export const getStaticPaths = localeStaticPaths;
     margin: var(--space-4) 0 0;
     font-size: var(--size-lg);
     color: var(--color-mute);
+  }
+  .list-title {
+    margin: 0 0 var(--space-4);
+    font-size: var(--size-lg);
+    font-weight: 600;
   }
   .tree {
     margin: 0;

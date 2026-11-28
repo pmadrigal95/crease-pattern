@@ -1,0 +1,248 @@
+---
+/**
+ * One post of the Precrease collection (doc 41): where it sits in the topic tree, its title and
+ * summary, its label and facts, and its thumbnail as a seal. The whole row is the link. Hovering
+ * lifts the seal and draws its mountain folds; inspecting shows where the pattern comes from: the
+ * slug's seed and the 16 folds it decides (src/lib/thumbnail.ts, the same sequence that drew it).
+ */
+import PostBranches from './PostBranches.astro';
+import PostThumb from './PostThumb.astro';
+import { formats } from '../../config/precrease';
+import { copyFor, fill } from '../../i18n/dictionary';
+import { LOCALES, langOf } from '../../i18n/routing';
+import { formatDate } from '../../lib/format';
+import { creaseNumber, postHref, postKind, type PostSummary } from '../../lib/precrease';
+import { readingMinutes } from '../../lib/reading';
+import { creaseCells, seedOf } from '../../lib/thumbnail';
+
+interface Props {
+  post: PostSummary;
+}
+const { post } = Astro.props;
+const lang = langOf(Astro.currentLocale);
+const t = copyFor(lang).precrease;
+const data = post.entry.data;
+// Not yet in this page's language: the original shows, marked as such.
+const otherLang = post.lang !== lang ? LOCALES[post.lang].htmlLang : undefined;
+const crease = formats[data.format].family === 'crease' ? creaseCells(post.key) : null;
+---
+
+<li class="piece" data-inspect="PostPiece">
+  <PostBranches topics={data.topics} />
+  <div class="words">
+    <h3 lang={otherLang}>
+      <a href={postHref(post)}>{data.title}</a>
+    </h3>
+    <p class="summary" lang={otherLang}>
+      {data.description}
+    </p>
+    <p class="facts">
+      <span>{creaseNumber(post.number, lang)}</span>
+      <span>{postKind(post.entry, lang)}</span>
+      <span>{fill(t.minutes, { minutes: readingMinutes(post.entry.body ?? '') })}</span>
+      <span>
+        <time datetime={post.date.toISOString()}>{formatDate(post.date, lang)}</time>
+      </span>
+      {otherLang && <span>{t.untranslated}</span>}
+    </p>
+  </div>
+  <div class="seal">
+    <PostThumb slug={post.key} format={data.format} />
+    <div class="origin" aria-hidden="true">
+      <span>
+        slug <b>{post.key}</b>
+      </span>
+      <span>
+        {t.collection.seed} <b>0x{crease?.seed ?? seedOf(post.key)}</b>
+      </span>
+      {crease && (
+        <span class="cells">
+          {crease.cells.map((c) => (
+            <span
+              class:list={{ valley: c.valley }}
+              title={c.valley ? t.collection.valley : t.collection.mountain}
+            >
+              {c.backslash ? '╲' : '╱'}
+            </span>
+          ))}
+        </span>
+      )}
+    </div>
+  </div>
+</li>
+
+<style>
+  .piece {
+    position: relative;
+    display: grid;
+    grid-template-columns: 11rem minmax(0, 1fr) 168px;
+    gap: var(--space-8);
+    align-items: center;
+    padding: var(--space-8) 0;
+    border-bottom: 1px solid var(--color-rule);
+  }
+  .piece > :global(.post-branches) {
+    align-self: start;
+    padding-top: 6px;
+  }
+  h3 {
+    margin: 0 0 var(--space-2);
+    font: 500 clamp(1.6rem, 2.6vw, 2.2rem) / 1.12 var(--font-serif);
+    letter-spacing: -0.01em;
+  }
+  h3 a {
+    color: var(--color-ink);
+    text-decoration: none;
+  }
+  /* The whole row is the link. */
+  h3 a::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+  h3 a:focus-visible {
+    outline: none;
+  }
+  .piece:has(h3 a:focus-visible) {
+    outline: 2px solid var(--color-accent-ui);
+    outline-offset: 4px;
+    border-radius: 6px;
+  }
+  h3 a:hover {
+    text-decoration: underline;
+    text-decoration-color: var(--color-accent-ui);
+    text-underline-offset: 0.18em;
+  }
+  .summary {
+    max-width: 62ch;
+    margin: 0;
+    color: var(--color-mute);
+  }
+  .facts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1) var(--space-3);
+    margin: var(--space-3) 0 0;
+    font: var(--type-caption);
+    color: var(--color-mute);
+  }
+  .facts span + span::before {
+    content: '·';
+    margin-right: var(--space-3);
+  }
+
+  /* The thumbnail as a seal: smaller, finer; it lifts and draws its mountain folds on hover. */
+  .seal {
+    position: relative;
+    perspective: 700px;
+  }
+  .seal :global(.post-thumb) {
+    width: 168px;
+    transform-origin: 50% 100%;
+    transition: transform 500ms var(--motion-ease-out);
+  }
+  .seal :global(svg path) {
+    stroke-width: 1.1;
+  }
+  .seal :global(svg path[pathLength='1']) {
+    stroke-width: 1.8;
+    stroke-dasharray: 1;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .piece:hover .seal :global(.post-thumb) {
+      transform: rotateX(12deg) translateY(-4px);
+    }
+    .piece:hover .seal :global(svg path[pathLength='1']) {
+      animation: draw-fold 700ms var(--motion-ease-out) both;
+    }
+  }
+  @keyframes draw-fold {
+    from {
+      stroke-dashoffset: 1;
+    }
+  }
+  :global(:root[data-direction='washi-asagi']) .seal :global(svg path) {
+    stroke-linecap: round;
+  }
+
+  /* Inspecting: where the pattern comes from. */
+  .origin {
+    display: none;
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    align-content: start;
+    gap: 6px;
+    padding: 10px;
+    background: var(--color-ink);
+    color: var(--color-bg);
+    font: 500 10px / 1.35 var(--font-mono);
+    overflow-wrap: anywhere;
+  }
+  :global(.inspecting) .origin {
+    display: grid;
+  }
+  .origin b {
+    font-weight: 600;
+    color: color-mix(in oklab, var(--color-accent-ui) 70%, var(--color-bg));
+  }
+  .cells {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2px;
+  }
+  .cells span {
+    display: grid;
+    place-items: center;
+    aspect-ratio: 1;
+    border: 1px solid color-mix(in oklab, var(--color-bg) 35%, transparent);
+    font-size: 13px;
+  }
+  .cells .valley {
+    opacity: 0.55;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    :global(.inspecting) .cells span {
+      animation: cell-in 300ms var(--motion-ease-out) both;
+    }
+    :global(.inspecting) .cells span:nth-child(n + 5) {
+      animation-delay: 80ms;
+    }
+    :global(.inspecting) .cells span:nth-child(n + 9) {
+      animation-delay: 160ms;
+    }
+    :global(.inspecting) .cells span:nth-child(n + 13) {
+      animation-delay: 240ms;
+    }
+  }
+  @keyframes cell-in {
+    from {
+      opacity: 0;
+      transform: scale(0.6);
+    }
+  }
+
+  @media (max-width: 720px) {
+    .piece {
+      grid-template-columns: minmax(0, 1fr) 96px;
+      gap: var(--space-4);
+    }
+    .piece > :global(.post-branches) {
+      grid-column: 1 / -1;
+    }
+    .seal :global(.post-thumb) {
+      width: 96px;
+    }
+    .origin {
+      padding: 6px;
+      font-size: 8px;
+    }
+    /* A seal this small shows only the folds. */
+    .origin > span:not(.cells) {
+      display: none;
+    }
+    .origin .cells span {
+      font-size: 9px;
+    }
+  }
+</style>

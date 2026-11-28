@@ -2,7 +2,8 @@
 /**
  * Precrease's own masthead, under the site's (decision 48, "same house, own room"): the large
  * wordmark from the fold-out zine direction, the search, the tagline over a heavy accent rule, and
- * the blog's sections. On the index the wordmark is the page's h1; elsewhere it links home.
+ * the blog's sections. On the index the wordmark is the page's h1; elsewhere it links home, and
+ * the masthead is compact, without the tagline, so the page's own content starts sooner (doc 41).
  */
 import PrecreaseMark from './PrecreaseMark.astro';
 import PrecreaseSearch from './PrecreaseSearch.astro';
@@ -27,7 +28,7 @@ const links = [
 const Word = home ? 'h1' : 'p';
 ---
 
-<header class="precrease-mast" data-inspect="PrecreaseMast">
+<header class:list={['precrease-mast', { compact: !home }]} data-inspect="PrecreaseMast">
   <div class="wrap">
     <p class="eyebrow">
       <PrecreaseMark size={16} />
@@ -49,7 +50,7 @@ const Word = home ? 'h1' : 'p';
       </Word>
       <PrecreaseSearch />
     </div>
-    <p class="tagline">{`${t.tagline} ${t.description}`}</p>
+    {home && <p class="tagline">{`${t.tagline} ${t.description}`}</p>}
     <nav aria-label={t.name}>
       {links.map((l) => (
         <a href={l.href} aria-current={path === l.href ? 'page' : undefined}>
@@ -87,6 +88,9 @@ const Word = home ? 'h1' : 'p';
     /* 1, not tighter: the italic P's ascender would rise into the eyebrow above it. */
     line-height: 1;
     letter-spacing: -0.02em;
+  }
+  .compact .word {
+    font-size: clamp(2.6rem, 5vw, 3.75rem);
   }
   .word a {
     color: inherit;
