@@ -1,5 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
+import { holdStill } from '../hold-still';
 
 // The hero's 3D figure (src/scripts/hero3d.ts, src/components/inspector/scene3d.ts): on devices
 // that can run it, the hero's square turns 3D at the visitor's first move; the Inspector takes the
@@ -202,7 +203,8 @@ test('the 3D scene raises no Content Security Policy violations', async ({ page 
 
 for (const theme of ['light', 'dark'] as const) {
   test(`the home page with the 3D figure has no axe violations · ${theme}`, async ({ page }) => {
-    // axe over the whole home page while software WebGL draws takes over a minute in dark: room to spare.
+    // axe over the whole home page with software WebGL: room to spare, though the scene holds still
+    // while axe reads (tests/hold-still.ts).
     test.setTimeout(180_000);
     await allowSoftwareGl(page);
     await page.addInitScript((t) => localStorage.setItem('pm.theme', t), theme);
@@ -218,6 +220,7 @@ for (const theme of ['light', 'dark'] as const) {
           .map((a) => a.finished.catch(() => undefined)),
       ),
     );
+    await holdStill(page);
     const results = await new AxeBuilder({ page })
       .withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa'])
       .analyze();

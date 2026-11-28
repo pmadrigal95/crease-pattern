@@ -119,7 +119,10 @@ const years = (major: number) => {
 </figure>
 
 <style>
+  /* The drawing and the 3D relief share one cell: the relief takes the drawing's place and its
+     exact size, and the two cross-fade, so nothing on the page moves (doc 37). */
   .expedition {
+    display: grid;
     margin: 0;
     border: 1px solid var(--color-rule);
     border-radius: var(--radius-panel);
@@ -127,9 +130,13 @@ const years = (major: number) => {
     overflow: hidden;
   }
   .drawing {
+    grid-area: 1 / 1;
     display: block;
     width: 100%;
     height: auto;
+    transition:
+      opacity 600ms var(--motion-ease-out),
+      visibility 0s 600ms;
   }
   .narrow {
     display: none;
@@ -143,15 +150,19 @@ const years = (major: number) => {
     }
   }
   .caption-relief,
-  .relief-on .caption-map,
-  .relief-on .drawing {
+  .relief-on .caption-map {
     display: none;
+  }
+  .relief-on .drawing {
+    opacity: 0;
+    visibility: hidden;
   }
   .relief-on .caption-relief {
     display: inline;
   }
 
   figcaption {
+    grid-area: 2 / 1;
     padding: var(--space-3) var(--space-4);
     border-top: 1px solid var(--color-rule);
     font: var(--type-caption);

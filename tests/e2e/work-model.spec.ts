@@ -1,5 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
+import { holdStill } from '../hold-still';
 
 // The Work section's Sonobe star (src/components/site/WorkModel.astro, M4.3): drawn at build time,
 // it assembles as the section scrolls into view, in three.js where the device can run it and in
@@ -137,6 +138,7 @@ for (const theme of ['light', 'dark'] as const) {
     await page.locator('[data-inspector-toggle]').click();
     await expect(page.locator(counts)).toBeVisible(ready);
     await page.waitForTimeout(1_000);
+    await holdStill(page);
     const results = await new AxeBuilder({ page })
       .include('#work')
       .withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa'])

@@ -93,11 +93,29 @@ const years = (major: number) => {
 
 <style>
   /* A readout of the place in view, the models, the names and steps. */
+  /* The relief takes the drawing's place at the drawing's size (1000 × 520, ExpeditionMap.astro),
+     and fades in as the drawing fades out: the map becomes the models, and nothing moves. The
+     readout and the names float on the models, as on a map. */
   .relief {
-    padding: var(--space-6) var(--space-6) var(--space-4);
+    grid-area: 1 / 1;
+    position: relative;
+    aspect-ratio: 1000 / 520;
+    opacity: 0;
+    transition: opacity 600ms var(--motion-ease-out);
+  }
+  :global(.relief-on) .relief {
+    opacity: 1;
   }
   .readout {
+    position: absolute;
+    top: var(--space-6);
+    left: var(--space-6);
+    z-index: 1;
     display: grid;
+    pointer-events: none;
+  }
+  .readout a {
+    pointer-events: auto;
   }
   .head {
     grid-area: 1 / 1;
@@ -135,21 +153,22 @@ const years = (major: number) => {
   }
   /* The models stand on the page's paper. */
   .relief-stage {
-    position: relative;
-    margin-top: var(--space-4);
-    height: clamp(360px, 44vw, 540px);
-    border-radius: calc(var(--radius-panel) - 2px);
+    position: absolute;
+    inset: 0;
     overflow: hidden;
     background: var(--color-surface);
-    box-shadow: inset 0 0 0 1px var(--color-rule);
   }
   /* Choosing a place: its name, or a step either way. */
   .bar {
+    position: absolute;
+    right: var(--space-4);
+    bottom: var(--space-4);
+    left: var(--space-4);
+    z-index: 1;
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: var(--space-4);
-    margin-top: var(--space-4);
   }
   .names {
     display: flex;
@@ -182,6 +201,12 @@ const years = (major: number) => {
   .step {
     min-width: 44px;
     font-size: var(--size-md);
+    background: var(--color-surface);
     box-shadow: inset 0 0 0 1px var(--color-rule);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .relief {
+      transition: none;
+    }
   }
 </style>

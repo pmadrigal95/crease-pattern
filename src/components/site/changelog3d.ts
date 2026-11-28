@@ -220,6 +220,8 @@ export const mountRelief = async (figure: HTMLElement): Promise<void> => {
   const built: (Built & { x: number })[] = lay(scene, models);
   const eye = follower(camera);
   box.hidden = false;
+  // A frame with the relief laid out but still clear, so its fade over the drawing runs.
+  void box.offsetWidth;
   figure.classList.add('relief-on');
 
   let active = 0;
